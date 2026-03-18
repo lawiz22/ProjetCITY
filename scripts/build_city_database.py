@@ -20,7 +20,7 @@ DATABASE_FILE = ROOT_DIR / "data" / "city_analysis.db"
 CANADIAN_PROVINCES = {
     "Québec", "Quebec", "Ontario", "British Columbia", "Alberta", "Manitoba",
     "Saskatchewan", "Nova Scotia", "New Brunswick", "Prince Edward Island",
-    "Newfoundland and Labrador"
+    "Newfoundland and Labrador", "Northwest Territories", "Nunavut", "Yukon"
 }
 
 US_STATES = {

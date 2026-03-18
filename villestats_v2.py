@@ -689,3 +689,25 @@ annotations = [
     (2020, 5750,  "🏳️ Résilience franco — télétravail (2015)",            'blue',   (2002, 6100)),
 ]
 
+
+CITY_NAME = "Yellowknife, Northwest Territories"
+CITY_COLOR = '#FFD700'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [0, 0, 0, 0, 0, 0, 0, 200,
+              1000, 3500, 6000, 9483, 11000, 15179,
+              16541, 19234, 20340]
+
+annotations = [
+    (1930, 200,   "⛏️ Découverte or — rush minier (1934)",                'gold',   (1932, 17000)),
+    (1940, 1000,  "☢️ Radium Port Radium — projet Manhattan (1942)",      'green',  (1942, 17500)),
+    (1950, 3500,  "🔄 Mines rouvrent — boom d'après-guerre (1945)",       'brown',  (1952, 18000)),
+    (1970, 9483,  "🏛️ Capitale TNO — gouvernement (1967)",               'blue',   (1962, 18500)),
+    (1990, 15179, "💣 Grève Giant Mine — 9 morts (1992)",                 'red',    (1972, 19000)),
+    (2000, 16541, "💎 Mine Ekati — diamants canadiens (1998)",            'cyan',   (1982, 19500)),
+    (2010, 19234, "☠️ Giant Mine fermée — 237kt arsenic (2004)",          'gray',   (1992, 20000)),
+    (2020, 20340, "🔥 Évacuation totale — feux de forêt (2023)",          'orange', (2002, 20200)),
+]
+
