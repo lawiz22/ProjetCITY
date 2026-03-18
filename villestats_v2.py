@@ -711,3 +711,23 @@ annotations = [
     (2020, 20340, "🔥 Évacuation totale — feux de forêt (2023)",          'orange', (2002, 20200)),
 ]
 
+CITY_NAME = "North Bay, Ontario"
+CITY_COLOR = '#1B4F8A'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [0, 0, 500, 2500, 6000, 9000, 12000, 16000,
+              18000, 23000, 30000, 49187, 51268, 55405,
+              52771, 53651, 51553]
+
+annotations = [
+    (1880, 500,   "🚂 CPR — jonction ferroviaire fondatrice (1882)",       'brown',  (1862, 46000)),
+    (1900, 6000,  "⛏️ Rush argent Cobalt — North Bay transit (1903)",      'silver', (1872, 47500)),
+    (1920, 12000, "✈️ Aéroport — BCATP pilotes Commonwealth (1940)",      'blue',   (1882, 49000)),
+    (1950, 23000, "🛡️ NORAD souterrain — guerre froide (1963)",           'gray',   (1892, 50000)),
+    (1970, 49187, "🎓 Nipissing University College fondé (1967)",          'green',  (1942, 50500)),
+    (1990, 55405, "📉 Base militaire réduite — choc emplois (1989)",       'red',    (1952, 51000)),
+    (2000, 52771, "🏛️ Nipissing University indépendante (1992)",          'gold',   (1972, 51500)),
+    (2020, 51553, "🏡 Télétravail — afflux du Sud COVID (2020)",           'orange', (2002, 51000)),
+]
