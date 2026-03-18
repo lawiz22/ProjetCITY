@@ -731,3 +731,48 @@ annotations = [
     (2000, 52771, "🏛️ Nipissing University indépendante (1992)",          'gold',   (1972, 51500)),
     (2020, 51553, "🏡 Télétravail — afflux du Sud COVID (2020)",           'orange', (2002, 51000)),
 ]
+
+
+CITY_NAME = "Dallas, Texas"
+CITY_COLOR = '#006400'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [678, 1200, 10358, 38067, 42638, 92104, 158976, 260475,
+              294734, 434462, 679684, 844401, 904078, 1006877,
+              1188580, 1197816, 1304379]
+
+annotations = [
+    (1880, 10358,  "🚂 Deux rails se croisent — Dallas née (1872)",         'brown',  (1862, 1100000)),
+    (1900, 42638,  "🛢️ Spindletop — pétrole texan (1901)",                 'black',  (1872, 1150000)),
+    (1910, 92104,  "🏦 Federal Reserve Dallas — hub financier (1914)",      'gold',   (1882, 1170000)),
+    (1940, 294734, "✈️ Aviation guerre — North American (1941)",            'gray',   (1892, 1180000)),
+    (1960, 679684, "💻 Texas Instruments — circuit intégré (1958)",         'green',  (1902, 1190000)),
+    (1970, 844401, "🔫 JFK assassiné — Dealey Plaza (1963)",               'red',    (1942, 1200000)),
+    (1980, 904078, "✈️ DFW ouvre — hub mondial (1974)",                    'blue',   (1952, 1210000)),
+    (2020, 1304379,"🏢 Toyota, CBRE — exodus Californie (2017)",           'orange', (2002, 1250000)),
+]
+
+
+CITY_NAME = "San Jose, California"
+CITY_COLOR = '#0066CC'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [3000, 4000, 12567, 18060, 21500, 28946, 39642, 57651,
+              68457, 95280, 204196, 459913, 629400, 782248,
+              894943, 945942, 1013240]
+
+annotations = [
+    (1860, 3000,   "🌸 Capitale des vergers — prunes du monde (1860)",      'green',  (1862, 870000)),
+    (1880, 12567,  "🚂 Southern Pacific — relie SF (1864)",                  'brown',  (1872, 880000)),
+    (1940, 68457,  "⚔️ Internement japonais — Japantown vidé (1942)",       'red',    (1882, 890000)),
+    (1950, 95280,  "🔬 Stanford Industrial Park — HP, tech (1951)",          'blue',   (1892, 900000)),
+    (1960, 204196, "💾 Fairchild Semi — circuit intégré (1957)",             'purple', (1902, 910000)),
+    (1970, 459913, "🏗️ Dutch Hamann — annexions massives (1960)",           'orange', (1942, 920000)),
+    (2000, 894943, "🌐 eBay fondé — dot-com boom (1995)",                   'gold',   (1952, 930000)),
+    (2020, 1013240,"🏢 Google Downtown West — ville tech (2019)",           'cyan',   (2002, 950000)),
+]
+
