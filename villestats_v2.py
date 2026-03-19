@@ -776,3 +776,47 @@ annotations = [
     (2020, 1013240,"🏢 Google Downtown West — ville tech (2019)",           'cyan',   (2002, 950000)),
 ]
 
+
+CITY_NAME = "Saguenay, Québec"
+CITY_COLOR = '#003DA5'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [8000, 12000, 18000, 25000, 32000, 42000, 55000, 72000,
+              85000, 105000, 125000, 133000, 138000, 157000,
+              150000, 144000, 145000]
+
+annotations = [
+    (1860, 8000,   "🌲 Price Brothers — empire du bois (1838)",             'green',  (1862, 130000)),
+    (1880, 18000,  "🚂 Chemin de fer Québec–Lac-Saint-Jean (1888)",         'brown',  (1872, 132000)),
+    (1920, 55000,  "🏭 Pâtes et papier — Kénogami (1912)",                  'gray',   (1882, 134000)),
+    (1930, 72000,  "⚡ Arvida fondée — Alcan aluminium (1926)",             'silver', (1892, 136000)),
+    (1940, 85000,  "✈️ Record mondial alu — effort de guerre (1943)",       'blue',   (1902, 138000)),
+    (1970, 133000, "🎓 UQAC fondée — démocratisation (1969)",               'gold',   (1942, 140000)),
+    (1990, 157000, "🌊 Déluge du Saguenay — catastrophe (1996)",            'red',    (1952, 142000)),
+    (2010, 144000, "🏙️ Fusion Chicoutimi-Jonquière-La Baie (2002)",        'orange', (2002, 146000)),
+]
+
+
+CITY_NAME = "Saint-Jean-sur-Richelieu, Québec"
+CITY_COLOR = '#C8102E'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [3500, 4800, 6200, 7800, 9500, 11000, 13500, 16000,
+              19000, 24000, 32000, 40000, 50000, 60000,
+              79600, 87000, 95000]
+
+annotations = [
+    (1860, 3500,  "⚔️ Fort Saint-Jean — axe militaire Richelieu (1666)",   'red',    (1862, 82000)),
+    (1880, 6200,  "🚢 Canal de Chambly + rail — hub transit (1851)",        'blue',   (1872, 84000)),
+    (1900, 9500,  "🏺 St. Johns Pottery — argile du Richelieu (1839)",      'brown',  (1882, 86000)),
+    (1930, 16000, "🏭 Manufactures textiles — entre-deux-guerres (1925)",   'gray',   (1892, 88000)),
+    (1960, 32000, "🎖️ CMR fondé — officiers bilingues (1952)",             'green',  (1902, 90000)),
+    (1980, 50000, "🎈 Festival montgolfières — 400k visiteurs (1982)",      'orange', (1942, 91000)),
+    (2000, 79600, "🏙️ Fusion — Saint-Jean absorbe Iberville (2001)",       'purple', (1952, 92000)),
+    (2020, 95000, "🚗 A-35 complète — boom navetteurs Montréal (2018)",    'gold',   (2002, 96000)),
+]
+
