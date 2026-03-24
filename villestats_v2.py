@@ -820,3 +820,23 @@ annotations = [
     (2020, 95000, "🚗 A-35 complète — boom navetteurs Montréal (2018)",    'gold',   (2002, 96000)),
 ]
 
+CITY_NAME = "Guelph, Ontario"
+CITY_COLOR = '#4B0082'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [4500, 6000, 9800, 11500, 11496, 15175, 18128, 21050,
+              23273, 27386, 39838, 60087, 73000, 87976, 106170, 121688, 143740]
+
+annotations = [
+    (1860, 4500,   "🚂 Grand Trunk Railway — essor industriel (1856)",        'brown',  (1862, 12000)),
+    (1880, 9800,   "⛪ Basilique Notre-Dame-Immaculée construite (1877)",      'purple', (1872, 20000)),
+    (1900, 11496,  "🌾 Ontario Agricultural College — pôle agronomique (1874)",'green', (1882, 26000)),
+    (1920, 18128,  "⚔️ Reconversion industrielle — effort de guerre (1918)",  'gray',   (1902, 32000)),
+    (1960, 39838,  "🎓 Université de Guelph — statut universitaire (1964)",   'blue',   (1942, 48000)),
+    (1980, 73000,  "🏘️ Suburbanisation — boom résidentiel (1975)",            'orange', (1962, 80000)),
+    (2000, 106170, "🔬 Biotech & recherche — économie du savoir (1995)",      'teal',   (1982, 115000)),
+    (2020, 143740, "🏗️ Densification & pression immobilière Toronto (2015)", 'red',    (2002, 150000)),
+]
+
