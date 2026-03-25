@@ -6,15 +6,53 @@
 <section class="panel-grid panel-grid-1">
     <article class="panel">
         <div class="panel-head">
-            <h2>Ajout de ville</h2>
+            <h2>Ajout / mise à jour de ville</h2>
             <span>Coller les données population + périodes détaillées, puis cliquer Importer</span>
         </div>
         <p class="helper-text" id="slug-info" style="margin:0;font-weight:600;"></p>
     </article>
 </section>
 
+<!-- Existing city detection banner -->
+<section class="panel-grid panel-grid-1" id="existing-banner" style="display:none;">
+    <article class="panel existing-city-banner">
+        <div class="panel-head">
+            <h2>⚠️ Ville existante détectée</h2>
+            <span id="existing-city-name"></span>
+        </div>
+        <div class="existing-city-details">
+            <div class="existing-city-grid">
+                <div class="existing-item">
+                    <strong>Population</strong>
+                    <span id="existing-pop"></span>
+                </div>
+                <div class="existing-item">
+                    <strong>Périodes historiques</strong>
+                    <span id="existing-periods"></span>
+                </div>
+                <div class="existing-item">
+                    <strong>Fiche complète</strong>
+                    <span id="existing-fiche"></span>
+                </div>
+                <div class="existing-item">
+                    <strong>Photo</strong>
+                    <span id="existing-photo"></span>
+                </div>
+            </div>
+            <p class="helper-text" style="margin-top:12px;">
+                Cochez les éléments que vous souhaitez <strong>conserver sans remplacer</strong> :
+            </p>
+            <div class="skip-checkboxes">
+                <label><input type="checkbox" name="skip_population" id="skip-pop"> Conserver la population existante</label>
+                <label><input type="checkbox" name="skip_periods" id="skip-periods"> Conserver les périodes existantes</label>
+                <label><input type="checkbox" name="skip_fiche" id="skip-fiche"> Conserver la fiche complète existante</label>
+                <label><input type="checkbox" name="skip_photo" id="skip-photo"> Conserver la photo existante</label>
+            </div>
+        </div>
+    </article>
+</section>
+
 <section class="panel-grid panel-grid-2">
-    <!-- ── BOX 1 : Population / Stats ──────────────────────────── -->
     <article class="panel">
         <div class="panel-head">
             <h2>Population &amp; annotations</h2>
@@ -33,7 +71,6 @@ annotations = [
 ]' style="font-family:var(--font-mono,monospace);font-size:.82rem;"></textarea>
     </article>
 
-    <!-- ── BOX 2 : Périodes détaillées ─────────────────────────── -->
     <article class="panel">
         <div class="panel-head">
             <h2>Périodes détaillées</h2>
@@ -53,7 +90,6 @@ annotations = [
 </section>
 
 <section class="panel-grid panel-grid-1">
-    <!-- ── BOX 3 : Fiche Complète ──────────────────────────── -->
     <article class="panel">
         <div class="panel-head">
             <h2>Fiche complète</h2>
@@ -70,12 +106,6 @@ Fondation	1826
 👥 Population
 2016	383 822
 2021	422 324
-
-📈 Croissance de ~10% entre 2016 et 2021
-
-📐 Géographie &amp; Densité
-Superficie	~420 km²
-Densité	~1 000 hab./km²
 
 🏛️ Économie
 🏥 Santé — London Health Sciences Centre
@@ -103,6 +133,9 @@ Densité	~1 000 hab./km²
     var btn = document.getElementById('import-btn');
     var hint = document.getElementById('import-hint');
     var slugInfo = document.getElementById('slug-info');
+    var banner = document.getElementById('existing-banner');
+    var lastSlug = '';
+    var checkTimeout = null;
 
     function extractSlug(text) {
         var m = text.match(/CITY_NAME\s*=\s*["'](.+?)["']/);
@@ -117,6 +150,41 @@ Densité	~1 000 hab./km²
         return m ? m[1] : '';
     }
 
+    function checkExisting(slug) {
+        if (!slug) {
+            banner.style.display = 'none';
+            return;
+        }
+        fetch('{{ url_for("web.add_city_check_slug") }}?slug=' + encodeURIComponent(slug))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data.exists) {
+                    banner.style.display = 'none';
+                    btn.textContent = 'Importer la ville';
+                    // Reset checkboxes
+                    document.getElementById('skip-pop').checked = false;
+                    document.getElementById('skip-periods').checked = false;
+                    document.getElementById('skip-fiche').checked = false;
+                    document.getElementById('skip-photo').checked = false;
+                    return;
+                }
+                banner.style.display = '';
+                btn.textContent = 'Mettre à jour la ville';
+                document.getElementById('existing-city-name').textContent =
+                    data.city_name + ' (' + data.country + ')';
+                document.getElementById('existing-pop').textContent =
+                    data.pop_count + ' points — ' +
+                    (data.min_year || '?') + ' à ' + (data.max_year || '?');
+                document.getElementById('existing-periods').textContent =
+                    data.period_count ? data.period_count + ' périodes' : 'Aucune';
+                document.getElementById('existing-fiche').textContent =
+                    data.fiche_sections ? data.fiche_sections + ' sections' : 'Aucune';
+                document.getElementById('existing-photo').textContent =
+                    data.has_photo ? 'Oui' : 'Non';
+            })
+            .catch(function() { banner.style.display = 'none'; });
+    }
+
     function sync() {
         var slug = extractSlug(statsArea.value);
         var name = extractName(statsArea.value);
@@ -124,10 +192,17 @@ Densité	~1 000 hab./km²
             btn.disabled = false;
             hint.textContent = 'Prêt à importer : ' + name;
             slugInfo.textContent = 'Ville détectée : ' + name + '  (slug: ' + slug + ')';
+            if (slug !== lastSlug) {
+                lastSlug = slug;
+                clearTimeout(checkTimeout);
+                checkTimeout = setTimeout(function() { checkExisting(slug); }, 400);
+            }
         } else {
             btn.disabled = true;
             hint.textContent = 'Collez les données population pour activer le bouton.';
             slugInfo.textContent = '';
+            lastSlug = '';
+            banner.style.display = 'none';
         }
     }
 

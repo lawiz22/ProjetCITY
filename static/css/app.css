@@ -643,6 +643,29 @@ button {
     gap: 12px;
 }
 
+.sql-example-category {
+    margin-bottom: 20px;
+}
+
+.sql-category-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent);
+}
+
+.example-card pre {
+    font-size: 0.72rem;
+    line-height: 1.4;
+    max-height: 80px;
+    overflow: auto;
+}
+
 .tag-list {
     padding: 0;
     list-style: none;
@@ -2321,9 +2344,165 @@ dt {
     flex-wrap: wrap;
 }
 
+.sql-lab-layout {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+.sql-lab-left,
+.sql-lab-right {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.sql-result-panel .table-wrapper {
+    max-height: 500px;
+    overflow: auto;
+}
+.sql-result-table,
+.sql-result-table table {
+    font-size: 0.75rem;
+}
+.sql-result-table th,
+.sql-result-table td {
+    padding: 4px 8px;
+}
+
 .sql-form {
     display: grid;
     gap: 12px;
+}
+
+/* ── Existing city banner (add-city page) ── */
+.existing-city-banner {
+    border-left: 4px solid var(--accent);
+}
+.existing-city-details {
+    padding: 12px 0 0;
+}
+.existing-city-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+.existing-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.existing-item strong {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.7;
+}
+.existing-item span {
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+.skip-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    margin-top: 8px;
+}
+.skip-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.skip-checkboxes input[type="checkbox"] {
+    width: auto;
+    accent-color: var(--accent);
+}
+
+/* ── Coverage page ── */
+.coverage-metrics {
+    grid-template-columns: repeat(5, 1fr);
+}
+.metric-warn .metric-value {
+    color: var(--accent);
+}
+.coverage-table {
+    font-size: 0.8rem;
+}
+.coverage-table th,
+.coverage-table td {
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+.tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+.tag-ok {
+    background: #d4edda;
+    color: #155724;
+}
+.tag-miss {
+    background: #f8d7da;
+    color: #721c24;
+}
+.tag-miss-year {
+    display: inline-block;
+    background: #f8d7da;
+    color: #721c24;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.68rem;
+    margin: 1px;
+}
+.missing-years-cell {
+    white-space: normal;
+    max-width: 500px;
+}
+.completeness-bar {
+    position: relative;
+    width: 100%;
+    min-width: 80px;
+    height: 18px;
+    background: #f8d7da;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.completeness-fill {
+    height: 100%;
+    background: #72c585;
+    border-radius: 4px 0 0 4px;
+}
+.completeness-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #333;
+}
+:root[data-theme='dark'] .tag-ok {
+    background: #1e3a2b;
+    color: #8fd9a8;
+}
+:root[data-theme='dark'] .tag-miss,
+:root[data-theme='dark'] .tag-miss-year {
+    background: #3a1e1e;
+    color: #f5a0a0;
+}
+:root[data-theme='dark'] .completeness-bar {
+    background: #3a1e1e;
+}
+:root[data-theme='dark'] .completeness-fill {
+    background: #3a7a4a;
+}
+:root[data-theme='dark'] .completeness-label {
+    color: #ddd;
 }
 
 .compare-form {
@@ -2992,8 +3171,13 @@ td {
     .compare-grid,
     .map-filter-bar,
     .annotation-story-grid,
-    .city-chart-layout {
+    .city-chart-layout,
+    .sql-lab-layout {
         grid-template-columns: 1fr;
+    }
+
+    .coverage-metrics {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .map-toolbar {

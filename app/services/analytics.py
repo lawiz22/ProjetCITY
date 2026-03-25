@@ -15,7 +15,6 @@ from typing import Any, Iterable, Sequence
 from flask import current_app
 
 from app.db import get_db
-from app.services.city_coordinates import CITY_COORDINATES
 from app.services.city_photos import get_city_photo
 
 
@@ -382,6 +381,8 @@ class AnalyticsService:
                 latest.country,
                 latest.region,
                 latest.city_color,
+                latest.latitude,
+                latest.longitude,
                 latest.population,
                 latest.year,
                 peak.peak_population,
@@ -415,8 +416,9 @@ class AnalyticsService:
         max_population = max((row["population"] or 0 for row in rows), default=0)
 
         for row in rows:
-            coordinates = CITY_COORDINATES.get(row["city_slug"])
-            if coordinates is None:
+            lat = row["latitude"]
+            lng = row["longitude"]
+            if lat is None or lng is None:
                 missing.append(row["city_slug"])
                 continue
             population = row["population"] or 0
@@ -448,8 +450,8 @@ class AnalyticsService:
                     "deepest_decline_pct": row["deepest_decline_pct"],
                     "annotation_count": row["annotation_count"] or 0,
                     "annotations": annotation_preview,
-                    "lat": coordinates["lat"],
-                    "lng": coordinates["lng"],
+                    "lat": lat,
+                    "lng": lng,
                     "radius": radius,
                 }
             )
@@ -939,17 +941,85 @@ class AnalyticsService:
 
     def get_sql_examples(self) -> list[dict[str, str]]:
         return [
+            # ── Population ──
             {
-                "label": "Villes canadiennes par population récente",
-                "sql": "SELECT city_name, year, population\nFROM vw_city_population_analysis\nWHERE country = 'Canada'\nORDER BY year DESC, population DESC\nLIMIT 25;",
+                "category": "Population",
+                "label": "Population récente par ville",
+                "sql": "SELECT city_name, country, year, population\nFROM vw_city_population_analysis\nORDER BY year DESC, population DESC\nLIMIT 25;",
             },
             {
+                "category": "Population",
+                "label": "Top 10 villes les plus peuplées",
+                "sql": "SELECT city_name, country, MAX(year) AS année, MAX(population) AS population\nFROM vw_city_population_analysis\nGROUP BY city_id\nORDER BY population DESC\nLIMIT 10;",
+            },
+            {
+                "category": "Population",
+                "label": "Pic historique par ville",
+                "sql": "SELECT city_name, country, peak_year, peak_population, peak_annotation\nFROM vw_city_peak_population\nORDER BY peak_population DESC;",
+            },
+            # ── Croissance ──
+            {
+                "category": "Croissance",
                 "label": "Croissance par décennie",
-                "sql": "SELECT city_name, decade, absolute_growth, growth_pct\nFROM vw_city_growth_by_decade\nORDER BY growth_pct DESC\nLIMIT 25;",
+                "sql": "SELECT city_name, decade, start_population, end_population, absolute_growth, growth_pct\nFROM vw_city_growth_by_decade\nORDER BY growth_pct DESC\nLIMIT 25;",
             },
             {
-                "label": "Périodes détaillées enrichies",
-                "sql": "SELECT city_name, period_range_label, period_title, start_population, end_population, population_change_pct\nFROM vw_city_period_detail_with_population\nORDER BY city_name, period_order\nLIMIT 25;",
+                "category": "Croissance",
+                "label": "Top décroissances",
+                "sql": "SELECT city_name, country, previous_year, current_year, change_pct\nFROM vw_city_decline_periods\nORDER BY change_pct ASC\nLIMIT 20;",
+            },
+            {
+                "category": "Croissance",
+                "label": "Rebonds après déclin",
+                "sql": "SELECT city_name, country, previous_year, current_year, absolute_change, change_pct\nFROM vw_city_rebound_periods\nORDER BY change_pct DESC\nLIMIT 20;",
+            },
+            # ── Périodes & Annotations ──
+            {
+                "category": "Périodes",
+                "label": "Périodes détaillées avec population",
+                "sql": "SELECT city_name, period_range_label, period_title,\n  start_population, end_population, population_change_pct\nFROM vw_city_period_detail_with_population\nORDER BY city_name, period_order\nLIMIT 25;",
+            },
+            {
+                "category": "Périodes",
+                "label": "Événements annotés par période",
+                "sql": "SELECT city_name, year, annotation_label, annotation_color, population\nFROM vw_annotated_events_by_period\nORDER BY year DESC\nLIMIT 25;",
+            },
+            # ── Fiches complètes ──
+            {
+                "category": "Fiches",
+                "label": "Couverture des fiches par ville",
+                "sql": "SELECT city_name, country, section_count,\n  has_population, has_economie, has_education, has_transport, has_climat\nFROM vw_fiche_coverage\nORDER BY section_count DESC;",
+            },
+            {
+                "category": "Fiches",
+                "label": "Catalogue des sections",
+                "sql": "SELECT section_emoji, section_title, city_count,\n  coverage_pct || '%' AS couverture, avg_content_length\nFROM vw_fiche_section_catalog\nORDER BY city_count DESC;",
+            },
+            {
+                "category": "Fiches",
+                "label": "Richesse des fiches (classement)",
+                "sql": "SELECT city_name, country, section_count,\n  total_content_length, avg_section_length\nFROM vw_fiche_city_richness\nORDER BY total_content_length DESC\nLIMIT 20;",
+            },
+            {
+                "category": "Fiches",
+                "label": "Stats de contenu par type de section",
+                "sql": "SELECT section_title, total_sections, avg_length,\n  with_table, with_bullets, with_text,\n  table_pct || '%' AS pct_tables, bullets_pct || '%' AS pct_bullets\nFROM vw_fiche_section_content_stats\nORDER BY total_sections DESC;",
+            },
+            # ── Exploration ──
+            {
+                "category": "Exploration",
+                "label": "Tables et vues disponibles",
+                "sql": "SELECT type, name, sql\nFROM sqlite_master\nWHERE type IN ('table','view')\nORDER BY type, name;",
+            },
+            {
+                "category": "Exploration",
+                "label": "Villes sans fiche complète",
+                "sql": "SELECT dc.city_name, dc.country, dc.region\nFROM dim_city dc\nLEFT JOIN dim_city_fiche f ON f.city_id = dc.city_id\nWHERE f.fiche_id IS NULL\nORDER BY dc.city_name;",
+            },
+            {
+                "category": "Exploration",
+                "label": "Nombre de points de données par ville",
+                "sql": "SELECT dc.city_name, dc.country,\n  COUNT(f.population_id) AS data_points,\n  MIN(dt.year) AS première_année,\n  MAX(dt.year) AS dernière_année\nFROM dim_city dc\nJOIN fact_city_population f ON f.city_id = dc.city_id\nJOIN dim_time dt ON dt.time_id = f.time_id\nGROUP BY dc.city_id\nORDER BY data_points DESC;",
             },
         ]
 
@@ -1087,6 +1157,145 @@ class AnalyticsService:
         history = [entry] + deduped
         history = history[: current_app.config["SQL_HISTORY_LIMIT"]]
         history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # ------------------------------------------------------------------
+    # Coverage / completeness
+    # ------------------------------------------------------------------
+
+    def get_city_coverage(self, filters: dict[str, object] | None = None) -> list[dict[str, object]]:
+        """Return one row per city with completeness indicators."""
+        filters = filters or {}
+        conn = get_db()
+        rows = conn.execute(
+            """
+            SELECT
+                c.city_id,
+                c.city_name,
+                c.city_slug,
+                c.country,
+                c.region,
+                COALESCE(pop.data_points, 0) AS data_points,
+                pop.min_year,
+                pop.max_year,
+                CASE WHEN f.fiche_id IS NOT NULL THEN 1 ELSE 0 END AS has_fiche,
+                COALESCE(fs.section_count, 0) AS fiche_sections,
+                CASE WHEN pd.cnt > 0 THEN 1 ELSE 0 END AS has_periods
+            FROM dim_city c
+            LEFT JOIN (
+                SELECT city_id,
+                       COUNT(*) AS data_points,
+                       MIN(year) AS min_year,
+                       MAX(year) AS max_year
+                FROM fact_city_population
+                GROUP BY city_id
+            ) pop ON pop.city_id = c.city_id
+            LEFT JOIN dim_city_fiche f ON f.city_id = c.city_id
+            LEFT JOIN (
+                SELECT fiche_id, COUNT(*) AS section_count
+                FROM dim_city_fiche_section
+                GROUP BY fiche_id
+            ) fs ON fs.fiche_id = f.fiche_id
+            LEFT JOIN (
+                SELECT city_id, COUNT(*) AS cnt
+                FROM dim_city_period_detail
+                GROUP BY city_id
+            ) pd ON pd.city_id = c.city_id
+            ORDER BY c.city_name
+            """
+        ).fetchall()
+        from app.services.city_photos import get_city_photo
+
+        results = []
+        for r in rows:
+            d = dict(r)
+            d["has_photo"] = get_city_photo(d["city_slug"]).get("has_photo", False)
+            results.append(d)
+        return results
+
+    def get_missing_decades(self) -> list[dict[str, object]]:
+        """Return one row per city with the list of missing decade-years."""
+        conn = get_db()
+        # Build the decade grid: 1800, 1810, ... up to current decade
+        from datetime import date
+        current_year = date.today().year
+        max_decade = (current_year // 10) * 10
+
+        cities = conn.execute(
+            "SELECT city_id, city_name, city_slug, country FROM dim_city ORDER BY city_name"
+        ).fetchall()
+
+        existing = {}
+        for row in conn.execute(
+            "SELECT city_id, year FROM fact_city_population"
+        ).fetchall():
+            existing.setdefault(row["city_id"], set()).add(row["year"])
+
+        results = []
+        for city in cities:
+            city_years = existing.get(city["city_id"], set())
+            if not city_years:
+                continue
+            min_year = min(city_years)
+            # Align to decade floor
+            start_decade = (min_year // 10) * 10
+            # Include current year as the last expected checkpoint
+            expected = list(range(start_decade, max_decade + 1, 10))
+            if current_year not in expected:
+                expected.append(current_year)
+            expected.sort()
+
+            missing = [y for y in expected if y not in city_years]
+            if missing:
+                results.append({
+                    "city_id": city["city_id"],
+                    "city_name": city["city_name"],
+                    "city_slug": city["city_slug"],
+                    "country": city["country"],
+                    "start_decade": start_decade,
+                    "max_decade": max_decade,
+                    "current_year": current_year,
+                    "missing_years": missing,
+                    "missing_count": len(missing),
+                    "expected_count": len(expected),
+                    "completeness_pct": round(100 * (1 - len(missing) / len(expected)), 1) if expected else 100,
+                })
+        results.sort(key=lambda r: r["missing_count"], reverse=True)
+        return results
+
+    def export_coverage_csv(self) -> str:
+        """Export city coverage table as CSV."""
+        import csv
+        import io
+        rows = self.get_city_coverage()
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["Ville", "Pays", "Région", "Points de données", "Année min", "Année max", "Fiche complète", "Sections fiche", "Périodes historiques", "Photo"])
+        for r in rows:
+            writer.writerow([
+                r["city_name"], r["country"], r["region"],
+                r["data_points"], r["min_year"] or "", r["max_year"] or "",
+                "Oui" if r["has_fiche"] else "Non",
+                r["fiche_sections"],
+                "Oui" if r["has_periods"] else "Non",
+                "Oui" if r["has_photo"] else "Non",
+            ])
+        return buf.getvalue()
+
+    def export_missing_decades_csv(self) -> str:
+        """Export missing decades table as CSV."""
+        import csv
+        import io
+        rows = self.get_missing_decades()
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["Ville", "Pays", "Début", "Années manquantes", "Nb manquantes", "Nb attendues", "Complétude %"])
+        for r in rows:
+            writer.writerow([
+                r["city_name"], r["country"], r["start_decade"],
+                " | ".join(str(y) for y in r["missing_years"]),
+                r["missing_count"], r["expected_count"], r["completeness_pct"],
+            ])
+        return buf.getvalue()
 
     def _sql_history_path(self) -> Path:
         return Path(current_app.config["SQL_HISTORY_PATH"])

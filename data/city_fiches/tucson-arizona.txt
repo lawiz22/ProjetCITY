@@ -1,0 +1,313 @@
+# SECTION 1 — Tucson, Arizona
+
+---
+
+**TUCSON, ARIZONA — Fiche Historique par Période**
+*(Niveau 3 — Détail intermédiaire)*
+
+---
+
+**1800-1850 — ORIGINES**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏞️ Territoire ancestral des peuples Tohono O'odham et Hohokam depuis des millénaires; presidio espagnol de Tucson fondé en 1775 sur la rive est de la rivière Santa Cruz; passage de la Nouvelle-Espagne puis du Mexique après l'indépendance mexicaine en 1821
+🚢 Commerce sur le Camino Real reliant Sonora au nord; élevage, agriculture irriguée (acequia), mission San Xavier del Bac fondée en 1692 à proximité — joyau de l'architecture coloniale espagnole
+👥 Population mixte d'environ 500 à 1 500 habitants — soldats espagnols, colons mexicains, Tohono O'odham; ville de garnison et de commerce dans le désert de Sonora; territoire rattaché aux États-Unis par l'Achat Gadsden en 1853
+
+= Tucson est à ses origines un presidio espagnol puis mexicain dans le désert de Sonora, carrefour militaire et commercial entre la Sonora mexicaine et le sud-ouest américain naissant.
+
+---
+
+**1850-1900 — INDUSTRIALISATION / EXPANSION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏗️ Rattachement aux États-Unis via l'Achat Gadsden (1853); capitale du Territoire de l'Arizona de 1867 à 1877; arrivée du Southern Pacific Railroad en 1880 — transformation majeure reliant Tucson à Los Angeles et à la Nouvelle-Orléans; développement du commerce minier dans la région
+📈 Croissance démographique notable — de ~500 habitants en 1860 à ~7 500 en 1900; afflux de colons américains, de mineurs, de commerçants et d'aventuriers; essor de l'industrie du bétail et de l'extraction minière (argent, cuivre) dans les montagnes environnantes
+🔥 Conflits avec les Apaches de Geronimo jusqu'en 1886 — période d'insécurité et de violence dans tout le territoire; Tucson sert de base militaire et d'approvisionnement; incorporation comme ville en 1877
+
+= L'arrivée du Southern Pacific Railroad et la fin des guerres apaches transforment Tucson en ville frontalière dynamique, carrefour minier et commercial du Territoire de l'Arizona.
+
+---
+
+**1900-1945 — CONSOLIDATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏙️ Fondation de l'Université d'Arizona en 1885 — institution structurante qui façonnera l'identité de Tucson pour toujours; statehood de l'Arizona en 1912; développement d'un centre-ville avec hôtels, commerces et institutions publiques; arrivée du tourisme de santé — le climat sec attirant tuberculeux et convalescents
+🏭 Élevage bovin, agriculture cotonnière et minière (cuivre à Bisbee et environs); tourisme hivernal naissant pour les riches Américains du nord fuyant l'hiver; développement des premiers ranches-hôtels (dude ranches) dans les environs
+⚔️ La Seconde Guerre mondiale amène la base aérienne Davis-Monthan (ouverte en 1925) à prendre une importance stratégique majeure — Tucson devient un centre d'entraînement militaire aérien crucial pour l'effort de guerre
+
+= Tucson se consolide comme ville universitaire, centre de santé et base militaire, établissant les piliers de son économie future tout en préservant son identité mexicaine et amérindienne distincte.
+
+---
+
+**1945-1980 — APRÈS-GUERRE / SUBURBANISATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚗 Explosion démographique spectaculaire — de ~36 000 habitants en 1940 à ~330 000 en 1980; climatisation généralisée rendant le désert habitable confortablement; autoroutes I-10 et I-19 structurant l'étalement urbain; suburbanisation massive dans toutes les directions
+🏢 Industrie de défense et aérospatiale — Hughes Aircraft, Raytheon, IBM s'installent à Tucson; Davis-Monthan AFB reste un employeur majeur; l'Université d'Arizona en pleine expansion devient moteur économique et culturel; tourisme hivernal (snowbirds) en forte croissance
+⚠️ Étalement urbain incontrôlé dévorant le désert de Sonora; tensions entre développement et conservation environnementale; rivalité historique avec Phoenix pour le statut de capitale et de métropole dominante de l'Arizona — Tucson perd progressivement cette bataille
+
+= L'air conditionné et l'industrie de défense propulsent Tucson dans une croissance explosive d'après-guerre, mais l'étalement urbain et la concurrence de Phoenix définissent ses défis structurels.
+
+---
+
+**1980-AUJOURD'HUI — RENAISSANCE / ÈRE CONTEMPORAINE**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💻 Université d'Arizona — hub de recherche en optique, astronomie, médecine spatiale et biotechnologie; Tech Parks Arizona attirant des entreprises technologiques; tourisme culturel et écotourisme dans le désert de Sonora; désignation UNESCO Ville de la Gastronomie en 2015 — première ville américaine
+🏗️ Revitalisation du centre-ville — 4th Avenue, Congress Street, Hotel Congress historique; développement du Sun Link streetcar (tramway) en 2014; projets de densification et de logements abordables face à la croissance; enjeux d'eau critiquesd dans un contexte de sécheresse chronique
+🌍 Tucson affirme une identité culturelle riche et unique — métissage mexicain, amérindien et américain; ville progressiste dans un État conservateur; défis majeurs de l'immigration et de la frontière (à ~100 km de Nogales/Mexique); stress hydrique et chaleur extrême liés aux changements climatiques
+
+= Tucson s'affirme comme ville universitaire, culturelle et technologique au caractère unique, naviguant entre son héritage mexicain et amérindien profond et les défis contemporains de l'eau, de la chaleur et de l'immigration.
+
+---
+
+---
+
+# SECTION 2 — Code Python
+
+```python
+CITY_NAME = "Tucson, Arizona"
+CITY_COLOR = '#B5651D'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [915, 3224, 7007, 5150, 7531, 13193, 20292, 32506,
+              36818, 45454, 212892, 262933, 330537, 405390,
+              486699, 520116, 542629]
+
+annotations = [
+    (1860, 915,    "🏰 Presidio espagnol — Achat Gadsden USA (1853)",         'brown',  (1862, 60000)),
+    (1880, 7007,   "🚂 Southern Pacific Railroad — boom minier (1880)",       'orange', (1872, 100000)),
+    (1900, 7531,   "🎓 Université d'Arizona — fondée (1885)",                 'green',  (1882, 150000)),
+    (1920, 20292,  "✈️ Davis-Monthan AFB — base aérienne (1925)",            'blue',   (1892, 200000)),
+    (1940, 36818,  "⚔️ WWII — centre entraînement aérien (1942)",            'gray',   (1922, 240000)),
+    (1960, 212892, "❄️ Climatisation — boom suburbanisation (1955)",          'teal',   (1942, 280000)),
+    (1980, 330537, "🏭 Raytheon & Hughes Aircraft — défense (1975)",          'purple', (1962, 370000)),
+    (2000, 486699, "🌮 UNESCO Ville Gastronomie — 1ère USA (2015)",           'red',    (1982, 480000)),
+    (2020, 542629, "💧 Stress hydrique — sécheresse chronique (2020)",        'darkred',(2002, 530000)),
+]
+```
+
+---
+
+# SECTION 3 — Fiche Complète (Markdown)
+
+```markdown
+# Tucson, Arizona — Fiche Complète
+
+## 📍 Informations Générales
+
+| Catégorie | Détails |
+|-----------|---------|
+| Ville | Tucson |
+| État | Arizona (États-Unis) |
+| Comté | Pima County |
+| Surnom | "The Old Pueblo" 🏜️ / "Pueblo" |
+| Statut | City (ville charter) |
+| Maire | Regina Romero (depuis 2019) |
+| Fondation | 1775 (presidio espagnol) |
+| Incorporation | 1877 |
+
+---
+
+## 👥 Population
+
+| Année | Population |
+|-------|-----------|
+| 2000 | 486 699 |
+| 2010 | 520 116 |
+| 2020 | 542 629 |
+| 2024 (est.) | ~560 000 (ville) / ~1 050 000 (métro) |
+
+📈 Croissance continue mais plus lente que Phoenix
+- 2ème plus grande ville de l'Arizona
+- Métropole Tucson (Pima County) : ~1 million d'habitants
+- Importante population hispanique : **~43% de la population**
+- Communauté Tohono O'odham significative en périphérie
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée | Valeur |
+|--------|--------|
+| Superficie | ~637 km² |
+| Densité | ~850 hab./km² |
+| Altitude | ~728 m |
+| Rivière | Santa Cruz (souvent à sec) |
+
+- Entourée de 5 chaînes de montagnes (Santa Catalina, Rincon,
+  Tucson Mountains, Santa Rita, Tortolita)
+- Désert de Sonora — le plus biodivers des déserts nord-américains
+- À ~100 km au nord de la frontière mexicaine (Nogales)
+- À ~185 km au sud-est de Phoenix
+
+---
+
+## 🏛️ Économie
+
+### Secteurs Principaux :
+
+- 🎓 **Éducation & Recherche** — Université d'Arizona, Tech Parks
+- ✈️ **Défense & Aérospatiale** — Raytheon Technologies, Davis-Monthan AFB
+- 🏥 **Santé** — Banner University Medical Center, TMC Health
+- 🌮 **Tourisme & Gastronomie** — UNESCO Ville de la Gastronomie
+- 🔭 **Astronomie & Optique** — Kitt Peak, Steward Observatory
+- 🌵 **Écotourisme** — Saguaro National Park, désert de Sonora
+
+> Tucson est un centre de recherche en optique et astronomie
+> de renommée mondiale grâce à l'Université d'Arizona
+
+---
+
+## 🎓 Éducation
+
+| Institution | Type | Étudiants |
+|-------------|------|-----------|
+| University of Arizona | Université de recherche publique | ~47 000 |
+| Pima Community College | Collège communautaire | ~25 000 |
+| University of Arizona South | Campus satellite | ~3 000 |
+| Eller College of Management | Business school (UA) | ~6 000 |
+
+🏆 L'UA est classée parmi les meilleures universités américaines
+en optique, astronomie, aridland studies et médecine
+
+---
+
+## ✈️ Défense & Militaire
+
+- **Davis-Monthan Air Force Base** — l'un des employeurs majeurs de Tucson
+- Célèbre **AMARG (Boneyard)** — plus grand cimetière d'avions militaires
+  au monde avec ~4 000 aéronefs stockés dans le désert
+- **Raytheon Technologies** — missiles et systèmes de défense;
+  des milliers d'emplois à Tucson
+- Héritage militaire profond depuis le presidio de 1775
+
+---
+
+## 🔭 Astronomie & Science
+
+- **Kitt Peak National Observatory** — 25 télescopes à ~90 km de Tucson
+- **Steward Observatory** (Université d'Arizona) — recherche de pointe
+- **Biosphere 2** — installation de recherche environnementale unique
+  à ~50 km au nord
+- **Mirror Lab** (UA) — fabrication des plus grands miroirs de télescopes
+  au monde
+- Tucson = capitale mondiale de l'astronomie amateur et professionnelle
+
+---
+
+## 🌮 Gastronomie & Culture
+
+- Première ville américaine désignée **UNESCO Ville de la Gastronomie (2015)**
+- Cuisine Sonoran — fusion mexicaine, amérindienne et américaine unique
+- Spécialités : **Sonoran hot dog**, tamales, carne seca, chiles
+- Plus de **2 000 restaurants** — scène culinaire diverse et authentique
+- **4th Avenue** — quartier bohème, restaurants, bars, boutiques vintage
+- **Mission San Xavier del Bac** (1692) — "la Colombe blanche du désert"
+
+---
+
+## 🏈 Sports & Loisirs
+
+| Équipe | Sport | Ligue |
+|--------|-------|-------|
+| Arizona Wildcats | Football américain | NCAA Pac-12 |
+| Arizona Wildcats | Basketball | NCAA Pac-12 |
+| Tucson Roadrunners | Hockey | AHL |
+| Tucson Saguaros | Baseball | Ligue indépendante |
+
+🐻 Les **Arizona Wildcats** sont la fierté sportive de Tucson —
+rivalité légendaire avec les Arizona State Sun Devils de Phoenix
+
+---
+
+## 🌵 Parcs & Environnement
+
+- **Saguaro National Park** (Est & Ouest) — entourant littéralement la ville;
+  forêts de cactus saguaro géants emblématiques
+- **Sabino Canyon** — canyon spectaculaire dans les Santa Catalinas
+- **Tucson Mountain Park** — 6 000 ha de désert protégé
+- **Tohono Chul** — jardin botanique du désert de Sonora
+- Plus de **350 jours de soleil** par an
+- Désert de Sonora — plus de 2 000 espèces de plantes, jaguar, ocelot
+
+---
+
+## 🚗 Transport
+
+| Mode | Détails |
+|------|---------|
+| Autoroute | I-10 (Phoenix–El Paso), I-19 (Nogales/Mexique) |
+| Tramway | Sun Link Streetcar (centre-ville, 2014) |
+| Bus | Sun Tran (réseau urbain) |
+| Aéroport | Tucson International Airport (TUS) |
+| Train | Amtrak Sunset Limited (Los Angeles–New Orleans) |
+
+- À **~2h de Phoenix** en voiture via l-10
+- À **~1h de la frontière mexicaine** (Nogales) via I-19
+- Aéroport international avec vols directs vers les grandes villes US
+
+---
+
+## 🌡️ Climat
+
+| Saison | Température moyenne |
+|--------|-------------------|
+| Hiver (Jan) | +8°C |
+| Printemps (Avr) | +20°C |
+| Été (Juil) | +35°C |
+| Automne (Oct) | +22°C |
+
+- Climat désertique semi-aride (BSk/BWh)
+- **350+ jours de soleil** par an
+- **Mousson d'été** (juillet-septembre) — pluies intenses et spectaculaires
+- Étés très chauds — températures dépassant **40°C** possibles
+- Hivers doux et ensoleillés — destination prisée des snowbirds
+- Stress hydrique critique — aquifère en déclin, Colorado River sous pression
+
+---
+
+## 🏙️ Quartiers Notables
+
+| Quartier | Caractéristique |
+|----------|----------------|
+| Downtown Core | Revitalisé, Congress St., arts, restaurants |
+| 4th Avenue | Bohème, vintage, bars, festival annuel |
+| Barrio Viejo | Historique, adobe, patrimoine mexicain |
+| Catalina Foothills | Résidentiel huppé, vues montagnes |
+| Midtown | Commercial, université, médical |
+| South Tucson | Enclave hispanique, gastronomie authentique |
+| Oro Valley | Banlieue nord, golf, snowbirds |
+
+---
+
+## 📊 Comparaison avec Grandes Villes de l'Arizona
+
+| Ville | Population | Caractéristique |
+|-------|-----------|----------------|
+| Phoenix | 1 608 139 | Capitale, plus grande ville |
+| Tucson | 542 629 | Université, culture, désert |
+| Mesa | 504 258 | Banlieue de Phoenix |
+| Chandler | 275 987 | Tech, Intel, banlieue |
+| Scottsdale | 241 361 | Luxe, tourisme, golf |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- 🌵 Tucson est **entourée de deux sections distinctes** du Saguaro
+  National Park — unique aux États-Unis
+- ✈️ Le **AMARG Boneyard** à Davis-Monthan contient plus de **4 000 avions**
+  militaires stockés dans le désert — visible sur Google Maps
+- 🔭 La région de Tucson abrite plus de **telescopes par km²**
+  que presque n'importe où sur Terre
+- 🌮 Le **Sonoran hot dog** (bacon, haricots, tomates, mayo) est né à Tucson
+  et est un symbole culinaire de la ville
+- 🏜️ La **Mission San Xavier del Bac** (1692) est considérée comme
+  l'un des plus beaux exemples d'architecture coloniale espagnole
+  aux États-Unis
+- 💧 Tucson est pionnière en **conservation de l'eau** — l'une des premières
+  villes américaines à récupérer et recycler les eaux usées pour
+  l'irrigation à grande échelle
+- 🌡️ Tucson détient le record de **la ville américaine avec le plus de
+  jours de soleil** parmi les grandes villes
+- 🎸 Tucson a une scène musicale unique mélangeant country, norteño mexicain,
+  indie rock et musique amérindienne

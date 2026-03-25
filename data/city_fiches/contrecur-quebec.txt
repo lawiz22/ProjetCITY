@@ -1,0 +1,269 @@
+# SECTION 1 — Contrecœur, Québec
+
+---
+
+**CONTRECŒUR, QUÉBEC — Fiche Historique par Période**
+*(Niveau 3 — Détail intermédiaire)*
+
+---
+
+**1800-1850 — ORIGINES**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏞️ Seigneurie de Contrecœur fondée en 1672 sur la rive sud du Saint-Laurent — territoire agricole fertile entre Varennes et Sorel; nom tiré de la famille de Contrecœur, officiers militaires français en Nouvelle-France
+🚢 Le Saint-Laurent est l'artère commerciale principale; navigation et pêche essentielles; quelques quais rudimentaires pour le commerce agricole local
+👥 Petite communauté rurale francophone et catholique d'environ 1 000 à 1 500 habitants; agriculture céréalière et élevage dominants; moulin seigneurial et église paroissiale au cœur du village
+
+= Contrecœur est un village seigneurial agricole typique de la rive sud du Saint-Laurent, fondé sur l'agriculture et la navigation fluviale, sans industrialisation significative avant la seconde moitié du XIXe siècle.
+
+---
+
+**1850-1900 — INDUSTRIALISATION / EXPANSION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏗️ Arrivée du chemin de fer du Grand Tronc longeant la rive sud dans les années 1850-1860 — amélioration des liens commerciaux avec Montréal et Sorel; développement modeste de quais et d'installations portuaires rudimentaires
+📈 Croissance démographique lente; incorporation comme municipalité en 1845; village qui conserve son caractère agricole malgré quelques activités de transformation du bois et de commerce fluvial
+🔥 Construction d'institutions paroissiales majeures — église, couvent, école; vie sociale organisée autour de la paroisse catholique; quelques briqueteries exploitant les argiles locales
+
+= Contrecœur reste un village agricole et fluvial tranquille, légèrement stimulé par le rail, mais sans transformation industrielle majeure avant le XXe siècle.
+
+---
+
+**1900-1945 — CONSOLIDATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏙️ Population stable autour de 1 500 à 2 500 habitants; développement des institutions scolaires et religieuses; quelques commerces locaux et artisans; village typique du Québec rural de la première moitié du XXe siècle
+🏭 Agriculture maraîchère et vergers profitant des terres riches de la rive sud; quelques travailleurs commutent vers les industries de Sorel-Tracy pour la métallurgie et la construction navale
+⚔️ Les deux guerres mondiales amènent des départs vers le front et stimulent indirectement l'industrie lourde de Sorel voisine; Contrecœur reste en marge de l'effort industriel de guerre
+
+= Contrecœur se consolide comme village agricole satellite de l'axe industriel Sorel-Tracy, sans véritable développement économique autonome significatif.
+
+---
+
+**1945-1980 — APRÈS-GUERRE / SUBURBANISATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚗 Développement de l'autoroute 30 et amélioration du réseau routier de la rive sud — Contrecœur devient accessible depuis Montréal; premières vagues de développement résidentiel en périphérie du village historique
+🏢 Installation majeure de l'aciérie STELCO (devenue Ispat Sidbec puis ArcelorMittal) dans les années 1960-1970 — transformation radicale de l'économie locale; industrie sidérurgique lourde qui fait de Contrecœur un pôle industriel de la rive sud
+⚠️ Tension croissante entre développement industriel et qualité de vie résidentielle; enjeux environnementaux liés à l'aciérie; pression sur les terres agricoles; population en croissance rapide grâce aux emplois industriels
+
+= L'installation de l'aciérie transforme radicalement Contrecœur, passant d'un village agricole à un pôle industriel majeur de la rive sud en quelques décennies.
+
+---
+
+**1980-AUJOURD'HUI — RENAISSANCE / ÈRE CONTEMPORAINE**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💻 ArcelorMittal Contrecœur — l'un des plus importants complexes sidérurgiques du Canada; production d'acier pour la construction et l'automobile; employeur majeur de toute la région Rive-Sud–Sorel
+🏗️ Annonce et développement du nouveau terminal portuaire de Contrecœur par le Port de Montréal — projet majeur de plusieurs milliards de dollars pour décongestionner le port de Montréal; transformations infrastructurelles importantes prévues pour les années 2020-2030
+🌍 Contrecœur jongle entre son identité industrielle lourde (aciérie, port) et la pression résidentielle croissante de familles cherchant espace et accessibilité; enjeux environnementaux, de décontamination et de cohabitation industrie-résidentiel; population en forte croissance récente
+
+= Contrecœur est aujourd'hui un carrefour industriel et portuaire stratégique du Saint-Laurent, dont le futur terminal portuaire pourrait transformer toute la logistique du corridor Montréal–Sorel.
+
+---
+
+---
+
+# SECTION 2 — Code Python
+
+```python
+CITY_NAME = "Contrecœur, Québec"
+CITY_COLOR = '#37474F'
+
+years = [1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900,
+         1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990,
+         2000, 2010, 2020]
+
+population = [900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700,
+              1800, 1900, 2000, 2200, 2500, 3000, 4500, 5500, 6000,
+              6500, 7200, 8800]
+
+annotations = [
+    (1820, 900,  "🏰 Seigneurie agricole — rive sud du Saint-Laurent (1672)", 'brown',  (1822, 2500)),
+    (1860, 1300, "🚂 Grand Tronc — lien commercial rive sud (1856)",          'darkred',(1852, 3500)),
+    (1900, 1700, "⛪ Institutions paroissiales — village catholique (1900)",  'purple', (1882, 4000)),
+    (1940, 2200, "🌾 Agriculture & satellites industriels Sorel (1940)",      'green',  (1922, 4500)),
+    (1960, 3000, "🏭 Aciérie STELCO — boom industriel majeur (1965)",        'gray',   (1942, 5500)),
+    (1980, 5500, "⚙️ ArcelorMittal — sidérurgie lourde dominante (1980)",    'blue',   (1962, 6200)),
+    (2000, 6500, "🚗 Autoroute 30 — croissance résidentielle (2000)",         'orange', (1982, 7000)),
+    (2020, 8800, "⚓ Terminal portuaire — projet Port de Montréal (2021)",    'navy',   (2002, 8000)),
+]
+```
+
+---
+
+# SECTION 3 — Fiche Complète (Markdown)
+
+```markdown
+# Contrecœur, Québec — Fiche Complète
+
+## 📍 Informations Générales
+
+| Catégorie | Détails |
+|-----------|---------|
+| Ville | Contrecœur |
+| Province | Québec |
+| Surnom | "Ville de l'acier et du fleuve" ⚙️ |
+| Statut | Municipalité de la MRC de Marguerite-D'Youville |
+| Maire | Maud Allaire |
+| Fondation | 1672 (seigneurie) |
+| Incorporation | 1845 |
+
+---
+
+## 👥 Population
+
+| Année | Population |
+|-------|-----------|
+| 2011 | 6 352 |
+| 2016 | 7 110 |
+| 2021 | 8 769 |
+| 2024 (est.) | ~9 500 |
+
+📈 Croissance de ~23% entre 2016 et 2021 — parmi les plus fortes de la Rive-Sud
+- Pression résidentielle intense liée à la proximité de Montréal
+- Futur terminal portuaire attire de nouveaux résidents et travailleurs
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée | Valeur |
+|--------|--------|
+| Superficie | ~74 km² |
+| Densité | ~118 hab./km² |
+| Cours d'eau | Fleuve Saint-Laurent (rive sud) |
+| Altitude | ~10 m |
+
+- Située à ~50 km à l'est de Montréal
+- Bordée par le Saint-Laurent au nord
+- Voisine de Varennes (ouest) et Sorel-Tracy (est)
+- Zone industrielle lourde en bordure du fleuve
+
+---
+
+## 🏛️ Économie
+
+### Secteurs Principaux :
+
+- ⚙️ **Sidérurgie** — ArcelorMittal Contrecœur, l'un des plus grands complexes
+  d'acier au Canada
+- ⚓ **Logistique portuaire** — futur terminal portuaire du Port de Montréal
+  (projet ~1,2 milliard $)
+- 🏘️ **Résidentiel** — croissance rapide de nouveaux quartiers familiaux
+- 🌾 **Agriculture** — zones agricoles protégées en périphérie
+- 🏗️ **Construction** — boom lié au développement du terminal et des quartiers
+
+> Contrecœur est l'un des rares endroits au Québec où coexistent
+> industrie lourde, logistique internationale et croissance résidentielle rapide
+
+---
+
+## ⚙️ ArcelorMittal Contrecœur
+
+- Complexe sidérurgique parmi les plus importants au Canada
+- Production de barres d'acier pour la construction et l'industrie
+- Plusieurs centaines d'emplois directs et des milliers d'emplois indirects
+- Historiquement STELCO → Ispat Sidbec → Mittal Steel → ArcelorMittal
+- Enjeux environnementaux : émissions, qualité de l'air, cohabitation
+
+---
+
+## ⚓ Terminal Portuaire — Projet Majeur
+
+- Projet du **Port de Montréal** pour construire un nouveau terminal
+  à conteneurs à Contrecœur
+- Investissement estimé à **~1,2 milliard de dollars**
+- Capacité prévue : **1,15 million de conteneurs EVP par an**
+- Objectif : décongestionner le port actuel de Montréal
+- Controverses : impacts environnementaux, milieux humides, faune du fleuve
+- Construction prévue pour les années **2020-2030**
+
+---
+
+## 🎓 Éducation
+
+| Institution | Type |
+|-------------|------|
+| École primaire de Contrecœur | École publique francophone |
+| École secondaire Armand-Racicot | École secondaire régionale (Saint-Jean) |
+| Cégep | Accès via Sorel-Tracy ou Longueuil |
+
+---
+
+## 🌿 Parcs & Environnement
+
+- Parc riverain du bord du fleuve — accès au Saint-Laurent
+- Zone agricole protégée (LPTAA) — préservation des terres cultivables
+- Controverses environnementales liées à l'aciérie et au terminal portuaire
+- Milieux humides en bordure du fleuve — enjeux de conservation
+- Pistes cyclables régionales — lien avec la Route verte
+
+---
+
+## 🚗 Transport
+
+| Mode | Détails |
+|------|---------|
+| Autoroute | A-30 (Rive-Sud) |
+| Route | Route 132 longeant le fleuve |
+| Train | Aucun service passager direct |
+| Bus | exo (réseau Rive-Sud — service limité) |
+| Port | Futur terminal à conteneurs |
+
+- À ~45 min de Montréal en voiture via l'A-30
+- La route 132 traverse le cœur du village historique
+- Le futur port transformera les flux de transport lourds dans la région
+
+---
+
+## 🌡️ Climat
+
+| Saison | Température moyenne |
+|--------|-------------------|
+| Hiver (Jan) | -12°C |
+| Printemps (Avr) | +6°C |
+| Été (Juil) | +24°C |
+| Automne (Oct) | +9°C |
+
+- Climat continental humide
+- Enneigement moyen : ~250 cm/an
+- Vents du fleuve notables en toutes saisons
+- Étés chauds et humides, hivers froids et neigeux
+
+---
+
+## 🏙️ Secteurs & Quartiers Notables
+
+| Secteur | Caractéristique |
+|---------|----------------|
+| Vieux-Contrecœur | Noyau historique, église, bord de fleuve |
+| Zone industrielle | ArcelorMittal, industries lourdes |
+| Zone portuaire | Futur terminal Port de Montréal |
+| Quartiers résidentiels récents | Développements familiaux 2000-2020 |
+| Zone agricole | Terres protégées en périphérie sud |
+
+---
+
+## 📊 Comparaison avec Villes Voisines (MRC Marguerite-D'Youville)
+
+| Ville | Population | Caractéristique |
+|-------|-----------|----------------|
+| Boucherville | ~45 000 | Résidentiel majeur, pharma |
+| Varennes | ~23 000 | Pétrochimie & batteries |
+| Contrecœur | ~8 800 | Acier + port + résidentiel |
+| Verchères | ~6 800 | Patrimoine & résidentiel |
+| Calixa-Lavallée | ~600 | Village rural |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- ⚙️ L'aciérie de Contrecœur produit de l'acier utilisé dans des projets
+  de construction **partout au Canada et aux États-Unis**
+- ⚓ Le futur terminal portuaire sera l'**un des plus grands investissements
+  en infrastructures** dans l'histoire récente du Québec
+- 🌊 Le Saint-Laurent à Contrecœur est un couloir migratoire important
+  pour les **bélugas et les grandes espèces marines**
+- 🏰 La seigneurie de Contrecœur a été concédée à la famille
+  **de Contrecœur** — des officiers militaires français célèbres
+  en Nouvelle-France
+- 📈 Contrecœur est l'une des municipalités à la **plus forte croissance
+  démographique** de toute la Rive-Sud entre 2016 et 2021
+- 🌾 Malgré l'industrialisation, une partie significative du territoire
+  reste sous **protection agricole permanente**

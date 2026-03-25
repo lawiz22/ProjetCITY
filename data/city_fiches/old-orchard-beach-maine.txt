@@ -1,0 +1,285 @@
+# SECTION 1 — Old Orchard Beach, Maine
+
+---
+
+**OLD ORCHARD BEACH, MAINE — Fiche Historique par Période**
+*(Niveau 3 — Détail intermédiaire)*
+
+---
+
+**1800-1850 — ORIGINES**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏞️ Territoire côtier de la côte sud du Maine — longues plages de sable fin de 11 km bordant l'Atlantique; terres agricoles et vergers (pommiers) donnant son nom au village; peuplement progressif par des familles d'origine britannique et irlandaise
+🚢 Pêche artisanale et agriculture locale; quelques auberges rudimentaires accueillant les premiers visiteurs estivaux venus de Portland et Boston par voie terrestre ou maritime
+👥 Communauté rurale d'environ 500 à 800 habitants; activités saisonnières naissantes; paroisse locale et école de village typiques du Maine rural du début du XIXe siècle
+
+= Old Orchard Beach est à ses débuts un modeste village agricole et côtier du Maine, dont les longues plages commencent à attirer quelques visiteurs estivaux, annonçant sa vocation touristique future.
+
+---
+
+**1850-1900 — INDUSTRIALISATION / EXPANSION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏗️ Arrivée du chemin de fer Boston & Maine Railroad en 1842 — transformation radicale; Old Orchard Beach devient accessible depuis Boston, Portland et tout le nord-est américain en quelques heures; explosion des hôtels, pensions et attractions balnéaires
+📈 Boom touristique spectaculaire dans les années 1870-1890; construction de grands hôtels victoriens, de cottages, de pavillons de danse et d'attractions; la plage devient l'une des destinations estivales les plus populaires de la Nouvelle-Angleterre
+🔥 Grand incendie de 1907 (préparé dès la fin du XIXe siècle) détruira une grande partie du front de mer; mais déjà dans les années 1890 plusieurs incendies partiels touchent les structures en bois; construction du Old Orchard Pier — jetée emblématique s'avançant dans l'Atlantique
+
+= L'arrivée du train transforme radicalement Old Orchard Beach en station balnéaire majeure de la Nouvelle-Angleterre, attirant des milliers de vacanciers américains et les premiers touristes canadiens-français.
+
+---
+
+**1900-1945 — CONSOLIDATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏙️ Grand incendie de 1907 détruit une grande partie du centre-ville et du front de mer; reconstruction rapide en briques et en bois; développement du Palace Playland — parc d'attractions emblématique ouvert en 1902; incorporation comme ville en 1883
+🏭 Économie entièrement tournée vers le tourisme saisonnier; hôtels, restaurants, boutiques de souvenirs, manèges, spectacles; arrivée massive des Canadiens français du Québec qui font d'OOB leur destination de vacances favorite — surnommée "la plage des Québécois"
+⚔️ La Prohibition (1920-1933) et la Grande Dépression freinent temporairement le tourisme; les deux guerres mondiales réduisent les voyages estivaux; mais OOB résiste grâce à sa clientèle locale et canadienne-française
+
+= Old Orchard Beach se consolide comme station balnéaire populaire et accessible, développant une identité unique fortement marquée par la présence des vacanciers canadiens-français qui en font leur lieu de villégiature favori.
+
+---
+
+**1945-1980 — APRÈS-GUERRE / SUBURBANISATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚗 Démocratisation de l'automobile et développement des autoroutes I-95 et Maine Turnpike — Old Orchard Beach devient encore plus accessible depuis Boston, Montréal et tout le nord-est; boom des motels, campings et cottages de location
+🏢 Apogée du tourisme de masse dans les années 1950-1960; Palace Playland en pleine expansion; la clientèle québécoise représente une part considérable des visiteurs — panneau bilingues, menus en français, ambiance franco-américaine unique
+⚠️ Concurrence croissante des destinations plus lointaines (Floride, Caraïbes) avec l'essor du transport aérien dans les années 1970; vieillissement de certaines infrastructures touristiques; enjeux de saisonnalité aiguë — ville quasi déserte hors saison estivale
+
+= L'automobile amplifie le tourisme de masse à Old Orchard Beach, dont la relation privilégiée avec les Québécois s'intensifie, mais la concurrence des destinations exotiques commence à poser des défis structurels.
+
+---
+
+**1980-AUJOURD'HUI — RENAISSANCE / ÈRE CONTEMPORAINE**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💻 Tourisme diversifié — festivals, événements sportifs, plage, Palace Playland; présence croissante des réseaux sociaux et du tourisme numérique amplifiant la notoriété d'OOB; hébergements Airbnb proliférant dans les maisons et cottages
+🏗️ Rénovation et modernisation du front de mer; reconstruction de la jetée après plusieurs dommages causés par les tempêtes; enjeux croissants d'érosion côtière et de montée des eaux liés aux changements climatiques
+🌍 Old Orchard Beach maintient son identité franco-québécoise unique — environ 30 à 40% des visiteurs estivaux sont des Québécois; panneaux en français, commerces bilingues; enjeux d'érosion côtière, de logement saisonnier et de transition vers un tourisme quatre saisons
+
+= Old Orchard Beach reste l'une des stations balnéaires les plus emblématiques du nord-est américain, célèbre pour sa jetée, son Palace Playland et sa relation unique et durable avec les vacanciers québécois.
+
+---
+
+---
+
+# SECTION 2 — Code Python
+
+```python
+CITY_NAME = "Old Orchard Beach, Maine"
+CITY_COLOR = '#1565C0'
+
+years = [1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930,
+         1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [400, 600, 800, 1200, 1800, 2500, 3200, 3500, 3800, 4000,
+              4200, 4800, 5600, 6400, 7500, 8000, 8856, 8624, 8223]
+
+annotations = [
+    (1840, 400,  "🚂 Boston & Maine Railroad — boom balnéaire (1842)",        'brown',  (1842, 2000)),
+    (1870, 1200, "🏖️ Station balnéaire — Nouvelle-Angleterre (1870)",        'blue',   (1852, 3000)),
+    (1900, 3200, "🎡 Palace Playland — parc d'attractions (1902)",            'purple', (1862, 4000)),
+    (1910, 3500, "🔥 Grand incendie — reconstruction front de mer (1907)",    'red',    (1872, 4500)),
+    (1930, 4000, "🇫🇷 Québécois — 'la plage des Québécois' (1920)",          'darkblue',(1912, 5000)),
+    (1950, 4800, "🚗 Autoroute I-95 — tourisme de masse (1950)",              'green',  (1932, 5500)),
+    (1980, 7500, "🌊 Tempêtes & érosion côtière — enjeux (1978)",             'gray',   (1962, 6500)),
+    (2000, 8856, "📈 Apogée démographique — ~8 856 hab. (2000)",              'orange', (1982, 7800)),
+    (2020, 8223, "🌍 Changements climatiques & montée des eaux (2020)",       'teal',   (2002, 8500)),
+]
+```
+
+---
+
+# SECTION 3 — Fiche Complète (Markdown)
+
+```markdown
+# Old Orchard Beach, Maine — Fiche Complète
+
+## 📍 Informations Générales
+
+| Catégorie | Détails |
+|-----------|---------|
+| Ville | Old Orchard Beach |
+| État | Maine (États-Unis) |
+| Comté | York County |
+| Surnom | "OOB" / "La plage des Québécois" 🇫🇷🏖️ |
+| Statut | Town (ville indépendante) |
+| Maire | Larissa Alrashid |
+| Fondation | ~1820 |
+| Incorporation | 1883 |
+
+---
+
+## 👥 Population
+
+| Année | Population |
+|-------|-----------|
+| 2000 | 8 856 |
+| 2010 | 8 624 |
+| 2020 | 8 223 |
+| Été (pic) | ~150 000 à 200 000 visiteurs/semaine |
+
+📉 Légère baisse démographique permanente depuis 2000
+- Population permanente modeste mais explosion estivale spectaculaire
+- Environ **30 à 40% des visiteurs estivaux sont québécois**
+- L'une des villes américaines les plus bilingues (anglais-français)
+  de la Nouvelle-Angleterre
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée | Valeur |
+|--------|--------|
+| Superficie | ~14 km² |
+| Densité | ~587 hab./km² (permanents) |
+| Longueur de plage | ~11 km de sable fin |
+| Altitude | ~5 m |
+
+- Située sur la côte sud du Maine
+- À ~30 km au sud de Portland, Maine
+- À ~290 km de Montréal (environ 3h de route)
+- À ~160 km de Boston (environ 2h de route)
+- Bordée par Saco au nord et Scarborough au nord-est
+
+---
+
+## 🏛️ Économie
+
+### Secteurs Principaux :
+
+- 🏖️ **Tourisme balnéaire** — moteur économique quasi exclusif
+- 🎡 **Palace Playland** — parc d'attractions emblématique sur la plage
+- 🍦 **Restauration & commerces** — centaines d'établissements saisonniers
+- 🏨 **Hébergement** — motels, hôtels, campings, Airbnb, cottages
+- 🎪 **Événements & festivals** — festivals estivaux, feux d'artifice
+
+> L'économie d'OOB est quasi entièrement saisonnière —
+> la ville génère l'essentiel de ses revenus entre juin et septembre
+
+---
+
+## 🎡 Palace Playland
+
+- Ouvert en **1902** — l'un des plus anciens parcs d'attractions des États-Unis
+- Situé directement **sur la plage** — unique en Nouvelle-Angleterre
+- Manèges classiques : grande roue, montagnes russes, carrousel historique
+- Inscrit au **National Register of Historic Places**
+- Attraction principale d'OOB — incontournable pour les familles québécoises
+
+---
+
+## 🇫🇷 Connexion Québécoise — Phénomène Unique
+
+- Depuis les années **1920-1930**, les Québécois francophones adoptent OOB
+  comme destination de vacances favorite
+- **Panneaux bilingues**, menus en français, commerces francophones
+- Nombreuses familles québécoises possèdent des **cottages ou condos**
+- Radio locale et médias reconnaissent la clientèle francophone
+- Surnommée affectueusement **"la plage des Québécois"** ou **"Old Orchard"**
+  tout court au Québec
+- Environ **1 million de Québécois** visitent OOB chaque été
+
+---
+
+## 🏖️ La Plage & Le Pier
+
+- **11 km** de plage de sable blanc — l'une des plus longues de
+  la Nouvelle-Angleterre
+- **Old Orchard Pier** — jetée emblématique de ~180 m s'avançant
+  dans l'Atlantique
+- Restaurants, boutiques et attractions sur la jetée
+- La jetée a été reconstruite plusieurs fois après des tempêtes majeures
+- Eau de l'Atlantique : **~20°C en juillet-août**
+
+---
+
+## 🎓 Éducation
+
+| Institution | Type |
+|-------------|------|
+| Old Orchard Beach Elementary School | École primaire publique |
+| Old Orchard Beach Middle/High School | École secondaire publique |
+| Accès université | University of Southern Maine (Portland, ~30 km) |
+
+---
+
+## 🌿 Parcs & Environnement
+
+- Plage publique de 11 km — accès libre et gratuit
+- Dunstan River et zones humides en périphérie
+- Enjeux majeurs d'**érosion côtière** — recul du trait de côte
+- **Montée des eaux** et tempêtes hivernales de plus en plus destructrices
+- Efforts de protection des dunes et de la faune côtière
+
+---
+
+## 🚗 Transport
+
+| Mode | Détails |
+|------|---------|
+| Autoroute | I-95 / Maine Turnpike (sortie Saco/OOB) |
+| Train | Amtrak Downeaster (Portland — Boston) |
+| Bus | Greyhound / services saisonniers |
+| Aéroport | Portland International Jetport (PWM, ~30 km) |
+| Vélo | Piste côtière Eastern Trail |
+
+- À **~3h de Montréal** en voiture via l'autoroute 10 et I-89 ou I-91
+- La **I-95** est l'axe principal pour les visiteurs de Boston et Montréal
+- Navettes saisonnières depuis Portland disponibles en été
+
+---
+
+## 🌡️ Climat
+
+| Saison | Température moyenne |
+|--------|-------------------|
+| Hiver (Jan) | -7°C |
+| Printemps (Avr) | +8°C |
+| Été (Juil) | +23°C |
+| Automne (Oct) | +11°C |
+
+- Climat continental humide avec influence océanique
+- Étés doux et ensoleillés — idéaux pour la plage
+- Hivers froids et tempétueux — ville quasi déserte
+- Tempêtes nordeasters en hiver causant des dommages côtiers importants
+- Enneigement moyen : ~150 cm/an
+
+---
+
+## 🏙️ Quartiers & Secteurs Notables
+
+| Secteur | Caractéristique |
+|---------|----------------|
+| Ocean Park | Communauté historique fondée en 1881, ambiance chalet |
+| Front de mer | Pier, Palace Playland, commerces, restaurants |
+| Old Orchard St. | Artère commerciale principale — boutiques et restos |
+| Campgrounds | Nombreux terrains de camping en périphérie |
+| Résidentiel permanent | Quartiers calmes actifs hors saison |
+
+---
+
+## 📊 Comparaison avec Villes Côtières Voisines (Maine)
+
+| Ville | Population | Caractéristique |
+|-------|-----------|----------------|
+| Portland | 68 408 | Plus grande ville du Maine |
+| Saco | 20 000 | Ville résidentielle voisine |
+| Biddeford | 22 000 | Revitalisé, industrie textile |
+| Old Orchard Beach | 8 223 | Tourisme balnéaire & Québécois |
+| Kennebunkport | 3 500 | Tourisme huppé, ex-Présidents |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- 🇫🇷 Old Orchard Beach est probablement la ville américaine où l'on entend
+  le **plus de français québécois** chaque été
+- 🎡 Le **Palace Playland** est le **seul parc d'attractions sur la plage**
+  restant en Nouvelle-Angleterre
+- 🌊 La jetée originale construite en **1898** mesurait plus de **500 mètres**
+  — aujourd'hui réduite à ~180 m après plusieurs tempêtes
+- ✈️ Charles Lindbergh a **atterri à OOB** en 1927 lors de sa tournée
+  triomphale après sa traversée de l'Atlantique
+- 🏖️ La plage d'OOB est composée d'un sable particulièrement fin et blanc,
+  rare sur la côte rocheuse du Maine
+- 📺 OOB apparaît régulièrement dans les **médias québécois** comme
+  destination estivale emblématique des familles du Québec
+- 🌡️ La température de l'eau en juillet (~20°C) est parmi les plus chaudes
+  de toute la côte nord-est américaine

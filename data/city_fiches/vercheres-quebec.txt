@@ -1,0 +1,248 @@
+# SECTION 1 — Verchères, Québec
+
+---
+
+**VERCHÈRES, QUÉBEC — Fiche Historique par Période**
+*(Niveau 3 — Détail intermédiaire)*
+
+---
+
+**1800-1850 — ORIGINES**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏞️ Seigneurie de Verchères fondée en 1672 sur la rive sud du Saint-Laurent — célèbre pour le geste héroïque de Madeleine de Verchères en 1692 qui défendit le fort contre les Iroquois; territoire agricole fertile entre Montréal et Sorel
+🚢 Le Saint-Laurent est l'artère principale — traversées en bac, commerce agricole, pêche; village de rang typique du régime seigneurial québécois
+👥 Petite communauté rurale francophone et catholique d'environ 1 000 à 2 000 habitants; agriculture (céréales, foin, élevage) et artisanat local; présence d'un moulin seigneurial
+
+= Verchères est un village seigneurial agricole typique de la rive sud, dont la renommée historique repose avant tout sur le courage légendaire de Madeleine de Verchères en 1692.
+
+---
+
+**1850-1900 — INDUSTRIALISATION / EXPANSION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏗️ Arrivée du chemin de fer du Grand Tronc longeant la rive sud dans les années 1850-1860 — amélioration des liens avec Montréal et Sorel; développement modeste du commerce local; quelques petites industries artisanales
+📈 Croissance démographique lente mais stable; incorporation comme municipalité de paroisse en 1845; village qui conserve son caractère essentiellement rural et agricole
+🔥 Construction de l'église paroissiale imposante et du couvent — institutions catholiques structurant la vie sociale; érection du monument à Madeleine de Verchères en 1913 (préparé dès la fin du XIXe siècle)
+
+= Verchères reste un village agricole tranquille malgré l'arrivée du rail, son identité étant davantage façonnée par son patrimoine historique que par une industrialisation significative.
+
+---
+
+**1900-1945 — CONSOLIDATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏙️ Inauguration du monument à Madeleine de Verchères en 1913 — Verchères devient un lieu de mémoire nationale québécoise; développement des institutions paroissiales, école, couvent des Sœurs; population stable autour de 1 500 à 2 000 habitants
+🏭 Économie dominée par l'agriculture maraîchère et les vergers profitant des terres riches de la rive sud; quelques travailleurs commutent vers les industries de Sorel et de Montréal
+⚔️ Les deux guerres mondiales affectent peu l'économie locale directement; départ de jeunes pour le front; maintien d'une agriculture nourricière essentielle
+
+= Verchères se consolide comme village agricole et lieu de mémoire nationale, le monument de Madeleine devenant un symbole identitaire fort pour tout le Québec.
+
+---
+
+**1945-1980 — APRÈS-GUERRE / SUBURBANISATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚗 Construction du pont-tunnel Louis-Hippolyte-La Fontaine en 1967 et développement de l'autoroute 30 — Verchères devient accessible depuis Montréal en moins de 30 minutes; premiers développements résidentiels de banlieue
+🏢 Transformation progressive de village agricole en ville-dortoir; arrivée de familles montréalaises cherchant espace et tranquillité; développement de lotissements résidentiels en périphérie du noyau villageois historique
+⚠️ Pression sur les terres agricoles en périphérie; tension entre développement résidentiel et préservation du patrimoine agricole et historique; exode des jeunes vers Montréal pour l'emploi
+
+= L'autoroute et le tunnel transforment Verchères en banlieue résidentielle de Montréal, menaçant son caractère villageois historique tout en assurant sa croissance démographique.
+
+---
+
+**1980-AUJOURD'HUI — RENAISSANCE / ÈRE CONTEMPORAINE**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💻 Verchères s'intègre à la MRC de Marguerite-D'Youville — planification régionale coordonnée avec Varennes, Contrecœur et Boucherville; économie résidentielle dominante avec commerces de proximité et services locaux
+🏗️ Complétion progressive de l'autoroute 30 (tronçon Verchères inauguré en 2012) — accès amélioré vers la Rive-Sud et la région de Sorel; projets de mise en valeur du patrimoine historique et du bord du fleuve
+🌍 Identité axée sur le patrimoine (Madeleine de Verchères), la qualité de vie riveraine et la proximité de Montréal; enjeux de préservation des terres agricoles, de développement durable et d'attraction de jeunes familles
+
+= Verchères cherche aujourd'hui à équilibrer son rôle de banlieue résidentielle avec la préservation de son riche patrimoine historique et naturel sur les rives du Saint-Laurent.
+
+---
+
+---
+
+# SECTION 2 — Code Python
+
+```python
+CITY_NAME = "Verchères, Québec"
+CITY_COLOR = '#8B0000'
+
+years = [1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900,
+         1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000,
+         2010, 2020]
+
+population = [900, 1100, 1300, 1500, 1600, 1700, 1800, 1900, 2000, 2100,
+              2200, 2300, 2500, 2600, 2800, 3200, 4000, 4800, 5200, 5800,
+              6200, 6800]
+
+annotations = [
+    (1810, 900,  "🏰 Seigneurie agricole — héritage Madeleine (1692)",      'brown',   (1812, 2500)),
+    (1850, 1600, "🚂 Grand Tronc — lien Montréal–Sorel (1856)",             'darkred', (1842, 3500)),
+    (1910, 2200, "🗿 Monument Madeleine de Verchères inauguré (1913)",      'green',   (1892, 4000)),
+    (1940, 2600, "🌾 Agriculture maraîchère — économie rurale (1940)",      'gold',    (1922, 4500)),
+    (1960, 3200, "🚗 Autoroute & tunnel La Fontaine — banlieue (1967)",     'blue',    (1942, 5000)),
+    (1980, 4800, "🏘️ Boom résidentiel — ville-dortoir Montréal (1975)",    'orange',  (1962, 5400)),
+    (2000, 5800, "🛣️ Autoroute 30 — accès Rive-Sud amélioré (2012)",       'purple',  (1982, 5800)),
+    (2020, 6800, "🌿 Patrimoine & qualité de vie riveraine (2020)",         'teal',    (2002, 6500)),
+]
+```
+
+---
+
+# SECTION 3 — Fiche Complète (Markdown)
+
+```markdown
+# Verchères, Québec — Fiche Complète
+
+## 📍 Informations Générales
+
+| Catégorie | Détails |
+|-----------|---------|
+| Ville | Verchères |
+| Province | Québec |
+| Surnom | "Village de Madeleine" 🏰 |
+| Statut | Municipalité de la MRC de Marguerite-D'Youville |
+| Maire | Alexandre Bélisle |
+| Fondation | 1672 (seigneurie) |
+| Incorporation | 1845 |
+
+---
+
+## 👥 Population
+
+| Année | Population |
+|-------|-----------|
+| 2011 | 5 981 |
+| 2016 | 6 258 |
+| 2021 | 6 800 |
+| 2024 (est.) | ~7 000 |
+
+📈 Croissance modeste mais stable (~8% entre 2011 et 2021)
+- Petite municipalité résidentielle de la Rive-Sud
+- Fait partie de la MRC de Marguerite-D'Youville
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée | Valeur |
+|--------|--------|
+| Superficie | ~73 km² |
+| Densité | ~93 hab./km² |
+| Cours d'eau | Fleuve Saint-Laurent (rive sud) |
+| Altitude | ~10 m |
+
+- Située à ~40 km à l'est de Montréal
+- Bordée par le Saint-Laurent au nord
+- Terres agricoles en zone sud et est
+- Voisine de Contrecœur, Varennes et Calixa-Lavallée
+
+---
+
+## 🏛️ Économie
+
+### Secteurs Principaux :
+
+- 🏘️ **Ville-dortoir** — majorité des résidents travaillent à Montréal ou sur la Rive-Sud
+- 🌾 **Agriculture** — maraîchage, vergers, terres agricoles protégées (zone verte)
+- 🏛️ **Tourisme patrimonial** — site historique Madeleine de Verchères, bord du fleuve
+- 🏗️ **Construction résidentielle** — développements de banlieue en croissance
+- 🛒 **Commerce local** — services de proximité, restauration, PME
+
+> Verchères est une économie essentiellement résidentielle, dépendante de Montréal, 
+> cherchant à valoriser son patrimoine historique unique comme levier touristique
+
+---
+
+## 🏰 Patrimoine Historique
+
+- **Madeleine de Verchères (1678–1747)** — héroïne nationale qui défendit le fort contre les Iroquois en 1692 à l'âge de 14 ans
+- **Monument de Madeleine** — inauguré en 1913, œuvre du sculpteur Louis-Philippe Hébert, icône de la mémoire québécoise
+- **Fort de Verchères** — site historique sur les rives du Saint-Laurent
+- **Église Saint-François-Xavier** — patrimoine religieux du XIXe siècle
+- **Noyau villageois historique** — conservation de l'architecture traditionnelle québécoise
+
+> Verchères est l'un des lieux de mémoire nationale les plus symboliques du Québec
+
+---
+
+## 🎓 Éducation
+
+| Institution | Type |
+|-------------|------|
+| École primaire de Verchères | École publique francophone |
+| École secondaire | Accès via Contrecœur ou Varennes |
+| Cégep | Accès via Sorel-Tracy ou Longueuil |
+
+---
+
+## 🌿 Parcs & Environnement
+
+- Parc du bord du fleuve — promenade riveraine avec vue sur le Saint-Laurent
+- Zone agricole protégée (LPTAA) — préservation des terres cultivables
+- Pistes cyclables régionales — lien avec la Route verte
+- Territoire boisé en zone sud
+- Accès aux îles du Saint-Laurent pour la faune et la nature
+
+---
+
+## 🚗 Transport
+
+| Mode | Détails |
+|------|---------|
+| Autoroute | A-30 (Rive-Sud) + A-20 via Varennes |
+| Tunnel | Louis-Hippolyte-La Fontaine (vers Montréal) |
+| Train | Aucun service direct |
+| Bus | exo (réseau Rive-Sud — service limité) |
+| Vélo | Route verte — piste cyclable |
+
+- À ~35 min de Montréal en voiture via le tunnel La Fontaine
+- Complétion de l'A-30 en 2012 a amélioré les liaisons régionales
+
+---
+
+## 🌡️ Climat
+
+| Saison | Température moyenne |
+|--------|-------------------|
+| Hiver (Jan) | -12°C |
+| Printemps (Avr) | +6°C |
+| Été (Juil) | +24°C |
+| Automne (Oct) | +9°C |
+
+- Climat continental humide
+- Enneigement moyen : ~250 cm/an
+- Étés chauds et humides, hivers froids
+- Vent du fleuve notable en toutes saisons
+
+---
+
+## 🏙️ Secteurs & Quartiers Notables
+
+| Secteur | Caractéristique |
+|---------|----------------|
+| Vieux-Verchères | Noyau historique, monument, bord de fleuve |
+| Secteurs résidentiels récents | Développements banlieusards des années 1980-2010 |
+| Zone agricole | Terres cultivées protégées en périphérie |
+| Bord du Saint-Laurent | Promenade, parc, patrimoine naturel |
+
+---
+
+## 📊 Comparaison avec Villes Voisines (MRC Marguerite-D'Youville)
+
+| Ville | Population | Caractéristique |
+|-------|-----------|----------------|
+| Boucherville | ~45 000 | Ville résidentielle majeure |
+| Varennes | ~23 000 | Pétrochimie & batteries |
+| Contrecœur | ~9 000 | Industrie lourde & port |
+| Verchères | ~6 800 | Patrimoine & résidentiel |
+| Calixa-Lavallée | ~600 | Village rural |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- 🏰 Madeleine de Verchères a défendu le fort à **14 ans** pendant 8 jours en 1692 — devenant une héroïne nationale
+- 🗿 Le monument de 1913 est l'œuvre de **Louis-Philippe Hébert**, le plus grand sculpteur québécois de son époque
+- 🌊 Le Saint-Laurent à Verchères est large de plusieurs kilomètres — vue spectaculaire sur le fleuve
+- 🚗 L'autoroute 30 complétée en **2012** a transformé l'accessibilité de toute la Rive-Sud
+- 🌾 La **zone agricole protégée** couvre une grande partie du territoire municipal
+- 📍 Verchères est à mi-chemin entre **Montréal** et **Sorel-Tracy** sur la rive sud

@@ -1,0 +1,120 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<!-- Metrics row -->
+<section class="metrics-grid coverage-metrics">
+    <article class="metric-card">
+        <span class="metric-value">{{ total }}</span>
+        <span class="metric-label">Villes totales</span>
+    </article>
+    <article class="metric-card metric-warn">
+        <span class="metric-value">{{ without_fiche }}</span>
+        <span class="metric-label">Sans fiche complète</span>
+    </article>
+    <article class="metric-card metric-warn">
+        <span class="metric-value">{{ without_photo }}</span>
+        <span class="metric-label">Sans photo</span>
+    </article>
+    <article class="metric-card metric-warn">
+        <span class="metric-value">{{ without_periods }}</span>
+        <span class="metric-label">Sans périodes historiques</span>
+    </article>
+    <article class="metric-card metric-warn">
+        <span class="metric-value">{{ without_data }}</span>
+        <span class="metric-label">Sans données population</span>
+    </article>
+</section>
+
+<!-- Table 1: City completeness overview -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>Couverture par ville</h2>
+        <a href="{{ url_for('web.coverage_export_csv') }}" class="secondary-button">Exporter CSV</a>
+    </div>
+    <div class="table-wrapper coverage-table">
+        <table data-sortable-table>
+            <thead>
+                <tr>
+                    <th>Ville</th>
+                    <th>Pays</th>
+                    <th>Points de données</th>
+                    <th>Période couverte</th>
+                    <th>Fiche complète</th>
+                    <th>Sections</th>
+                    <th>Périodes hist.</th>
+                    <th>Photo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city in coverage %}
+                <tr>
+                    <td><a href="{{ url_for('web.city_detail', city_slug=city.city_slug) }}">{{ city.city_name }}</a></td>
+                    <td>{{ city.country }}</td>
+                    <td>{{ city.data_points }}</td>
+                    <td>
+                        {% if city.min_year %}{{ city.min_year }} – {{ city.max_year }}{% else %}<span class="tag tag-miss">—</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if city.has_fiche %}<span class="tag tag-ok">✓</span>{% else %}<span class="tag tag-miss">✗</span>{% endif %}
+                    </td>
+                    <td>{{ city.fiche_sections }}</td>
+                    <td>
+                        {% if city.has_periods %}<span class="tag tag-ok">✓</span>{% else %}<span class="tag tag-miss">✗</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if city.has_photo %}<span class="tag tag-ok">✓</span>{% else %}<span class="tag tag-miss">✗</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Table 2: Missing decades -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>Années manquantes par décennie</h2>
+        <a href="{{ url_for('web.coverage_export_missing_csv') }}" class="secondary-button">Exporter CSV</a>
+    </div>
+    <p class="helper-text">
+        Intervalles de 10 ans, de la première donnée jusqu'à {{ missing_decades[0].current_year if missing_decades else '—' }}.
+        Les cellules rouges indiquent les décennies sans point de données.
+    </p>
+    <div class="table-wrapper coverage-table">
+        <table data-sortable-table>
+            <thead>
+                <tr>
+                    <th>Ville</th>
+                    <th>Pays</th>
+                    <th>Complétude</th>
+                    <th>Manquantes</th>
+                    <th>Années manquantes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city in missing_decades %}
+                <tr>
+                    <td><a href="{{ url_for('web.city_detail', city_slug=city.city_slug) }}">{{ city.city_name }}</a></td>
+                    <td>{{ city.country }}</td>
+                    <td>
+                        <div class="completeness-bar">
+                            <div class="completeness-fill" style="width: {{ city.completeness_pct }}%"></div>
+                            <span class="completeness-label">{{ city.completeness_pct }}%</span>
+                        </div>
+                    </td>
+                    <td>{{ city.missing_count }} / {{ city.expected_count }}</td>
+                    <td class="missing-years-cell">
+                        {% for year in city.missing_years %}
+                        <span class="tag tag-miss-year">{{ year }}</span>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% endblock %}

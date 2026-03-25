@@ -400,5 +400,113 @@
     "source_page": "https://en.wikipedia.org/wiki/Myrtle_Beach%2C_South_Carolina",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/BroadwayAtTheBeach1.jpg/330px-BroadwayAtTheBeach1.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "varennes-quebec": {
+    "filename": "varennes-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Varennes%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Varennes_%28Qu%C3%A9bec%29-Basilique_et_h%C3%B4tel-de-ville-2023-09-23.jpg/330px-Varennes_%28Qu%C3%A9bec%29-Basilique_et_h%C3%B4tel-de-ville-2023-09-23.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sorel-tracy-quebec": {
+    "filename": "sorel-tracy-quebec.png",
+    "source_page": "https://en.wikipedia.org/wiki/Sorel-Tracy",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Soreltracy.png/330px-Soreltracy.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "montreal-quebec": {
+    "filename": "montreal-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Montreal",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Mtl_from_mont_royal_%28cropped%29.jpg/330px-Mtl_from_mont_royal_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sorel-tracy": {
+    "filename": "sorel-tracy.png",
+    "source_page": "https://en.wikipedia.org/wiki/Sorel-Tracy",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Soreltracy.png/330px-Soreltracy.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "vercheres-quebec": {
+    "filename": "vercheres-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Verch%C3%A8res",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Vercheres.jpg/330px-Vercheres.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "contrecur-quebec": {
+    "filename": "contrecur-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Contrecoeur",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Moulin_Chaput_1.jpg/330px-Moulin_Chaput_1.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "old-orchard-beach-maine": {
+    "filename": "old-orchard-beach-maine.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Old_Orchard_Beach%2C_Maine",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Old_Orchard_Beach_Pier_%2810535487133%29.jpg/330px-Old_Orchard_Beach_Pier_%2810535487133%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "tucson-arizona": {
+    "filename": "tucson-arizona.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Tucson%2C_Arizona",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/View_of_Tucson_from_Sentinel_Peak_2.jpg/330px-View_of_Tucson_from_Sentinel_Peak_2.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "austin-texas": {
+    "filename": "austin-texas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Austin%2C_Texas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Austin_Downtown_2024.jpg/330px-Austin_Downtown_2024.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "baltimore-maryland": {
+    "filename": "baltimore-maryland.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Baltimore",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Fell%27s_Point_Aerial_2022.jpg/330px-Fell%27s_Point_Aerial_2022.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "cleveland-ohio": {
+    "filename": "cleveland-ohio.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Cleveland",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Cleveland_skyline_from_Lakewood_Park%2C_January_2026.jpg/330px-Cleveland_skyline_from_Lakewood_Park%2C_January_2026.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "pittsburgh-pennsylvania": {
+    "filename": "pittsburgh-pennsylvania.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Pittsburgh",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Ascending_the_Duquesne_Incline.jpg/330px-Ascending_the_Duquesne_Incline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "buffalo-new-york": {
+    "filename": "buffalo-new-york.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Buffalo%2C_New_York",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/KeyBank_Center_side_view_from_Main_Street_at_Prime_Street%2C_Buffalo%2C_New_York_-_20210725.jpg/330px-KeyBank_Center_side_view_from_Main_Street_at_Prime_Street%2C_Buffalo%2C_New_York_-_20210725.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "flint-michigan": {
+    "filename": "flint-michigan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Flint",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Miorcani_flint.jpg/330px-Miorcani_flint.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "tumbler-ridge-british-columbia": {
+    "filename": "tumbler-ridge-british-columbia.webp",
+    "source_page": "",
+    "source_image": "upload",
+    "attribution": "Photo uploadée manuellement."
+  },
+  "la-tuque-quebec": {
+    "filename": "la-tuque-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/La_Tuque%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/La_Tuque_centre-ville.jpg/330px-La_Tuque_centre-ville.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "donnacona-quebec": {
+    "filename": "donnacona-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Donnacona",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Postcard_of_butter_sculpture_tableau_of_the_meeting_of_Jacques_Cartier_and_Donnacona%2C_Franco-British_Exhibition%2CLondon%2C_1908.jpg/330px-Postcard_of_butter_sculpture_tableau_of_the_meeting_of_Jacques_Cartier_and_Donnacona%2C_Franco-British_Exhibition%2CLondon%2C_1908.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "gary-indiana": {
+    "filename": "gary-indiana.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Gary%2C_Indiana",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Gary%2C_Indiana_%282022%29.jpg/330px-Gary%2C_Indiana_%282022%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

@@ -232,7 +232,56 @@ def sql_lab_view_delete(view_id: str) -> Response:
 
 @web.route("/add-city")
 def add_city() -> str:
-    return render_template("web/add_city.html", page_title="Ajout de ville")
+    return render_template("web/add_city.html", page_title="Ajout / mise à jour de ville")
+
+
+@web.route("/add-city/check-slug")
+def add_city_check_slug() -> Response:
+    """AJAX: return existing city info for a given slug."""
+    from .db import get_db
+    slug = request.args.get("slug", "").strip()
+    if not slug:
+        return jsonify({"exists": False})
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_id, city_name, city_slug, country, region FROM dim_city WHERE city_slug = ?",
+        (slug,),
+    ).fetchone()
+    if not row:
+        return jsonify({"exists": False})
+    city_id = row["city_id"]
+    pop_count = conn.execute(
+        "SELECT COUNT(*) FROM fact_city_population WHERE city_id = ?", (city_id,)
+    ).fetchone()[0]
+    pop_range = conn.execute(
+        "SELECT MIN(year), MAX(year) FROM fact_city_population WHERE city_id = ?", (city_id,)
+    ).fetchone()
+    period_count = conn.execute(
+        "SELECT COUNT(*) FROM dim_city_period_detail WHERE city_id = ?", (city_id,)
+    ).fetchone()[0]
+    fiche = conn.execute(
+        "SELECT fiche_id FROM dim_city_fiche WHERE city_id = ?", (city_id,)
+    ).fetchone()
+    fiche_sections = 0
+    if fiche:
+        fiche_sections = conn.execute(
+            "SELECT COUNT(*) FROM dim_city_fiche_section WHERE fiche_id = ?", (fiche[0],)
+        ).fetchone()[0]
+    from app.services.city_photos import get_city_photo
+    has_photo = get_city_photo(row["city_slug"]).get("has_photo", False)
+    return jsonify({
+        "exists": True,
+        "city_name": row["city_name"],
+        "city_slug": row["city_slug"],
+        "country": row["country"],
+        "region": row["region"],
+        "pop_count": pop_count,
+        "min_year": pop_range[0],
+        "max_year": pop_range[1],
+        "period_count": period_count,
+        "fiche_sections": fiche_sections,
+        "has_photo": has_photo,
+    })
 
 
 @web.route("/add-city/import", methods=["POST"])
@@ -240,6 +289,10 @@ def add_city_import() -> Response:
     """Single button: import stats + periods + auto-fetch photo."""
     stats_text = request.form.get("stats_text", "").strip()
     periods_text = request.form.get("periods_text", "").strip()
+    skip_pop = request.form.get("skip_population") == "on"
+    skip_periods = request.form.get("skip_periods") == "on"
+    skip_fiche = request.form.get("skip_fiche") == "on"
+    skip_photo = request.form.get("skip_photo") == "on"
 
     if not stats_text:
         flash("Le champ population est vide.", "error")
@@ -254,21 +307,57 @@ def add_city_import() -> Response:
 
     from .db import get_db
     conn = get_db()
-    try:
-        city_id = import_city_stats(conn, stats)
-        conn.commit()
-    except Exception as exc:
-        conn.rollback()
-        flash(f"Erreur DB (population): {exc}", "error")
-        return redirect(url_for("web.add_city"))
 
-    messages = [
-        f"Population importée — {len(stats['years'])} années, "
-        f"{len(stats['annotations'])} annotations."
-    ]
+    messages = []
+
+    if skip_pop:
+        # Still need city_id — upsert dim_city only, skip population
+        cursor = conn.execute(
+            """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
+               VALUES (?, ?, ?, ?, ?, ?)
+               ON CONFLICT(city_slug) DO UPDATE SET
+                   city_name = excluded.city_name, region = excluded.region,
+                   country = excluded.country, city_color = excluded.city_color,
+                   source_file = excluded.source_file
+               RETURNING city_id""",
+            (stats["city_name"], stats["city_slug"], stats["region"],
+             stats["country"], stats["city_color"], "web-import"),
+        )
+        city_id = cursor.fetchone()[0]
+        conn.commit()
+        messages.append("Population conservée (non remplacée).")
+    else:
+        try:
+            city_id = import_city_stats(conn, stats)
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            flash(f"Erreur DB (population): {exc}", "error")
+            return redirect(url_for("web.add_city"))
+        messages.append(
+            f"Population importée — {len(stats['years'])} années, "
+            f"{len(stats['annotations'])} annotations."
+        )
+
+    # --- 1b. Auto-geocode if no coordinates yet ---
+    existing_coords = conn.execute(
+        "SELECT latitude, longitude FROM dim_city WHERE city_id = ?", (city_id,)
+    ).fetchone()
+    if existing_coords and (existing_coords[0] is None or existing_coords[1] is None):
+        from .services.city_coordinates import geocode_city
+        coords = geocode_city(stats["city_name"], stats["region"], stats["country"])
+        if coords:
+            conn.execute(
+                "UPDATE dim_city SET latitude = ?, longitude = ? WHERE city_id = ?",
+                (coords["lat"], coords["lng"], city_id),
+            )
+            conn.commit()
+            messages.append(f"Coordonnées géocodées ({coords['lat']}, {coords['lng']}).")
+        else:
+            messages.append("⚠️ Géocodage échoué — coordonnées manquantes.")
 
     # --- 2. Parse & import periods (if provided) ---
-    if periods_text:
+    if periods_text and not skip_periods:
         sections = parse_period_details_text(periods_text)
         if sections:
             try:
@@ -281,22 +370,27 @@ def add_city_import() -> Response:
                 messages.append(f"Erreur périodes: {exc}")
         else:
             messages.append("Aucune période détectée dans le texte.")
+    elif skip_periods:
+        messages.append("Périodes conservées (non remplacées).")
 
     # --- 3. Auto-fetch photo ---
-    try:
-        photo_result = fetch_and_save_city_photo(
-            stats["city_slug"], stats["city_name"], stats["region"], stats["country"],
-        )
-        if photo_result["success"]:
-            messages.append(f"Photo importée: {photo_result['filename']}")
-        else:
-            messages.append(f"Photo: {photo_result['error']}")
-    except Exception as exc:
-        messages.append(f"Erreur photo: {exc}")
+    if not skip_photo:
+        try:
+            photo_result = fetch_and_save_city_photo(
+                stats["city_slug"], stats["city_name"], stats["region"], stats["country"],
+            )
+            if photo_result["success"]:
+                messages.append(f"Photo importée: {photo_result['filename']}")
+            else:
+                messages.append(f"Photo: {photo_result['error']}")
+        except Exception as exc:
+            messages.append(f"Erreur photo: {exc}")
+    else:
+        messages.append("Photo conservée (non remplacée).")
 
     # --- 4. Parse & import fiche complète (if provided) ---
     fiche_text = request.form.get("fiche_text", "").strip()
-    if fiche_text:
+    if fiche_text and not skip_fiche:
         try:
             _header, fiche_sections = parse_fiche_text(fiche_text)
             if fiche_sections:
@@ -308,6 +402,18 @@ def add_city_import() -> Response:
         except Exception as exc:
             conn.rollback()
             messages.append(f"Erreur fiche complète: {exc}")
+    elif skip_fiche:
+        messages.append("Fiche complète conservée (non remplacée).")
+
+    # --- 5. Régénérer villestats_RAW.py ---
+    try:
+        from scripts.export_villestats_raw import export_all
+        from pathlib import Path
+        raw_path = Path(__file__).resolve().parent.parent / "villestats_RAW.py"
+        raw_path.write_text(export_all(), encoding="utf-8")
+        messages.append("villestats_RAW.py synchronisé.")
+    except Exception as exc:
+        messages.append(f"⚠️ villestats_RAW.py: {exc}")
 
     flash(f"{stats['city_name']} ({stats['city_slug']}) — " + " | ".join(messages), "success")
     return redirect(url_for("web.city_detail", city_slug=stats["city_slug"]))
@@ -401,3 +507,54 @@ def city_fiche_delete(city_slug: str) -> Response:
         flash(f"Erreur suppression fiche: {exc}", "error")
 
     return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+
+# ------------------------------------------------------------------
+#  Coverage / completeness
+# ------------------------------------------------------------------
+
+@web.route("/coverage")
+def city_coverage() -> str:
+    service = AnalyticsService()
+    filters = service.normalize_filters(request.args)
+    coverage = service.get_city_coverage(filters)
+    missing_decades = service.get_missing_decades()
+
+    total = len(coverage)
+    without_fiche = sum(1 for c in coverage if not c["has_fiche"])
+    without_photo = sum(1 for c in coverage if not c["has_photo"])
+    without_periods = sum(1 for c in coverage if not c["has_periods"])
+    without_data = sum(1 for c in coverage if c["data_points"] == 0)
+
+    return render_template(
+        "web/coverage.html",
+        page_title="Couverture des données",
+        filters=filters,
+        coverage=coverage,
+        missing_decades=missing_decades,
+        total=total,
+        without_fiche=without_fiche,
+        without_photo=without_photo,
+        without_periods=without_periods,
+        without_data=without_data,
+    )
+
+
+@web.route("/coverage/export/coverage.csv")
+def coverage_export_csv() -> Response:
+    service = AnalyticsService()
+    csv_content = service.export_coverage_csv()
+    response = Response(csv_content, mimetype="text/csv; charset=utf-8")
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    response.headers["Content-Disposition"] = f"attachment; filename=couverture-{timestamp}.csv"
+    return response
+
+
+@web.route("/coverage/export/missing-decades.csv")
+def coverage_export_missing_csv() -> Response:
+    service = AnalyticsService()
+    csv_content = service.export_missing_decades_csv()
+    response = Response(csv_content, mimetype="text/csv; charset=utf-8")
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    response.headers["Content-Disposition"] = f"attachment; filename=annees-manquantes-{timestamp}.csv"
+    return response

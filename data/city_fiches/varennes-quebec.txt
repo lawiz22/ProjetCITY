@@ -1,0 +1,276 @@
+# SECTION 1 — Varennes, Québec
+
+---
+
+**VARENNES, QUÉBEC — Fiche Historique par Période**
+*(Niveau 3 — Détail intermédiaire)*
+
+---
+
+**1800-1850 — ORIGINES**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏞️ Fondée en 1672 sur la rive sud du Saint-Laurent, en face de Montréal — seigneurie agricole traditionnelle; présence amérindienne antérieure
+🚢 Le fleuve Saint-Laurent est l'axe central : traversées en bac, commerce local, pêche et navigation saisonnière
+👥 Petite communauté rurale francophone, population d'environ 1 000 à 2 000 habitants; agriculture (céréales, foin) et artisanat local dominant
+
+= Varennes existe depuis le Régime français comme village seigneurial agricole calme, tourné vers le fleuve.
+
+---
+
+**1850-1900 — INDUSTRIALISATION / EXPANSION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏗️ Arrivée du chemin de fer du Grand Tronc sur la rive sud (vers 1850-1860) qui relie Varennes aux marchés de Montréal et de Québec
+📈 Légère croissance démographique; développement de moulins, briqueteries et petites industries riveraines
+🔥 Demeure essentiellement rurale malgré la proximité de Montréal; peu d'industrialisation lourde comparé aux villes voisines
+
+= Varennes reste un bourg agricole et artisanal, animé par le chemin de fer mais sans transformation industrielle majeure.
+
+---
+
+**1900-1945 — CONSOLIDATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏙️ Construction d'institutions locales (église, écoles, hôtel de ville); structure villageoise bien établie; population stable autour de 2 000 à 3 000 habitants
+🏭 Agriculture, briqueteries et quelques commerces de service; le fleuve demeure un lien économique important
+⚔️ Les deux guerres mondiales touchent indirectement la communauté; départ de jeunes hommes au front; économie locale peu transformée
+
+= Varennes consolide son identité de village tranquille de la rive sud, sans mutation économique majeure.
+
+---
+
+**1945-1980 — APRÈS-GUERRE / SUBURBANISATION**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚗 Construction du pont-tunnel Louis-Hippolyte-La Fontaine (1967) et de l'autoroute 20 : Varennes devient accessible depuis Montréal en moins de 30 minutes — boom des banlieues
+🏢 Arrivée de l'industrie pétrochimique majeure : implantation de Pétromont et d'autres entreprises chimiques le long du fleuve dans les années 1960-1970; transformation économique radicale
+⚠️ Pression environnementale liée aux industries lourdes; tensions entre développement industriel et qualité de vie résidentielle
+
+= Varennes se transforme : ville-dortoir pour Montréal ET pôle pétrochimique de la rive sud — double identité qui crée des tensions.
+
+---
+
+**1980-AUJOURD'HUI — RENAISSANCE / ÈRE CONTEMPORAINE**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💻 Émergence de la filière des technologies vertes et de l'énergie propre : implantation du Centre national en électrochimie et en technologies environnementales (CNETE) et attraction d'entreprises en batteries
+🏗️ Méga-projet de Northvolt (gigafactory de batteries pour véhicules électriques, annoncé 2023) — l'un des plus grands investissements industriels de l'histoire du Québec (~7 milliards $) ⚠️ projet sous tension en 2024-2025
+🌍 Varennes ambitionne de devenir un pôle mondial de l'électrification et des batteries; population d'environ 22 000 habitants (2021); défis : acceptabilité sociale, environnement, et viabilité du projet Northvolt
+
+= Varennes est à la croisée des chemins : ancienne ville pétrochimique en reconversion vers l'économie verte, avec un pari industriel gigantesque sur les batteries électriques.
+
+---
+
+**👥 Population — Varennes, Québec**
+
+| Année | Population | Notes |
+|-------|-----------|-------|
+| 1861 | ~1 800 | Village seigneurial agricole |
+| 1901 | ~2 100 | Stabilité rurale |
+| 1941 | ~2 600 | Avant-guerre, croissance lente |
+| 1961 | ~3 800 | Début suburbanisation |
+| 1971 | ~7 200 | 📍 Pont La Fontaine (1967) — explosion banlieue |
+| 1981 | ~12 500 | 🏭 Boom pétrochimique + banlieue Montréal |
+| 1991 | ~16 000 | Croissance résidentielle soutenue |
+| 2001 | ~19 390 | Ville-dortoir consolidée |
+| 2011 | ~21 060 | Stabilisation démographique |
+| 2021 | ~22 200 | 🔋 Annonce filière batterie — Northvolt |
+
+---
+---
+---
+
+# SECTION 2 — Code Python
+
+```python
+CITY_NAME = "Varennes, Québec"
+CITY_COLOR = '#1B5E20'
+
+years = [1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950,
+         1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [1800, 1900, 2000, 2050, 2100, 2200, 2400, 2600, 2800, 3200,
+              4500, 7800, 13000, 16500, 19390, 21060, 22200]
+
+annotations = [
+    (1860, 1800,  "⛵ Village seigneurial — rive sud St-Laurent (1672)",   'brown',  (1862, 5000)),
+    (1870, 1900,  "🚂 Grand Tronc — lien ferroviaire Montréal (1860)",    'gray',   (1872, 8000)),
+    (1940, 2800,  "🌾 Économie agricole dominante — guerre (1939)",       'green',  (1922, 10000)),
+    (1970, 7800,  "🚗 Pont La Fontaine — boom banlieue (1967)",           'blue',   (1952, 13000)),
+    (1980, 13000, "🏭 Pétrochimie — Pétromont s'installe (1975)",        'red',    (1962, 17000)),
+    (1990, 16500, "🏘️ Ville-dortoir Montréal — croissance rapide (1985)",'orange', (1972, 20000)),
+    (2010, 21060, "🔬 CNETE — technologies environnementales (2005)",     'teal',   (1992, 23000)),
+    (2020, 22200, "🔋 Northvolt — gigafactory batteries (2023)",          'darkgreen',(2002, 25000)),
+]
+```
+
+---
+---
+---
+
+# SECTION 3 — Fiche Complète (Markdown)
+
+```markdown
+# Varennes, Québec — Fiche Complète
+
+## 📍 Informations Générales
+
+| Catégorie | Détails |
+|-----------|---------|
+| Ville | Varennes |
+| Province | Québec |
+| Surnom | "La ville des batteries" 🔋 (émergent) |
+| Statut | Ville de la MRC de Marguerite-D'Youville |
+| Maire | Martin Damphousse (depuis 2013) |
+| Fondation | 1672 (seigneurie) |
+| Incorporation | 1845 |
+
+---
+
+## 👥 Population
+
+| Année | Population |
+|-------|-----------|
+| 2011 | 21 060 |
+| 2016 | 21 714 |
+| 2021 | 22 200 |
+| 2024 (est.) | ~23 000 |
+
+📈 Croissance lente mais stable depuis les années 2000
+Fait partie de la grande région métropolitaine de Montréal (CMM)
+Ville principale de la MRC de Marguerite-D'Youville
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée | Valeur |
+|--------|--------|
+| Superficie | ~236 km² |
+| Densité | ~94 hab./km² |
+| Fleuve | Saint-Laurent (rive sud) |
+| Altitude | ~10-30 m |
+
+- Située à ~30 km à l'est de Montréal (via autoroute 20)
+- Face à l'île de Montréal, de l'autre côté du fleuve
+- Reliée par le tunnel Louis-Hippolyte-La Fontaine (1967)
+- Territoire majoritairement plat, zone agricole et industrielle
+
+---
+
+## 🏛️ Économie
+
+### Secteurs Principaux :
+
+- 🏭 **Pétrochimie** — Complexe pétrochimique historique (Pétromont, NOVA Chemicals)
+- 🔋 **Batteries & Électrification** — Northvolt, Centre d'excellence en électrification des transports
+- 🔬 **Recherche** — CNETE (Centre national en électrochimie et technologies environnementales)
+- 🏘️ **Ville-dortoir** — nombreux résidents travaillant à Montréal
+- 🌾 **Agriculture** — terres agricoles en périphérie encore actives
+
+> Varennes est en reconversion de l'économie pétrochimique vers la filière des **batteries pour véhicules électriques**
+
+---
+
+## 🔋 Projet Northvolt — Élément Clé
+
+| Donnée | Détail |
+|--------|--------|
+| Investissement annoncé | ~7 milliards $ CAD |
+| Superficie | ~170 hectares |
+| Emplois prévus | ~3 000 emplois directs |
+| Capacité | 60 GWh/an (batteries Li-ion) |
+| Statut (2024-2025) | ⚠️ Sous tension — difficultés financières de Northvolt AB |
+
+> L'un des plus grands projets industriels de l'histoire du Québec — avenir incertain en 2025
+
+---
+
+## 🎓 Éducation
+
+| Institution | Type |
+|-------------|------|
+| École secondaire Polybel | École secondaire publique |
+| Centre de formation professionnelle | Formation technique |
+| Écoles primaires publiques (plusieurs) | Éducation de base |
+
+- Proximité de l'UQAM, Université de Montréal et ETS (30 min)
+- Accès aux cégeps de la rive sud (Édouard-Montpetit, Sorel-Tracy)
+
+---
+
+## 🏥 Santé
+
+- CLSC des Seigneuries — services de santé locaux
+- Hôpital Pierre-Boucher (Longueuil) — centre hospitalier régional le plus proche
+- Présence de cliniques et services médicaux de proximité
+
+---
+
+## 🌿 Parcs & Environnement
+
+- Parc régional des Îles-de-Saint-Timothée (à proximité)
+- Accès au fleuve Saint-Laurent — piste cyclable riveraine
+- Zone agricole protégée (ZAAP) en périphérie
+- Enjeux environnementaux liés à l'industrie pétrochimique historique
+- Projet Northvolt : débat sur l'impact environnemental et l'eau potable
+
+---
+
+## 🚗 Transport
+
+| Mode | Détails |
+|------|---------|
+| Autoroute | A-20 (Montréal–Québec), sortie Varennes |
+| Tunnel | Louis-Hippolyte-La Fontaine (vers Montréal) |
+| Train | Pas de service ferroviaire de passagers direct |
+| Bus | Exo (réseau Richelieu–Chambly) — service vers Montréal |
+| Vélo | Piste cyclable Route Verte le long du fleuve |
+
+- À ~30 min de Montréal en voiture (hors heure de pointe)
+- Le tunnel La Fontaine est l'un des axes les plus achalandés du Québec
+
+---
+
+## 🌡️ Climat
+
+| Saison | Température moyenne |
+|--------|-------------------|
+| Hiver (Jan) | -13°C |
+| Printemps (Avr) | +6°C |
+| Été (Juil) | +26°C |
+| Automne (Oct) | +9°C |
+
+- Climat continental humide
+- Enneigement moyen : ~250 cm/an
+- Étés chauds et humides, hivers rigoureux
+
+---
+
+## 🏙️ Quartiers & Secteurs Notables
+
+| Secteur | Caractéristique |
+|---------|----------------|
+| Vieux-Varennes | Noyau historique, église patrimoniale, bord de fleuve |
+| Zone industrielle nord | Complexe pétrochimique, futur site Northvolt |
+| Secteurs résidentiels récents | Développements banlieusards des années 1980-2000 |
+| Zone agricole | Terres cultivées en périphérie est et sud |
+
+---
+
+## 📊 Comparaison avec Villes Voisines (Rive Sud)
+
+| Ville | Population | Caractéristique |
+|-------|-----------|----------------|
+| Longueuil | 261 708 | Centre urbain rive sud |
+| Brossard | 90 290 | REM, développement intense |
+| Saint-Bruno | 28 340 | Banlieue cossue |
+| Varennes | 22 200 | Industrie + banlieue |
+| Contrecoeur | 8 500 | Port + industrie |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- ⛵ Varennes est l'une des plus vieilles seigneuries du Québec, fondée en **1672** sous le Régime français
+- 🔬 Marie-Marguerite d'Youville, **première sainte née au Canada**, est native de Varennes (1701)
+- 🏭 Le complexe pétrochimique de Varennes a été pendant des décennies l'un des plus importants de l'Est du Canada
+- 🔋 Varennes est devenue le **symbole québécois de la transition énergétique** avec le projet Northvolt
+- 🚇 Le tunnel La Fontaine, inauguré en 1967, est l'un des **plus longs tunnels sous-fluviaux** d'Amérique du Nord
+- 🌱 La ville ambitionne de devenir un **pôle mondial de l'économie verte** et des batteries lithium-ion
