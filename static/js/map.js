@@ -91,15 +91,11 @@
     /* ── filter logic ────────────────────────────────────────── */
 
     function applyFilters(points, ctrls) {
-        var country = ctrls.country.value;
-        var region = ctrls.region.value;
         var minPop = Number(ctrls.popRange.value) || 0;
         var search = (ctrls.search.value || '').trim().toLowerCase();
-        ctrls.popLabel.textContent = fmt(minPop);
+        if (ctrls.popLabel) ctrls.popLabel.textContent = fmt(minPop);
 
         return points.filter(function (p) {
-            if (country && p.country !== country) return false;
-            if (region && p.region !== region) return false;
             if (p.population < minPop) return false;
             if (search && p.city_name.toLowerCase().indexOf(search) === -1) return false;
             return true;
@@ -127,9 +123,8 @@
 
         /* Grab controls */
         var ctrls = {
-            theme: document.getElementById('map-theme-filter'),
-            country: document.getElementById('map-country-filter'),
-            region: document.getElementById('map-region-filter'),
+            themePills: document.querySelectorAll('.map-layer-pill'),
+            activeTheme: 'population',
             popRange: document.getElementById('map-population-filter'),
             popLabel: document.getElementById('map-population-value'),
             search: document.getElementById('map-search-filter'),
@@ -137,6 +132,8 @@
             status: document.getElementById('map-provider-status'),
             reset: document.getElementById('map-reset-filters')
         };
+        /* Shim: ctrls.theme acts like a {value} accessor */
+        ctrls.theme = { get value() { return ctrls.activeTheme; }, set value(v) { ctrls.activeTheme = v; } };
 
         /* Create the Leaflet map */
         var map = L.map(container, {
@@ -156,27 +153,10 @@
 
         var markerLayer = L.layerGroup().addTo(map);
 
-        /* Populate filter dropdowns */
-        var countries = [];
-        var regions = [];
-        var seen = {};
-        points.forEach(function (p) {
-            if (!seen['c:' + p.country]) { seen['c:' + p.country] = 1; countries.push(p.country); }
-            if (!seen['r:' + p.region]) { seen['r:' + p.region] = 1; regions.push(p.region); }
-        });
-        countries.sort().forEach(function (v) {
-            var o = document.createElement('option'); o.value = v; o.textContent = v;
-            ctrls.country.appendChild(o);
-        });
-        regions.sort().forEach(function (v) {
-            var o = document.createElement('option'); o.value = v; o.textContent = v;
-            ctrls.region.appendChild(o);
-        });
-
         /* ── render markers ──────────────────────────────────── */
 
         function render() {
-            var theme = ctrls.theme.value || 'population';
+            var theme = ctrls.activeTheme || 'population';
             markerLayer.clearLayers();
             var visible = applyFilters(points, ctrls);
             var coords = [];
@@ -208,7 +188,17 @@
 
         /* ── event wiring ────────────────────────────────────── */
 
-        [ctrls.theme, ctrls.country, ctrls.region, ctrls.popRange, ctrls.search].forEach(function (el) {
+        /* Layer pills */
+        ctrls.themePills.forEach(function (pill) {
+            pill.addEventListener('click', function () {
+                ctrls.themePills.forEach(function (p) { p.classList.remove('is-active'); });
+                pill.classList.add('is-active');
+                ctrls.activeTheme = pill.getAttribute('data-theme');
+                render();
+            });
+        });
+
+        [ctrls.popRange, ctrls.search].forEach(function (el) {
             if (el) {
                 el.addEventListener('input', render);
                 el.addEventListener('change', render);
@@ -217,9 +207,10 @@
 
         if (ctrls.reset) {
             ctrls.reset.addEventListener('click', function () {
-                ctrls.country.value = '';
-                ctrls.region.value = '';
-                ctrls.theme.value = 'population';
+                ctrls.activeTheme = 'population';
+                ctrls.themePills.forEach(function (p) {
+                    p.classList.toggle('is-active', p.getAttribute('data-theme') === 'population');
+                });
                 ctrls.popRange.value = '0';
                 ctrls.search.value = '';
                 render();

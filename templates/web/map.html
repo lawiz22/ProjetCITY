@@ -16,74 +16,45 @@
         <strong>{{ map_payload.missing_count }}</strong>
         <small>à compléter si nécessaire</small>
     </article>
-    <article class="metric-card accent-card">
-        <span>Portée</span>
-        <strong>Amérique du Nord</strong>
-        <small>Canada et États-Unis</small>
-    </article>
 </section>
 
-<section class="panel-grid panel-grid-2 map-layout">
-    <article class="panel">
-        <div class="panel-head">
-            <h2>Carte analytique</h2>
-            <span>Carte interactive — zoom, clic et filtres</span>
+<section class="panel map-panel-full">
+    <div class="map-toolbar">
+        <div class="map-toolbar-left">
+            <div class="map-layer-pills" id="map-theme-pills">
+                <button type="button" class="map-layer-pill is-active" data-theme="population">Population</button>
+                <button type="button" class="map-layer-pill" data-theme="growth">Croissance</button>
+                <button type="button" class="map-layer-pill" data-theme="decline">Déclin</button>
+                <button type="button" class="map-layer-pill" data-theme="peak">Pics</button>
+                <button type="button" class="map-layer-pill" data-theme="annotations">Annotations</button>
+            </div>
         </div>
-        <div class="map-filter-bar">
-            <label>
-                Couche
-                <select id="map-theme-filter">
-                    <option value="population">Population</option>
-                    <option value="growth">Croissance</option>
-                    <option value="decline">Déclin</option>
-                    <option value="peak">Pics</option>
-                    <option value="annotations">Annotations</option>
-                </select>
-            </label>
-            <label>
-                Pays
-                <select id="map-country-filter">
-                    <option value="">Tous</option>
-                </select>
-            </label>
-            <label>
-                Région
-                <select id="map-region-filter">
-                    <option value="">Toutes</option>
-                </select>
-            </label>
-            <label>
-                Population min
-                <input id="map-population-filter" type="range" min="0" max="5000000" step="50000" value="0">
-                <span id="map-population-value" class="helper-text">0</span>
-            </label>
-            <label>
-                Recherche
-                <input id="map-search-filter" type="text" placeholder="Ville...">
-            </label>
-            <button type="button" id="map-reset-filters" class="secondary-button">Réinitialiser</button>
+        <div class="map-toolbar-right">
+            <input id="map-search-filter" type="text" placeholder="🔍 Rechercher une ville…" class="map-search-input">
         </div>
-        <div id="city-map" class="map-canvas" style="width:100%;height:560px;min-height:420px;"></div>
-    </article>
+    </div>
 
-    <article class="panel">
-        <div class="panel-head">
-            <h2>Lecture de la carte</h2>
+    <div class="map-slider-row">
+        <label class="map-pop-label">
+            Pop. min
+            <input id="map-population-filter" type="range" min="0" max="5000000" step="50000" value="0">
+            <span id="map-population-value" class="helper-text">0</span>
+        </label>
+        <button type="button" id="map-reset-filters" class="map-reset-link">Réinitialiser</button>
+    </div>
+
+    <div id="city-map" class="map-canvas" style="width:100%;height:600px;min-height:480px;"></div>
+
+    <div class="map-reading-strip">
+        <div class="map-reading-text">
+            <p id="map-visible-summary" class="helper-text">{{ map_payload.mapped_count }} villes visibles.</p>
+            <p id="map-provider-status" class="helper-text"></p>
         </div>
-        <p>Chaque ville est placée par ses coordonnées géographiques réelles. La taille de la bulle suit la population la plus récente disponible. Le clic ouvre un résumé analytique et un lien direct vers la fiche ville. Zoom avec la molette ou le pinch.</p>
-        <p id="map-visible-summary" class="helper-text">{{ map_payload.mapped_count }} villes visibles.</p>
-        <p id="map-provider-status" class="helper-text"></p>
-        <ul class="tag-list">
-            <li>Population récente</li>
-            <li>Pic historique</li>
-            <li>Dernière croissance décénnale</li>
-            <li>Accès direct à la fiche</li>
-        </ul>
         <div class="map-legend">
             <span><i class="legend-dot legend-dot-small"></i>ville moyenne</span>
             <span><i class="legend-dot legend-dot-large"></i>grande métropole</span>
         </div>
-    </article>
+    </div>
 </section>
 
 <section class="panel">
