@@ -1,14 +1,7 @@
 {% extends 'web/base.html' %}
 
 {% block content %}
-<section class="panel export-strip">
-    <div class="panel-head">
-        <h2>Exports</h2>
-        <a class="secondary-button inline-button" href="{{ url_for('web.dashboard_pdf', country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">Exporter le dashboard en PDF</a>
-    </div>
-</section>
-
-<section class="metrics-grid">
+<section class="metrics-grid metrics-grid-dash">
     <article class="metric-card">
         <span>Villes</span>
         <strong>{{ metrics.city_count }}</strong>
@@ -20,14 +13,17 @@
         <small>source analytique couverte</small>
     </article>
     <article class="metric-card">
+        <span>Année la plus récente</span>
+        <strong>{{ metrics.latest_year }}</strong>
+        <small>moyenne {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</small>
+    </article>
+    <article class="metric-card">
         <span>Population agrégée</span>
         <strong>{{ '{:,}'.format(metrics.total_population).replace(',', ' ') }}</strong>
         <small>dernière année disponible</small>
     </article>
-    <article class="metric-card accent-card">
-        <span>Année la plus récente</span>
-        <strong>{{ metrics.latest_year }}</strong>
-        <small>moyenne {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</small>
+    <article class="metric-card metric-card-action">
+        <a class="secondary-button inline-button" href="{{ url_for('web.dashboard_pdf', country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">⇩ Exporter en PDF</a>
     </article>
 </section>
 

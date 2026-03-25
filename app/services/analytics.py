@@ -43,22 +43,52 @@ class SqlExecutionError(RuntimeError):
     pass
 
 
-@lru_cache(maxsize=256)
 def _get_city_origin_metadata(city_slug: str) -> dict[str, int | None]:
+    # 1) Try period details text file
     details_path = Path(current_app.root_path).parent / "data" / "city_details" / f"{city_slug}.txt"
-    if not details_path.exists():
-        return {"foundation_year": None}
+    if details_path.exists():
+        source_text = details_path.read_text(encoding="utf-8")
+        patterns = (
+            r"(?:fond(?:ation|e|ée|é)|founded|established|incorporated|cr[eé]ation|na[iî]t).{0,80}?(1[5-9]\d{2}|20\d{2})",
+            r"(1[5-9]\d{2}|20\d{2}).{0,80}?(?:fond(?:ation|e|ée|é)|founded|established|incorporated|cr[eé]ation|na[iî]t)",
+        )
+        for pattern in patterns:
+            match = re.search(pattern, source_text, flags=re.IGNORECASE | re.DOTALL)
+            if match:
+                year = next((group for group in match.groups() if group), None)
+                if year:
+                    return {"foundation_year": int(year)}
 
-    source_text = details_path.read_text(encoding="utf-8")
-    patterns = (
-        r"(?:fond(?:ation|e|ée|é)|founded|established|incorporated|cr[eé]ation|na[iî]t).{0,80}?(1[5-9]\d{2}|20\d{2})",
-        r"(1[5-9]\d{2}|20\d{2}).{0,80}?(?:fond(?:ation|e|ée|é)|founded|established|incorporated|cr[eé]ation|na[iî]t)",
-    )
-    for pattern in patterns:
-        match = re.search(pattern, source_text, flags=re.IGNORECASE | re.DOTALL)
-        if match:
-            year = next((group for group in match.groups() if group), None)
-            return {"foundation_year": int(year) if year else None}
+    # 2) Try fiche complète in DB (looks for "Fondation" row in pipe tables or text)
+    try:
+        connection = get_db()
+        row = connection.execute(
+            """SELECT f.raw_text FROM dim_city_fiche f
+               JOIN dim_city c ON c.city_id = f.city_id
+               WHERE c.city_slug = ?""",
+            (city_slug,),
+        ).fetchone()
+        if row:
+            fiche_text = row[0]
+            # Match pipe table row: | Fondation | 1837 |
+            m = re.search(
+                r"\|\s*(?:fond(?:ation|e|ée|é)|founded|established|incorporated)\s*\|\s*(1[5-9]\d{2}|20\d{2})\s*\|",
+                fiche_text,
+                flags=re.IGNORECASE,
+            )
+            if m:
+                return {"foundation_year": int(m.group(1))}
+            # Match plain text: Fondation : 1837 or Fondation	1837
+            m = re.search(
+                r"(?:fond(?:ation|e|ée|é)|founded|established|incorporated)\s*[:\t]\s*(1[5-9]\d{2}|20\d{2})",
+                fiche_text,
+                flags=re.IGNORECASE,
+            )
+            if m:
+                return {"foundation_year": int(m.group(1))}
+    except Exception:
+        pass
+
     return {"foundation_year": None}
 
 

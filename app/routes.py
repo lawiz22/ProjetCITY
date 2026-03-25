@@ -68,9 +68,9 @@ def dashboard_pdf() -> Response:
 def city_directory() -> str:
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
-    view_mode = request.args.get("view", "large").strip().lower()
+    view_mode = request.args.get("view", "small").strip().lower()
     if view_mode not in {"large", "medium", "small", "compact"}:
-        view_mode = "large"
+        view_mode = "small"
     return render_template(
         "web/cities.html",
         page_title="City Directory",
