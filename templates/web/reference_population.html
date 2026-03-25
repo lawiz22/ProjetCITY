@@ -1,0 +1,196 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<!-- Summary cards -->
+<section class="metrics-grid coverage-metrics">
+    <article class="metric-card">
+        <span class="metric-value">{{ total_ref_entries }}</span>
+        <span class="metric-label">Entrées de référence</span>
+    </article>
+    <article class="metric-card">
+        <span class="metric-value">{{ active_regions|length }}</span>
+        <span class="metric-label">Régions dans la BD</span>
+    </article>
+    {% if canada_best %}
+    <article class="metric-card">
+        <span class="metric-value">{{ canada_best.coverage_pct }}%</span>
+        <span class="metric-label">Meilleure couverture Canada ({{ canada_best.year }})</span>
+    </article>
+    {% endif %}
+    {% if usa_best %}
+    <article class="metric-card">
+        <span class="metric-value">{{ usa_best.coverage_pct }}%</span>
+        <span class="metric-label">Meilleure couverture USA ({{ usa_best.year }})</span>
+    </article>
+    {% endif %}
+</section>
+
+<!-- Main tabs: Nationale / Régionale -->
+<div class="ref-main-tabs">
+    <button class="ref-main-tab active" data-panel="national">🌍 Couverture nationale</button>
+    <button class="ref-main-tab" data-panel="regional">🗺️ Couverture régionale</button>
+</div>
+
+<!-- ═══════════════ NATIONAL PANEL ═══════════════ -->
+<section class="panel ref-panel" id="panel-national">
+    <p class="panel-subtitle">Population totale de référence vs somme de nos villes, par pays et année.</p>
+
+    <div class="ref-tabs">
+        <button class="ref-tab active" data-country="Canada">🇨🇦 Canada</button>
+        <button class="ref-tab" data-country="United States">🇺🇸 États-Unis</button>
+    </div>
+
+    <div class="table-scroll">
+        <table class="data-table ref-table" id="country-table">
+            <thead>
+                <tr>
+                    <th class="col-year">Année</th>
+                    <th class="col-pop">Pop. référence</th>
+                    <th class="col-pop">Pop. dans notre BD</th>
+                    <th class="col-cities">Villes</th>
+                    <th class="col-pct">Couverture</th>
+                    <th class="col-bar"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in country_rows %}
+                <tr data-country="{{ r.country }}">
+                    <td class="cell-year">{{ r.year_label }}</td>
+                    <td class="num cell-pop">{{ "{:,}".format(r.ref_population)|replace(",", " ") }}</td>
+                    <td class="num cell-pop cell-pop-db">{{ "{:,}".format(r.db_population)|replace(",", " ") }}</td>
+                    <td class="cell-cities" title="{{ r.cities|join(', ') }}">{{ r.cities|join(', ') }}</td>
+                    <td class="num cell-pct {% if r.coverage_pct >= 30 %}pct-good{% elif r.coverage_pct >= 10 %}pct-ok{% else %}pct-low{% endif %}">{{ r.coverage_pct }}%</td>
+                    <td class="cell-bar">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill {% if r.coverage_pct >= 30 %}fill-good{% elif r.coverage_pct >= 10 %}fill-ok{% else %}fill-low{% endif %}"
+                                 style="width: {{ [r.coverage_pct, 100]|min }}%"></div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════ REGIONAL PANEL ═══════════════ -->
+<section class="panel ref-panel" id="panel-regional" style="display:none">
+    <p class="panel-subtitle">Seulement les régions / états où au moins une ville existe dans la BD.</p>
+
+    <div class="ref-region-filter-bar">
+        <div class="ref-filter-group">
+            <label for="region-country-select">Pays :</label>
+            <select id="region-country-select">
+                <option value="__all__">Tous</option>
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="United States">🇺🇸 États-Unis</option>
+            </select>
+        </div>
+        <div class="ref-filter-group">
+            <label for="region-select">Région / État :</label>
+            <select id="region-select">
+                <option value="__all__">Toutes</option>
+                {% for cty, reg in active_regions %}
+                <option value="{{ reg }}" data-country="{{ cty }}">{{ reg }} ({{ cty[:2]|upper }})</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="table-scroll">
+        <table class="data-table ref-table" id="region-table">
+            <thead>
+                <tr>
+                    <th class="col-region">Pays</th>
+                    <th class="col-region">Région / État</th>
+                    <th class="col-year">Année</th>
+                    <th class="col-pop">Pop. référence</th>
+                    <th class="col-pop">Pop. dans notre BD</th>
+                    <th class="col-cities">Villes</th>
+                    <th class="col-pct">Couverture</th>
+                    <th class="col-bar"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in region_rows %}
+                {% if (r.country, r.region) in active_regions %}
+                <tr data-region="{{ r.region }}" data-country-r="{{ r.country }}">
+                    <td>{{ r.country }}</td>
+                    <td>{{ r.region }}</td>
+                    <td class="cell-year">{{ r.year_label }}</td>
+                    <td class="num cell-pop">{{ "{:,}".format(r.ref_population)|replace(",", " ") }}</td>
+                    <td class="num cell-pop cell-pop-db">{{ "{:,}".format(r.db_population)|replace(",", " ") }}</td>
+                    <td class="cell-cities" title="{{ r.cities|join(', ') }}">{{ r.cities|join(', ') }}</td>
+                    <td class="num cell-pct {% if r.coverage_pct >= 30 %}pct-good{% elif r.coverage_pct >= 10 %}pct-ok{% else %}pct-low{% endif %}">{{ r.coverage_pct }}%</td>
+                    <td class="cell-bar">
+                        <div class="completeness-bar">
+                            <div class="completeness-fill {% if r.coverage_pct >= 30 %}fill-good{% elif r.coverage_pct >= 10 %}fill-ok{% else %}fill-low{% endif %}"
+                                 style="width: {{ [r.coverage_pct, 100]|min }}%"></div>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+/* ── Main tabs: Nationale / Régionale ── */
+document.querySelectorAll('.ref-main-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.ref-main-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.panel;
+        document.querySelectorAll('.ref-panel').forEach(p => {
+            p.style.display = p.id === 'panel-' + target ? '' : 'none';
+        });
+    });
+});
+
+/* ── Country sub-tabs (national panel) ── */
+document.querySelectorAll('.ref-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.ref-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const country = btn.dataset.country;
+        document.querySelectorAll('#country-table tbody tr').forEach(tr => {
+            tr.style.display = tr.dataset.country === country ? '' : 'none';
+        });
+    });
+});
+document.querySelector('.ref-tab[data-country="Canada"]').click();
+
+/* ── Regional filters ── */
+const regionCountrySel = document.getElementById('region-country-select');
+const regionSel = document.getElementById('region-select');
+
+function filterRegionTable() {
+    const cty = regionCountrySel.value;
+    const reg = regionSel.value;
+    document.querySelectorAll('#region-table tbody tr').forEach(tr => {
+        let show = true;
+        if (cty !== '__all__' && tr.dataset.countryR !== cty) show = false;
+        if (reg !== '__all__' && tr.dataset.region !== reg) show = false;
+        tr.style.display = show ? '' : 'none';
+    });
+}
+
+regionCountrySel.addEventListener('change', function() {
+    const cty = this.value;
+    // Filter region dropdown options based on selected country
+    regionSel.querySelectorAll('option').forEach(opt => {
+        if (opt.value === '__all__') return;
+        opt.style.display = (cty === '__all__' || opt.dataset.country === cty) ? '' : 'none';
+    });
+    // Reset region to "Toutes" when switching country
+    regionSel.value = '__all__';
+    filterRegionTable();
+});
+
+regionSel.addEventListener('change', filterRegionTable);
+</script>
+
+{% endblock %}

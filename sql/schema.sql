@@ -15,6 +15,7 @@ DROP VIEW IF EXISTS vw_city_period_detail_analysis;
 DROP VIEW IF EXISTS vw_city_population_analysis;
 
 DROP TABLE IF EXISTS fact_city_population;
+DROP TABLE IF EXISTS ref_population;
 DROP TABLE IF EXISTS dim_city_fiche_section;
 DROP TABLE IF EXISTS dim_city_fiche;
 DROP TABLE IF EXISTS dim_city_period_detail_item;
@@ -29,6 +30,15 @@ CREATE TABLE dim_annotation (
     annotation_color TEXT NOT NULL,
     annotation_type TEXT NOT NULL DEFAULT 'event',
     UNIQUE(annotation_label, annotation_color)
+);
+
+CREATE TABLE ref_population (
+    ref_pop_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    country TEXT NOT NULL,
+    region TEXT,
+    year INTEGER NOT NULL,
+    population INTEGER NOT NULL,
+    UNIQUE(country, region, year)
 );
 
 CREATE TABLE dim_city (

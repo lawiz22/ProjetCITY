@@ -1383,3 +1383,137 @@ class AnalyticsService:
             return None
         cleaned = str(value).strip()
         return cleaned or None
+
+    # ------------------------------------------------------------------
+    # Reference population — couverture vs population réelle
+    # ------------------------------------------------------------------
+
+    def get_reference_population_overview(self) -> dict[str, Any]:
+        """Return reference population data with coverage ratios.
+
+        Uses ±1-year tolerance when matching city data to reference years
+        so that Canadian census years (1861, 1871 …) align with DB decade
+        years (1860, 1870 …).  Per-city deduplication picks the closest
+        year to avoid double-counting.
+        """
+        conn = get_db()
+
+        # --- All city-level rows (city, country, region, year, pop) ---
+        all_city = conn.execute(
+            "SELECT city_id, city_name, country, region, year, population "
+            "FROM vw_city_population_analysis"
+        ).fetchall()
+
+        # Build index: {(country, year): [(city_id, city_name, pop), ...]}
+        from collections import defaultdict
+        country_idx: dict[tuple[str, int], list[tuple[int, str, int]]] = defaultdict(list)
+        region_idx: dict[tuple[str, str, int], list[tuple[int, str, int]]] = defaultdict(list)
+        for r in all_city:
+            country_idx[(r["country"], r["year"])].append(
+                (r["city_id"], r["city_name"], r["population"])
+            )
+            if r["region"]:
+                region_idx[(r["country"], r["region"], r["year"])].append(
+                    (r["city_id"], r["city_name"], r["population"])
+                )
+
+        def _best_pop_for_year(idx, key_fn, ref_year: int) -> dict:
+            """Sum populations, picking the closest year per city (±1).
+
+            Returns dict with keys: total, cities (list of names),
+            year_label (str like '1861' or '1860-1861').
+            """
+            # Gather candidates: {city_id: (abs_delta, actual_year, name, pop)}
+            best: dict[int, tuple[int, int, str, int]] = {}
+            for delta in (0, -1, 1):
+                yr = ref_year + delta
+                for city_id, name, pop in idx.get(key_fn(yr), []):
+                    prev = best.get(city_id)
+                    if prev is None or abs(delta) < prev[0]:
+                        best[city_id] = (abs(delta), yr, name, pop)
+
+            total = sum(v[3] for v in best.values())
+            cities = sorted({v[2] for v in best.values()})
+            actual_years = {v[1] for v in best.values()}
+            if actual_years:
+                mn, mx = min(actual_years), max(actual_years)
+                year_label = str(ref_year) if mn == mx == ref_year else f"{min(mn, ref_year)}-{max(mx, ref_year)}"
+            else:
+                year_label = str(ref_year)
+            return {"total": total, "cities": cities, "year_label": year_label}
+
+        # --- Summary by country/year ---
+        country_ref = conn.execute(
+            "SELECT country, year, population FROM ref_population "
+            "WHERE region IS NULL ORDER BY country, year"
+        ).fetchall()
+
+        country_rows: list[dict[str, Any]] = []
+        for r in country_ref:
+            yr = r["year"]
+            cty = r["country"]
+            ref_pop = r["population"]
+            info = _best_pop_for_year(
+                country_idx, lambda y: (cty, y), yr
+            )
+            db_pop = info["total"]
+            pct = round(db_pop / ref_pop * 100, 1) if ref_pop else 0
+            country_rows.append({
+                "country": cty,
+                "year": yr,
+                "year_label": info["year_label"],
+                "ref_population": ref_pop,
+                "db_population": db_pop,
+                "cities": info["cities"],
+                "coverage_pct": pct,
+            })
+
+        # --- By region/year ---
+        region_ref = conn.execute(
+            "SELECT country, region, year, population FROM ref_population "
+            "WHERE region IS NOT NULL ORDER BY country, region, year"
+        ).fetchall()
+
+        region_rows: list[dict[str, Any]] = []
+        for r in region_ref:
+            yr = r["year"]
+            cty = r["country"]
+            reg = r["region"]
+            ref_pop = r["population"]
+            info = _best_pop_for_year(
+                region_idx, lambda y, c=cty, g=reg: (c, g, y), yr
+            )
+            db_pop = info["total"]
+            pct = round(db_pop / ref_pop * 100, 1) if ref_pop else 0
+            region_rows.append({
+                "country": cty,
+                "region": reg,
+                "year": yr,
+                "year_label": info["year_label"],
+                "ref_population": ref_pop,
+                "db_population": db_pop,
+                "cities": info["cities"],
+                "coverage_pct": pct,
+            })
+
+        # --- Distinct regions present in our DB ---
+        db_regions = conn.execute(
+            "SELECT DISTINCT country, region FROM dim_city "
+            "WHERE region IS NOT NULL ORDER BY country, region"
+        ).fetchall()
+        active_regions = [(r["country"], r["region"]) for r in db_regions]
+
+        # --- Summary cards ---
+        ca_latest = [r for r in country_rows if r["country"] == "Canada"]
+        us_latest = [r for r in country_rows if r["country"] == "United States"]
+        ca_best = max(ca_latest, key=lambda x: x["coverage_pct"]) if ca_latest else None
+        us_best = max(us_latest, key=lambda x: x["coverage_pct"]) if us_latest else None
+
+        return {
+            "country_rows": country_rows,
+            "region_rows": region_rows,
+            "active_regions": active_regions,
+            "canada_best": ca_best,
+            "usa_best": us_best,
+            "total_ref_entries": len(country_ref) + len(region_ref),
+        }

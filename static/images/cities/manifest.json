@@ -508,5 +508,11 @@
     "source_page": "https://en.wikipedia.org/wiki/Gary%2C_Indiana",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Gary%2C_Indiana_%282022%29.jpg/330px-Gary%2C_Indiana_%282022%29.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "youngstown-ohio": {
+    "filename": "youngstown-ohio.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Youngstown%2C_Ohio",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Mill_Creek_Park_Lanterman%27s_Mill.jpg/330px-Mill_Creek_Park_Lanterman%27s_Mill.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 80
+# Nombre de villes : 81
 #
 
 # ============================================================
@@ -2086,4 +2086,32 @@ annotations = [
     (2000, 16541, "💎 Mine Ekati — diamants canadiens (1998)", 'cyan'),
     (2010, 19234, "☠️ Giant Mine fermée — 237kt arsenic (2004)", 'gray'),
     (2020, 20340, "🔥 Évacuation totale — feux de forêt (2023)", 'orange'),
+]
+
+# ============================================================
+# Youngstown (United States)
+# ============================================================
+CITY_NAME = "Youngstown, Ohio"
+CITY_COLOR = '#B22222'
+
+years = [
+    1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 
+    1990, 2000, 2010, 2020
+]
+population = [
+    3000, 8075, 10986, 15435, 33220, 44885, 79066, 132358, 170002, 167720, 168330, 
+    166689, 139788, 115436, 95732, 82026, 66982, 60068
+]
+
+annotations = [
+    (1850, 3000, "🏡 John Young fonde le village (1797)", 'green'),
+    (1900, 44885, "⚙️ Youngstown Sheet & Tube fondée (1900)", 'brown'),
+    (1920, 132358, "🔥 Boom acier — immigrants Europe Est (1915)", 'orange'),
+    (1930, 170002, "⭐ Pic historique — 170 000 hab. (1930)", 'gold'),
+    (1940, 167720, "⚔️ Arsenal acier — guerre mondiale (1940)", 'gray'),
+    (1950, 168330, "🏭 Dernière grande année de l'acier (1950)", 'blue'),
+    (1980, 115436, "💀 Black Monday — 50 000 emplois perdus (1977)", 'red'),
+    (2000, 82026, "📉 Corruption + abandon urbain (1990)", 'purple'),
+    (2010, 66982, "🏙️ Plan 2010 — shrinking city planifiée (2005)", 'teal'),
+    (2020, 60068, "🗳️ Rust Belt — bascule politique Trump (2016)", 'orange'),
 ]

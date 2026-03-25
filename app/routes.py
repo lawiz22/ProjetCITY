@@ -558,3 +558,18 @@ def coverage_export_missing_csv() -> Response:
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     response.headers["Content-Disposition"] = f"attachment; filename=annees-manquantes-{timestamp}.csv"
     return response
+
+
+# ------------------------------------------------------------------
+#  Reference population
+# ------------------------------------------------------------------
+
+@web.route("/reference-population")
+def reference_population() -> str:
+    service = AnalyticsService()
+    data = service.get_reference_population_overview()
+    return render_template(
+        "web/reference_population.html",
+        page_title="Population de référence",
+        **data,
+    )

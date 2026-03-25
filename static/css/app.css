@@ -3353,3 +3353,166 @@ td {
         height: 360px;
     }
 }
+
+/* ---------------------------------------------------------------
+   Reference population page
+   --------------------------------------------------------------- */
+/* ── Main tabs (Nationale / Régionale) ── */
+.ref-main-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 2px solid var(--border);
+}
+.ref-main-tab {
+    padding: 12px 28px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: color .15s, border-color .15s;
+    margin-bottom: -2px;
+}
+.ref-main-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+.ref-main-tab:hover:not(.active) {
+    color: var(--text);
+}
+
+/* ── Country sub-tabs (Canada / USA) ── */
+.ref-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.ref-tab {
+    width: auto;
+    padding: 8px 20px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background .15s, color .15s;
+}
+.ref-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+.ref-tab:hover:not(.active) {
+    background: var(--bg-alt, #eee);
+}
+
+/* ── Regional filter bar ── */
+.ref-region-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: var(--bg-alt, #f7f8fa);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+:root[data-theme='dark'] .ref-region-filter-bar {
+    background: var(--panel);
+}
+.ref-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ref-filter-group label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+.ref-filter-group select {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    font-size: 0.85rem;
+    min-width: 180px;
+}
+
+/* ── Table column sizing & readability ── */
+.ref-table .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.ref-table .col-year { width: 70px; }
+.ref-table .col-pop  { width: 180px; }
+.ref-table .col-pct  { width: 100px; }
+.ref-table .col-bar  { width: 140px; }
+.ref-table .col-region { width: auto; }
+.ref-table .col-cities { width: auto; }
+
+.ref-table .cell-cities {
+    font-size: 0.8rem;
+    color: var(--text-secondary, #666);
+    max-width: 320px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ref-table .cell-year {
+    font-weight: 700;
+    color: var(--accent);
+}
+.ref-table .cell-pop {
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+    padding-right: 14px;
+}
+.ref-table .cell-pop-db {
+    font-weight: 700;
+}
+.ref-table .cell-pct {
+    font-weight: 700;
+    padding-right: 10px;
+}
+.pct-good { color: #27ae60; }
+.pct-ok   { color: #e67e22; }
+.pct-low  { color: #c0392b; }
+:root[data-theme='dark'] .pct-good { color: #5ddb7e; }
+:root[data-theme='dark'] .pct-ok   { color: #f5b041; }
+:root[data-theme='dark'] .pct-low  { color: #e87e7e; }
+.ref-table .cell-bar {
+    padding-left: 4px;
+}
+.fill-good { background: #27ae60; }
+.fill-ok   { background: #f39c12; }
+.fill-low  { background: #e74c3c; }
+
+.dark .ref-tab {
+    background: var(--panel);
+    border-color: var(--border);
+}
+.dark .ref-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+.dark .ref-main-tab {
+    color: var(--muted);
+}
+.dark .ref-main-tab.active {
+    color: var(--accent);
+}
+.panel-subtitle {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: -8px 0 16px;
+}
