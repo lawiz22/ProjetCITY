@@ -394,5 +394,11 @@
     "source_page": "https://en.wikipedia.org/wiki/Victoriaville",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Hotel_de_ville_-_Victoriaville.JPG/330px-Hotel_de_ville_-_Victoriaville.JPG",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "myrtle-beach-south-carolina": {
+    "filename": "myrtle-beach-south-carolina.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Myrtle_Beach%2C_South_Carolina",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/BroadwayAtTheBeach1.jpg/330px-BroadwayAtTheBeach1.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }
