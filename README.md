@@ -2,6 +2,64 @@
 
 Base locale d'analyse urbaine pour villes canadiennes et américaines.
 
+## Plateforme web analyste
+
+Une première version web locale est maintenant disponible avec Flask + Jinja.
+
+### Fonctionnalités livrées
+
+- dashboard analytique avec indicateurs clés
+- annuaire des villes avec population récente et pic historique
+- annuaire des villes avec double affichage: vue blocs illustrée et vue liste compacte
+- fiche détaillée par ville avec courbe démographique, annotations et périodes narratives
+- fiche détaillée par ville avec header photo premium, badges de synthèse et résumé narratif
+- comparaison multi-villes
+- zoom, pan et réinitialisation sur les courbes de comparaison et de détail
+- export PNG des graphiques principaux
+- SQL Lab pour lancer des requêtes SQL directement sur la base SQLite
+- export CSV depuis le SQL Lab pour les requêtes en lecture
+- historique persistant des requêtes SQL avec rechargement rapide
+- sauvegarde de vues analytiques SQL personnalisées
+- carte analytique des villes avec bulles proportionnelles à la population récente
+- filtres dynamiques directement sur la carte
+- couches thématiques sur la carte: population, croissance, déclin, pics, annotations
+- export PDF du dashboard et des fiches ville
+- export PDF ville enrichi avec photo locale
+- tableaux triables et filtrables côté client
+- annotations temporelles cliquables sur la carte et dans les courbes des fiches ville
+- bandes verticales colorées sur les graphiques des villes pour matérialiser les annotations historiques
+- filtres à cocher sur les annotations des fiches ville pour afficher, masquer et réafficher librement les événements voulus
+- cache local d'images par ville dans static/images/cities/
+- timeline visuelle pour les périodes détaillées des fiches ville
+
+### Lancer l'application web
+
+Sous Windows PowerShell:
+
+1. Activer l'environnement: `\.venv\Scripts\Activate.ps1`
+2. Vérifier que la base existe: `python scripts\build_city_database.py`
+3. Lancer le serveur web: `python run_web.py`
+4. Ouvrir le navigateur sur `http://127.0.0.1:5000`
+
+Pour générer ou rafraîchir les images locales des villes depuis Wikipedia/Wikimedia:
+
+`python scripts\fetch_city_photos.py`
+
+### Variables d'environnement disponibles
+
+- `PROJETCITY_DATABASE_PATH` : chemin alternatif vers la base SQLite
+- `PROJETCITY_SQL_QUERY_LIMIT` : nombre maximal de lignes retournées par instruction SQL Lab
+- `PROJETCITY_SQL_EXPORT_LIMIT` : nombre maximal de lignes exportées en CSV depuis le SQL Lab
+- `PROJETCITY_SQL_HISTORY_PATH` : chemin du fichier local de persistance de l'historique SQL
+- `PROJETCITY_SQL_HISTORY_LIMIT` : nombre maximal d'entrées conservées dans l'historique SQL
+- `PROJETCITY_SAVED_VIEWS_PATH` : chemin du fichier local des vues analytiques sauvegardées
+- `PROJETCITY_SAVED_VIEWS_LIMIT` : nombre maximal de vues personnalisées sauvegardées
+- `PROJETCITY_SQL_STATEMENT_LIMIT` : nombre maximal d'instructions par exécution SQL Lab
+- `PROJETCITY_SQL_ENABLE_WRITE` : mettre `1` pour autoriser les requêtes SQL en écriture dans SQL Lab
+
+Par défaut, le SQL Lab accepte les requêtes en lecture (`SELECT`, `WITH`, `PRAGMA`).
+Le mode écriture est désactivé tant que `PROJETCITY_SQL_ENABLE_WRITE=1` n'est pas défini.
+
 ## Ce qui est déjà en place
 
 - un environnement virtuel local `.venv`
@@ -23,6 +81,8 @@ Base locale d'analyse urbaine pour villes canadiennes et américaines.
 
 - `villestats.py` : script source avec les séries historiques et annotations
 - `villestats_v2.py` : version simplifiée du fichier source
+- `run_web.py` : point d'entrée du serveur web Flask local
+- `app/` : application web Flask, routes et services analytiques
 - `scripts/build_city_database.py` : construit et recharge la base SQLite à partir de `villestats.py` et `villestats_v2.py`
 - `scripts/import_city_period_details.py` : recharge uniquement les périodes détaillées depuis les `.txt`
 - `scripts/validate_villestats.py` : valide les nouvelles villes ajoutées dans `villestats.py`
@@ -31,6 +91,8 @@ Base locale d'analyse urbaine pour villes canadiennes et américaines.
 - `sql/schema.sql` : schéma SQL
 - `data/city_details/` : fichiers texte détaillés par ville
 - `data/city_analysis.db` : base locale générée
+- `templates/web/` : templates Jinja de la plateforme web
+- `static/` : CSS et JavaScript de l'interface analyste
 
 ## Modèle actuel
 

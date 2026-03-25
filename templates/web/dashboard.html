@@ -1,0 +1,117 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<section class="panel export-strip">
+    <div class="panel-head">
+        <h2>Exports</h2>
+        <a class="secondary-button inline-button" href="{{ url_for('web.dashboard_pdf', country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">Exporter le dashboard en PDF</a>
+    </div>
+</section>
+
+<section class="metrics-grid">
+    <article class="metric-card">
+        <span>Villes</span>
+        <strong>{{ metrics.city_count }}</strong>
+        <small>dans le périmètre actif</small>
+    </article>
+    <article class="metric-card">
+        <span>Pays</span>
+        <strong>{{ metrics.country_count }}</strong>
+        <small>source analytique couverte</small>
+    </article>
+    <article class="metric-card">
+        <span>Population agrégée</span>
+        <strong>{{ '{:,}'.format(metrics.total_population).replace(',', ' ') }}</strong>
+        <small>dernière année disponible</small>
+    </article>
+    <article class="metric-card accent-card">
+        <span>Année la plus récente</span>
+        <strong>{{ metrics.latest_year }}</strong>
+        <small>moyenne {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</small>
+    </article>
+</section>
+
+<section class="panel-grid panel-grid-2">
+    <article class="panel tall-panel">
+        <div class="panel-head">
+            <h2>Top populations récentes</h2>
+            <a href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">Voir les villes</a>
+        </div>
+        <div class="chart-block">
+            <div class="chart-toolbar">
+                <span class="helper-text">Export PNG disponible pour les graphiques principaux.</span>
+                <button type="button" class="secondary-button chart-export" data-chart-export>Exporter PNG</button>
+            </div>
+            <div class="chart-frame">
+                <canvas class="chart-canvas" data-chart='{{ chart_payload.topPopulations | tojson }}' data-chart-type="bar" data-chart-filename="dashboard-top-populations"></canvas>
+            </div>
+        </div>
+    </article>
+
+    <article class="panel insight-panel">
+        <div class="panel-head">
+            <h2>Lecture rapide</h2>
+        </div>
+        <p>Le cockpit combine les vues analytiques prêtes dans SQLite pour fournir un point d’entrée lisible avant de plonger dans les fiches villes ou le SQL Lab.</p>
+        <ul class="tag-list">
+            <li>Décennies</li>
+            <li>Déclin / rebond</li>
+            <li>Annotations</li>
+            <li>Périodes narratives</li>
+        </ul>
+    </article>
+</section>
+
+<section class="panel-grid panel-grid-3">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Top croissances</h2>
+        </div>
+        <div class="data-list">
+            {% for row in growth_leaders %}
+            <div class="data-row">
+                <div>
+                    <strong>{{ row.city_name }}</strong>
+                    <span>{{ row.country }} · {{ row.region }} · {{ row.decade }}</span>
+                </div>
+                <strong>{{ row.growth_pct }}%</strong>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Villes au pic</h2>
+        </div>
+        <div class="data-list">
+            {% for row in peak_cities %}
+            <div class="data-row">
+                <div>
+                    <strong>{{ row.city_name }}</strong>
+                    <span>{{ row.country }} · {{ row.region }}</span>
+                </div>
+                <strong>{{ '{:,}'.format(row.peak_population).replace(',', ' ') }}</strong>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Périodes de déclin</h2>
+        </div>
+        <div class="data-list">
+            {% for row in decline_cities %}
+            <div class="data-row">
+                <div>
+                    <strong>{{ row.city_name }}</strong>
+                    <span>{{ row.start_year }} → {{ row.end_year }}</span>
+                </div>
+                <strong>{{ '{:,}'.format(row.population_change).replace(',', ' ') }}</strong>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}

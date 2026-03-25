@@ -1,0 +1,124 @@
+{% extends 'web/base.html' %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block content %}
+<section class="metrics-grid">
+    <article class="metric-card">
+        <span>Villes cartographiées</span>
+        <strong>{{ map_payload.mapped_count }}</strong>
+        <small>points visibles sur la carte</small>
+    </article>
+    <article class="metric-card">
+        <span>Coordonnées manquantes</span>
+        <strong>{{ map_payload.missing_count }}</strong>
+        <small>à compléter si nécessaire</small>
+    </article>
+    <article class="metric-card accent-card">
+        <span>Portée</span>
+        <strong>Amérique du Nord</strong>
+        <small>Canada et États-Unis</small>
+    </article>
+</section>
+
+<section class="panel-grid panel-grid-2 map-layout">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Carte analytique</h2>
+            <span>Bulles proportionnelles à la population récente</span>
+        </div>
+        <div class="map-filter-bar">
+            <label>
+                Couche
+                <select id="map-theme-filter">
+                    <option value="population">Population</option>
+                    <option value="growth">Croissance</option>
+                    <option value="decline">Déclin</option>
+                    <option value="peak">Pics</option>
+                    <option value="annotations">Annotations</option>
+                </select>
+            </label>
+            <label>
+                Pays
+                <select id="map-country-filter">
+                    <option value="">Tous</option>
+                </select>
+            </label>
+            <label>
+                Région
+                <select id="map-region-filter">
+                    <option value="">Toutes</option>
+                </select>
+            </label>
+            <label>
+                Population min
+                <input id="map-population-filter" type="range" min="0" max="5000000" step="50000" value="0">
+                <span id="map-population-value" class="helper-text">0</span>
+            </label>
+            <label>
+                Recherche
+                <input id="map-search-filter" type="text" placeholder="Ville...">
+            </label>
+            <button type="button" id="map-reset-filters" class="secondary-button">Réinitialiser</button>
+        </div>
+        <div id="city-map" class="map-canvas" data-map='{{ map_payload.points | tojson }}'></div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Lecture de la carte</h2>
+        </div>
+        <p>Chaque ville est placée par ses coordonnées approximatives. La taille de la bulle suit la population la plus récente disponible. Le clic ouvre un résumé analytique et un lien direct vers la fiche ville.</p>
+        <p id="map-visible-summary" class="helper-text">{{ map_payload.mapped_count }} villes visibles.</p>
+        <ul class="tag-list">
+            <li>Population récente</li>
+            <li>Pic historique</li>
+            <li>Dernière croissance décénnale</li>
+            <li>Accès direct à la fiche</li>
+        </ul>
+        <div class="map-legend">
+            <span><i class="legend-dot legend-dot-small"></i>ville moyenne</span>
+            <span><i class="legend-dot legend-dot-large"></i>grande métropole</span>
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Top villes cartographiées</h2>
+    </div>
+    <div class="table-wrapper">
+        <table data-sortable-table>
+            <thead>
+                <tr>
+                    <th>Ville</th>
+                    <th>Pays</th>
+                    <th>Région</th>
+                    <th>Population récente</th>
+                    <th>Pic</th>
+                    <th>Croissance récente</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for point in map_payload.top_points %}
+                <tr>
+                    <td><a href="{{ url_for('web.city_detail', city_slug=point.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">{{ point.city_name }}</a></td>
+                    <td>{{ point.country }}</td>
+                    <td>{{ point.region }}</td>
+                    <td>{{ '{:,}'.format(point.population).replace(',', ' ') }} en {{ point.year }}</td>
+                    <td>{{ '{:,}'.format(point.peak_population).replace(',', ' ') if point.peak_population else 'n/a' }}{% if point.peak_year %} en {{ point.peak_year }}{% endif %}</td>
+                    <td>{% if point.latest_growth_pct is not none %}{{ point.latest_growth_pct }}% ({{ point.latest_growth_decade }}){% else %}n/a{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script defer src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

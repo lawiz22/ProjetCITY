@@ -1,0 +1,153 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<section class="panel-grid panel-grid-2">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>SQL Lab</h2>
+            <span>Exécution directe sur SQLite</span>
+        </div>
+        <form method="post" class="sql-form">
+            <textarea name="sql" rows="14" placeholder="SELECT * FROM vw_city_population_analysis LIMIT 20;">{{ sql }}</textarea>
+            <div class="saved-view-form">
+                <input type="text" name="view_name" placeholder="Nom de la vue analytique">
+                <input type="text" name="view_description" placeholder="Description courte (optionnel)">
+                <button type="submit" class="secondary-button" formaction="{{ url_for('web.sql_lab_view_save') }}" formmethod="post">Sauvegarder la vue</button>
+            </div>
+            <label class="checkbox-row">
+                <input type="checkbox" name="confirm_write">
+                Je confirme l'exécution des requêtes en écriture
+            </label>
+            <div class="button-row">
+                <button type="submit">Exécuter</button>
+                <button type="submit" class="secondary-button" formaction="{{ url_for('web.sql_lab_export') }}" formmethod="post">Exporter CSV</button>
+            </div>
+        </form>
+        <p class="helper-text">
+            Mode écriture: {% if sql_write_enabled %}activé{% else %}désactivé{% endif %}. Les requêtes en lecture acceptent SELECT, WITH et PRAGMA.
+        </p>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Exemples</h2>
+        </div>
+        <div class="example-stack">
+            {% for example in examples %}
+            <article class="example-card sql-snippet-card" data-sql-snippet="{{ example.sql }}">
+                <strong>{{ example.label }}</strong>
+                <pre>{{ example.sql }}</pre>
+                <button type="button" class="secondary-button sql-use-snippet">Charger dans l'éditeur</button>
+            </article>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="panel-grid panel-grid-2">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Vues analytiques sauvegardées</h2>
+        </div>
+        <div class="history-stack">
+            {% for view in saved_views %}
+            <article class="history-card sql-snippet-card" data-sql-snippet="{{ view.sql }}">
+                <div class="history-meta-row">
+                    <strong>{{ view.name }}</strong>
+                    <span>{{ view.created_at }}</span>
+                </div>
+                {% if view.description %}<p>{{ view.description }}</p>{% endif %}
+                <pre>{{ view.sql }}</pre>
+                <div class="button-row">
+                    <button type="button" class="secondary-button sql-use-snippet">Charger</button>
+                    <form method="post" action="{{ url_for('web.sql_lab_view_delete', view_id=view.id) }}">
+                        <button type="submit" class="secondary-button">Supprimer</button>
+                    </form>
+                </div>
+            </article>
+            {% else %}
+            <p>Aucune vue sauvegardée.</p>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Historique persistant</h2>
+            <form method="post" action="{{ url_for('web.sql_lab_history_clear') }}">
+                <button type="submit" class="secondary-button">Effacer</button>
+            </form>
+        </div>
+        <div class="history-stack">
+            {% for entry in history_entries %}
+            <article class="history-card sql-snippet-card" data-sql-snippet="{{ entry.sql }}">
+                <div class="history-meta-row">
+                    <strong>{{ entry.action }}</strong>
+                    <span>{{ entry.status }}</span>
+                </div>
+                <p>{{ entry.timestamp }}</p>
+                <pre>{{ entry.sql }}</pre>
+                <button type="button" class="secondary-button sql-use-snippet">Recharger</button>
+            </article>
+            {% else %}
+            <p>Aucune requête enregistrée pour le moment.</p>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Rappels</h2>
+        </div>
+        <p>L’historique est stocké localement sur la machine, dans le projet. Les exécutions et les exports sont enregistrés tant qu’une requête SQL valide ou invalide est soumise.</p>
+        <ul class="tag-list">
+            <li>persistant</li>
+            <li>réutilisable</li>
+            <li>effaçable</li>
+            <li>compatible export</li>
+        </ul>
+    </article>
+</section>
+
+{% if result %}
+<section class="panel">
+    <div class="panel-head">
+        <h2>Résultats</h2>
+        <span>{{ result.kind }}</span>
+    </div>
+    {% for statement in result.results %}
+    <article class="result-block">
+        <pre>{{ statement.statement }}</pre>
+        {% if statement.columns %}
+        <div class="table-wrapper">
+            <table data-sortable-table>
+                <thead>
+                    <tr>
+                        {% for column in statement.columns %}
+                        <th>{{ column }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in statement.rows %}
+                    <tr>
+                        {% for column in statement.columns %}
+                        <td>{{ row[column] }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>{{ statement.row_count }} ligne(s) affectée(s).</p>
+        {% endif %}
+    </article>
+    {% endfor %}
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts_extra %}
+<script defer src="{{ url_for('static', filename='js/sql_lab.js') }}"></script>
+{% endblock %}

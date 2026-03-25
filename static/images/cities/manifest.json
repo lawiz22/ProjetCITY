@@ -1,0 +1,386 @@
+{
+  "atlanta-georgia": {
+    "filename": "atlanta-georgia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Atlanta",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/A2ATL20250614-0721_%28cropped%29.jpg/330px-A2ATL20250614-0721_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "boston": {
+    "filename": "boston.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Boston",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/ISH_WC_Boston4.jpg/330px-ISH_WC_Boston4.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "boucherville-quebec": {
+    "filename": "boucherville-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Boucherville",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Boucherville%2C_Quebec.jpg/330px-Boucherville%2C_Quebec.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "brampton-ontario": {
+    "filename": "brampton-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Brampton",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Brampton_Dominion_Building.jpg/330px-Brampton_Dominion_Building.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "burnaby-british-columbia": {
+    "filename": "burnaby-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Burnaby",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Burnaby_Metrotown_skyline.jpg/330px-Burnaby_Metrotown_skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "calgary-alberta": {
+    "filename": "calgary-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Calgary",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Downtown_Calgary_2020-4.jpg/330px-Downtown_Calgary_2020-4.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "charlottetown-prince-edward-island": {
+    "filename": "charlottetown-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Charlottetown",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Charlottetown%2C_PEI_skyline.jpg/330px-Charlottetown%2C_PEI_skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "chicago-illinois": {
+    "filename": "chicago-illinois.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Chicago",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Chicago_River_ferry_b.jpg/330px-Chicago_River_ferry_b.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "cincinnati-ohio": {
+    "filename": "cincinnati-ohio.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Cincinnati",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Downtown_Cincinnati_viewed_from_Devou_Park_%28cropped%29.jpg/330px-Downtown_Cincinnati_viewed_from_Devou_Park_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "dallas-texas": {
+    "filename": "dallas-texas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Dallas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Dallas_Skyline_%2816780190385%29.jpg/330px-Dallas_Skyline_%2816780190385%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "denver-colorado": {
+    "filename": "denver-colorado.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Denver",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Denver_Downtown_Aerial%2C_December_2025.jpg/330px-Denver_Downtown_Aerial%2C_December_2025.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "des-moines-iowa": {
+    "filename": "des-moines-iowa.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Des_Moines%2C_Iowa",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/State_Fair_Time%21_%2814860351256%29_%28cropped3%29.jpg/330px-State_Fair_Time%21_%2814860351256%29_%28cropped3%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "detroit-michigan": {
+    "filename": "detroit-michigan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Detroit",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Detroit_Skyline_from_Windsor_2025-09-01.jpg/330px-Detroit_Skyline_from_Windsor_2025-09-01.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "edmonton-alberta": {
+    "filename": "edmonton-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Edmonton",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Alberta_Legislature_Building_at_night.jpg/330px-Alberta_Legislature_Building_at_night.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "gatineau-quebec": {
+    "filename": "gatineau-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Gatineau",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Gatineau_-_QC_-_Museum_of_Civilisation3.jpg/330px-Gatineau_-_QC_-_Museum_of_Civilisation3.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "guelph-ontario": {
+    "filename": "guelph-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Guelph",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Guelph_Downtown_Aerial.jpg/330px-Guelph_Downtown_Aerial.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "halifax-nova-scotia": {
+    "filename": "halifax-nova-scotia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Halifax%2C_Nova_Scotia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Halifax_Harbour_Sunset_Skyline%2C_Nova_Scotia_%2824237034620%29.jpg/330px-Halifax_Harbour_Sunset_Skyline%2C_Nova_Scotia_%2824237034620%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "hamilton-ontario": {
+    "filename": "hamilton-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Hamilton%2C_Ontario",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/View_to_Hamilton_from_the_Mountain_%286577549603%29.jpg/330px-View_to_Hamilton_from_the_Mountain_%286577549603%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "houston-texas": {
+    "filename": "houston-texas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Houston",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Texas_medical_center.jpg/330px-Texas_medical_center.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "las-vegas-nevada": {
+    "filename": "las-vegas-nevada.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Las_Vegas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Las_Vegas_from_above_%2840064746644%29.jpg/330px-Las_Vegas_from_above_%2840064746644%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "laval-quebec": {
+    "filename": "laval-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Laval%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Laval_Quebec_Montage.jpg/330px-Laval_Quebec_Montage.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "london-ontario": {
+    "filename": "london-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/London%2C_Ontario",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/London_Ontario_Skyline_2017_%28cropped%29.jpg/330px-London_Ontario_Skyline_2017_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "long-beach-california": {
+    "filename": "long-beach-california.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Long_Beach%2C_California",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Long_beach3_%28cropped%29.jpg/330px-Long_beach3_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "longueuil-quebec": {
+    "filename": "longueuil-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Longueuil",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Longueuil_City_Hall_2011.jpg/330px-Longueuil_City_Hall_2011.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "los-angeles-californie": {
+    "filename": "los-angeles-californie.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Los_Angeles",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Hollywood_Sign_%28Zuschnitt%29.jpg/330px-Hollywood_Sign_%28Zuschnitt%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "miami-floride": {
+    "filename": "miami-floride.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Miami",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Villa_Vizcaya_20110228.jpg/330px-Villa_Vizcaya_20110228.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "minneapolis-minnesota": {
+    "filename": "minneapolis-minnesota.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Minneapolis",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Minneapolis_Skyline_looking_south.jpg/330px-Minneapolis_Skyline_looking_south.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "mississauga-ontario": {
+    "filename": "mississauga-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Mississauga",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Mississauga_City_Centre%2C_September_13_2025.jpg/330px-Mississauga_City_Centre%2C_September_13_2025.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "moncton-new-brunswick": {
+    "filename": "moncton-new-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Moncton",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/View_of_the_Moncton%2C_New_Brunswick_skyline_%28cropped%29.jpg/330px-View_of_the_Moncton%2C_New_Brunswick_skyline_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "montreal": {
+    "filename": "montreal.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Montreal",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Mtl_from_mont_royal_%28cropped%29.jpg/330px-Mtl_from_mont_royal_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "nashville-tennessee": {
+    "filename": "nashville-tennessee.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Nashville%2C_Tennessee",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Nashville%2C_TN_skyline.jpg/330px-Nashville%2C_TN_skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "new-orleans-louisiana": {
+    "filename": "new-orleans-louisiana.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/New_Orleans",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/New_Orleans_from_the_Air_September_2019_-_Central_Business_District_Skyline_%28cropped%29.jpg/330px-New_Orleans_from_the_Air_September_2019_-_Central_Business_District_Skyline_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "new-westminster-british-columbia": {
+    "filename": "new-westminster-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/New_Westminster",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/New_Westminster_platform_level.jpg/330px-New_Westminster_platform_level.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "new-york-city-new-york": {
+    "filename": "new-york-city-new-york.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/New_York_City",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/View_of_Empire_State_Building_from_Rockefeller_Center_New_York_City_dllu_%28cropped%29.jpg/330px-View_of_Empire_State_Building_from_Rockefeller_Center_New_York_City_dllu_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "newark-new-jersey": {
+    "filename": "newark-new-jersey.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Newark%2C_New_Jersey",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/2025-09-12_12_24_59_Aerial_view_of_downtown_in_Newark%2C_Essex_County%2C_New_Jersey_from_an_aircraft_which_just_departed_from_Newark_Liberty_International_Airport.jpg/330px-thumbnail.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "north-bay-ontario": {
+    "filename": "north-bay-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/North_Bay%2C_Ontario",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Ferguson_at_Main_St_West_facing_South_East.jpg/330px-Ferguson_at_Main_St_West_facing_South_East.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "oakland-california": {
+    "filename": "oakland-california.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Oakland%2C_California",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/OAKLAND%2C_CA%2C_USA_-_Skyline_and_Bridge_%28cropped%29.JPG/330px-OAKLAND%2C_CA%2C_USA_-_Skyline_and_Bridge_%28cropped%29.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "ottawa-ontario": {
+    "filename": "ottawa-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Ottawa",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Parliament-Ottawa.jpg/330px-Parliament-Ottawa.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "philadelphia-pennsylvania": {
+    "filename": "philadelphia-pennsylvania.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Philadelphia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Philadelphia_skyline_20240528_%28cropped_2-1%29.jpg/330px-Philadelphia_skyline_20240528_%28cropped_2-1%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "phoenix-arizona": {
+    "filename": "phoenix-arizona.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Phoenix%2C_Arizona",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Downtown_Phoenix_Aerial_Looking_Northeast.jpg/330px-Downtown_Phoenix_Aerial_Looking_Northeast.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "portland-oregon": {
+    "filename": "portland-oregon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Portland%2C_Oregon",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Portland_Oregon_Aerial%2C_June_2025.jpg/330px-Portland_Oregon_Aerial%2C_June_2025.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "quebec-quebec": {
+    "filename": "quebec-quebec.png",
+    "source_page": "https://en.wikipedia.org/wiki/Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Flag_of_Quebec.svg/330px-Flag_of_Quebec.svg.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "richmond-british-columbia": {
+    "filename": "richmond-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Richmond%2C_British_Columbia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Richmond_BC_Oval_District.jpg/330px-Richmond_BC_Oval_District.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sacramento-california": {
+    "filename": "sacramento-california.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Sacramento%2C_California",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Sacramento%2C_California_skyline_in_2023.jpg/330px-Sacramento%2C_California_skyline_in_2023.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saguenay-quebec": {
+    "filename": "saguenay-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saguenay%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Ville_saguenay_montage.jpg/330px-Ville_saguenay_montage.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-jean-sur-richelieu-quebec": {
+    "filename": "saint-jean-sur-richelieu-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saint-Jean-sur-Richelieu",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Saint-Jean-sur-Richelieu.jpg/330px-Saint-Jean-sur-Richelieu.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "salt-lake-city-utah": {
+    "filename": "salt-lake-city-utah.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Salt_Lake_City",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Salt_Lake_Union_Pacific_Railroad_Station%2C_South_Temple_at_400_West%2C_Central_City_West%2C_Salt_Lake_City%2C_UT%2C_USA.jpg/330px-Salt_Lake_Union_Pacific_Railroad_Station%2C_South_Temple_at_400_West%2C_Central_City_West%2C_Salt_Lake_City%2C_UT%2C_USA.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "san-francisco-californie": {
+    "filename": "san-francisco-californie.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/San_Francisco",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/San_Francisco_Downtown_Aerial%2C_August_2025.jpg/330px-San_Francisco_Downtown_Aerial%2C_August_2025.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "san-jose-california": {
+    "filename": "san-jose-california.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/San_Jose%2C_California",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Valencia_Hotel%2C_Santana_Row_%28cropped%29.jpg/330px-Valencia_Hotel%2C_Santana_Row_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saskatoon-saskatchewan": {
+    "filename": "saskatoon-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saskatoon",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Saskatoon%2C_Saskatchewan.jpg/330px-Saskatoon%2C_Saskatchewan.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "seattle-washington": {
+    "filename": "seattle-washington.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Seattle",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Seattle_Center_as_night_falls.jpg/330px-Seattle_Center_as_night_falls.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sherbrooke-quebec": {
+    "filename": "sherbrooke-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Sherbrooke",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Sherb.jpg/330px-Sherb.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sorel-quebec": {
+    "filename": "sorel-quebec.png",
+    "source_page": "https://en.wikipedia.org/wiki/Sorel-Tracy",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Soreltracy.png/330px-Soreltracy.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "st-john-s-newfoundland-and-labrador": {
+    "filename": "st-john-s-newfoundland-and-labrador.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/St._John's%2C_Newfoundland_and_Labrador",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/St_John%27s_Newfoundland_Collage.jpg/330px-St_John%27s_Newfoundland_Collage.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "st-louis-missouri": {
+    "filename": "st-louis-missouri.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/St._Louis",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Runner_Fountain_and_Old_Courthouse_and_Arch_%285618845531%29.jpg/330px-Runner_Fountain_and_Old_Courthouse_and_Arch_%285618845531%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sturgeon-falls-ontario": {
+    "filename": "sturgeon-falls-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Sturgeon_Falls",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Sturgeon_Falls_on_the_Sturgeon_River.jpg/330px-Sturgeon_Falls_on_the_Sturgeon_River.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "surrey-british-columbia": {
+    "filename": "surrey-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Surrey",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Guildford_%26_Cathedral_of_Surrey.JPG/330px-Guildford_%26_Cathedral_of_Surrey.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "trois-rivieres-quebec": {
+    "filename": "trois-rivieres-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Trois-Rivi%C3%A8res",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Trois-Rivi%C3%A8res%2C_Quebec_%28cropped%292.jpg/330px-Trois-Rivi%C3%A8res%2C_Quebec_%28cropped%292.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "vancouver-british-columbia": {
+    "filename": "vancouver-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Vancouver",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Concord_Pacific_Master_Plan_Area.jpg/330px-Concord_Pacific_Master_Plan_Area.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "victoria-british-columbia": {
+    "filename": "victoria-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Victoria%2C_British_Columbia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Victoria_Montage_2020.jpg/330px-Victoria_Montage_2020.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "virginia-beach-virginia": {
+    "filename": "virginia-beach-virginia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Virginia_Beach%2C_Virginia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/VB_Oceanfront.jpg/330px-VB_Oceanfront.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "washington-district-of-columbia": {
+    "filename": "washington-district-of-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Washington%2C_D.C.",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/12-07-13-washington-by-RalfR-08.jpg/330px-12-07-13-washington-by-RalfR-08.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "winnipeg-manitoba": {
+    "filename": "winnipeg-manitoba.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Winnipeg",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Winnipeg%2C_Manitoba_skyline_%28cropped%29.jpg/330px-Winnipeg%2C_Manitoba_skyline_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "yellowknife-northwest-territories": {
+    "filename": "yellowknife-northwest-territories.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Yellowknife",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Northwest_Territories_Legislative_Building.jpg/330px-Northwest_Territories_Legislative_Building.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  }
+}

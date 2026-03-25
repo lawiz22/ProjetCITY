@@ -1,0 +1,85 @@
+{% extends 'web/base.html' %}
+
+{% block filter_hidden_fields %}
+{% for slug in selected_slugs %}
+<input type="hidden" name="city" value="{{ slug }}">
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-head">
+        <h2>Comparaison multi-villes</h2>
+        <span>Jusqu'à 6 villes dans la même courbe</span>
+    </div>
+    <form method="get" class="compare-form">
+        <div class="compare-grid">
+            {% for slot in range(6) %}
+            <label>
+                Ville {{ slot + 1 }}
+                <select name="city">
+                    <option value="">Aucune</option>
+                    {% for option in city_options %}
+                    {% set selected_slug = selected_slugs[slot] if slot < selected_slugs|length else '' %}
+                    <option value="{{ option.city_slug }}" {% if selected_slug == option.city_slug %}selected{% endif %}>{{ option.city_name }} · {{ option.country }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% endfor %}
+        </div>
+        <button type="submit">Comparer</button>
+    </form>
+    {% if chart_payload.comparison.datasets %}
+    <div class="chart-block">
+        <div class="chart-toolbar">
+            <span class="helper-text">Zoom sur l'axe du temps avec la molette. Utilise Maj + glisser pour le pan.</span>
+            <div class="button-row">
+                <button type="button" class="secondary-button chart-reset" data-chart-reset>Réinitialiser le zoom</button>
+                <button type="button" class="secondary-button chart-export" data-chart-export>Exporter PNG</button>
+            </div>
+        </div>
+        <div class="chart-frame chart-frame-large">
+            <canvas class="chart-canvas" data-chart='{{ chart_payload.comparison | tojson }}' data-chart-type="line" data-chart-filename="comparison-curves"></canvas>
+        </div>
+    </div>
+    {% else %}
+    <p>Sélectionne au moins une ville pour afficher les trajectoires comparées.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Vue synthèse</h2>
+    </div>
+    <div class="table-wrapper">
+        <table data-sortable-table>
+            <thead>
+                <tr>
+                    <th>Ville</th>
+                    <th>Pays</th>
+                    <th>Région</th>
+                    <th>Population récente</th>
+                    <th>Année</th>
+                    <th>Pic</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in compare_rows %}
+                <tr>
+                    <td>{{ row.city_name }}</td>
+                    <td>{{ row.country }}</td>
+                    <td>{{ row.region }}</td>
+                    <td>{{ '{:,}'.format(row.population).replace(',', ' ') }}</td>
+                    <td>{{ row.year }}</td>
+                    <td>{{ '{:,}'.format(row.peak_population).replace(',', ' ') }} en {{ row.peak_year }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">Aucune ville sélectionnée.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

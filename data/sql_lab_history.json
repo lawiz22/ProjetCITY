@@ -1,0 +1,16 @@
+[
+  {
+    "timestamp": "2026-03-25T00:28:22.244969+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, decade, absolute_growth, growth_pct\r\nFROM vw_city_growth_by_decade\r\nORDER BY growth_pct DESC\r\nLIMIT 25;",
+    "preview": "SELECT city_name, decade, absolute_growth, growth_pct"
+  },
+  {
+    "timestamp": "2026-03-24T23:42:53.259279+00:00",
+    "action": "export",
+    "status": "csv",
+    "sql": "SELECT city_name, year, population FROM vw_city_population_analysis LIMIT 5;",
+    "preview": "SELECT city_name, year, population FROM vw_city_population_analysis LIMIT 5;"
+  }
+]

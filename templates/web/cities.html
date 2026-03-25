@@ -1,0 +1,86 @@
+{% extends 'web/base.html' %}
+
+{% block filter_hidden_fields %}
+<input type="hidden" name="view" value="{{ view_mode }}">
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>Annuaire analytique</h2>
+            <span>{{ cities|length }} villes</span>
+        </div>
+        <div class="view-switcher" role="group" aria-label="Mode d'affichage">
+            <a class="secondary-button inline-button {% if view_mode == 'grid' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='grid') }}">Vue blocs</a>
+            <a class="secondary-button inline-button {% if view_mode == 'list' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='list') }}">Vue liste</a>
+        </div>
+    </div>
+
+    {% if view_mode == 'list' %}
+    <div class="table-wrapper city-list-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Ville</th>
+                    <th>Pays / région</th>
+                    <th>Population récente</th>
+                    <th>Année</th>
+                    <th>Pic historique</th>
+                    <th>Photo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city in cities %}
+                <tr>
+                    <td>
+                        <a class="city-list-link" href="{{ url_for('web.city_detail', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">
+                            <span class="city-dot" style="background: {{ city.city_color or '#2f6fed' }}"></span>
+                            <strong>{{ city.city_name }}</strong>
+                        </a>
+                    </td>
+                    <td>{{ city.country }} · {{ city.region }}</td>
+                    <td>{{ '{:,}'.format(city.population).replace(',', ' ') }}</td>
+                    <td>{{ city.year }}</td>
+                    <td>{{ '{:,}'.format(city.peak_population).replace(',', ' ') }} en {{ city.peak_year }}</td>
+                    <td>{% if city.has_photo %}Locale{% else %}Fallback{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="city-grid city-grid-photo">
+        {% for city in cities %}
+        <a class="city-card city-card-photo" href="{{ url_for('web.city_detail', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">
+            <div class="city-card-media">
+                <img src="{{ url_for('static', filename=city.photo_path) }}" alt="Vue de {{ city.city_name }}" loading="lazy">
+                <div class="city-card-overlay"></div>
+                <div class="city-card-heading">
+                    <span class="city-dot" style="background: {{ city.city_color or '#2f6fed' }}"></span>
+                    <div>
+                        <strong>{{ city.city_name }}</strong>
+                        <p>{{ city.country }} · {{ city.region }}</p>
+                    </div>
+                </div>
+            </div>
+            <dl>
+                <div>
+                    <dt>Population récente</dt>
+                    <dd>{{ '{:,}'.format(city.population).replace(',', ' ') }}</dd>
+                </div>
+                <div>
+                    <dt>Année</dt>
+                    <dd>{{ city.year }}</dd>
+                </div>
+                <div>
+                    <dt>Pic</dt>
+                    <dd>{{ '{:,}'.format(city.peak_population).replace(',', ' ') }} en {{ city.peak_year }}</dd>
+                </div>
+            </dl>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
