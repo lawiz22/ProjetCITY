@@ -344,7 +344,76 @@ class AnalyticsService:
                         "backgroundColor": [row["city_color"] or "#2f6fed" for row in rows],
                     }
                 ],
-            }
+            },
+            "popByCountry": self._pop_pie_by_country(filters),
+            "popByRegion": self._pop_pie_by_region(filters),
+        }
+
+    # ── Pie-chart helpers (dashboard) ──────────────────────────────
+
+    _COUNTRY_COLORS = {"Canada": "#d62728", "United States": "#1f77b4"}
+    _REGION_PALETTE = [
+        "#2f6fed", "#e45932", "#22c55e", "#f59e0b", "#8b5cf6",
+        "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
+        "#14b8a6", "#ef4444",
+    ]
+
+    def _pop_pie_by_country(self, filters: dict[str, str | None]) -> dict[str, Any]:
+        conn = get_db()
+        rows = conn.execute(
+            f"""
+            WITH {self._filtered_analysis_cte(filters)},
+            latest AS (
+                SELECT city_slug, MAX(year) AS year
+                FROM filtered_analysis GROUP BY city_slug
+            )
+            SELECT v.country, SUM(v.population) AS total
+            FROM filtered_analysis v
+            INNER JOIN latest l ON l.city_slug = v.city_slug AND l.year = v.year
+            GROUP BY v.country
+            ORDER BY total DESC
+            """,
+            self._analysis_filter_params(filters),
+        ).fetchall()
+        labels = [r["country"] for r in rows]
+        data = [r["total"] for r in rows]
+        colors = [self._COUNTRY_COLORS.get(c, "#999") for c in labels]
+        return {
+            "labels": labels,
+            "datasets": [{"data": data, "backgroundColor": colors}],
+        }
+
+    def _pop_pie_by_region(self, filters: dict[str, str | None]) -> dict[str, Any]:
+        conn = get_db()
+        rows = conn.execute(
+            f"""
+            WITH {self._filtered_analysis_cte(filters)},
+            latest AS (
+                SELECT city_slug, MAX(year) AS year
+                FROM filtered_analysis GROUP BY city_slug
+            )
+            SELECT v.region, SUM(v.population) AS total
+            FROM filtered_analysis v
+            INNER JOIN latest l ON l.city_slug = v.city_slug AND l.year = v.year
+            WHERE v.region IS NOT NULL
+            GROUP BY v.region
+            ORDER BY total DESC
+            """,
+            self._analysis_filter_params(filters),
+        ).fetchall()
+        # Keep top 10, group rest as "Autres"
+        top = rows[:10]
+        rest_total = sum(r["total"] for r in rows[10:])
+        labels = [r["region"] for r in top]
+        data = [r["total"] for r in top]
+        colors = list(self._REGION_PALETTE[: len(top)])
+        if rest_total:
+            labels.append("Autres")
+            data.append(rest_total)
+            colors.append("#9ca3af")
+        return {
+            "labels": labels,
+            "datasets": [{"data": data, "backgroundColor": colors}],
         }
 
     def get_map_payload(self, filters: dict[str, str | None]) -> dict[str, Any]:
@@ -376,6 +445,7 @@ class AnalyticsService:
                 GROUP BY city_id
             )
             SELECT
+                latest.city_id,
                 latest.city_name,
                 latest.city_slug,
                 latest.country,
@@ -415,6 +485,9 @@ class AnalyticsService:
         missing: list[str] = []
         max_population = max((row["population"] or 0 for row in rows), default=0)
 
+        climate_index = self._build_climate_index(connection)
+        geography_index = self._build_geography_index(connection)
+
         for row in rows:
             lat = row["latitude"]
             lng = row["longitude"]
@@ -453,6 +526,8 @@ class AnalyticsService:
                     "lat": lat,
                     "lng": lng,
                     "radius": radius,
+                    "climate": climate_index.get(row["city_id"]),
+                    "geography": geography_index.get(row["city_id"]),
                 }
             )
 
@@ -462,6 +537,148 @@ class AnalyticsService:
             "missing_count": len(missing),
             "top_points": points[:12],
         }
+
+    # ── Climate extraction for map markers ─────────────────────
+
+    @staticmethod
+    def _build_climate_index(connection) -> dict[int, dict[str, Any]]:
+        """Return {city_id: {winter, summer, climate_type, bullets}} from fiche Climat sections."""
+        import json as _json
+        import re as _re
+
+        rows = connection.execute(
+            """
+            SELECT f.city_id, s.content_json
+            FROM dim_city_fiche_section s
+            JOIN dim_city_fiche f ON f.fiche_id = s.fiche_id
+            WHERE LOWER(s.section_title) LIKE '%climat%'
+            """
+        ).fetchall()
+
+        index: dict[int, dict[str, Any]] = {}
+        temp_re = _re.compile(r"([-+]?\d+)\s*°?\s*C")
+
+        for r in rows:
+            city_id = r["city_id"]
+            blocks = _json.loads(r["content_json"])
+            winter = None
+            summer = None
+            climate_type = None
+            bullets: list[str] = []
+
+            for block in blocks:
+                if block["type"] == "table":
+                    for row in block.get("rows", []):
+                        if len(row) >= 2:
+                            m = temp_re.search(row[1])
+                            if m:
+                                val = int(m.group(1))
+                                label = row[0].lower()
+                                if "hiver" in label or "jan" in label:
+                                    winter = val
+                                elif "été" in label or "juil" in label or "jul" in label:
+                                    summer = val
+                elif block["type"] == "bullets":
+                    for item in block.get("items", []):
+                        bullets.append(item)
+                        low = item.lower()
+                        if "climat " in low or "climat\u00a0" in low:
+                            cm = _re.search(r"\*\*(.+?)\*\*", item)
+                            if cm:
+                                climate_type = cm.group(1).strip()
+                elif block["type"] == "text":
+                    text = block.get("value", "")
+                    wm = _re.search(r"Hiver.*?([-+]?\d+)\s*°?\s*C", text)
+                    sm = _re.search(r"[EÉ]t[eé].*?([-+]?\d+)\s*°?\s*C", text)
+                    if wm:
+                        winter = int(wm.group(1))
+                    if sm:
+                        summer = int(sm.group(1))
+                    cm = _re.search(r"[Cc]limat\s*\*\*(.+?)\*\*", text)
+                    if cm:
+                        climate_type = cm.group(1).strip()
+
+            index[city_id] = {
+                "winter_temp": winter,
+                "summer_temp": summer,
+                "climate_type": climate_type,
+                "climate_bullets": bullets[:6],
+            }
+
+        return index
+
+    @staticmethod
+    def _build_geography_index(connection) -> dict[int, dict[str, Any]]:
+        """Return {city_id: {area_km2, density, river, altitude, bullets}} from fiche Géographie sections."""
+        import json as _json
+        import re as _re
+
+        rows = connection.execute(
+            """
+            SELECT f.city_id, s.content_json
+            FROM dim_city_fiche_section s
+            JOIN dim_city_fiche f ON f.fiche_id = s.fiche_id
+            WHERE LOWER(s.section_title) LIKE '%ographie%densit%'
+               OR LOWER(s.section_title) LIKE '%densit%'
+            """
+        ).fetchall()
+
+        num_re = _re.compile(r"~?\s*([\d\s]+)")
+
+        index: dict[int, dict[str, Any]] = {}
+        for r in rows:
+            city_id = r["city_id"]
+            blocks = _json.loads(r["content_json"])
+            area = None
+            density = None
+            river = None
+            altitude = None
+            bullets: list[str] = []
+
+            for block in blocks:
+                if block["type"] == "table":
+                    for row in block.get("rows", []):
+                        if len(row) < 2:
+                            continue
+                        key = row[0].lower()
+                        val = row[1]
+                        if "superficie" in key or "area" in key:
+                            m = num_re.search(val)
+                            if m:
+                                area = int(m.group(1).replace(" ", "").replace("\u00a0", ""))
+                        elif "densit" in key:
+                            m = num_re.search(val)
+                            if m:
+                                density = int(m.group(1).replace(" ", "").replace("\u00a0", ""))
+                        elif "rivi" in key or "cours" in key or "lac" in key or "river" in key or "fleuve" in key:
+                            river = val
+                        elif "altitude" in key:
+                            m = num_re.search(val)
+                            if m:
+                                altitude = int(m.group(1).replace(" ", "").replace("\u00a0", ""))
+                elif block["type"] == "bullets":
+                    bullets.extend(block.get("items", []))
+                elif block["type"] == "text":
+                    text = block.get("value", "")
+                    dm = _re.search(r"[Dd]ensit[eé].*?~?\s*([\d\s]+)\s*hab", text)
+                    if dm:
+                        density = int(dm.group(1).replace(" ", "").replace("\u00a0", ""))
+                    am = _re.search(r"[Ss]uperficie.*?~?\s*([\d\s]+)\s*km", text)
+                    if am:
+                        area = int(am.group(1).replace(" ", "").replace("\u00a0", ""))
+                    hm = _re.search(r"[Aa]ltitude.*?~?\s*([\d\s]+)\s*m", text)
+                    if hm:
+                        altitude = int(hm.group(1).replace(" ", "").replace("\u00a0", ""))
+
+            index[city_id] = {
+                "area_km2": area,
+                "density": density,
+                "river": river,
+                "altitude": altitude,
+                "geo_bullets": bullets[:6],
+            }
+
+        return index
 
     def get_city_directory(self, filters: dict[str, str | None]) -> list[dict[str, Any]]:
         connection = get_db()

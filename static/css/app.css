@@ -633,6 +633,34 @@ button {
     line-height: 1.6;
 }
 
+/* ── Pie-chart tabs inside insight panel ── */
+.pie-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.pie-tab {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 5px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.pie-tab:hover { background: var(--surface-alt); }
+.pie-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+.chart-frame-pie {
+    height: 260px;
+}
+
 .tag-list,
 .data-list,
 .timeline-stack,
@@ -2324,6 +2352,109 @@ dt {
     width: 10px;
     height: 10px;
     border-radius: 50%;
+}
+
+/* ── Climate popup block ── */
+.map-popup-climate {
+    margin: 8px 0;
+    padding: 8px 10px;
+    background: rgba(240, 245, 255, 0.92);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.map-popup-climate p { margin: 0 0 4px; }
+.map-climate-type {
+    font-weight: 700;
+    font-style: italic;
+    color: var(--accent);
+}
+.map-climate-bullets {
+    margin: 4px 0 0;
+    padding-left: 6px;
+    list-style: none;
+    font-size: 0.78rem;
+}
+.map-climate-bullets li {
+    padding: 1px 0;
+}
+[data-theme="dark"] .map-popup-climate {
+    background: rgba(30, 40, 60, 0.92);
+}
+
+/* ── Geography / density popup block ── */
+.map-popup-geo {
+    margin: 8px 0;
+    padding: 8px 10px;
+    background: rgba(245, 240, 230, 0.92);
+    border-radius: 6px;
+    border-left: 3px solid #f59e0b;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.map-geo-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 4px;
+}
+.map-geo-table td {
+    padding: 2px 6px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    font-size: 0.8rem;
+}
+.map-geo-table td:first-child {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink);
+}
+.map-geo-table td:last-child {
+    text-align: right;
+}
+.map-geo-bullets {
+    margin: 4px 0 0;
+    padding-left: 6px;
+    list-style: none;
+    font-size: 0.78rem;
+}
+.map-geo-bullets li { padding: 1px 0; }
+[data-theme="dark"] .map-popup-geo {
+    background: rgba(40, 35, 25, 0.92);
+}
+
+/* ── Density legend strip ── */
+.map-density-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: var(--surface-alt);
+    border-radius: 8px;
+    margin-top: 8px;
+}
+.density-legend-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.density-legend-scale {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.density-swatch {
+    display: inline-block;
+    width: 18px;
+    height: 14px;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+.density-label {
+    font-size: 0.76rem;
+    color: var(--muted);
+    margin-right: 8px;
 }
 
 .timeline-header,

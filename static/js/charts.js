@@ -92,6 +92,34 @@ function applyThemeToChart(chart) {
 
 function buildDefaultOptions(chartType) {
     const palette = getThemePalette();
+    if (chartType === 'pie' || chartType === 'doughnut') {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: palette.ink,
+                        font: { family: 'Space Grotesk', size: 11 },
+                        padding: 10,
+                        boxWidth: 14,
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const val = ctx.parsed || 0;
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = total ? ((val / total) * 100).toFixed(1) : 0;
+                            return ctx.label + ': ' + val.toLocaleString('fr-CA') + '  (' + pct + ' %)';
+                        }
+                    }
+                }
+            }
+        };
+    }
     const base = {
         responsive: true,
         maintainAspectRatio: false,

@@ -27,6 +27,8 @@
                 <button type="button" class="map-layer-pill" data-theme="decline">Déclin</button>
                 <button type="button" class="map-layer-pill" data-theme="peak">Pics</button>
                 <button type="button" class="map-layer-pill" data-theme="annotations">Annotations</button>
+                <button type="button" class="map-layer-pill" data-theme="climate">Climat</button>
+                <button type="button" class="map-layer-pill" data-theme="density">Densité</button>
             </div>
         </div>
         <div class="map-toolbar-right">
@@ -53,6 +55,22 @@
         <div class="map-legend">
             <span><i class="legend-dot legend-dot-small"></i>ville moyenne</span>
             <span><i class="legend-dot legend-dot-large"></i>grande métropole</span>
+        </div>
+    </div>
+
+    <div class="map-density-legend" id="density-legend" style="display:none">
+        <span class="density-legend-title">Densité (hab./km²)</span>
+        <div class="density-legend-scale">
+            <span class="density-swatch" style="background:#22c55e"></span>
+            <span class="density-label">&lt; 200</span>
+            <span class="density-swatch" style="background:#84cc16"></span>
+            <span class="density-label">200 – 1 000</span>
+            <span class="density-swatch" style="background:#f59e0b"></span>
+            <span class="density-label">1 000 – 3 000</span>
+            <span class="density-swatch" style="background:#ef6c00"></span>
+            <span class="density-label">3 000 – 6 000</span>
+            <span class="density-swatch" style="background:#dc2626"></span>
+            <span class="density-label">&gt; 6 000</span>
         </div>
     </div>
 </section>

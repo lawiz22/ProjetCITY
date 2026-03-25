@@ -24,7 +24,9 @@
         growth: 'Croissance',
         decline: 'Déclin',
         peak: 'Pics',
-        annotations: 'Annotations'
+        annotations: 'Annotations',
+        climate: 'Climat',
+        density: 'Densit\u00e9'
     };
 
     /* ── marker style per theme ──────────────────────────────── */
@@ -48,6 +50,35 @@
             var ac = pt.annotation_count || 0;
             var ca = ac > 0 ? '#ef6c3d' : '#b8c0cc';
             return { radius: Math.max(8, Math.min(24, 8 + ac * 2)), color: ca, fillColor: ca };
+        }
+        if (theme === 'density') {
+            var geo = pt.geography;
+            if (!geo || geo.density == null) {
+                return { radius: 8, color: '#b8c0cc', fillColor: '#b8c0cc' };
+            }
+            var d = geo.density;
+            /* 5-step scale: <200 green, 200-1000 lime, 1000-3000 yellow, 3000-6000 orange, >6000 red */
+            var dc;
+            if (d < 200)       dc = '#22c55e';
+            else if (d < 1000) dc = '#84cc16';
+            else if (d < 3000) dc = '#f59e0b';
+            else if (d < 6000) dc = '#ef6c00';
+            else               dc = '#dc2626';
+            return { radius: Math.max(8, Math.min(24, 8 + Math.log10(d + 1) * 4)), color: dc, fillColor: dc };
+        }
+        if (theme === 'climate') {
+            var cl = pt.climate;
+            if (!cl || cl.winter_temp == null) {
+                return { radius: 8, color: '#b8c0cc', fillColor: '#b8c0cc' };
+            }
+            var w = cl.winter_temp;
+            /* cold <= -5  => blue,  hot >= 10 => red,  in-between => gradient */
+            var t = Math.max(0, Math.min(1, (w + 5) / 15));
+            var cr = Math.round(50 + t * 200);
+            var cb = Math.round(230 - t * 180);
+            var cg = Math.round(80 + (0.5 - Math.abs(t - 0.5)) * 120);
+            var cc = 'rgb(' + cr + ',' + cg + ',' + cb + ')';
+            return { radius: 12, color: cc, fillColor: cc };
         }
         return { radius: pt.radius || 10, color: pt.city_color || '#2f6fed', fillColor: pt.city_color || '#2f6fed' };
     }
@@ -77,12 +108,51 @@
             annotBlock = '<div class="map-popup-layer"><strong>Annotations</strong>' + annotBlock + '</div>';
         }
 
+        /* Geography block */
+        var geoBlock = '';
+        if (pt.geography) {
+            var g = pt.geography;
+            var geoLines = '';
+            if (g.density != null) geoLines += '<tr><td>Densit\u00e9</td><td>~' + fmt(g.density) + ' hab./km\u00b2</td></tr>';
+            if (g.area_km2 != null) geoLines += '<tr><td>Superficie</td><td>~' + fmt(g.area_km2) + ' km\u00b2</td></tr>';
+            if (g.altitude != null) geoLines += '<tr><td>Altitude</td><td>~' + g.altitude + ' m</td></tr>';
+            if (g.river) geoLines += '<tr><td>Cours d\u0027eau</td><td>' + g.river + '</td></tr>';
+            var geoTable = geoLines ? '<table class="map-geo-table">' + geoLines + '</table>' : '';
+            var geoBullets = '';
+            if (theme === 'density' && g.geo_bullets && g.geo_bullets.length) {
+                geoBullets = '<ul class="map-geo-bullets">' +
+                    g.geo_bullets.map(function (b) { return '<li>' + b + '</li>'; }).join('') +
+                    '</ul>';
+            }
+            geoBlock = '<div class="map-popup-geo">' + geoTable + geoBullets + '</div>';
+        }
+
+        /* Climate block */
+        var climateBlock = '';
+        if (pt.climate) {
+            var cl = pt.climate;
+            var temps = '';
+            if (cl.winter_temp != null) temps += '❄️ Hiver : ' + cl.winter_temp + '°C';
+            if (cl.summer_temp != null) temps += (temps ? '  &middot;  ' : '') + '☀️ Été : ' + cl.summer_temp + '°C';
+            var typeLine = cl.climate_type ? '<p class="map-climate-type">' + cl.climate_type + '</p>' : '';
+            var bulletLines = '';
+            if (theme === 'climate' && cl.climate_bullets && cl.climate_bullets.length) {
+                bulletLines = '<ul class="map-climate-bullets">' +
+                    cl.climate_bullets.map(function (b) { return '<li>' + b + '</li>'; }).join('') +
+                    '</ul>';
+            }
+            climateBlock = '<div class="map-popup-climate">' +
+                '<p>' + temps + '</p>' + typeLine + bulletLines + '</div>';
+        }
+
         return '<div class="map-popup">' +
             '<h3>' + pt.city_name + '</h3>' +
             '<p>' + pt.country + ' &middot; ' + pt.region + '</p>' +
             '<p>Population: ' + fmt(pt.population) + ' en ' + pt.year + '</p>' +
             '<p>Pic: ' + (pt.peak_population ? fmt(pt.peak_population) + ' en ' + pt.peak_year : 'n/a') + '</p>' +
             '<p>Croissance: ' + growth + '</p>' +
+            climateBlock +
+            geoBlock +
             annotBlock +
             '<a href="' + cityUrl(pt.city_slug) + '">Ouvrir la fiche</a>' +
             '</div>';
@@ -178,6 +248,10 @@
             if (ctrls.summary) {
                 ctrls.summary.textContent = visible.length + ' villes visibles. Couche active\u00a0: ' + (THEME_LABELS[theme] || theme) + '.';
             }
+
+            /* Toggle density legend */
+            var densityLegend = document.getElementById('density-legend');
+            if (densityLegend) densityLegend.style.display = theme === 'density' ? '' : 'none';
 
             if (coords.length) {
                 map.fitBounds(coords, { padding: [28, 28], maxZoom: 7 });

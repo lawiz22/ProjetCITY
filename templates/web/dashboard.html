@@ -46,15 +46,22 @@
 
     <article class="panel insight-panel">
         <div class="panel-head">
-            <h2>Lecture rapide</h2>
+            <h2>Répartition de la population</h2>
         </div>
-        <p>Le cockpit combine les vues analytiques prêtes dans SQLite pour fournir un point d’entrée lisible avant de plonger dans les fiches villes ou le SQL Lab.</p>
-        <ul class="tag-list">
-            <li>Décennies</li>
-            <li>Déclin / rebond</li>
-            <li>Annotations</li>
-            <li>Périodes narratives</li>
-        </ul>
+        <div class="pie-tabs">
+            <button class="pie-tab active" data-pie-target="pie-country">Par pays</button>
+            <button class="pie-tab" data-pie-target="pie-region">Par région</button>
+        </div>
+        <div class="chart-block" id="pie-country">
+            <div class="chart-frame chart-frame-pie">
+                <canvas class="chart-canvas" data-chart='{{ chart_payload.popByCountry | tojson }}' data-chart-type="doughnut" data-chart-filename="dashboard-pop-par-pays"></canvas>
+            </div>
+        </div>
+        <div class="chart-block" id="pie-region" style="display:none">
+            <div class="chart-frame chart-frame-pie">
+                <canvas class="chart-canvas" data-chart='{{ chart_payload.popByRegion | tojson }}' data-chart-type="doughnut" data-chart-filename="dashboard-pop-par-region"></canvas>
+            </div>
+        </div>
     </article>
 </section>
 
@@ -127,4 +134,17 @@
         </div>
     </article>
 </section>
+
+<script>
+document.querySelectorAll('.pie-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.pie-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.pieTarget;
+        document.querySelectorAll('.insight-panel .chart-block').forEach(b => {
+            b.style.display = b.id === target ? '' : 'none';
+        });
+    });
+});
+</script>
 {% endblock %}

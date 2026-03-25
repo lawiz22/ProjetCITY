@@ -1,5 +1,12 @@
 [
   {
+    "timestamp": "2026-03-25T20:48:43.383740+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, country, year, population\r\nFROM vw_city_population_analysis\r\nORDER BY year DESC, population DESC\r\nLIMIT 25;",
+    "preview": "SELECT city_name, country, year, population"
+  },
+  {
     "timestamp": "2026-03-25T16:31:52.349483+00:00",
     "action": "execute",
     "status": "read",
@@ -18,13 +25,6 @@
     "action": "execute",
     "status": "error",
     "sql": "SELECT city_name, country, year, population\r\nFROM vw_city_population_analysis\r\nORDER BY year DESC, population DESC\r\nWHERE country = 'Canada'\r\nLIMIT 25;",
-    "preview": "SELECT city_name, country, year, population"
-  },
-  {
-    "timestamp": "2026-03-25T16:31:00.624711+00:00",
-    "action": "execute",
-    "status": "read",
-    "sql": "SELECT city_name, country, year, population\r\nFROM vw_city_population_analysis\r\nORDER BY year DESC, population DESC\r\nLIMIT 25;",
     "preview": "SELECT city_name, country, year, population"
   }
 ]
