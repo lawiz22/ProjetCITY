@@ -2659,6 +2659,163 @@ td {
     border-left: 6px solid var(--success);
 }
 
+/* Fiche Complète */
+.fiche-panel .panel-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.fiche-panel .panel-head .fiche-actions {
+    margin-left: auto;
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+}
+
+.fiche-delete-btn {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    padding: .45rem 1.1rem;
+    border-radius: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+}
+.fiche-delete-btn:hover { opacity: .85; }
+
+.fiche-sections {
+    display: grid;
+    gap: 20px;
+}
+
+.fiche-section {
+    background: var(--panel-strong);
+    border-radius: 12px;
+    border-left: 4px solid var(--accent);
+    padding: 20px 24px 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.05);
+    transition: border-color .3s, box-shadow .3s;
+}
+.fiche-section:nth-child(even) {
+    border-left-color: var(--accent-2);
+}
+.fiche-section:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,.09);
+}
+
+.fiche-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    letter-spacing: -.01em;
+}
+.fiche-section-title .fiche-emoji {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.fiche-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+}
+
+.fiche-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .88rem;
+}
+
+.fiche-table th,
+.fiche-table td {
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+}
+
+.fiche-table th {
+    font-weight: 700;
+    background: var(--accent-3);
+    color: #fff;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.fiche-table tbody tr:nth-child(even) {
+    background: rgba(27, 36, 48, 0.025);
+}
+:root[data-theme='dark'] .fiche-table tbody tr:nth-child(even) {
+    background: rgba(237, 242, 247, 0.04);
+}
+
+.fiche-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.fiche-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px;
+    display: grid;
+    gap: 6px;
+}
+
+.fiche-bullets li {
+    padding: 6px 10px;
+    font-size: .9rem;
+    line-height: 1.5;
+    border-radius: 6px;
+    background: rgba(27, 36, 48, 0.03);
+    border-left: 3px solid var(--accent-2);
+    transition: background .2s;
+}
+:root[data-theme='dark'] .fiche-bullets li {
+    background: rgba(237, 242, 247, 0.04);
+}
+.fiche-bullets li:hover {
+    background: rgba(27, 36, 48, 0.06);
+}
+
+.fiche-text {
+    font-size: .92rem;
+    margin: 6px 0 10px;
+    line-height: 1.6;
+    color: var(--muted);
+}
+
+.fiche-import-form {
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+}
+
+.fiche-import-form textarea {
+    font-family: var(--font-mono, monospace);
+    font-size: .82rem;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    padding: .8rem;
+    background: var(--panel-strong);
+    color: var(--ink);
+    resize: vertical;
+}
+
+.fiche-import-form button {
+    align-self: flex-start;
+    font-size: 1rem;
+    padding: .6rem 1.8rem;
+}
+
 @media (max-width: 1200px) {
     .site-shell,
     .panel-grid-2,

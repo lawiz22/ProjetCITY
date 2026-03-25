@@ -15,6 +15,7 @@
             <a href="#city-chart">Courbe</a>
             <a href="#city-annotations">Annotations</a>
             <a href="#city-timeline">Timeline</a>
+            <a href="#city-fiche">Fiche</a>
         </nav>
         <div class="city-sticky-tools" data-guided-reader>
             <button type="button" class="city-sticky-tool" data-guided-reset aria-label="Vue complete" title="Vue complete">[]</button>
@@ -232,5 +233,78 @@
         {% endfor %}
     </div>
 </section>
+
+{% if fiche %}
+<section class="panel fiche-panel" id="city-fiche">
+    <div class="panel-head">
+        <div>
+            <h2>📋 Fiche Complète</h2>
+            <span>{{ fiche.sections|length }} sections</span>
+        </div>
+        <div class="fiche-actions">
+            <form method="post" action="{{ url_for('web.city_fiche_delete', city_slug=city.city_slug) }}" onsubmit="return confirm('Supprimer la fiche complète ?');">
+                <button type="submit" class="fiche-delete-btn">🗑 Supprimer la fiche</button>
+            </form>
+        </div>
+    </div>
+    <div class="fiche-sections">
+        {% for section in fiche.sections %}
+        <article class="fiche-section">
+            <h3 class="fiche-section-title"><span class="fiche-emoji">{{ section.emoji }}</span> {{ section.title }}</h3>
+            {% for blk in section.blocks %}
+                {% if blk.type == 'table' %}
+                <div class="fiche-table-wrap">
+                    <table class="fiche-table">
+                        <thead>
+                            <tr>
+                                {% for h in blk.headers %}
+                                <th>{{ h }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in blk.rows %}
+                            <tr>
+                                {% for cell in row %}
+                                <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% elif blk.type == 'bullets' %}
+                <ul class="fiche-bullets">
+                    {% for item in blk['items'] %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% elif blk.type == 'text' %}
+                <p class="fiche-text">{{ blk.value }}</p>
+                {% endif %}
+            {% endfor %}
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% else %}
+<section class="panel" id="city-fiche">
+    <div class="panel-head">
+        <h2>📋 Fiche Complète</h2>
+        <span>Aucune fiche disponible pour {{ city.city_name }}</span>
+    </div>
+    <form method="post" action="{{ url_for('web.city_fiche_import', city_slug=city.city_slug) }}" class="fiche-import-form">
+        <p class="helper-text">Collez la fiche complète de la ville (format avec émojis, tableaux, listes) puis cliquez Importer.</p>
+        <textarea name="fiche_text" rows="16" placeholder="London, Ontario — Fiche Complète
+
+## 📍 Informations Générales
+| Catégorie | Détails |
+|---|---|
+| Ville | London |
+..."></textarea>
+        <button type="submit">Importer la fiche complète</button>
+    </form>
+</section>
+{% endif %}
 
 {% endblock %}

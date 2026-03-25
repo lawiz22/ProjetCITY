@@ -11,6 +11,8 @@ DROP VIEW IF EXISTS vw_city_period_detail_analysis;
 DROP VIEW IF EXISTS vw_city_population_analysis;
 
 DROP TABLE IF EXISTS fact_city_population;
+DROP TABLE IF EXISTS dim_city_fiche_section;
+DROP TABLE IF EXISTS dim_city_fiche;
 DROP TABLE IF EXISTS dim_city_period_detail_item;
 DROP TABLE IF EXISTS dim_city_period_detail;
 DROP TABLE IF EXISTS dim_time;
@@ -87,6 +89,25 @@ CREATE TABLE fact_city_population (
     FOREIGN KEY (annotation_id) REFERENCES dim_annotation(annotation_id)
 );
 
+CREATE TABLE dim_city_fiche (
+    fiche_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    city_id INTEGER NOT NULL UNIQUE,
+    raw_text TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (city_id) REFERENCES dim_city(city_id)
+);
+
+CREATE TABLE dim_city_fiche_section (
+    section_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fiche_id INTEGER NOT NULL,
+    section_order INTEGER NOT NULL,
+    section_emoji TEXT,
+    section_title TEXT NOT NULL,
+    content_json TEXT NOT NULL,
+    UNIQUE(fiche_id, section_order),
+    FOREIGN KEY (fiche_id) REFERENCES dim_city_fiche(fiche_id)
+);
+
 CREATE INDEX idx_city_slug ON dim_city (city_slug);
 CREATE INDEX idx_city_country ON dim_city (country, region);
 CREATE INDEX idx_period_detail_city ON dim_city_period_detail (city_id, period_order);
@@ -95,6 +116,8 @@ CREATE INDEX idx_period_item_detail ON dim_city_period_detail_item (period_detai
 CREATE INDEX idx_fact_city_year ON fact_city_population (city_id, year);
 CREATE INDEX idx_fact_time ON fact_city_population (time_id);
 CREATE INDEX idx_fact_annotation ON fact_city_population (annotation_id);
+CREATE INDEX idx_fiche_city ON dim_city_fiche (city_id);
+CREATE INDEX idx_fiche_section ON dim_city_fiche_section (fiche_id, section_order);
 
 CREATE VIEW vw_city_population_analysis AS
 SELECT

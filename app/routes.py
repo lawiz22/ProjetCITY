@@ -6,9 +6,13 @@ from flask import Blueprint, Response, current_app, flash, jsonify, redirect, re
 
 from .services.analytics import AnalyticsService, SqlExecutionError
 from .services.city_import import (
+    delete_city_fiche,
     fetch_and_save_city_photo,
+    get_city_fiche,
+    import_city_fiche,
     import_city_periods,
     import_city_stats,
+    parse_fiche_text,
     parse_period_details_text,
     parse_stats_text,
     save_period_details_file,
@@ -85,11 +89,15 @@ def city_detail(city_slug: str) -> str:
         flash("Ville introuvable dans la base analytique.", "error")
         return redirect(url_for("web.city_directory"))
 
+    from .db import get_db
+    fiche = get_city_fiche(get_db(), city["city_id"])
+
     return render_template(
         "web/city_detail.html",
         page_title=city["city_name"],
         filters=filters,
         city=city,
+        fiche=fiche,
         periods=service.get_city_periods(city_slug, filters),
         annotations=service.get_city_annotations(city_slug, filters),
         chart_payload=service.get_city_chart_payload(city_slug, filters),
@@ -286,6 +294,21 @@ def add_city_import() -> Response:
     except Exception as exc:
         messages.append(f"Erreur photo: {exc}")
 
+    # --- 4. Parse & import fiche complète (if provided) ---
+    fiche_text = request.form.get("fiche_text", "").strip()
+    if fiche_text:
+        try:
+            _header, fiche_sections = parse_fiche_text(fiche_text)
+            if fiche_sections:
+                import_city_fiche(conn, city_id, stats["city_slug"], fiche_text, fiche_sections)
+                conn.commit()
+                messages.append(f"{len(fiche_sections)} sections fiche complète importées.")
+            else:
+                messages.append("Aucune section détectée dans la fiche complète.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"Erreur fiche complète: {exc}")
+
     flash(f"{stats['city_name']} ({stats['city_slug']}) — " + " | ".join(messages), "success")
     return redirect(url_for("web.city_detail", city_slug=stats["city_slug"]))
 
@@ -316,4 +339,65 @@ def city_photo_import(city_slug: str) -> Response:
         flash(f"Photo importée: {result['filename']}", "success")
     else:
         flash(result["error"], "error")
+    return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+
+@web.route("/cities/<city_slug>/fiche", methods=["POST"])
+def city_fiche_import(city_slug: str) -> Response:
+    """Import a fiche complète for an existing city."""
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_id, city_name FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not row:
+        flash("Ville introuvable.", "error")
+        return redirect(url_for("web.city_directory"))
+
+    city_id, city_name = row["city_id"], row["city_name"]
+    fiche_text = request.form.get("fiche_text", "").strip()
+
+    if not fiche_text:
+        flash("Le champ fiche complète est vide.", "error")
+        return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+    try:
+        _header, sections = parse_fiche_text(fiche_text)
+        if not sections:
+            flash("Aucune section détectée dans le texte.", "error")
+            return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+        import_city_fiche(conn, city_id, city_slug, fiche_text, sections)
+        conn.commit()
+        flash(f"Fiche complète importée pour {city_name} — {len(sections)} sections.", "success")
+    except Exception as exc:
+        conn.rollback()
+        flash(f"Erreur fiche complète: {exc}", "error")
+
+    return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+
+@web.route("/cities/<city_slug>/fiche/delete", methods=["POST"])
+def city_fiche_delete(city_slug: str) -> Response:
+    """Delete the fiche complète for a city."""
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_id, city_name FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not row:
+        flash("Ville introuvable.", "error")
+        return redirect(url_for("web.city_directory"))
+
+    try:
+        deleted = delete_city_fiche(conn, row["city_id"], city_slug)
+        conn.commit()
+        if deleted:
+            flash(f"Fiche complète supprimée pour {row['city_name']}.", "success")
+        else:
+            flash("Aucune fiche à supprimer.", "error")
+    except Exception as exc:
+        conn.rollback()
+        flash(f"Erreur suppression fiche: {exc}", "error")
+
     return redirect(url_for("web.city_detail", city_slug=city_slug))

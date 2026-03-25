@@ -16,6 +16,7 @@ from .city_photos import CITY_PHOTO_DIR, CITY_PHOTO_MANIFEST, clear_city_photo_m
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DETAILS_DIR = PROJECT_ROOT / "data" / "city_details"
+FICHES_DIR = PROJECT_ROOT / "data" / "city_fiches"
 
 CANADIAN_PROVINCES = {
     "Québec", "Quebec", "Ontario", "British Columbia", "Alberta", "Manitoba",
@@ -544,3 +545,333 @@ def save_uploaded_photo(city_slug: str, file_storage: Any) -> dict[str, Any]:
     clear_city_photo_manifest_cache()
 
     return {"success": True, "filename": filename}
+
+
+# ---------------------------------------------------------------------------
+# Fiche Complète parser
+# ---------------------------------------------------------------------------
+
+_NOISE_LINES = {"Copier le tableau", "Copier", "Copy table"}
+_NOISE_RE = re.compile(r"^[-|:\s]+$")
+_MD_SECTION_RE = re.compile(r"^#{1,3}\s+([^\w\s]{1,4})\s+(.+)$", re.UNICODE)
+_EMOJI_SECTION_RE = re.compile(r"^([^\w\s]{1,4})\s+(.+)$", re.UNICODE)
+_PIPE_ROW_RE = re.compile(r"^\|(.+)\|$")
+_HR_RE = re.compile(r"^-{3,}$")
+
+
+def _is_noise(line: str) -> bool:
+    stripped = line.strip()
+    return stripped in _NOISE_LINES or bool(_HR_RE.match(stripped))
+
+
+def _is_pipe_separator(line: str) -> bool:
+    """Detect pipe-table separator lines like |---|---|"""
+    return bool(re.fullmatch(r"\|[-:\s|]+\|", line.strip()))
+
+
+def _parse_pipe_row(line: str) -> list[str] | None:
+    """Parse a markdown pipe table row. Returns cells or None."""
+    stripped = line.strip()
+    m = _PIPE_ROW_RE.match(stripped)
+    if not m:
+        return None
+    cells = [c.strip() for c in m.group(1).split("|")]
+    return cells if len(cells) >= 2 else None
+
+
+def _is_section_header(line: str) -> tuple[str, str] | None:
+    """Return (emoji, title) if line is a section header, else None.
+    Handles both '## 📍 Title' markdown and '📍 Title' plain formats."""
+    stripped = line.strip()
+    if not stripped:
+        return None
+
+    # Pipe table rows are never headers
+    if stripped.startswith("|"):
+        return None
+
+    # Try markdown format: ## 📍 Title or ### 📍 Title
+    m = _MD_SECTION_RE.match(stripped)
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
+
+    # Lines starting with # but not matching MD section emoji pattern are not headers
+    if stripped.startswith("#"):
+        return None
+
+    # Try plain emoji format: 📍 Title (short titles only, ≤ 3 words)
+    m = _EMOJI_SECTION_RE.match(stripped)
+    if m:
+        emoji, title = m.group(1).strip(), m.group(2).strip()
+        # Reject if title contains markdown bold (it's content, not a header)
+        if "**" in title:
+            return None
+        if title and len(title) > 2 and len(title.split()) <= 3:
+            return emoji, title
+    return None
+
+
+def parse_fiche_text(text: str) -> tuple[str, list[dict[str, Any]]]:
+    """Parse a fiche complète text into city header and sections.
+    Handles markdown pipe tables, ## headers, bullet lists, and plain text.
+    """
+    raw_lines = text.splitlines()
+
+    # Extract header (first meaningful line, e.g. "# London, Ontario — Fiche Complète")
+    header = ""
+    start = 0
+    for i, line in enumerate(raw_lines):
+        stripped = line.strip().lstrip("#").strip()
+        if stripped and not _is_noise(line):
+            if "fiche" in stripped.lower() or "—" in stripped:
+                header = stripped
+                start = i + 1
+                break
+            header = stripped
+            start = i + 1
+            break
+
+    # Split into sections by section headers
+    sections: list[dict[str, Any]] = []
+    current_section: dict[str, Any] | None = None
+    current_lines: list[str] = []
+
+    def _flush_section():
+        nonlocal current_section, current_lines
+        if current_section is not None:
+            current_section["_raw_lines"] = [l for l in current_lines]
+            sections.append(current_section)
+            current_lines = []
+            current_section = None
+
+    for i in range(start, len(raw_lines)):
+        line = raw_lines[i]
+        stripped = line.strip()
+
+        # Skip noise
+        if _is_noise(line):
+            continue
+
+        if not stripped:
+            if current_lines and current_lines[-1] != "":
+                current_lines.append("")
+            continue
+
+        header_match = _is_section_header(stripped)
+        if header_match:
+            _flush_section()
+            emoji, title = header_match
+            current_section = {"emoji": emoji, "title": title, "blocks": []}
+            current_lines = []
+            continue
+
+        # Skip ### sub-headers (e.g. "### Secteurs Principaux :") — keep as text
+        if stripped.startswith("###"):
+            stripped = stripped.lstrip("#").strip()
+
+        if current_section is not None:
+            current_lines.append(stripped)
+
+    _flush_section()
+
+    # Parse content blocks within each section
+    for section in sections:
+        raw = section.pop("_raw_lines")
+        blocks = _parse_content_blocks(raw)
+        section["blocks"] = blocks
+
+    return header, sections
+
+
+def _parse_content_blocks(lines: list[str]) -> list[dict[str, Any]]:
+    """Parse lines into blocks: pipe-tables, tab-tables, bullets, and text."""
+    blocks: list[dict[str, Any]] = []
+    if not lines:
+        return blocks
+
+    i = 0
+    pending_bullets: list[str] = []
+    pending_text: list[str] = []
+
+    def flush_bullets():
+        nonlocal pending_bullets
+        if pending_bullets:
+            blocks.append({"type": "bullets", "items": list(pending_bullets)})
+            pending_bullets = []
+
+    def flush_text():
+        nonlocal pending_text
+        if pending_text:
+            blocks.append({"type": "text", "value": " ".join(pending_text)})
+            pending_text = []
+
+    while i < len(lines):
+        line = lines[i].strip()
+
+        if not line:
+            i += 1
+            continue
+
+        if line in _NOISE_LINES or _is_pipe_separator(line):
+            i += 1
+            continue
+
+        # --- Try pipe table ---
+        pipe_cells = _parse_pipe_row(line)
+        if pipe_cells:
+            flush_bullets()
+            flush_text()
+            # Collect all consecutive pipe rows (skip blanks + separators)
+            headers = pipe_cells
+            rows: list[list[str]] = []
+            i += 1
+            while i < len(lines):
+                row_line = lines[i].strip()
+                if not row_line or _is_pipe_separator(row_line):
+                    i += 1
+                    continue
+                row_cells = _parse_pipe_row(row_line)
+                if row_cells:
+                    rows.append(row_cells)
+                    i += 1
+                else:
+                    break
+            blocks.append({"type": "table", "headers": headers, "rows": rows})
+            continue
+
+        # --- Try tab table ---
+        if "\t" in line:
+            flush_bullets()
+            flush_text()
+            headers_tab = [h.strip() for h in line.split("\t") if h.strip()]
+            if len(headers_tab) >= 2:
+                rows_tab: list[list[str]] = []
+                i += 1
+                while i < len(lines):
+                    row_line = lines[i].strip()
+                    if not row_line or row_line in _NOISE_LINES:
+                        i += 1
+                        continue
+                    if _is_section_header(row_line):
+                        break
+                    if "\t" in row_line:
+                        cells = [c.strip() for c in row_line.split("\t")]
+                        rows_tab.append(cells)
+                        i += 1
+                    else:
+                        break
+                blocks.append({"type": "table", "headers": headers_tab, "rows": rows_tab})
+                continue
+
+        # --- Bullet item ---
+        is_bullet = bool(re.match(r"^(?:[-*]\s|[^\w\s]{1,3}\s)", line))
+        if not is_bullet and " — " in line:
+            is_bullet = True
+        if is_bullet:
+            flush_text()
+            # Clean up leading "- " prefix
+            cleaned = re.sub(r"^[-*]\s+", "", line)
+            pending_bullets.append(cleaned)
+            i += 1
+            continue
+
+        # --- Plain text ---
+        flush_bullets()
+        pending_text.append(line)
+        i += 1
+
+    flush_bullets()
+    flush_text()
+
+    return blocks
+
+
+# ---------------------------------------------------------------------------
+# Fiche Complète database import
+# ---------------------------------------------------------------------------
+
+def import_city_fiche(conn: sqlite3.Connection, city_id: int, city_slug: str,
+                      raw_text: str, sections: list[dict[str, Any]]) -> int:
+    """Insert/update fiche complète for a city. Saves to DB + .txt file. Returns fiche_id."""
+    # Remove existing fiche
+    existing = conn.execute(
+        "SELECT fiche_id FROM dim_city_fiche WHERE city_id = ?", (city_id,)
+    ).fetchone()
+    if existing:
+        conn.execute("DELETE FROM dim_city_fiche_section WHERE fiche_id = ?", (existing[0],))
+        conn.execute("DELETE FROM dim_city_fiche WHERE fiche_id = ?", (existing[0],))
+
+    cursor = conn.execute(
+        "INSERT INTO dim_city_fiche (city_id, raw_text) VALUES (?, ?) RETURNING fiche_id",
+        (city_id, raw_text),
+    )
+    fiche_id = cursor.fetchone()[0]
+
+    for order, section in enumerate(sections, start=1):
+        conn.execute(
+            """INSERT INTO dim_city_fiche_section
+               (fiche_id, section_order, section_emoji, section_title, content_json)
+               VALUES (?, ?, ?, ?, ?)""",
+            (fiche_id, order, section.get("emoji", ""),
+             section["title"], json.dumps(section["blocks"], ensure_ascii=False)),
+        )
+
+    # Save raw text to file
+    save_fiche_file(city_slug, raw_text)
+
+    return fiche_id
+
+
+def delete_city_fiche(conn: sqlite3.Connection, city_id: int, city_slug: str) -> bool:
+    """Delete fiche complète from DB and remove .txt file."""
+    existing = conn.execute(
+        "SELECT fiche_id FROM dim_city_fiche WHERE city_id = ?", (city_id,)
+    ).fetchone()
+    if not existing:
+        return False
+    conn.execute("DELETE FROM dim_city_fiche_section WHERE fiche_id = ?", (existing[0],))
+    conn.execute("DELETE FROM dim_city_fiche WHERE fiche_id = ?", (existing[0],))
+    file_path = FICHES_DIR / f"{city_slug}.txt"
+    if file_path.exists():
+        file_path.unlink()
+    return True
+
+
+def save_fiche_file(city_slug: str, text: str) -> Path:
+    """Save the fiche complète raw text as a .txt file in data/city_fiches/."""
+    FICHES_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = FICHES_DIR / f"{city_slug}.txt"
+    file_path.write_text(text, encoding="utf-8")
+    return file_path
+
+
+def get_city_fiche(conn: sqlite3.Connection, city_id: int) -> dict[str, Any] | None:
+    """Load a city's fiche complète with all sections."""
+    fiche = conn.execute(
+        "SELECT fiche_id, raw_text, created_at FROM dim_city_fiche WHERE city_id = ?",
+        (city_id,),
+    ).fetchone()
+    if not fiche:
+        return None
+
+    sections = conn.execute(
+        """SELECT section_emoji, section_title, content_json
+           FROM dim_city_fiche_section
+           WHERE fiche_id = ?
+           ORDER BY section_order""",
+        (fiche[0],),
+    ).fetchall()
+
+    return {
+        "fiche_id": fiche[0],
+        "raw_text": fiche[1],
+        "created_at": fiche[2],
+        "sections": [
+            {
+                "emoji": row[0],
+                "title": row[1],
+                "blocks": json.loads(row[2]),
+            }
+            for row in sections
+        ],
+    }
