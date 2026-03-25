@@ -5,19 +5,44 @@
 {% endblock %}
 
 {% block content %}
+<section class="city-sticky-header">
+    <div class="city-sticky-bar">
+        <div class="city-sticky-copy">
+            <span>{{ city.country }} · {{ city.region }}</span>
+            <strong>{{ city.city_name }}</strong>
+        </div>
+        <nav class="city-sticky-nav" aria-label="Navigation rapide ville">
+            <a href="#city-chart">Courbe</a>
+            <a href="#city-annotations">Annotations</a>
+            <a href="#city-timeline">Timeline</a>
+        </nav>
+        <div class="city-sticky-tools" data-guided-reader>
+            <button type="button" class="city-sticky-tool" data-guided-reset aria-label="Vue complete" title="Vue complete">[]</button>
+            <button type="button" class="city-sticky-tool" data-guided-start aria-label="Demarrer la lecture guidee" title="Demarrer la lecture guidee">|&gt;</button>
+            <button type="button" class="city-sticky-tool" data-guided-prev aria-label="Periode precedente" title="Periode precedente">&lt;</button>
+            <button type="button" class="city-sticky-tool" data-guided-next aria-label="Periode suivante" title="Periode suivante">&gt;</button>
+            <button type="button" class="city-sticky-tool" data-guided-autoplay aria-label="Activer l'autoplay" title="Activer l'autoplay">&gt;&gt;</button>
+            <button type="button" class="city-sticky-tool" data-guided-stop aria-label="Quitter la lecture guidee" title="Quitter la lecture guidee">x</button>
+            <button type="button" class="city-sticky-tool" data-back-to-top aria-label="Retour en haut" title="Retour en haut">^</button>
+        </div>
+    </div>
+</section>
+
 <section class="city-header" style="--city-accent: {{ city.city_color or '#2f6fed' }}; --city-hero-image: url('{{ url_for('static', filename=city.photo_path) }}')">
     <div class="city-header-overlay"></div>
     <article class="city-header-content">
         <p class="eyebrow">{{ city.country }} · {{ city.region }}</p>
         <h2>{{ city.city_name }}</h2>
         <div class="city-badge-strip">
+            <span class="city-badge city-badge-trend city-badge-trend-{{ 'up' if city.trend_label == 'En croissance' else 'down' if city.trend_label == 'En décroissance' else 'stable' }}">{{ city.trend_label }}</span>
             <span class="city-badge">{{ annotations|length }} annotation{% if annotations|length > 1 %}s{% endif %}</span>
             <span class="city-badge">{{ periods|length }} période{% if periods|length > 1 %}s{% endif %}</span>
             <span class="city-badge">Ville suivie jusqu'en {{ city.latest_year }}</span>
             <span class="city-badge">Pic démographique en {{ city.peak_year }}</span>
+            <a class="city-badge city-header-export" href="{{ url_for('web.city_detail_pdf', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">⇩ Export PDF</a>
         </div>
         <p class="city-narrative">
-            {{ city.city_name }} présente une trajectoire urbaine suivie sur {{ periods|length }} période{% if periods|length > 1 %}s{% endif %},
+            {{ city.city_name }} présente une évolution urbaine suivie sur {{ periods|length }} période{% if periods|length > 1 %}s{% endif %},
             avec {{ annotations|length }} repère{% if annotations|length > 1 %}s historiques{% else %} historique{% endif %}
             directement relié{% if annotations|length > 1 %}s{% endif %} à la courbe démographique. La lecture combinée du header,
             de la courbe et de la timeline permet de passer du récit urbain aux chiffres sans rupture.
@@ -35,72 +60,116 @@
                 <span>Pic historique</span>
                 <strong>{{ '{:,}'.format(city.peak_population).replace(',', ' ') }} en {{ city.peak_year }}</strong>
             </div>
+            <div>
+                <span>Tendance</span>
+                <strong>
+                    {% if city.trend_label == 'En croissance' %}
+                        <span style="color:#22c55e;">▲</span> {{ city.trend_label }}
+                    {% elif city.trend_label == 'En décroissance' %}
+                        <span style="color:#ef4444;">▼</span> {{ city.trend_label }}
+                    {% else %}
+                        {{ city.trend_label }}
+                    {% endif %}
+                </strong>
+            </div>
+            {% if city.foundation_year %}
+            <div>
+                <span>Fondation</span>
+                <strong>{{ city.foundation_year }}</strong>
+            </div>
+            {% endif %}
+            <div>
+                <span>Première population</span>
+                <strong>{% if city.first_population %}{{ '{:,}'.format(city.first_population).replace(',', ' ') }} en {{ city.first_population_year }}{% else %}n.d.{% endif %}</strong>
+            </div>
         </div>
     </article>
 </section>
 
-<section class="panel city-chart-panel">
+{% if not city.has_photo %}
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Photo manquante</h2>
+            <span>Importer une photo pour {{ city.city_name }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+            <form method="post" action="{{ url_for('web.city_photo_import', city_slug=city.city_slug) }}" style="display:inline;">
+                <button type="submit" class="secondary-button">Chercher sur Wikipedia</button>
+            </form>
+            <form method="post" action="{{ url_for('web.city_photo_import', city_slug=city.city_slug) }}" enctype="multipart/form-data" style="display:inline-flex;align-items:center;gap:.6rem;">
+                <input type="file" name="photo_file" accept=".jpg,.jpeg,.png,.webp" style="font-size:.85rem;">
+                <button type="submit" class="secondary-button">Uploader</button>
+            </form>
+        </div>
+    </article>
+</section>
+{% endif %}
+
+<section class="panel city-chart-panel" id="city-chart">
         <div class="panel-head">
             <h2>Courbe démographique</h2>
         </div>
-        <div class="chart-block">
-            <div class="chart-toolbar">
-                <span class="helper-text">Molette pour zoomer, glisser pour sélectionner, Maj + glisser pour naviguer. Clique une bande colorée pour lire une annotation.</span>
-                <div class="button-row">
-                    <button type="button" class="secondary-button chart-reset" data-chart-reset>Réinitialiser le zoom</button>
-                    <button type="button" class="secondary-button chart-export" data-chart-export>Exporter PNG</button>
+        <div class="city-chart-layout">
+            <div class="chart-block">
+                <div class="chart-toolbar">
+                    <span class="helper-text">Molette pour zoomer, glisser pour sélectionner, Maj + glisser pour naviguer. Les annotations se gèrent dans la liste à droite.</span>
+                    <div class="button-row">
+                        <span class="chart-focus-indicator" data-chart-focus-indicator>Vue complète active</span>
+                        <button type="button" class="secondary-button chart-toolbar-button chart-reset" data-chart-reset>Reset zoom</button>
+                        <button type="button" class="secondary-button chart-toolbar-button chart-export" data-chart-export>PNG</button>
+                        <a class="secondary-button chart-toolbar-button city-export-button" href="{{ url_for('web.city_detail_pdf', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">PDF</a>
+                    </div>
+                </div>
+                <div class="chart-stage">
+                    <div class="chart-frame chart-frame-large">
+                        <canvas class="chart-canvas" data-chart='{{ chart_payload.timeline | tojson }}' data-chart-type="line" data-chart-filename="{{ city.city_slug }}-timeline"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="chart-frame chart-frame-large">
-                <canvas class="chart-canvas" data-chart='{{ chart_payload.timeline | tojson }}' data-chart-type="line" data-chart-filename="{{ city.city_slug }}-timeline"></canvas>
-            </div>
-            <div class="annotation-focus" data-annotation-detail>
-                <strong>Lecture des annotations</strong>
-                <p>Clique sur une bande verticale du graphique ou sur une carte ci-dessous pour afficher le détail ici.</p>
-            </div>
+            <aside class="annotation-side-panel" data-annotation-controls>
+                <div class="annotation-toolbar-copy">
+                    <strong>Repères historiques</strong>
+                    <p class="helper-text" data-annotation-visible-count>{{ annotations|length }} annotation(s) visible(s)</p>
+                </div>
+                <div class="button-row annotation-side-actions">
+                    <button type="button" class="secondary-button annotation-toggle-button" data-annotation-select-all>Tout</button>
+                    <button type="button" class="secondary-button annotation-toggle-button" data-annotation-clear>Masquer</button>
+                </div>
+                <div class="annotation-side-list">
+                    {% for annotation in annotations %}
+                    <label class="annotation-list-item" data-annotation-list-item data-annotation-id="annotation-{{ loop.index0 }}" data-annotation-year="{{ annotation.year }}">
+                        <input type="checkbox" data-annotation-toggle data-annotation-id="annotation-{{ loop.index0 }}" checked>
+                        <span class="annotation-dot" style="background: {{ annotation.annotation_color }}"></span>
+                        <span class="annotation-list-year">{{ annotation.year }}</span>
+                        <span class="annotation-list-label">{{ annotation.annotation_label }}</span>
+                        <button type="button" class="annotation-open-link" data-annotation-open data-annotation-year="{{ annotation.year }}" aria-label="Ouvrir la période {{ annotation.year }}" title="Voir la période">↘</button>
+                    </label>
+                    {% endfor %}
+                </div>
+            </aside>
         </div>
 </section>
 
-<section class="panel annotation-story-panel">
+<section class="panel annotation-story-panel" id="city-annotations">
     <div class="panel-head">
         <h2>Annotations temporelles</h2>
-        <span>Lecture narrative synchronisée avec la courbe</span>
+        <span>Ces cartes ouvrent directement la période détaillée correspondante</span>
     </div>
-    {% if annotations %}
-    <div class="annotation-controls" data-annotation-controls>
-        <div class="annotation-toolbar">
-            <div class="annotation-toolbar-copy">
-                <strong>Choisir les annotations visibles</strong>
-                <p class="helper-text" data-annotation-visible-count>{{ annotations|length }} annotation(s) visible(s)</p>
-            </div>
-            <div class="button-row">
-                <button type="button" class="secondary-button annotation-toggle-button" data-annotation-select-all>Tout afficher</button>
-                <button type="button" class="secondary-button annotation-toggle-button" data-annotation-clear>Tout masquer</button>
-            </div>
-        </div>
-        <div class="annotation-filter-grid">
-            {% for annotation in annotations %}
-            <label class="annotation-filter-pill" data-annotation-filter-pill data-annotation-id="annotation-{{ loop.index0 }}">
-                <input type="checkbox" data-annotation-toggle data-annotation-id="annotation-{{ loop.index0 }}" checked>
-                <span class="annotation-dot" style="background: {{ annotation.annotation_color }}"></span>
-                <span>{{ annotation.year }} · {{ annotation.annotation_label }}</span>
-            </label>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
     <div class="annotation-story-grid">
         {% for annotation in annotations %}
         <article class="annotation-card" data-annotation-card data-annotation-id="annotation-{{ loop.index0 }}" data-annotation-year="{{ annotation.year }}" data-annotation-label="{{ annotation.annotation_label }}" data-annotation-color="{{ annotation.annotation_color }}" data-annotation-type="{{ annotation.annotation_type }}">
             <div class="annotation-card-head">
-                <span class="annotation-dot annotation-dot-large" style="background: {{ annotation.annotation_color }}"></span>
-                <div>
-                    <strong>{{ annotation.year }}</strong>
-                    <p>{{ annotation.annotation_type }}</p>
+                <div class="annotation-card-meta">
+                    <span class="annotation-dot annotation-dot-large" style="background: {{ annotation.annotation_color }}"></span>
+                    <div>
+                        <strong>{{ annotation.year }}</strong>
+                        <p>{{ annotation.annotation_type }}</p>
+                    </div>
                 </div>
             </div>
             <h3>{{ annotation.annotation_label }}</h3>
-            <p>Cette annotation est liée directement à la courbe démographique. Clique pour centrer la vue sur cette période et mettre en évidence la bande verticale correspondante.</p>
+            <button type="button" class="annotation-card-cta" data-annotation-open data-annotation-year="{{ annotation.year }}">Voir la période</button>
         </article>
         {% else %}
         <p>Aucune annotation disponible pour cette ville.</p>
@@ -108,14 +177,16 @@
     </div>
 </section>
 
-<section class="panel timeline-panel">
+<section class="panel timeline-panel" id="city-timeline">
     <div class="panel-head">
-        <h2>Périodes détaillées</h2>
-        <span>Timeline narrative et démographique</span>
+        <div>
+            <h2>Périodes détaillées</h2>
+            <span>Timeline narrative et démographique</span>
+        </div>
     </div>
     <div class="period-timeline">
         {% for period in periods %}
-        <article class="timeline-card visual-timeline-card">
+        <article class="timeline-card visual-timeline-card" data-period-card data-period-id="period-{{ period.period_detail_id }}" data-period-primary-year="{{ period.linked_annotations[0].year if period.linked_annotations else '' }}" data-linked-years="{% for annotation in period.linked_annotations %}{{ annotation.year }}{% if not loop.last %},{% endif %}{% endfor %}">
             <div class="timeline-rail">
                 <span class="timeline-node"></span>
                 {% if not loop.last %}
@@ -126,16 +197,33 @@
                 <div class="timeline-header timeline-header-visual">
                     <span>{{ period.period_range_label }}</span>
                     <strong>{{ period.period_title }}</strong>
+                    <span class="timeline-step-badge">Étape {{ loop.index }} / {{ periods|length }}</span>
                 </div>
                 <div class="timeline-kpis">
                     <span>Population {{ period.start_population or 'n/a' }} → {{ period.end_population or 'n/a' }}</span>
                     <span>Variation {{ period.population_change_pct or 'n/a' }}%</span>
                 </div>
+                {% if period.linked_annotations %}
+                <div class="timeline-annotation-links">
+                    <button type="button" class="secondary-button timeline-filter-button" data-period-only-annotations data-period-id="period-{{ period.period_detail_id }}">Ouvrir uniquement ces annotations</button>
+                    {% for annotation in period.linked_annotations %}
+                    <button type="button" class="timeline-annotation-chip" data-annotation-year-target="{{ annotation.year }}" data-period-id="period-{{ period.period_detail_id }}" style="--annotation-color: {{ annotation.color or '#ef6c3d' }}">
+                        <span class="timeline-annotation-dot"></span>
+                        <span>{{ annotation.year }} · {{ annotation.label }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if period.summary_text and not period.display_bullets %}
                 <p class="timeline-summary">{{ period.summary_text }}</p>
-                {% if period['items'] %}
+                {% endif %}
+                {% if period.display_bullets %}
                 <ul class="timeline-items">
-                    {% for item in period['items'] %}
-                    <li>{{ item }}</li>
+                    {% for item in period.display_bullets %}
+                    <li>
+                        <span class="timeline-item-icon">{{ item.icon }}</span>
+                        <span class="timeline-item-text">{{ item.text }}</span>
+                    </li>
                     {% endfor %}
                 </ul>
                 {% endif %}
@@ -145,10 +233,4 @@
     </div>
 </section>
 
-<section class="panel export-strip export-strip-bottom">
-    <div class="panel-head">
-        <h2>Exports</h2>
-        <a class="secondary-button inline-button" href="{{ url_for('web.city_detail_pdf', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">Exporter la fiche ville en PDF</a>
-    </div>
-</section>
 {% endblock %}

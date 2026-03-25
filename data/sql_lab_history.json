@@ -1,6 +1,20 @@
 [
   {
-    "timestamp": "2026-03-25T00:28:22.244969+00:00",
+    "timestamp": "2026-03-25T02:32:21.716602+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, period_range_label, period_title, start_population, end_population, population_change_pct\r\nFROM vw_city_period_detail_with_population\r\nORDER BY city_name, period_order\r\nLIMIT 25;",
+    "preview": "SELECT city_name, period_range_label, period_title, start_population, end_population, population_change_pct"
+  },
+  {
+    "timestamp": "2026-03-25T02:32:02.483811+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, period_label FROM vw_city_population_analysis WHERE period_label = 'Industrialisation' LIMIT 10;",
+    "preview": "SELECT city_name, period_label FROM vw_city_population_analysis WHERE period_label = 'Industrialisation' LIMIT 10;"
+  },
+  {
+    "timestamp": "2026-03-25T02:31:36.393702+00:00",
     "action": "execute",
     "status": "read",
     "sql": "SELECT city_name, decade, absolute_growth, growth_pct\r\nFROM vw_city_growth_by_decade\r\nORDER BY growth_pct DESC\r\nLIMIT 25;",

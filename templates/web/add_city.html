@@ -1,0 +1,106 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<form method="post" action="{{ url_for('web.add_city_import') }}" id="import-form" enctype="multipart/form-data">
+
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Ajout de ville</h2>
+            <span>Coller les données population + périodes détaillées, puis cliquer Importer</span>
+        </div>
+        <p class="helper-text" id="slug-info" style="margin:0;font-weight:600;"></p>
+    </article>
+</section>
+
+<section class="panel-grid panel-grid-2">
+    <!-- ── BOX 1 : Population / Stats ──────────────────────────── -->
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Population &amp; annotations</h2>
+            <span>Format Python (CITY_NAME, years, population, annotations)</span>
+        </div>
+        <textarea name="stats_text" rows="24" placeholder='CITY_NAME = "Guelph, Ontario"
+CITY_COLOR = &apos;#4B0082&apos;
+
+years = [1860, 1870, 1880, ...]
+
+population = [4500, 6000, 9800, ...]
+
+annotations = [
+    (1860, 4500, "🚂 Grand Trunk Railway (1856)", &apos;brown&apos;, (1862, 12000)),
+    ...
+]' style="font-family:var(--font-mono,monospace);font-size:.82rem;"></textarea>
+    </article>
+
+    <!-- ── BOX 2 : Périodes détaillées ─────────────────────────── -->
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Périodes détaillées</h2>
+            <span>Format .txt (même format que data/city_details/)</span>
+        </div>
+        <textarea name="periods_text" rows="24" placeholder='1800-1850 — ORIGINES
+━━━━━━━━━━━━━━━━━━━━
+🏞️ Fondée en 1827 par John Galt...
+🚢 Premier moteur économique...
+= Ville planifiée dès sa naissance.
+
+1850-1900 — INDUSTRIALISATION
+━━━━━━━━━━━━━━━━━━━━
+🏗️ Arrivée du chemin de fer...
+...' style="font-family:var(--font-mono,monospace);font-size:.82rem;"></textarea>
+    </article>
+</section>
+
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+            <button type="submit" id="import-btn" disabled style="font-size:1rem;padding:.7rem 2rem;">
+                Importer la ville
+            </button>
+            <span class="helper-text" id="import-hint">Collez les données population pour activer le bouton.</span>
+        </div>
+    </article>
+</section>
+
+</form>
+
+<script>
+(function() {
+    var statsArea = document.querySelector('textarea[name="stats_text"]');
+    var btn = document.getElementById('import-btn');
+    var hint = document.getElementById('import-hint');
+    var slugInfo = document.getElementById('slug-info');
+
+    function extractSlug(text) {
+        var m = text.match(/CITY_NAME\s*=\s*["'](.+?)["']/);
+        if (!m) return '';
+        var raw = m[1];
+        return raw.normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+                   .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+
+    function extractName(text) {
+        var m = text.match(/CITY_NAME\s*=\s*["'](.+?)["']/);
+        return m ? m[1] : '';
+    }
+
+    function sync() {
+        var slug = extractSlug(statsArea.value);
+        var name = extractName(statsArea.value);
+        if (slug) {
+            btn.disabled = false;
+            hint.textContent = 'Prêt à importer : ' + name;
+            slugInfo.textContent = 'Ville détectée : ' + name + '  (slug: ' + slug + ')';
+        } else {
+            btn.disabled = true;
+            hint.textContent = 'Collez les données population pour activer le bouton.';
+            slugInfo.textContent = '';
+        }
+    }
+
+    statsArea.addEventListener('input', sync);
+    sync();
+})();
+</script>
+{% endblock %}

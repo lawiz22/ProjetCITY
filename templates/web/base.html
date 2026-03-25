@@ -4,21 +4,42 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ page_title }} | ProjetCITY Analyst</title>
+    <script>
+        document.documentElement.dataset.theme = localStorage.getItem('projetcity-theme') || 'light';
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
     {% block head_extra %}{% endblock %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0"></script>
+    <script defer src="{{ url_for('static', filename='js/ui.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/tables.js') }}"></script>
 </head>
 <body>
+    {% set filter_state = namespace(count=0, summary='') %}
+    {% if request.args.get('country') %}
+        {% set filter_state.count = filter_state.count + 1 %}
+        {% set filter_state.summary = request.args.get('country') %}
+    {% endif %}
+    {% if request.args.get('region') %}
+        {% set filter_state.count = filter_state.count + 1 %}
+        {% if not filter_state.summary %}{% set filter_state.summary = request.args.get('region') %}{% endif %}
+    {% endif %}
+    {% if request.args.get('period') %}
+        {% set filter_state.count = filter_state.count + 1 %}
+        {% if not filter_state.summary %}{% set filter_state.summary = request.args.get('period') %}{% endif %}
+    {% endif %}
+    {% if request.args.get('search') %}
+        {% set filter_state.count = filter_state.count + 1 %}
+        {% if not filter_state.summary %}{% set filter_state.summary = request.args.get('search') %}{% endif %}
+    {% endif %}
     <div class="site-shell">
-        <aside class="sidebar">
-            <div>
+        <aside class="sidebar sidebar-nav">
+            <div class="sidebar-nav-top">
                 <a class="brand" href="{{ url_for('web.dashboard') }}">
                     <span class="brand-mark">PC</span>
                     <div>
@@ -32,44 +53,61 @@
                     <a href="{{ url_for('web.compare') }}">Comparaison</a>
                     <a href="{{ url_for('web.city_map') }}">Carte</a>
                     <a href="{{ url_for('web.sql_lab') }}">SQL Lab</a>
+                    <a href="{{ url_for('web.add_city') }}">Ajout villes</a>
                 </nav>
+                <details class="filter-card filter-card-collapsible sidebar-filter-card" {% if filter_state.count %}open{% endif %}>
+                    <summary class="filter-summary">
+                        <span class="filter-summary-icon" aria-hidden="true">⌕</span>
+                        <div class="filter-summary-copy">
+                            <strong>Filtres globaux</strong>
+                            <span>Affiner tout le workspace</span>
+                        </div>
+                        <span class="filter-summary-chip">{{ filter_state.summary or 'Aucun filtre actif' }}</span>
+                        <span class="filter-count-badge">{{ filter_state.count }}</span>
+                    </summary>
+                    <form class="filter-form-compact" method="get" action="{{ request.path }}">
+                        <div class="filter-grid">
+                            <label>
+                                Pays
+                                <select name="country">
+                                    <option value="">Tous</option>
+                                    {% for country in nav_filters.countries %}
+                                    <option value="{{ country }}" {% if request.args.get('country') == country %}selected{% endif %}>{{ country }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label>
+                                Région
+                                <select name="region">
+                                    <option value="">Toutes</option>
+                                    {% for region in nav_filters.regions %}
+                                    <option value="{{ region }}" {% if request.args.get('region') == region %}selected{% endif %}>{{ region }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label>
+                                Période
+                                <select name="period">
+                                    <option value="">Toutes</option>
+                                    {% for period in nav_filters.periods %}
+                                    <option value="{{ period }}" {% if request.args.get('period') == period %}selected{% endif %}>{{ period }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label>
+                                Recherche
+                                <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Ville, région...">
+                            </label>
+                        </div>
+                        {% block filter_hidden_fields %}{% endblock %}
+                        <div class="filter-actions-row">
+                            <button type="submit" class="filter-apply-button">Appliquer</button>
+                            <a class="secondary-button filter-reset-button" href="{{ request.path }}">Réinitialiser les filtres</a>
+                        </div>
+                    </form>
+                </details>
             </div>
-            <form class="filter-card" method="get" action="{{ request.path }}">
-                <h2>Filtres globaux</h2>
-                <label>
-                    Pays
-                    <select name="country">
-                        <option value="">Tous</option>
-                        {% for country in nav_filters.countries %}
-                        <option value="{{ country }}" {% if request.args.get('country') == country %}selected{% endif %}>{{ country }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label>
-                    Région
-                    <select name="region">
-                        <option value="">Toutes</option>
-                        {% for region in nav_filters.regions %}
-                        <option value="{{ region }}" {% if request.args.get('region') == region %}selected{% endif %}>{{ region }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label>
-                    Période
-                    <select name="period">
-                        <option value="">Toutes</option>
-                        {% for period in nav_filters.periods %}
-                        <option value="{{ period }}" {% if request.args.get('period') == period %}selected{% endif %}>{{ period }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label>
-                    Recherche
-                    <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Ville, région...">
-                </label>
-                {% block filter_hidden_fields %}{% endblock %}
-                <button type="submit">Appliquer</button>
-            </form>
+            <button type="button" class="theme-toggle-button" data-theme-toggle aria-label="Changer le thème">Mode sombre</button>
         </aside>
 
         <main class="main-panel">

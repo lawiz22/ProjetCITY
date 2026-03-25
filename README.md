@@ -13,6 +13,10 @@ Une première version web locale est maintenant disponible avec Flask + Jinja.
 - annuaire des villes avec double affichage: vue blocs illustrée et vue liste compacte
 - fiche détaillée par ville avec courbe démographique, annotations et périodes narratives
 - fiche détaillée par ville avec header photo premium, badges de synthèse et résumé narratif
+- fiche détaillée par ville avec navigation rapide par ancres vers Courbe, Annotations, Timeline et Export
+- fiche détaillée par ville avec bouton flottant de retour en haut
+- fiche détaillée par ville avec mode lecture guidée période par période
+- fiche détaillée par ville avec barre de lecture guidée flottante, autoplay lent et vue complète explicite
 - comparaison multi-villes
 - zoom, pan et réinitialisation sur les courbes de comparaison et de détail
 - export PNG des graphiques principaux
@@ -25,12 +29,16 @@ Une première version web locale est maintenant disponible avec Flask + Jinja.
 - couches thématiques sur la carte: population, croissance, déclin, pics, annotations
 - export PDF du dashboard et des fiches ville
 - export PDF ville enrichi avec photo locale
+- export PDF ville enrichi avec photo locale et badges de synthèse en tête
 - tableaux triables et filtrables côté client
 - annotations temporelles cliquables sur la carte et dans les courbes des fiches ville
 - bandes verticales colorées sur les graphiques des villes pour matérialiser les annotations historiques
 - filtres à cocher sur les annotations des fiches ville pour afficher, masquer et réafficher librement les événements voulus
 - cache local d'images par ville dans static/images/cities/
 - timeline visuelle pour les périodes détaillées des fiches ville
+- repères d'annotations directement reliés aux périodes dans la timeline des fiches ville
+- surbrillance croisée web entre période, annotation et bande graphique active
+- bouton par période pour n'ouvrir que les annotations liées puis retour fiable à la vue complète
 
 ### Lancer l'application web
 

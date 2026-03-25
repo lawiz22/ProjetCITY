@@ -1,235 +1,261 @@
-function formatNumber(value) {
-    return new Intl.NumberFormat('fr-CA').format(value || 0);
-}
+(function () {
+    'use strict';
 
-function buildCityDetailUrl(citySlug, annotationYear = null) {
-    const params = new URLSearchParams(window.location.search);
-    const forwarded = new URLSearchParams();
-    ['country', 'region', 'period', 'search'].forEach((key) => {
-        const value = params.get(key);
-        if (value) {
-            forwarded.set(key, value);
-        }
-    });
-    if (annotationYear) {
-        forwarded.set('focus_annotation', annotationYear);
+    /* ── helpers ─────────────────────────────────────────────── */
+
+    function fmt(value) {
+        return new Intl.NumberFormat('fr-CA').format(value || 0);
     }
-    const queryString = forwarded.toString();
-    return `/cities/${citySlug}${queryString ? `?${queryString}` : ''}`;
-}
 
-function buildPopup(point, theme) {
-    const growth = point.latest_growth_pct === null || point.latest_growth_pct === undefined
-        ? 'n/a'
-        : `${point.latest_growth_pct}% (${point.latest_growth_decade})`;
+    function cityUrl(slug, annotationYear) {
+        var qs = new URLSearchParams(window.location.search);
+        var fwd = new URLSearchParams();
+        ['country', 'region', 'period', 'search'].forEach(function (k) {
+            var v = qs.get(k);
+            if (v) fwd.set(k, v);
+        });
+        if (annotationYear) fwd.set('focus_annotation', annotationYear);
+        var s = fwd.toString();
+        return '/cities/' + slug + (s ? '?' + s : '');
+    }
 
-    const annotationHtml = (point.annotations || []).length > 0
-        ? `<div class="map-popup-annotations">${point.annotations.map((annotation) => `<button type="button" class="map-popup-annotation" data-city-slug="${point.city_slug}" data-annotation-year="${annotation.year}"><span style="background:${annotation.color}"></span>${annotation.year} · ${annotation.label}</button>`).join('')}</div>`
-        : '<p>Aucune annotation détaillée disponible.</p>';
-
-    const themeBlock = theme === 'annotations'
-        ? `<div class="map-popup-layer"><strong>Annotations temporelles</strong>${annotationHtml}</div>`
-        : '';
-
-    return `
-        <div class="map-popup">
-            <h3>${point.city_name}</h3>
-            <p>${point.country} · ${point.region}</p>
-            <p>Population récente: ${formatNumber(point.population)} en ${point.year}</p>
-            <p>Pic: ${point.peak_population ? `${formatNumber(point.peak_population)} en ${point.peak_year}` : 'n/a'}</p>
-            <p>Croissance récente: ${growth}</p>
-            ${themeBlock}
-            <a href="${buildCityDetailUrl(point.city_slug)}">Ouvrir la fiche</a>
-        </div>
-    `;
-}
-
-function themeLabel(theme) {
-    const labels = {
+    var THEME_LABELS = {
         population: 'Population',
         growth: 'Croissance',
         decline: 'Déclin',
         peak: 'Pics',
         annotations: 'Annotations'
     };
-    return labels[theme] || 'Population';
-}
 
-function markerStyle(point, theme) {
-    if (theme === 'growth') {
-        const growth = point.latest_growth_pct || 0;
-        return {
-            radius: Math.max(8, Math.min(26, 10 + Math.abs(growth) / 4)),
-            color: growth >= 0 ? '#1f9d66' : '#b33951',
-            fillColor: growth >= 0 ? '#1f9d66' : '#b33951'
-        };
-    }
-    if (theme === 'decline') {
-        const declineCount = point.decline_count || 0;
-        return {
-            radius: Math.max(8, Math.min(24, 8 + declineCount * 3)),
-            color: declineCount > 0 ? '#b33951' : '#b8c0cc',
-            fillColor: declineCount > 0 ? '#b33951' : '#b8c0cc'
-        };
-    }
-    if (theme === 'peak') {
-        const peakPopulation = point.peak_population || point.population || 0;
-        return {
-            radius: Math.max(8, Math.min(28, 8 + peakPopulation / 500000)),
-            color: '#264653',
-            fillColor: '#264653'
-        };
-    }
-    if (theme === 'annotations') {
-        const annotationCount = point.annotation_count || 0;
-        return {
-            radius: Math.max(8, Math.min(24, 8 + annotationCount * 2)),
-            color: annotationCount > 0 ? '#ef6c3d' : '#b8c0cc',
-            fillColor: annotationCount > 0 ? '#ef6c3d' : '#b8c0cc'
-        };
-    }
-    return {
-        radius: point.radius,
-        color: point.city_color,
-        fillColor: point.city_color
-    };
-}
+    /* ── marker style per theme ──────────────────────────────── */
 
-function mountMap(element) {
-    if (!window.L) {
-        return;
+    function markerStyle(pt, theme) {
+        if (theme === 'growth') {
+            var g = pt.latest_growth_pct || 0;
+            var c = g >= 0 ? '#1f9d66' : '#b33951';
+            return { radius: Math.max(8, Math.min(26, 10 + Math.abs(g) / 4)), color: c, fillColor: c };
+        }
+        if (theme === 'decline') {
+            var dc = pt.decline_count || 0;
+            var cd = dc > 0 ? '#b33951' : '#b8c0cc';
+            return { radius: Math.max(8, Math.min(24, 8 + dc * 3)), color: cd, fillColor: cd };
+        }
+        if (theme === 'peak') {
+            var pp = pt.peak_population || pt.population || 0;
+            return { radius: Math.max(8, Math.min(28, 8 + pp / 500000)), color: '#264653', fillColor: '#264653' };
+        }
+        if (theme === 'annotations') {
+            var ac = pt.annotation_count || 0;
+            var ca = ac > 0 ? '#ef6c3d' : '#b8c0cc';
+            return { radius: Math.max(8, Math.min(24, 8 + ac * 2)), color: ca, fillColor: ca };
+        }
+        return { radius: pt.radius || 10, color: pt.city_color || '#2f6fed', fillColor: pt.city_color || '#2f6fed' };
     }
 
-    const rawPayload = element.dataset.map;
-    if (!rawPayload) {
-        return;
-    }
+    /* ── popup HTML ──────────────────────────────────────────── */
 
-    const points = JSON.parse(rawPayload);
-    const countrySelect = document.getElementById('map-country-filter');
-    const regionSelect = document.getElementById('map-region-filter');
-    const themeSelect = document.getElementById('map-theme-filter');
-    const populationFilter = document.getElementById('map-population-filter');
-    const populationValue = document.getElementById('map-population-value');
-    const searchFilter = document.getElementById('map-search-filter');
-    const summary = document.getElementById('map-visible-summary');
-    const resetButton = document.getElementById('map-reset-filters');
-    const map = L.map(element, {
-        scrollWheelZoom: true,
-        minZoom: 3
-    });
+    function popupHtml(pt, theme) {
+        var growth = (pt.latest_growth_pct == null)
+            ? 'n/a'
+            : pt.latest_growth_pct + '% (' + pt.latest_growth_decade + ')';
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    const markerLayer = L.layerGroup().addTo(map);
-    const allCountries = [...new Set(points.map((point) => point.country))].sort();
-    const allRegions = [...new Set(points.map((point) => point.region))].sort();
-
-    allCountries.forEach((country) => {
-        const option = document.createElement('option');
-        option.value = country;
-        option.textContent = country;
-        countrySelect.appendChild(option);
-    });
-
-    allRegions.forEach((region) => {
-        const option = document.createElement('option');
-        option.value = region;
-        option.textContent = region;
-        regionSelect.appendChild(option);
-    });
-
-    function renderMarkers() {
-        const selectedCountry = countrySelect.value;
-        const selectedRegion = regionSelect.value;
-        const selectedTheme = themeSelect.value || 'population';
-        const minPopulation = Number(populationFilter.value || 0);
-        const searchTerm = (searchFilter.value || '').trim().toLowerCase();
-
-        populationValue.textContent = formatNumber(minPopulation);
-        markerLayer.clearLayers();
-
-        const visiblePoints = points.filter((point) => {
-            if (selectedCountry && point.country !== selectedCountry) {
-                return false;
+        var annotations = pt.annotations || [];
+        var annotBlock = '';
+        if (theme === 'annotations') {
+            if (annotations.length) {
+                annotBlock = '<div class="map-popup-annotations">' +
+                    annotations.map(function (a) {
+                        return '<button type="button" class="map-popup-annotation" data-slug="' +
+                            pt.city_slug + '" data-year="' + a.year + '">' +
+                            '<span style="background:' + a.color + '"></span>' +
+                            a.year + ' &middot; ' + a.label + '</button>';
+                    }).join('') +
+                    '</div>';
+            } else {
+                annotBlock = '<p>Aucune annotation.</p>';
             }
-            if (selectedRegion && point.region !== selectedRegion) {
-                return false;
-            }
-            if (point.population < minPopulation) {
-                return false;
-            }
-            if (searchTerm && !point.city_name.toLowerCase().includes(searchTerm)) {
-                return false;
-            }
+            annotBlock = '<div class="map-popup-layer"><strong>Annotations</strong>' + annotBlock + '</div>';
+        }
+
+        return '<div class="map-popup">' +
+            '<h3>' + pt.city_name + '</h3>' +
+            '<p>' + pt.country + ' &middot; ' + pt.region + '</p>' +
+            '<p>Population: ' + fmt(pt.population) + ' en ' + pt.year + '</p>' +
+            '<p>Pic: ' + (pt.peak_population ? fmt(pt.peak_population) + ' en ' + pt.peak_year : 'n/a') + '</p>' +
+            '<p>Croissance: ' + growth + '</p>' +
+            annotBlock +
+            '<a href="' + cityUrl(pt.city_slug) + '">Ouvrir la fiche</a>' +
+            '</div>';
+    }
+
+    /* ── filter logic ────────────────────────────────────────── */
+
+    function applyFilters(points, ctrls) {
+        var country = ctrls.country.value;
+        var region = ctrls.region.value;
+        var minPop = Number(ctrls.popRange.value) || 0;
+        var search = (ctrls.search.value || '').trim().toLowerCase();
+        ctrls.popLabel.textContent = fmt(minPop);
+
+        return points.filter(function (p) {
+            if (country && p.country !== country) return false;
+            if (region && p.region !== region) return false;
+            if (p.population < minPop) return false;
+            if (search && p.city_name.toLowerCase().indexOf(search) === -1) return false;
             return true;
         });
-
-        const bounds = [];
-        visiblePoints.forEach((point) => {
-            const style = markerStyle(point, selectedTheme);
-            const marker = L.circleMarker([point.lat, point.lng], {
-                radius: style.radius,
-                color: style.color,
-                fillColor: style.fillColor,
-                fillOpacity: 0.42,
-                weight: 2
-            });
-            marker.bindPopup(buildPopup(point, selectedTheme));
-            marker.addTo(markerLayer);
-            bounds.push([point.lat, point.lng]);
-        });
-
-        if (summary) {
-            summary.textContent = `${visiblePoints.length} villes visibles. Couche active: ${themeLabel(selectedTheme)}.`;
-        }
-
-        if (bounds.length > 0) {
-            map.fitBounds(bounds, { padding: [28, 28], maxZoom: 7 });
-        } else {
-            map.setView([45.5, -96], 4);
-        }
     }
 
-    [countrySelect, regionSelect, themeSelect, populationFilter, searchFilter].forEach((elementRef) => {
-        elementRef.addEventListener('input', renderMarkers);
-        elementRef.addEventListener('change', renderMarkers);
-    });
+    /* ── main init ───────────────────────────────────────────── */
 
-    resetButton.addEventListener('click', () => {
-        countrySelect.value = '';
-        regionSelect.value = '';
-        themeSelect.value = 'population';
-        populationFilter.value = '0';
-        searchFilter.value = '';
-        renderMarkers();
-    });
+    function initMap() {
+        var container = document.getElementById('city-map');
+        if (!container) return;
 
-    renderMarkers();
-
-    map.on('popupopen', (event) => {
-        const popupElement = event.popup.getElement();
-        if (!popupElement) {
+        /* Read points from the global set by the template */
+        var points = window.__mapPoints;
+        if (!points || !points.length) {
+            container.textContent = 'Aucune donnée de carte disponible.';
             return;
         }
-        popupElement.querySelectorAll('.map-popup-annotation').forEach((button) => {
-            button.addEventListener('click', () => {
-                const citySlug = button.dataset.citySlug;
-                const annotationYear = button.dataset.annotationYear;
-                if (citySlug && annotationYear) {
-                    window.location.href = buildCityDetailUrl(citySlug, annotationYear);
-                }
+
+        /* Check Leaflet */
+        if (typeof L === 'undefined') {
+            container.textContent = 'Leaflet non chargé — vérifiez votre connexion.';
+            return;
+        }
+
+        /* Grab controls */
+        var ctrls = {
+            theme: document.getElementById('map-theme-filter'),
+            country: document.getElementById('map-country-filter'),
+            region: document.getElementById('map-region-filter'),
+            popRange: document.getElementById('map-population-filter'),
+            popLabel: document.getElementById('map-population-value'),
+            search: document.getElementById('map-search-filter'),
+            summary: document.getElementById('map-visible-summary'),
+            status: document.getElementById('map-provider-status'),
+            reset: document.getElementById('map-reset-filters')
+        };
+
+        /* Create the Leaflet map */
+        var map = L.map(container, {
+            scrollWheelZoom: true,
+            zoomControl: true,
+            minZoom: 3,
+            maxZoom: 18
+        }).setView([45.5, -96], 4);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            subdomains: 'abcd',
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        }).addTo(map);
+
+        if (ctrls.status) ctrls.status.textContent = 'Fond de carte: CARTO Voyager';
+
+        var markerLayer = L.layerGroup().addTo(map);
+
+        /* Populate filter dropdowns */
+        var countries = [];
+        var regions = [];
+        var seen = {};
+        points.forEach(function (p) {
+            if (!seen['c:' + p.country]) { seen['c:' + p.country] = 1; countries.push(p.country); }
+            if (!seen['r:' + p.region]) { seen['r:' + p.region] = 1; regions.push(p.region); }
+        });
+        countries.sort().forEach(function (v) {
+            var o = document.createElement('option'); o.value = v; o.textContent = v;
+            ctrls.country.appendChild(o);
+        });
+        regions.sort().forEach(function (v) {
+            var o = document.createElement('option'); o.value = v; o.textContent = v;
+            ctrls.region.appendChild(o);
+        });
+
+        /* ── render markers ──────────────────────────────────── */
+
+        function render() {
+            var theme = ctrls.theme.value || 'population';
+            markerLayer.clearLayers();
+            var visible = applyFilters(points, ctrls);
+            var coords = [];
+
+            visible.forEach(function (pt) {
+                var s = markerStyle(pt, theme);
+                var m = L.circleMarker([pt.lat, pt.lng], {
+                    radius: s.radius,
+                    color: s.color,
+                    fillColor: s.fillColor,
+                    fillOpacity: 0.42,
+                    weight: 2
+                });
+                m.bindPopup(function () { return popupHtml(pt, theme); });
+                m.addTo(markerLayer);
+                coords.push([pt.lat, pt.lng]);
+            });
+
+            if (ctrls.summary) {
+                ctrls.summary.textContent = visible.length + ' villes visibles. Couche active\u00a0: ' + (THEME_LABELS[theme] || theme) + '.';
+            }
+
+            if (coords.length) {
+                map.fitBounds(coords, { padding: [28, 28], maxZoom: 7 });
+            } else {
+                map.setView([45.5, -96], 4);
+            }
+        }
+
+        /* ── event wiring ────────────────────────────────────── */
+
+        [ctrls.theme, ctrls.country, ctrls.region, ctrls.popRange, ctrls.search].forEach(function (el) {
+            if (el) {
+                el.addEventListener('input', render);
+                el.addEventListener('change', render);
+            }
+        });
+
+        if (ctrls.reset) {
+            ctrls.reset.addEventListener('click', function () {
+                ctrls.country.value = '';
+                ctrls.region.value = '';
+                ctrls.theme.value = 'population';
+                ctrls.popRange.value = '0';
+                ctrls.search.value = '';
+                render();
+            });
+        }
+
+        map.on('popupopen', function (e) {
+            var el = e.popup.getElement();
+            if (!el) return;
+            el.querySelectorAll('.map-popup-annotation').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var slug = btn.getAttribute('data-slug');
+                    var year = btn.getAttribute('data-year');
+                    if (slug && year) window.location.href = cityUrl(slug, year);
+                });
             });
         });
-    });
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-    const element = document.getElementById('city-map');
-    if (element) {
-        mountMap(element);
+        /* ── first render ────────────────────────────────────── */
+
+        render();
+
+        /* Ensure Leaflet knows the container size */
+        map.invalidateSize();
+        setTimeout(function () { map.invalidateSize(); }, 100);
+        setTimeout(function () { map.invalidateSize(); }, 500);
+        setTimeout(function () { map.invalidateSize(); }, 1500);
+        window.addEventListener('resize', function () { map.invalidateSize(); });
+        window.addEventListener('load', function () { map.invalidateSize(); });
     }
-});
+
+    /* ── boot ────────────────────────────────────────────────── */
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMap);
+    } else {
+        initMap();
+    }
+})();

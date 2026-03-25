@@ -12,75 +12,94 @@
             <span>{{ cities|length }} villes</span>
         </div>
         <div class="view-switcher" role="group" aria-label="Mode d'affichage">
-            <a class="secondary-button inline-button {% if view_mode == 'grid' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='grid') }}">Vue blocs</a>
-            <a class="secondary-button inline-button {% if view_mode == 'list' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='list') }}">Vue liste</a>
+            <a class="secondary-button inline-button view-mode-button view-mode-button-large {% if view_mode == 'large' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='large') }}" aria-label="Vue gros bloc" title="Vue gros bloc">
+                <span class="view-mode-icon view-mode-large" aria-hidden="true"></span>
+                <span class="sr-only">Vue gros bloc</span>
+            </a>
+            <a class="secondary-button inline-button view-mode-button view-mode-button-medium {% if view_mode == 'medium' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='medium') }}" aria-label="Vue moyen bloc" title="Vue moyen bloc">
+                <span class="view-mode-icon view-mode-medium" aria-hidden="true"></span>
+                <span class="sr-only">Vue moyen bloc</span>
+            </a>
+            <a class="secondary-button inline-button view-mode-button view-mode-button-small {% if view_mode == 'small' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='small') }}" aria-label="Vue petit bloc" title="Vue petit bloc">
+                <span class="view-mode-icon view-mode-small" aria-hidden="true"></span>
+                <span class="sr-only">Vue petit bloc</span>
+            </a>
+            <a class="secondary-button inline-button view-mode-button view-mode-button-compact {% if view_mode == 'compact' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='compact') }}" aria-label="Vue compacte" title="Vue compacte">
+                <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
+                <span class="sr-only">Vue compacte</span>
+            </a>
         </div>
     </div>
 
-    {% if view_mode == 'list' %}
-    <div class="table-wrapper city-list-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>Ville</th>
-                    <th>Pays / région</th>
-                    <th>Population récente</th>
-                    <th>Année</th>
-                    <th>Pic historique</th>
-                    <th>Photo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for city in cities %}
-                <tr>
-                    <td>
-                        <a class="city-list-link" href="{{ url_for('web.city_detail', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">
-                            <span class="city-dot" style="background: {{ city.city_color or '#2f6fed' }}"></span>
-                            <strong>{{ city.city_name }}</strong>
-                        </a>
-                    </td>
-                    <td>{{ city.country }} · {{ city.region }}</td>
-                    <td>{{ '{:,}'.format(city.population).replace(',', ' ') }}</td>
-                    <td>{{ city.year }}</td>
-                    <td>{{ '{:,}'.format(city.peak_population).replace(',', ' ') }} en {{ city.peak_year }}</td>
-                    <td>{% if city.has_photo %}Locale{% else %}Fallback{% endif %}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <div class="city-grid city-grid-photo">
+    <div class="city-grid city-grid-photo city-grid-{{ view_mode }}">
         {% for city in cities %}
-        <a class="city-card city-card-photo" href="{{ url_for('web.city_detail', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">
+        {% set trend_state = 'up' if city.trend_label == 'En croissance' else 'down' if city.trend_label == 'En décroissance' else 'stable' %}
+        <a class="city-card city-card-photo city-card-{{ view_mode }} city-card-trend-{{ trend_state }}" href="{{ url_for('web.city_detail', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">
             <div class="city-card-media">
                 <img src="{{ url_for('static', filename=city.photo_path) }}" alt="Vue de {{ city.city_name }}" loading="lazy">
                 <div class="city-card-overlay"></div>
                 <div class="city-card-heading">
                     <span class="city-dot" style="background: {{ city.city_color or '#2f6fed' }}"></span>
-                    <div>
+                    <div class="city-card-heading-copy">
+                        <p class="city-card-kicker">{{ city.country }}</p>
+                        {% if view_mode == 'large' %}
+                        <p class="city-card-subtitle">
+                            <span class="city-card-trend-arrow city-card-trend-arrow-{{ trend_state }}">{{ '▲' if trend_state == 'up' else '▼' if trend_state == 'down' else '•' }}</span>
+                            {{ city.trend_label }}{% if city.foundation_year %} · {{ city.foundation_year }}{% endif %}
+                        </p>
+                        {% endif %}
                         <strong>{{ city.city_name }}</strong>
-                        <p>{{ city.country }} · {{ city.region }}</p>
+                        <p>{{ city.region }}</p>
                     </div>
                 </div>
             </div>
-            <dl>
-                <div>
-                    <dt>Population récente</dt>
-                    <dd>{{ '{:,}'.format(city.population).replace(',', ' ') }}</dd>
+            <div class="city-card-body">
+                <div class="city-card-badges">
+                    <span class="city-card-chip">{{ city.country }}</span>
+                    <span class="city-card-chip city-card-chip-trend city-card-chip-trend-{{ 'up' if city.trend_label == 'En remontée' else 'down' if city.trend_label == 'En déclin' else 'stable' }}">{{ city.trend_label }}</span>
+                    <span class="city-card-chip city-card-chip-muted">{{ 'Photo locale' if city.has_photo else 'Photo fallback' }}</span>
                 </div>
-                <div>
-                    <dt>Année</dt>
-                    <dd>{{ city.year }}</dd>
-                </div>
-                <div>
-                    <dt>Pic</dt>
-                    <dd>{{ '{:,}'.format(city.peak_population).replace(',', ' ') }} en {{ city.peak_year }}</dd>
-                </div>
-            </dl>
+                <ul class="city-card-facts">
+                    <li>
+                        <span>Population récente</span>
+                        <strong>{{ '{:,}'.format(city.population).replace(',', ' ') }} en {{ city.year }}</strong>
+                    </li>
+                    {% if city.foundation_year %}
+                    <li>
+                        <span>Fondation</span>
+                        <strong>{{ city.foundation_year }}</strong>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <span>Première population</span>
+                        <strong>
+                            {% if city.first_population %}
+                                {{ '{:,}'.format(city.first_population).replace(',', ' ') }} en {{ city.first_population_year }}
+                            {% else %}
+                                n.d.
+                            {% endif %}
+                        </strong>
+                    </li>
+                    <li>
+                        <span>Tendance</span>
+                        <strong>
+                            {% if city.trend_label == 'En croissance' %}
+                                <span style="color:#22c55e;">▲</span> {{ city.trend_label }}
+                            {% elif city.trend_label == 'En décroissance' %}
+                                <span style="color:#ef4444;">▼</span> {{ city.trend_label }}
+                            {% else %}
+                                {{ city.trend_label }}
+                            {% endif %}
+                        </strong>
+                    </li>
+                    <li>
+                        <span>Pic historique</span>
+                        <strong>{{ '{:,}'.format(city.peak_population).replace(',', ' ') }} en {{ city.peak_year }}</strong>
+                    </li>
+                </ul>
+            </div>
         </a>
         {% endfor %}
     </div>
-    {% endif %}
 </section>
 {% endblock %}

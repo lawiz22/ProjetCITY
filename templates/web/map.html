@@ -1,7 +1,7 @@
 {% extends 'web/base.html' %}
 
 {% block head_extra %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -27,7 +27,7 @@
     <article class="panel">
         <div class="panel-head">
             <h2>Carte analytique</h2>
-            <span>Bulles proportionnelles à la population récente</span>
+            <span>Carte interactive — zoom, clic et filtres</span>
         </div>
         <div class="map-filter-bar">
             <label>
@@ -63,15 +63,16 @@
             </label>
             <button type="button" id="map-reset-filters" class="secondary-button">Réinitialiser</button>
         </div>
-        <div id="city-map" class="map-canvas" data-map='{{ map_payload.points | tojson }}'></div>
+        <div id="city-map" class="map-canvas" style="width:100%;height:560px;min-height:420px;"></div>
     </article>
 
     <article class="panel">
         <div class="panel-head">
             <h2>Lecture de la carte</h2>
         </div>
-        <p>Chaque ville est placée par ses coordonnées approximatives. La taille de la bulle suit la population la plus récente disponible. Le clic ouvre un résumé analytique et un lien direct vers la fiche ville.</p>
+        <p>Chaque ville est placée par ses coordonnées géographiques réelles. La taille de la bulle suit la population la plus récente disponible. Le clic ouvre un résumé analytique et un lien direct vers la fiche ville. Zoom avec la molette ou le pinch.</p>
         <p id="map-visible-summary" class="helper-text">{{ map_payload.mapped_count }} villes visibles.</p>
+        <p id="map-provider-status" class="helper-text"></p>
         <ul class="tag-list">
             <li>Population récente</li>
             <li>Pic historique</li>
@@ -119,6 +120,7 @@
 {% endblock %}
 
 {% block scripts_extra %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script defer src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script>window.__mapPoints = {{ map_payload.points | tojson }};</script>
+<script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
 {% endblock %}

@@ -382,5 +382,17 @@
     "source_page": "https://en.wikipedia.org/wiki/Yellowknife",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Northwest_Territories_Legislative_Building.jpg/330px-Northwest_Territories_Legislative_Building.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "blainville-quebec": {
+    "filename": "blainville-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Blainville%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Blainville_QC_1.jpg/330px-Blainville_QC_1.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "victoriaville-quebec": {
+    "filename": "victoriaville-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Victoriaville",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Hotel_de_ville_-_Victoriaville.JPG/330px-Hotel_de_ville_-_Victoriaville.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

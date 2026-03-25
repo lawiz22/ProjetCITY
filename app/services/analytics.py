@@ -8,6 +8,7 @@ import re
 import sqlite3
 from collections import defaultdict
 from datetime import datetime, UTC
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
@@ -42,7 +43,79 @@ class SqlExecutionError(RuntimeError):
     pass
 
 
+@lru_cache(maxsize=256)
+def _get_city_origin_metadata(city_slug: str) -> dict[str, int | None]:
+    details_path = Path(current_app.root_path).parent / "data" / "city_details" / f"{city_slug}.txt"
+    if not details_path.exists():
+        return {"foundation_year": None}
+
+    source_text = details_path.read_text(encoding="utf-8")
+    patterns = (
+        r"(?:fond(?:ation|e|ée|é)|founded|established|incorporated|cr[eé]ation|na[iî]t).{0,80}?(1[5-9]\d{2}|20\d{2})",
+        r"(1[5-9]\d{2}|20\d{2}).{0,80}?(?:fond(?:ation|e|ée|é)|founded|established|incorporated|cr[eé]ation|na[iî]t)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, source_text, flags=re.IGNORECASE | re.DOTALL)
+        if match:
+            year = next((group for group in match.groups() if group), None)
+            return {"foundation_year": int(year) if year else None}
+    return {"foundation_year": None}
+
+
 class AnalyticsService:
+    def _normalize_narrative_text(self, value: str | None) -> str:
+        if not value:
+            return ""
+        return re.sub(r"[\W_]+", "", value.casefold())
+
+    def _extract_leading_emoji(self, value: str) -> tuple[str, str]:
+        stripped = (value or "").strip()
+        if not stripped:
+            return "", ""
+        match = re.match(r"^([^\w\s]+)\s*(.*)$", stripped, flags=re.UNICODE)
+        if match:
+            return match.group(1).strip(), match.group(2).strip()
+        return "", stripped
+
+    def _build_period_bullets(self, items: list[str], summary_text: str) -> list[dict[str, str]]:
+        source_items = items or []
+        if not source_items and summary_text:
+            source_items = [part.strip() for part in re.split(r"\s+[—–-]\s+", summary_text) if part.strip()]
+
+        bullets: list[dict[str, str]] = []
+        seen: set[str] = set()
+        for item in source_items:
+            icon, text = self._extract_leading_emoji(item)
+            normalized = self._normalize_narrative_text(text)
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            bullets.append({
+                "icon": icon or "•",
+                "text": text,
+            })
+        return bullets
+
+    def _dedupe_period_items(self, summary_text: str, items: list[str]) -> list[str]:
+        normalized_summary = self._normalize_narrative_text(summary_text)
+        unique_items: list[str] = []
+        seen: set[str] = set()
+        duplicated_count = 0
+
+        for item in items:
+            normalized_item = self._normalize_narrative_text(item)
+            if not normalized_item or normalized_item in seen:
+                continue
+            seen.add(normalized_item)
+            if normalized_item in normalized_summary:
+                duplicated_count += 1
+                continue
+            unique_items.append(item)
+
+        if items and duplicated_count / max(len(items), 1) >= 0.6:
+            return []
+        return unique_items
+
     def normalize_filters(self, args: Any) -> dict[str, str | None]:
         country = self._clean_value(args.get("country"))
         region = self._clean_value(args.get("region"))
@@ -170,6 +243,43 @@ class AnalyticsService:
             LIMIT 8
             """,
             self._decline_filter_params(filters),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_decline_leader_cities(self, filters: dict[str, str | None]) -> list[dict[str, Any]]:
+        connection = get_db()
+        filtered_analysis_sql = self._filtered_analysis_cte(filters)
+        rows = connection.execute(
+            f"""
+            WITH {filtered_analysis_sql},
+            latest_year AS (
+                SELECT city_slug, MAX(year) AS year
+                FROM filtered_analysis
+                GROUP BY city_slug
+            )
+            SELECT
+                v.city_name,
+                v.city_slug,
+                v.country,
+                city.region,
+                peak.peak_year,
+                peak.peak_population,
+                v.population AS current_population,
+                v.year AS current_year,
+                ROUND(((v.population - peak.peak_population) * 100.0) / peak.peak_population, 1) AS decline_pct
+            FROM filtered_analysis v
+            INNER JOIN latest_year ly
+                ON ly.city_slug = v.city_slug
+               AND ly.year = v.year
+            INNER JOIN dim_city city
+                ON city.city_id = v.city_id
+            INNER JOIN vw_city_peak_population peak
+                ON peak.city_id = v.city_id
+            WHERE v.population < peak.peak_population
+            ORDER BY decline_pct ASC
+            LIMIT 8
+            """,
+            self._analysis_filter_params(filters),
         ).fetchall()
         return [dict(row) for row in rows]
 
@@ -331,8 +441,28 @@ class AnalyticsService:
                 SELECT city_slug, MAX(year) AS year
                 FROM filtered_analysis
                 GROUP BY city_slug
+            ),
+            first_population AS (
+                SELECT city_id, year AS first_population_year, population AS first_population
+                FROM (
+                    SELECT city_id, year, population,
+                           ROW_NUMBER() OVER (PARTITION BY city_id ORDER BY year ASC) AS rn
+                    FROM fact_city_population
+                ) ranked
+                WHERE rn = 1
+            ),
+            decline_rollup AS (
+                SELECT city_id, COUNT(*) AS decline_count, MAX(current_year) AS latest_decline_year
+                FROM vw_city_decline_periods
+                GROUP BY city_id
+            ),
+            rebound_rollup AS (
+                SELECT city_id, COUNT(*) AS rebound_count, MAX(current_year) AS latest_rebound_year
+                FROM vw_city_rebound_periods
+                GROUP BY city_id
             )
             SELECT
+                v.city_id,
                 v.city_name,
                 v.city_slug,
                 v.country,
@@ -341,13 +471,25 @@ class AnalyticsService:
                 v.population,
                 v.year,
                 peak.peak_population,
-                peak.peak_year
+                peak.peak_year,
+                first_population.first_population_year,
+                first_population.first_population,
+                decline.decline_count,
+                decline.latest_decline_year,
+                rebound.rebound_count,
+                rebound.latest_rebound_year
             FROM filtered_analysis v
             INNER JOIN latest_year ly
                 ON ly.city_slug = v.city_slug
                AND ly.year = v.year
             LEFT JOIN vw_city_peak_population peak
                 ON peak.city_id = v.city_id
+            LEFT JOIN first_population
+                ON first_population.city_id = v.city_id
+            LEFT JOIN decline_rollup decline
+                ON decline.city_id = v.city_id
+            LEFT JOIN rebound_rollup rebound
+                ON rebound.city_id = v.city_id
             ORDER BY v.city_name
             """,
             self._analysis_filter_params(filters),
@@ -355,6 +497,20 @@ class AnalyticsService:
         result: list[dict[str, Any]] = []
         for row in rows:
             record = dict(row)
+            foundation = _get_city_origin_metadata(record["city_slug"])
+            record.update(foundation)
+            latest_decline_year = record.get("latest_decline_year")
+            latest_rebound_year = record.get("latest_rebound_year")
+            decline_count = record.get("decline_count") or 0
+            rebound_count = record.get("rebound_count") or 0
+            if latest_rebound_year and (not latest_decline_year or latest_rebound_year >= latest_decline_year):
+                record["trend_label"] = "En croissance"
+            elif decline_count:
+                record["trend_label"] = "En décroissance"
+            elif rebound_count:
+                record["trend_label"] = "En croissance"
+            else:
+                record["trend_label"] = "Stable"
             record.update(get_city_photo(record["city_slug"]))
             result.append(record)
         return result
@@ -370,8 +526,28 @@ class AnalyticsService:
                 FROM filtered_analysis
                 WHERE city_slug = ?
                 GROUP BY city_slug
+            ),
+            first_population AS (
+                SELECT city_id, year AS first_population_year, population AS first_population
+                FROM (
+                    SELECT city_id, year, population,
+                           ROW_NUMBER() OVER (PARTITION BY city_id ORDER BY year ASC) AS rn
+                    FROM fact_city_population
+                ) ranked
+                WHERE rn = 1
+            ),
+            decline_rollup AS (
+                SELECT city_id, COUNT(*) AS decline_count, MAX(current_year) AS latest_decline_year
+                FROM vw_city_decline_periods
+                GROUP BY city_id
+            ),
+            rebound_rollup AS (
+                SELECT city_id, COUNT(*) AS rebound_count, MAX(current_year) AS latest_rebound_year
+                FROM vw_city_rebound_periods
+                GROUP BY city_id
             )
             SELECT
+                v.city_id,
                 v.city_name,
                 v.city_slug,
                 v.country,
@@ -380,19 +556,48 @@ class AnalyticsService:
                 v.population AS latest_population,
                 v.year AS latest_year,
                 peak.peak_population,
-                peak.peak_year
+                peak.peak_year,
+                first_population.first_population_year,
+                first_population.first_population,
+                decline.decline_count,
+                decline.latest_decline_year,
+                rebound.rebound_count,
+                rebound.latest_rebound_year
             FROM filtered_analysis v
             INNER JOIN latest_year ly
                 ON ly.city_slug = v.city_slug
                AND ly.year = v.year
             LEFT JOIN vw_city_peak_population peak
                 ON peak.city_id = v.city_id
+            LEFT JOIN first_population
+                ON first_population.city_id = v.city_id
+            LEFT JOIN decline_rollup decline
+                ON decline.city_id = v.city_id
+            LEFT JOIN rebound_rollup rebound
+                ON rebound.city_id = v.city_id
             """,
             self._analysis_filter_params(detail_filters) + [city_slug],
         ).fetchone()
         if row is None:
             return None
         record = dict(row)
+        record.update(_get_city_origin_metadata(record["city_slug"]))
+        latest_decline_year = record.get("latest_decline_year")
+        latest_rebound_year = record.get("latest_rebound_year")
+        decline_count = record.get("decline_count") or 0
+        rebound_count = record.get("rebound_count") or 0
+        if latest_rebound_year and (not latest_decline_year or latest_rebound_year >= latest_decline_year):
+            record["trend_label"] = "En croissance"
+            record["trend_symbol"] = "▲"
+        elif decline_count:
+            record["trend_label"] = "En décroissance"
+            record["trend_symbol"] = "▼"
+        elif rebound_count:
+            record["trend_label"] = "En croissance"
+            record["trend_symbol"] = "▲"
+        else:
+            record["trend_label"] = "Stable"
+            record["trend_symbol"] = "•"
         record.update(get_city_photo(record["city_slug"]))
         return record
 
@@ -430,10 +635,51 @@ class AnalyticsService:
         for item in items:
             item_map[item["period_detail_id"]].append(item["item_text"])
 
+        period_annotations = connection.execute(
+            """
+            SELECT
+                pd.period_detail_id,
+                f.year,
+                da.annotation_label,
+                da.annotation_color,
+                da.annotation_type
+            FROM dim_city_period_detail pd
+            INNER JOIN dim_city city
+                ON city.city_id = pd.city_id
+            INNER JOIN fact_city_population f
+                ON f.city_id = pd.city_id
+               AND f.annotation_id IS NOT NULL
+            INNER JOIN dim_annotation da
+                ON da.annotation_id = f.annotation_id
+            LEFT JOIN vw_city_period_detail_with_annotations pop
+                ON pop.period_detail_id = pd.period_detail_id
+            WHERE city.city_slug = ?
+              AND pop.annotation_window_start IS NOT NULL
+              AND pop.annotation_window_end IS NOT NULL
+              AND f.year BETWEEN pop.annotation_window_start AND pop.annotation_window_end
+            ORDER BY pd.period_order, f.year
+            """,
+            (city_slug,),
+        ).fetchall()
+        annotation_map: dict[int, list[dict[str, Any]]] = defaultdict(list)
+        for annotation in period_annotations:
+            annotation_map[annotation["period_detail_id"]].append(
+                {
+                    "year": annotation["year"],
+                    "label": annotation["annotation_label"],
+                    "color": annotation["annotation_color"],
+                    "type": annotation["annotation_type"],
+                }
+            )
+
         result: list[dict[str, Any]] = []
         for row in rows:
             record = dict(row)
             record["items"] = item_map.get(record["period_detail_id"], [])
+            record["display_items"] = self._dedupe_period_items(record["summary_text"], record["items"])
+            record["display_bullets"] = self._build_period_bullets(record["items"], record["summary_text"])
+            record["condensed_items_count"] = max(0, len(record["items"]) - len(record["display_items"]))
+            record["linked_annotations"] = annotation_map.get(record["period_detail_id"], [])
             result.append(record)
         return result
 

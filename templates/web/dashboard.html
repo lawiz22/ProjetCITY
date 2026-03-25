@@ -62,7 +62,7 @@
     </article>
 </section>
 
-<section class="panel-grid panel-grid-3">
+<section class="panel-grid panel-grid-4">
     <article class="panel">
         <div class="panel-head">
             <h2>Top croissances</h2>
@@ -71,10 +71,27 @@
             {% for row in growth_leaders %}
             <div class="data-row">
                 <div>
-                    <strong>{{ row.city_name }}</strong>
+                    <strong><span style="color:#22c55e;">▲</span> {{ row.city_name }}</strong>
                     <span>{{ row.country }} · {{ row.region }} · {{ row.decade }}</span>
                 </div>
-                <strong>{{ row.growth_pct }}%</strong>
+                <strong style="color:#22c55e;">{{ row.growth_pct }}%</strong>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Top décroissances</h2>
+        </div>
+        <div class="data-list">
+            {% for row in decline_leaders %}
+            <div class="data-row">
+                <div>
+                    <strong><span style="color:#ef4444;">▼</span> {{ row.city_name }}</strong>
+                    <span>{{ row.country }} · {{ row.region }} · En déclin depuis {{ row.peak_year }}</span>
+                </div>
+                <strong style="color:#ef4444;">{{ row.decline_pct }}%</strong>
             </div>
             {% endfor %}
         </div>

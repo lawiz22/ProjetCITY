@@ -2,9 +2,18 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from flask import Blueprint, Response, current_app, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, current_app, flash, jsonify, redirect, render_template, request, url_for
 
 from .services.analytics import AnalyticsService, SqlExecutionError
+from .services.city_import import (
+    fetch_and_save_city_photo,
+    import_city_periods,
+    import_city_stats,
+    parse_period_details_text,
+    parse_stats_text,
+    save_period_details_file,
+    save_uploaded_photo,
+)
 from .services.pdf_reports import build_city_pdf, build_dashboard_pdf
 
 web = Blueprint("web", __name__)
@@ -28,6 +37,7 @@ def dashboard() -> str:
         filters=filters,
         metrics=service.get_dashboard_metrics(filters),
         growth_leaders=service.get_growth_leaders(filters),
+        decline_leaders=service.get_decline_leader_cities(filters),
         peak_cities=service.get_peak_cities(filters),
         decline_cities=service.get_decline_cities(filters),
         chart_payload=service.get_dashboard_chart_payload(filters),
@@ -54,9 +64,9 @@ def dashboard_pdf() -> Response:
 def city_directory() -> str:
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
-    view_mode = request.args.get("view", "grid").strip().lower()
-    if view_mode not in {"grid", "list"}:
-        view_mode = "grid"
+    view_mode = request.args.get("view", "large").strip().lower()
+    if view_mode not in {"large", "medium", "small", "compact"}:
+        view_mode = "large"
     return render_template(
         "web/cities.html",
         page_title="City Directory",
@@ -206,3 +216,104 @@ def sql_lab_view_delete(view_id: str) -> Response:
     service.delete_sql_view(view_id)
     flash("Vue analytique supprimée.", "success")
     return redirect(url_for("web.sql_lab"))
+
+
+# ---------------------------------------------------------------------------
+# Add City
+# ---------------------------------------------------------------------------
+
+@web.route("/add-city")
+def add_city() -> str:
+    return render_template("web/add_city.html", page_title="Ajout de ville")
+
+
+@web.route("/add-city/import", methods=["POST"])
+def add_city_import() -> Response:
+    """Single button: import stats + periods + auto-fetch photo."""
+    stats_text = request.form.get("stats_text", "").strip()
+    periods_text = request.form.get("periods_text", "").strip()
+
+    if not stats_text:
+        flash("Le champ population est vide.", "error")
+        return redirect(url_for("web.add_city"))
+
+    # --- 1. Parse & import stats ---
+    try:
+        stats = parse_stats_text(stats_text)
+    except ValueError as exc:
+        flash(f"Erreur de parsing population: {exc}", "error")
+        return redirect(url_for("web.add_city"))
+
+    from .db import get_db
+    conn = get_db()
+    try:
+        city_id = import_city_stats(conn, stats)
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        flash(f"Erreur DB (population): {exc}", "error")
+        return redirect(url_for("web.add_city"))
+
+    messages = [
+        f"Population importée — {len(stats['years'])} années, "
+        f"{len(stats['annotations'])} annotations."
+    ]
+
+    # --- 2. Parse & import periods (if provided) ---
+    if periods_text:
+        sections = parse_period_details_text(periods_text)
+        if sections:
+            try:
+                count = import_city_periods(conn, city_id, stats["city_slug"], sections)
+                save_period_details_file(stats["city_slug"], periods_text)
+                conn.commit()
+                messages.append(f"{count} périodes détaillées importées.")
+            except Exception as exc:
+                conn.rollback()
+                messages.append(f"Erreur périodes: {exc}")
+        else:
+            messages.append("Aucune période détectée dans le texte.")
+
+    # --- 3. Auto-fetch photo ---
+    try:
+        photo_result = fetch_and_save_city_photo(
+            stats["city_slug"], stats["city_name"], stats["region"], stats["country"],
+        )
+        if photo_result["success"]:
+            messages.append(f"Photo importée: {photo_result['filename']}")
+        else:
+            messages.append(f"Photo: {photo_result['error']}")
+    except Exception as exc:
+        messages.append(f"Erreur photo: {exc}")
+
+    flash(f"{stats['city_name']} ({stats['city_slug']}) — " + " | ".join(messages), "success")
+    return redirect(url_for("web.city_detail", city_slug=stats["city_slug"]))
+
+
+@web.route("/cities/<city_slug>/photo", methods=["POST"])
+def city_photo_import(city_slug: str) -> Response:
+    """Fetch or upload a photo for an existing city."""
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_name, region, country FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not row:
+        flash("Ville introuvable.", "error")
+        return redirect(url_for("web.city_directory"))
+
+    city_name, region, country = row
+
+    # Check for uploaded file first
+    uploaded = request.files.get("photo_file")
+    if uploaded and uploaded.filename:
+        from .services.city_import import save_uploaded_photo
+        result = save_uploaded_photo(city_slug, uploaded)
+    else:
+        result = fetch_and_save_city_photo(city_slug, city_name, region, country)
+
+    if result["success"]:
+        flash(f"Photo importée: {result['filename']}", "success")
+    else:
+        flash(result["error"], "error")
+    return redirect(url_for("web.city_detail", city_slug=city_slug))

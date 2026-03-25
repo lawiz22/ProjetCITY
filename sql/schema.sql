@@ -298,57 +298,42 @@ LEFT JOIN annotation_rollup ar
     ON ar.period_detail_id = b.period_detail_id;
 
 CREATE VIEW vw_city_growth_by_decade AS
-WITH decade_base AS (
+WITH ordered_pop AS (
     SELECT
         dc.city_id,
         dc.city_name,
         dc.country,
+        dt.year,
         dt.decade,
-        MIN(dt.year) AS start_year,
-        MAX(dt.year) AS end_year
+        f.population,
+        LAG(dt.year) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS prev_year,
+        LAG(f.population) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS prev_population,
+        LAG(dt.decade) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS prev_decade
     FROM fact_city_population f
     INNER JOIN dim_city dc
         ON dc.city_id = f.city_id
     INNER JOIN dim_time dt
         ON dt.time_id = f.time_id
-    GROUP BY dc.city_id, dc.city_name, dc.country, dt.decade
-),
-decade_values AS (
-    SELECT
-        db.city_id,
-        db.city_name,
-        db.country,
-        db.decade,
-        db.start_year,
-        db.end_year,
-        fs.population AS start_population,
-        fe.population AS end_population
-    FROM decade_base db
-    INNER JOIN fact_city_population fs
-        ON fs.city_id = db.city_id
-       AND fs.year = db.start_year
-    INNER JOIN fact_city_population fe
-        ON fe.city_id = db.city_id
-       AND fe.year = db.end_year
 )
 SELECT
     city_id,
     city_name,
     country,
     decade,
-    start_year,
-    end_year,
-    start_population,
-    end_population,
-    end_population - start_population AS absolute_growth,
+    prev_year AS start_year,
+    year AS end_year,
+    prev_population AS start_population,
+    population AS end_population,
+    population - prev_population AS absolute_growth,
     ROUND(
         CASE
-            WHEN start_population = 0 THEN NULL
-            ELSE ((end_population - start_population) * 100.0) / start_population
+            WHEN prev_population IS NULL OR prev_population = 0 THEN NULL
+            ELSE ((population - prev_population) * 100.0) / prev_population
         END,
         2
     ) AS growth_pct
-FROM decade_values;
+FROM ordered_pop
+WHERE prev_year IS NOT NULL;
 
 CREATE VIEW vw_city_peak_population AS
 SELECT
