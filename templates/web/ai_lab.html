@@ -1,0 +1,328 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<!-- Header with logo -->
+<div class="ailab-header">
+    <img src="{{ url_for('static', filename='images/mammouth_logo.svg') }}" alt="Mammouth AI" class="ailab-logo">
+    <div>
+        <h2 class="ailab-title">AI Lab</h2>
+        <span class="ailab-subtitle">Génération automatique de villes via Mammouth AI</span>
+    </div>
+</div>
+
+<!-- Token bar -->
+<div class="token-bar">
+    <div class="token-item">
+        <span class="token-label">MAMMOUTH Token</span>
+        <span class="token-value" id="token-mammouth">{{ settings.tokens_used | default(0) }}</span>
+        <button type="button" class="token-reset" id="token-reset-mammouth" title="Réinitialiser">↺</button>
+    </div>
+</div>
+
+<!-- Top config bar -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>Configuration</h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-top-row">
+            <div class="ai-lab-field">
+                <label class="opt-label" for="ai-api-select">API</label>
+                <select id="ai-api-select" class="opt-input opt-input-model" style="max-width:220px;">
+                    <option value="mammouth" selected>🦣 Mammouth AI</option>
+                </select>
+            </div>
+            <div class="ai-lab-field ai-lab-model-field">
+                <label class="opt-label" for="ai-model-select">Modèle</label>
+                <select id="ai-model-select" class="opt-input opt-input-model">
+                    {% if models %}
+                        {% for m in models %}
+                        <option value="{{ m.id if m.id is defined else m }}" {% if (m.id if m.id is defined else m) == settings.model %}selected{% endif %}>{{ m.id if m.id is defined else m }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                    {% endif %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1.5;">
+                <label class="opt-label" for="ai-city-input">Ville à générer</label>
+                <input type="text" id="ai-city-input" class="opt-input" placeholder="ex: Burlington, Vermont" spellcheck="false">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== STEP 1 — Code Python ===================== -->
+<section class="panel ailab-step" id="step1-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">1</span>
+            Population &amp; annotations (Python)
+            <span class="ailab-check" id="step1-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai1-prompt">Prompt (modifiable)</label>
+            <textarea id="ai1-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_city }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="ai1-generate">🚀 Générer Step 1</button>
+        </div>
+        <div class="ai-lab-field" id="ai1-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="ai1-result" class="opt-input ai-lab-result" rows="20" readonly></textarea>
+            <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="ai1-copy" style="margin-top:.5rem;">📋 Copier</button>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== STEP 2 — Détails historiques ===================== -->
+<section class="panel ailab-step" id="step2-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">2</span>
+            Détails historiques par période
+            <span class="ailab-check" id="step2-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai2-prompt">Prompt (modifiable)</label>
+            <textarea id="ai2-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_details }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="ai2-generate">🚀 Générer Step 2</button>
+        </div>
+        <div class="ai-lab-field" id="ai2-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="ai2-result" class="opt-input ai-lab-result" rows="28" readonly></textarea>
+            <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="ai2-copy" style="margin-top:.5rem;">📋 Copier</button>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== STEP 3 — Fiche complète ===================== -->
+<section class="panel ailab-step" id="step3-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">3</span>
+            Fiche détaillée complète
+            <span class="ailab-check" id="step3-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai3-prompt">Prompt (modifiable)</label>
+            <textarea id="ai3-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_fiche }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="ai3-generate">🚀 Générer Step 3</button>
+        </div>
+        <div class="ai-lab-field" id="ai3-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="ai3-result" class="opt-input ai-lab-result" rows="35" readonly></textarea>
+            <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="ai3-copy" style="margin-top:.5rem;">📋 Copier</button>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Ajouter la ville ===================== -->
+<section class="panel" id="add-city-panel" style="display:none;">
+    <div class="panel-head">
+        <h2>✅ Ajouter la ville</h2>
+        <span>Les 3 étapes sont complètes — prêt à importer</span>
+    </div>
+    <div class="options-body">
+        <p id="add-city-info" style="font-weight:600;margin-bottom:1rem;"></p>
+
+        <!-- Existing city detection banner -->
+        <div id="existing-banner" style="display:none;margin-bottom:1rem;padding:1rem;border-radius:10px;border:2px solid var(--accent);background:var(--panel-strong);">
+            <strong>⚠️ Ville existante détectée : </strong><span id="existing-city-name"></span>
+            <div style="margin-top:.8rem;" class="skip-checkboxes">
+                <label><input type="checkbox" id="skip-pop"> Conserver la population existante</label>
+                <label><input type="checkbox" id="skip-periods"> Conserver les périodes existantes</label>
+                <label><input type="checkbox" id="skip-fiche"> Conserver la fiche complète existante</label>
+                <label><input type="checkbox" id="skip-photo"> Conserver la photo existante</label>
+            </div>
+        </div>
+
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="add-city-btn" style="font-size:1rem;padding:.7rem 2rem;">
+                🏙️ Ajouter la ville
+            </button>
+        </div>
+        <div class="opt-test-result" id="add-city-result" style="display:none;"></div>
+    </div>
+</section>
+
+<script>
+(function() {
+    /* ---- Shared refs ---- */
+    var cityInput   = document.getElementById('ai-city-input');
+    var modelSelect = document.getElementById('ai-model-select');
+    var tokenEl     = document.getElementById('token-mammouth');
+    var resetBtn    = document.getElementById('token-reset-mammouth');
+    var generateUrl = '{{ url_for("web.options_generate") }}';
+
+    /* Step completion state */
+    var stepDone = { 1: false, 2: false, 3: false };
+
+    /* ---- Token reset ---- */
+    resetBtn.addEventListener('click', function() {
+        if (!confirm('Réinitialiser le compteur MAMMOUTH Token à 0 ?')) return;
+        fetch('{{ url_for("web.options_reset_tokens") }}', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { if (d.success) tokenEl.textContent = '0'; });
+    });
+
+    /* ---- Check if all 3 steps done ---- */
+    function checkAllDone() {
+        if (stepDone[1] && stepDone[2] && stepDone[3]) {
+            var panel = document.getElementById('add-city-panel');
+            panel.style.display = '';
+            var city = cityInput.value.trim();
+            document.getElementById('add-city-info').textContent = 'Ville : ' + city;
+            /* Check if city exists */
+            var slug = city.normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            fetch('{{ url_for("web.add_city_check_slug") }}?slug=' + encodeURIComponent(slug))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.exists) {
+                        document.getElementById('existing-banner').style.display = '';
+                        document.getElementById('existing-city-name').textContent =
+                            data.city_name + ' (' + data.country + ')';
+                    } else {
+                        document.getElementById('existing-banner').style.display = 'none';
+                    }
+                });
+        }
+    }
+
+    /* ---- Generic step handler ---- */
+    function setupStep(num, promptId, generateBtnId, resultWrapId, resultId, copyBtnId, opts) {
+        var promptEl    = document.getElementById(promptId);
+        var genBtn      = document.getElementById(generateBtnId);
+        var resultWrap  = document.getElementById(resultWrapId);
+        var resultEl    = document.getElementById(resultId);
+        var copyBtn     = document.getElementById(copyBtnId);
+        var checkEl     = document.getElementById('step' + num + '-check');
+        var label       = opts.label || '🚀 Générer Step ' + num;
+        var maxTokens   = opts.maxTokens || 2000;
+
+        genBtn.addEventListener('click', function() {
+            var city = cityInput.value.trim();
+            if (!city) { alert('Entrez un nom de ville en haut.'); return; }
+
+            genBtn.disabled = true;
+            genBtn.textContent = '⏳ Génération en cours…';
+            resultWrap.style.display = '';
+            resultEl.value = 'Interrogation de ' + modelSelect.value + '…';
+
+            var fd = new FormData();
+            fd.append('city_input', city);
+            fd.append('model', modelSelect.value);
+            fd.append('prompt_text', promptEl.value);
+            fd.append('max_tokens', String(maxTokens));
+
+            fetch(generateUrl, { method: 'POST', body: fd })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    genBtn.disabled = false;
+                    genBtn.textContent = label;
+                    if (data.success) {
+                        var text = data.reply;
+                        if (opts.stripFences) {
+                            text = text.replace(/^```python\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+                        }
+                        resultEl.value = text;
+                        if (data.tokens_total !== undefined) {
+                            tokenEl.textContent = data.tokens_total;
+                        }
+                        /* Mark step done */
+                        stepDone[num] = true;
+                        checkEl.classList.add('visible');
+                        checkAllDone();
+                    } else {
+                        resultEl.value = '❌ ERREUR : ' + data.error;
+                    }
+                })
+                .catch(function(err) {
+                    genBtn.disabled = false;
+                    genBtn.textContent = label;
+                    resultEl.value = '❌ Erreur réseau : ' + err.message;
+                });
+        });
+
+        copyBtn.addEventListener('click', function() {
+            resultEl.select();
+            navigator.clipboard.writeText(resultEl.value).then(function() {
+                copyBtn.textContent = '✅ Copié!';
+                setTimeout(function() { copyBtn.textContent = '📋 Copier'; }, 2000);
+            });
+        });
+    }
+
+    /* Setup all 3 steps */
+    setupStep(1, 'ai1-prompt', 'ai1-generate', 'ai1-result-wrap', 'ai1-result', 'ai1-copy',
+        { label: '🚀 Générer Step 1', stripFences: true });
+
+    setupStep(2, 'ai2-prompt', 'ai2-generate', 'ai2-result-wrap', 'ai2-result', 'ai2-copy',
+        { label: '🚀 Générer Step 2' });
+
+    setupStep(3, 'ai3-prompt', 'ai3-generate', 'ai3-result-wrap', 'ai3-result', 'ai3-copy',
+        { label: '🚀 Générer Step 3', maxTokens: 4000 });
+
+    /* ---- Add city button ---- */
+    var addBtn = document.getElementById('add-city-btn');
+    var addResult = document.getElementById('add-city-result');
+
+    addBtn.addEventListener('click', function() {
+        var statsText   = document.getElementById('ai1-result').value.trim();
+        var periodsText = document.getElementById('ai2-result').value.trim();
+        var ficheText   = document.getElementById('ai3-result').value.trim();
+
+        if (!statsText) { alert('Le résultat Step 1 est vide.'); return; }
+
+        addBtn.disabled = true;
+        addBtn.textContent = '⏳ Import en cours…';
+        addResult.style.display = '';
+        addResult.className = 'opt-test-result opt-test-pending';
+        addResult.textContent = 'Importation de la ville…';
+
+        var fd = new FormData();
+        fd.append('stats_text', statsText);
+        fd.append('periods_text', periodsText);
+        fd.append('fiche_text', ficheText);
+        if (document.getElementById('skip-pop').checked)     fd.append('skip_population', 'on');
+        if (document.getElementById('skip-periods').checked) fd.append('skip_periods', 'on');
+        if (document.getElementById('skip-fiche').checked)   fd.append('skip_fiche', 'on');
+        if (document.getElementById('skip-photo').checked)   fd.append('skip_photo', 'on');
+
+        fetch('{{ url_for("web.ai_lab_import") }}', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                addBtn.disabled = false;
+                addBtn.textContent = '🏙️ Ajouter la ville';
+                if (data.success) {
+                    addResult.className = 'opt-test-result opt-test-success';
+                    addResult.innerHTML = '✅ <strong>' + data.city_name + '</strong> importée avec succès!<br>' +
+                        data.messages.join('<br>') +
+                        '<br><a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir la fiche</a>';
+                } else {
+                    addResult.className = 'opt-test-result opt-test-error';
+                    addResult.innerHTML = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                addBtn.disabled = false;
+                addBtn.textContent = '🏙️ Ajouter la ville';
+                addResult.className = 'opt-test-result opt-test-error';
+                addResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+})();
+</script>
+{% endblock %}

@@ -165,11 +165,31 @@
         var search = (ctrls.search.value || '').trim().toLowerCase();
         if (ctrls.popLabel) ctrls.popLabel.textContent = fmt(minPop);
 
+        var country = ctrls.countrySelect ? ctrls.countrySelect.value : '';
+        var regions = ctrls.regionList ? getCheckedRegions(ctrls.regionList) : null;
+
         return points.filter(function (p) {
             if (p.population < minPop) return false;
             if (search && p.city_name.toLowerCase().indexOf(search) === -1) return false;
+            if (country && p.country !== country) return false;
+            if (regions && !regions.has(p.region)) return false;
             return true;
         });
+    }
+
+    function getCheckedRegions(regionList) {
+        var set = new Set();
+        regionList.querySelectorAll('input[type="checkbox"]:checked').forEach(function (cb) {
+            set.add(cb.value);
+        });
+        return set;
+    }
+
+    function updateRegionLabel(toggle, regionList) {
+        if (!toggle || !regionList) return;
+        var total = regionList.querySelectorAll('input[type="checkbox"]').length;
+        var checked = regionList.querySelectorAll('input[type="checkbox"]:checked').length;
+        toggle.firstChild.textContent = (checked === total) ? 'Toutes les régions ' : checked + ' région' + (checked > 1 ? 's' : '') + ' ';
     }
 
     /* ── main init ───────────────────────────────────────────── */
@@ -200,7 +220,12 @@
             search: document.getElementById('map-search-filter'),
             summary: document.getElementById('map-visible-summary'),
             status: document.getElementById('map-provider-status'),
-            reset: document.getElementById('map-reset-filters')
+            reset: document.getElementById('map-reset-filters'),
+            countrySelect: document.getElementById('map-filter-country'),
+            regionToggle: document.getElementById('map-region-toggle'),
+            regionDropdown: document.getElementById('map-region-dropdown'),
+            regionList: document.getElementById('map-region-list'),
+            visibleCount: document.getElementById('map-visible-count')
         };
         /* Shim: ctrls.theme acts like a {value} accessor */
         ctrls.theme = { get value() { return ctrls.activeTheme; }, set value(v) { ctrls.activeTheme = v; } };
@@ -248,6 +273,9 @@
             if (ctrls.summary) {
                 ctrls.summary.textContent = visible.length + ' villes visibles. Couche active\u00a0: ' + (THEME_LABELS[theme] || theme) + '.';
             }
+            if (ctrls.visibleCount) {
+                ctrls.visibleCount.textContent = visible.length + ' villes';
+            }
 
             /* Toggle density legend */
             var densityLegend = document.getElementById('density-legend');
@@ -287,9 +315,44 @@
                 });
                 ctrls.popRange.value = '0';
                 ctrls.search.value = '';
+                if (ctrls.countrySelect) ctrls.countrySelect.value = '';
+                if (ctrls.regionList) {
+                    ctrls.regionList.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = true; });
+                    updateRegionLabel(ctrls.regionToggle, ctrls.regionList);
+                }
                 render();
             });
         }
+
+        /* Country / Region filters */
+        if (ctrls.countrySelect) {
+            ctrls.countrySelect.addEventListener('change', render);
+        }
+        if (ctrls.regionToggle && ctrls.regionDropdown) {
+            ctrls.regionToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                ctrls.regionDropdown.classList.toggle('is-open');
+            });
+            document.addEventListener('click', function (e) {
+                if (!ctrls.regionDropdown.contains(e.target) && e.target !== ctrls.regionToggle) {
+                    ctrls.regionDropdown.classList.remove('is-open');
+                }
+            });
+        }
+        if (ctrls.regionList) {
+            ctrls.regionList.addEventListener('change', function () {
+                updateRegionLabel(ctrls.regionToggle, ctrls.regionList);
+                render();
+            });
+        }
+        ctrls.regionDropdown && ctrls.regionDropdown.querySelectorAll('[data-region-action]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var check = btn.dataset.regionAction === 'all';
+                ctrls.regionList.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = check; });
+                updateRegionLabel(ctrls.regionToggle, ctrls.regionList);
+                render();
+            });
+        });
 
         map.on('popupopen', function (e) {
             var el = e.popup.getElement();

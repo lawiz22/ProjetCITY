@@ -1,0 +1,118 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<!-- Token counters -->
+<div class="token-bar">
+    <div class="token-item">
+        <span class="token-label">MAMMOUTH Token</span>
+        <span class="token-value" id="token-mammouth">{{ settings.tokens_used | default(0) }}</span>
+        <button type="button" class="token-reset" id="token-reset-mammouth" title="Réinitialiser">↺</button>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Mammouth AI — Configuration</h2>
+    </div>
+    <div class="options-body">
+        <form id="options-form" method="POST" action="{{ url_for('web.options_save') }}">
+            <!-- API Key -->
+            <div class="opt-group">
+                <label class="opt-label" for="opt-api-key">Clé API Mammouth</label>
+                <p class="opt-hint">Obtenez votre clé sur <a href="https://mammouth.ai/app/account/settings/api" target="_blank" rel="noopener">mammouth.ai/settings/api</a></p>
+                <input type="text" id="opt-api-key" name="api_key" class="opt-input opt-input-key"
+                       value="{{ settings.api_key }}" placeholder="Collez votre clé API ici (sk-…)" autocomplete="off" spellcheck="false">
+            </div>
+
+            <!-- Model -->
+            <div class="opt-group">
+                <label class="opt-label" for="opt-model">Modèle par défaut</label>
+                <p class="opt-hint">Le modèle utilisé pour les appels IA. <a href="https://api.mammouth.ai/public/models" target="_blank" rel="noopener">Voir tous les modèles</a></p>
+                <select id="opt-model" name="model" class="opt-input opt-input-model">
+                    {% if models %}
+                        {% for m in models %}
+                        <option value="{{ m.id if m.id is defined else m }}" {% if (m.id if m.id is defined else m) == settings.model %}selected{% endif %}>{{ m.id if m.id is defined else m }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="gpt-4.1-mini" {% if settings.model == 'gpt-4.1-mini' %}selected{% endif %}>gpt-4.1-mini</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="opt-actions">
+                <button type="submit" class="opt-btn opt-btn-save">💾 Enregistrer</button>
+                <button type="button" class="opt-btn opt-btn-test" id="opt-test-btn">⚡ Tester la connexion</button>
+            </div>
+        </form>
+
+        <!-- Test result area -->
+        <div class="opt-test-result" id="opt-test-result" style="display:none;"></div>
+    </div>
+</section>
+
+<script>
+(function() {
+    var keyInput = document.getElementById('opt-api-key');
+    var testBtn = document.getElementById('opt-test-btn');
+    var resultDiv = document.getElementById('opt-test-result');
+    var modelSelect = document.getElementById('opt-model');
+    var tokenEl = document.getElementById('token-mammouth');
+    var resetBtn = document.getElementById('token-reset-mammouth');
+
+    resetBtn.addEventListener('click', function() {
+        if (!confirm('Réinitialiser le compteur MAMMOUTH Token à 0 ?')) return;
+        fetch('{{ url_for("web.options_reset_tokens") }}', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) tokenEl.textContent = '0';
+            });
+    });
+
+    testBtn.addEventListener('click', function() {
+        var key = keyInput.value.trim();
+        if (!key) {
+            resultDiv.style.display = '';
+            resultDiv.className = 'opt-test-result opt-test-error';
+            resultDiv.textContent = 'Veuillez entrer une clé API.';
+            return;
+        }
+        testBtn.disabled = true;
+        testBtn.textContent = '⏳ Test en cours…';
+        resultDiv.style.display = '';
+        resultDiv.className = 'opt-test-result opt-test-pending';
+        resultDiv.textContent = 'Connexion à Mammouth AI…';
+
+        var fd = new FormData();
+        fd.append('api_key', key);
+        fd.append('model', modelSelect.value);
+
+        fetch('{{ url_for("web.options_test") }}', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                testBtn.disabled = false;
+                testBtn.textContent = '⚡ Tester la connexion';
+                if (data.success) {
+                    resultDiv.className = 'opt-test-result opt-test-success';
+                    resultDiv.innerHTML = '✅ <strong>Connexion réussie!</strong><br>' +
+                        'Modèle : ' + data.model + '<br>' +
+                        'Réponse : « ' + data.reply + ' »<br>' +
+                        'Tokens utilisés : ' + data.tokens;
+                    if (data.tokens_total !== undefined) {
+                        tokenEl.textContent = data.tokens_total;
+                    }
+                } else {
+                    resultDiv.className = 'opt-test-result opt-test-error';
+                    resultDiv.innerHTML = '❌ <strong>Échec</strong> — ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                testBtn.disabled = false;
+                testBtn.textContent = '⚡ Tester la connexion';
+                resultDiv.className = 'opt-test-result opt-test-error';
+                resultDiv.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+})();
+</script>
+{% endblock %}

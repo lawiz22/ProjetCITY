@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 149
+# Nombre de villes : 153
 #
 
 # ============================================================
@@ -207,6 +207,41 @@ annotations = [
 ]
 
 # ============================================================
+# Boise (United States)
+# ============================================================
+CITY_NAME = "Boise, Idaho"
+CITY_COLOR = '#4B9CD3'
+
+years = [
+    1863, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 
+    2000, 2010, 2020
+]
+population = [
+    200, 1200, 5000, 10000, 15000, 21000, 30000, 40000, 45000, 60000, 90000, 110000, 
+    130000, 150000, 180000, 205000, 235000
+]
+
+annotations = [
+    (1863, 200, "🪓 Fondation de Boise — établissement militaire (1863)", 'brown'),
+    (1870, 1200, "🏛️ Capitale territoriale — Boise devient capitale de l'Idaho (1865)", 'orange'),
+    (1880, 5000, "🚂 Arrivée du chemin de fer — développement économique (1883)", 'green'),
+    (1890, 10000, "📜 Idaho devient État — Boise capitale d'État (1890)", 'blue'),
+    (1900, 15000, "🏭 Industrialisation — croissance économique (début 20e siècle)", 'red'),
+    (1910, 21000, "🏙️ Expansion urbaine — développement résidentiel (1910)", 'purple'),
+    (1920, 30000, "🚜 Agriculture prospère — boom local (1920)", 'gray'),
+    (1930, 40000, "💧 Construction du barrage Arrowrock — ressources en eau (1935)", 'gold'),
+    (1940, 45000, "✈️ Base aérienne établie — impact militaire (1942)", 'teal'),
+    (1950, 60000, "🏢 Croissance post-guerre — boom démographique (1950s)", 'navy'),
+    (1960, 90000, "🏫 Expansion éducative — université d'Idaho (1960)", 'black'),
+    (1970, 110000, "🚧 Développement infrastructurel — autoroutes (1970)", 'darkred'),
+    (1980, 130000, "🌳 Initiatives écologiques — espaces verts (1980)", 'green'),
+    (1990, 150000, "💼 Croissance économique — secteur technologique (1990)", 'blue'),
+    (2000, 180000, "🏘️ Urbanisation rapide — développement résidentiel (2000)", 'orange'),
+    (2010, 205000, "🚀 Innovation et startups — dynamisme économique (2010)", 'purple'),
+    (2020, 235000, "🌆 Boise moderne — centre culturel et économique (2020)", 'red'),
+]
+
+# ============================================================
 # Boston (United States)
 # ============================================================
 CITY_NAME = "Boston, Massachusetts"
@@ -304,7 +339,7 @@ annotations = [
 # ============================================================
 # Brossard (Canada)
 # ============================================================
-CITY_NAME = "Brossard, Quebec"
+CITY_NAME = "Brossard, Québec"
 CITY_COLOR = '#00695C'
 
 years = [
@@ -433,6 +468,37 @@ annotations = [
 ]
 
 # ============================================================
+# Cadillac (United States)
+# ============================================================
+CITY_NAME = "Cadillac, Michigan"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 
+    2010, 2020
+]
+population = [
+    500, 2500, 4500, 8000, 12000, 15000, 16000, 15500, 14000, 13500, 13000, 12500, 12000, 
+    11500, 10500, 10000
+]
+
+annotations = [
+    (1880, 2500, "🏭 Croissance industrielle — boom de la scierie (1880)", 'orange'),
+    (1890, 4500, "🏘️ Expansion urbaine — construction de nouveaux quartiers (1890)", 'purple'),
+    (1900, 8000, "📈 Pic démographique initial — croissance continue (1900)", 'red'),
+    (1910, 12000, "🏞️ Développement des infrastructures — amélioration des routes et ponts (1910)", 'teal'),
+    (1920, 15000, "🎉 Apogée économique — industrie du bois en plein essor (1920)", 'gold'),
+    (1930, 16000, "💼 Diversification économique — apparition de petites industries (1930)", 'navy'),
+    (1940, 15500, "⚠️ Déclin léger — impact de la Grande Dépression (1940)", 'brown'),
+    (1950, 14000, "🚗 Modernisation — développement des transports routiers (1950)", 'gray'),
+    (1960, 13500, "🏚️ Déclin industriel — fermeture progressive des scieries (1960)", 'darkred'),
+    (1980, 12500, "🌳 Transition économique — début du tourisme et conservation (1980)", 'green'),
+    (2000, 11500, "🏞️ Valorisation patrimoniale — mise en avant du patrimoine naturel (2000)", 'blue'),
+    (2010, 10500, "📉 Baisse démographique — exode rural et vieillissement (2010)", 'red'),
+    (2020, 10000, "🌟 Stabilisation — efforts pour revitaliser le centre-ville (2020)", 'purple'),
+]
+
+# ============================================================
 # Calgary (Canada)
 # ============================================================
 CITY_NAME = "Calgary, Alberta"
@@ -555,7 +621,7 @@ annotations = [
 # ============================================================
 # Châteauguay (Canada)
 # ============================================================
-CITY_NAME = "Châteauguay, Quebec"
+CITY_NAME = "Châteauguay, Québec"
 CITY_COLOR = '#1A237E'
 
 years = [
@@ -795,7 +861,7 @@ annotations = [
 # ============================================================
 # Drummondville (Canada)
 # ============================================================
-CITY_NAME = "Drummondville, Quebec"
+CITY_NAME = "Drummondville, Québec"
 CITY_COLOR = '#1565C0'
 
 years = [
@@ -1103,7 +1169,7 @@ annotations = [
 # ============================================================
 # Gaspé (Canada)
 # ============================================================
-CITY_NAME = "Gaspé, Quebec"
+CITY_NAME = "Gaspé, Québec"
 CITY_COLOR = '#006994'
 
 years = [1871, 1880, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
@@ -1151,7 +1217,7 @@ annotations = [
 # ============================================================
 # Granby (Canada)
 # ============================================================
-CITY_NAME = "Granby, Quebec"
+CITY_NAME = "Granby, Québec"
 CITY_COLOR = '#1565C0'
 
 years = [
@@ -1280,7 +1346,7 @@ annotations = [
 # ============================================================
 # Havre-Saint-Pierre (Canada)
 # ============================================================
-CITY_NAME = "Havre-Saint-Pierre, Quebec"
+CITY_NAME = "Havre-Saint-Pierre, Québec"
 CITY_COLOR = '#2E6B8A'
 
 years = [
@@ -1539,6 +1605,30 @@ annotations = [
 ]
 
 # ============================================================
+# Longlac (Canada)
+# ============================================================
+CITY_NAME = "Longlac, Ontario"
+CITY_COLOR = '#2E8B57'
+
+years = [1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [150, 400, 800, 1200, 1700, 2100, 2500, 2800, 2600, 2300, 1900, 1500]
+
+annotations = [
+    (1910, 150, "🚂 Fondation liée au chemin de fer — arrivée du Canadien Pacifique (1910)", 'brown'),
+    (1920, 400, "🌲 Développement de l'industrie forestière — croissance économique (1920)", 'green'),
+    (1930, 800, "🏫 Construction de la première école publique — éducation locale (1930)", 'blue'),
+    (1940, 1200, "⚙️ Expansion industrielle — augmentation des emplois (1940)", 'orange'),
+    (1950, 1700, "🚜 Modernisation agricole — diversification économique (1950)", 'purple'),
+    (1960, 2100, "🏥 Ouverture du centre médical — amélioration des services (1960)", 'teal'),
+    (1970, 2500, "🏠 Boom résidentiel — croissance démographique (1970)", 'navy'),
+    (1980, 2800, "🛤️ Amélioration des infrastructures routières — meilleure connectivité (1980)", 'gray'),
+    (1990, 2600, "🏭 Déclin industriel — fermeture d'usines majeures (1990)", 'red'),
+    (2000, 2300, "📉 Diminution de la population — exode rural (2000)", 'darkred'),
+    (2010, 1900, "🌿 Développement touristique — valorisation du patrimoine naturel (2010)", 'gold'),
+    (2020, 1500, "🏞️ Stabilisation démographique — efforts de revitalisation (2020)", 'black'),
+]
+
+# ============================================================
 # Longueuil (Canada)
 # ============================================================
 CITY_NAME = "Longueuil, Québec"
@@ -1590,7 +1680,7 @@ annotations = [
 # ============================================================
 # Lévis (Canada)
 # ============================================================
-CITY_NAME = "Lévis, Quebec"
+CITY_NAME = "Lévis, Québec"
 CITY_COLOR = '#1B5E8A'
 
 years = [
@@ -1708,7 +1798,7 @@ annotations = [
 # ============================================================
 # Mirabel (Canada)
 # ============================================================
-CITY_NAME = "Mirabel, Quebec"
+CITY_NAME = "Mirabel, Québec"
 CITY_COLOR = '#1B5E20'
 
 years = [1871, 1901, 1921, 1941, 1961, 1971, 1981, 1991, 1996, 2001, 2006, 2011, 2016, 2021]
@@ -1853,7 +1943,7 @@ annotations = [
 # ============================================================
 # Murdochville (Canada)
 # ============================================================
-CITY_NAME = "Murdochville, Quebec"
+CITY_NAME = "Murdochville, Québec"
 CITY_COLOR = '#8B4513'
 
 years = [1953, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
@@ -2444,7 +2534,7 @@ annotations = [
 # ============================================================
 # Repentigny (Canada)
 # ============================================================
-CITY_NAME = "Repentigny, Quebec"
+CITY_NAME = "Repentigny, Québec"
 CITY_COLOR = '#1565C0'
 
 years = [
@@ -2718,7 +2808,7 @@ annotations = [
 # ============================================================
 # Saint-Jérôme (Canada)
 # ============================================================
-CITY_NAME = "Saint-Jérôme, Quebec"
+CITY_NAME = "Saint-Jérôme, Québec"
 CITY_COLOR = '#2E7D32'
 
 years = [
@@ -2926,7 +3016,7 @@ annotations = [
 # ============================================================
 # Sept-Îles (Canada)
 # ============================================================
-CITY_NAME = "Sept-Îles, Quebec"
+CITY_NAME = "Sept-Îles, Québec"
 CITY_COLOR = '#8B4513'
 
 years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
@@ -2946,7 +3036,7 @@ annotations = [
 # ============================================================
 # Shawinigan (Canada)
 # ============================================================
-CITY_NAME = "Shawinigan, Quebec"
+CITY_NAME = "Shawinigan, Québec"
 CITY_COLOR = '#B22222'
 
 years = [1901, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
@@ -3165,7 +3255,7 @@ annotations = [
 # ============================================================
 # Terrebonne (Canada)
 # ============================================================
-CITY_NAME = "Terrebonne, Quebec"
+CITY_NAME = "Terrebonne, Québec"
 CITY_COLOR = '#2E7D32'
 
 years = [
@@ -3212,6 +3302,30 @@ annotations = [
     (1980, 29000, "☠️ Interdictions amiante — occident (1975)", 'black'),
     (2000, 26000, "📉 Fermetures mines — exode jeunes (1995)", 'orange'),
     (2020, 24500, "🏛️ Musée minier — tourisme industriel (2010)", 'teal'),
+]
+
+# ============================================================
+# Timmins (Canada)
+# ============================================================
+CITY_NAME = "Timmins, Ontario"
+CITY_COLOR = '#005a87'
+
+years = [1912, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [0, 10000, 15000, 18000, 21000, 23000, 25000, 28000, 32000, 42000, 43000, 41000]
+
+annotations = [
+    (1912, 0, "⛏️ Fondation — découverte d'or et établissement de la ville (1912)", 'gold'),
+    (1920, 10000, "🏗️ Expansion rapide — construction d'infrastructures minières (1920)", 'brown'),
+    (1930, 15000, "💰 Boom économique — pic de production aurifère (1930)", 'green'),
+    (1940, 18000, "🚂 Développement ferroviaire — amélioration des transports (1940)", 'blue'),
+    (1950, 21000, "🏥 Modernisation — ouverture d'hôpitaux et écoles (1950)", 'orange'),
+    (1960, 23000, "🏭 Diversification économique — début d'industries secondaires (1960)", 'purple'),
+    (1970, 25000, "🌲 Protection environnementale — premières mesures locales (1970)", 'teal'),
+    (1980, 28000, "📉 Déclin minier — fermeture de plusieurs mines (1980)", 'red'),
+    (1990, 32000, "🏙️ Urbanisation — croissance résidentielle malgré crise (1990)", 'navy'),
+    (2000, 42000, "🎓 Éducation — création de campus universitaires (2000)", 'darkred'),
+    (2010, 43000, "🌐 Connectivité — amélioration des réseaux internet (2010)", 'gray'),
+    (2020, 41000, "🦠 Pandémie — impact démographique et économique (2020)", 'black'),
 ]
 
 # ============================================================

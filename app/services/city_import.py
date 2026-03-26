@@ -19,7 +19,7 @@ DETAILS_DIR = PROJECT_ROOT / "data" / "city_details"
 FICHES_DIR = PROJECT_ROOT / "data" / "city_fiches"
 
 CANADIAN_PROVINCES = {
-    "Québec", "Quebec", "Ontario", "British Columbia", "Alberta", "Manitoba",
+    "Québec", "Ontario", "British Columbia", "Alberta", "Manitoba",
     "Saskatchewan", "Nova Scotia", "New Brunswick", "Prince Edward Island",
     "Newfoundland and Labrador", "Northwest Territories", "Nunavut", "Yukon",
 }
@@ -37,6 +37,7 @@ US_STATES = {
 }
 
 REGION_ALIASES = {
+    # French names
     "Californie": "California",
     "Floride": "Florida",
     "Pennsylvanie": "Pennsylvania",
@@ -45,6 +46,38 @@ REGION_ALIASES = {
     "Virginie": "Virginia",
     "Géorgie": "Georgia",
     "Louisiane": "Louisiana",
+    # Quebec accent normalization
+    "Quebec": "Québec",
+    # Canadian province abbreviations
+    "ON": "Ontario",
+    "QC": "Québec",
+    "BC": "British Columbia",
+    "AB": "Alberta",
+    "MB": "Manitoba",
+    "SK": "Saskatchewan",
+    "NS": "Nova Scotia",
+    "NB": "New Brunswick",
+    "PE": "Prince Edward Island",
+    "NL": "Newfoundland and Labrador",
+    "NT": "Northwest Territories",
+    "NU": "Nunavut",
+    "YT": "Yukon",
+    # US state abbreviations (common ones)
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
+    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
+    "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho",
+    "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
+    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+    "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota",
+    "MS": "Mississippi", "MO": "Missouri", "MT": "Montana", "NE": "Nebraska",
+    "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey",
+    "NM": "New Mexico", "NY": "New York", "NC": "North Carolina",
+    "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma", "OR": "Oregon",
+    "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
+    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
+    "VT": "Vermont", "VA": "Virginia", "WA": "Washington",
+    "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+    "DC": "District of Columbia",
 }
 
 USER_AGENT = "ProjetCITY/1.0 (city photo cache)"

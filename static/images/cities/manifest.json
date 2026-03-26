@@ -916,5 +916,29 @@
     "source_page": "https://en.wikipedia.org/wiki/Val-d'Or",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Ville_de_Val-d%27or.jpg/330px-Ville_de_Val-d%27or.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "cadillac-michigan": {
+    "filename": "cadillac-michigan.png",
+    "source_page": "https://en.wikipedia.org/wiki/Cadillac",
+    "source_image": "https://upload.wikimedia.org/wikipedia/en/thumb/6/66/Cadillac_logo_BW.svg/330px-Cadillac_logo_BW.svg.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "timmins-on": {
+    "filename": "timmins-on.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Timmins",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Timmins_Ontario.jpg/330px-Timmins_Ontario.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "boise-idaho": {
+    "filename": "boise-idaho.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Boise%2C_Idaho",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Boise_Metro_Chamber_of_Commerce_photo_to_share_-_winter_2017.jpg/330px-Boise_Metro_Chamber_of_Commerce_photo_to_share_-_winter_2017.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "longlac-on": {
+    "filename": "longlac-on.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Longlac",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Longlac_ON_1.JPG/330px-Longlac_ON_1.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

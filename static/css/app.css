@@ -3092,6 +3092,31 @@ dt {
     width: 180px;
 }
 
+.map-filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.map-filter-left {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+}
+.map-filter-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.map-visible-count {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+}
+
 .map-slider-row {
     display: flex;
     align-items: center;
@@ -4388,24 +4413,26 @@ td {
 .ann-keyword-pill.dragging {
     opacity: .5;
 }
+.ann-keyword-pill-en {
+    background: #2a9d8f;
+    font-style: italic;
+}
 
 /* Search bar with pill tokens */
 .ann-search-bar {
-    display: flex;
-    gap: .5rem;
     margin-bottom: .6rem;
 }
 .ann-search-input-wrap {
-    flex: 1;
     display: flex;
     flex-wrap: wrap;
-    gap: .3rem;
+    gap: .35rem;
     align-items: center;
-    padding: .35rem .5rem;
+    padding: .7rem .9rem;
     border: 2px solid var(--line);
-    border-radius: 8px;
+    border-radius: 12px;
     background: var(--panel-strong);
-    min-height: 38px;
+    min-height: 60px;
+    font-size: 1rem;
     transition: border-color .15s;
 }
 .ann-search-input-wrap:focus-within {
@@ -4417,13 +4444,25 @@ td {
 }
 .ann-search-input-wrap input {
     flex: 1;
-    min-width: 100px;
+    min-width: 120px;
     border: none;
     outline: none;
     background: transparent;
-    font-size: .85rem;
+    font-size: 1rem;
     color: var(--ink);
-    padding: .15rem 0;
+    padding: .25rem 0;
+}
+.ann-footer-buttons {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+}
+.ann-manual-search-btn {
+    padding: .45rem 1rem !important;
+    border-radius: 8px !important;
+    font-size: .82rem !important;
+    font-weight: 600;
+    white-space: nowrap;
 }
 .ann-search-pill {
     display: inline-flex;
@@ -4583,4 +4622,284 @@ td {
     max-height: 90vh;
     border-radius: 6px;
     box-shadow: 0 4px 24px rgba(0,0,0,.5);
+}
+
+/* ================================================================
+   Options / Mammouth AI settings
+   ================================================================ */
+/* Token bar */
+.token-bar {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+}
+.token-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: .5rem 1rem;
+}
+.token-label {
+    font-weight: 700;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted, #888);
+}
+.token-value {
+    font-family: monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 2ch;
+}
+.token-reset {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .15rem .45rem;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--muted);
+    transition: border-color .15s, color .15s;
+}
+.token-reset:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.options-body {
+    max-width: 640px;
+    padding: 1.5rem 0;
+}
+.opt-group {
+    margin-bottom: 1.6rem;
+}
+.opt-label {
+    display: block;
+    font-weight: 700;
+    font-size: .95rem;
+    margin-bottom: .25rem;
+    color: var(--ink);
+}
+.opt-hint {
+    font-size: .8rem;
+    color: var(--muted, #888);
+    margin: 0 0 .5rem;
+}
+.opt-hint a {
+    color: var(--accent);
+    text-decoration: underline;
+}
+.opt-input {
+    width: 100%;
+    padding: .55rem .75rem;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-strong);
+    color: var(--ink);
+    font-size: .9rem;
+    transition: border-color .15s;
+}
+.opt-input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.opt-input-key {
+    font-family: monospace;
+    letter-spacing: .04em;
+}
+.opt-input-model {
+    max-width: 320px;
+    cursor: pointer;
+}
+.opt-key-row {
+    display: flex;
+    gap: .4rem;
+    align-items: center;
+}
+.opt-key-row .opt-input {
+    flex: 1;
+}
+.opt-toggle-key {
+    padding: .4rem .6rem;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-strong);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: border-color .15s;
+}
+.opt-toggle-key:hover {
+    border-color: var(--accent);
+}
+.opt-actions {
+    display: flex;
+    gap: .7rem;
+    margin-top: 1.2rem;
+}
+.opt-btn {
+    padding: .55rem 1.2rem;
+    border: none;
+    border-radius: 10px;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+}
+.opt-btn:hover {
+    opacity: .88;
+}
+.opt-btn:active {
+    transform: scale(.97);
+}
+.opt-btn-save {
+    background: var(--accent);
+    color: #fff;
+}
+.opt-btn-test {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+}
+.opt-btn-test:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+.opt-test-result {
+    margin-top: 1rem;
+    padding: .8rem 1rem;
+    border-radius: 10px;
+    font-size: .85rem;
+    line-height: 1.6;
+}
+.opt-test-pending {
+    background: var(--line);
+    color: var(--ink);
+}
+.opt-test-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+.opt-test-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+.dark .opt-test-success {
+    background: rgba(16,185,129,.12);
+    color: #6ee7b7;
+    border-color: rgba(16,185,129,.3);
+}
+.dark .opt-test-error {
+    background: rgba(239,68,68,.12);
+    color: #fca5a5;
+    border-color: rgba(239,68,68,.3);
+}
+
+/* AI Lab */
+.ai-lab-body {
+    max-width: 900px;
+}
+.ai-lab-top-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.ai-lab-field {
+    flex: 1;
+    margin-bottom: 1rem;
+}
+.ai-lab-model-field {
+    max-width: 280px;
+}
+.ai-lab-prompt {
+    font-family: monospace;
+    font-size: .82rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+.ai-lab-result {
+    font-family: monospace;
+    font-size: .82rem;
+    line-height: 1.5;
+    resize: vertical;
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-color: #45475a;
+}
+.dark .ai-lab-result {
+    background: #0d0d14;
+    color: #cdd6f4;
+    border-color: #45475a;
+}
+.ai-copy-btn {
+    display: inline-block;
+}
+
+/* ===== AI Lab page ===== */
+.ailab-header {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin-bottom: 1.4rem;
+}
+.ailab-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    object-fit: contain;
+}
+.ailab-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.ailab-subtitle {
+    font-size: .85rem;
+    color: var(--muted, #888);
+}
+.ailab-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: .85rem;
+    font-weight: 700;
+    margin-right: .5rem;
+}
+.ailab-check {
+    display: none;
+    margin-left: .6rem;
+    font-size: 1.3rem;
+    color: #22c55e;
+    font-weight: 700;
+    animation: checkPop .35s ease;
+}
+.ailab-check.visible {
+    display: inline;
+}
+@keyframes checkPop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1); }
+}
+.skip-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+.skip-checkboxes label {
+    font-size: .85rem;
+    cursor: pointer;
 }

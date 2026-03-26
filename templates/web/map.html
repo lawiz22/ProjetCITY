@@ -5,19 +5,6 @@
 {% endblock %}
 
 {% block content %}
-<section class="metrics-grid">
-    <article class="metric-card">
-        <span>Villes cartographiées</span>
-        <strong>{{ map_payload.mapped_count }}</strong>
-        <small>points visibles sur la carte</small>
-    </article>
-    <article class="metric-card">
-        <span>Coordonnées manquantes</span>
-        <strong>{{ map_payload.missing_count }}</strong>
-        <small>à compléter si nécessaire</small>
-    </article>
-</section>
-
 <section class="panel map-panel-full">
     <div class="map-toolbar">
         <div class="map-toolbar-left">
@@ -36,13 +23,41 @@
         </div>
     </div>
 
-    <div class="map-slider-row">
-        <label class="map-pop-label">
-            Pop. min
-            <input id="map-population-filter" type="range" min="0" max="5000000" step="50000" value="0">
-            <span id="map-population-value" class="helper-text">0</span>
-        </label>
-        <button type="button" id="map-reset-filters" class="map-reset-link">Réinitialiser</button>
+    <!-- Inline filters row -->
+    <div class="map-filter-row">
+        <div class="map-filter-left">
+            <div class="dir-filter">
+                <select id="map-filter-country">
+                    <option value="">Tous les pays</option>
+                    {% for c in countries %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="dir-filter dir-filter-region-wrap">
+                <button type="button" class="dir-region-toggle" id="map-region-toggle">Toutes les régions <span class="dir-region-arrow">▾</span></button>
+                <div class="dir-region-dropdown" id="map-region-dropdown">
+                    <div class="dir-region-actions">
+                        <button type="button" data-region-action="all">Tout cocher</button>
+                        <button type="button" data-region-action="none">Tout décocher</button>
+                    </div>
+                    <div class="dir-region-list" id="map-region-list">
+                        {% for r in regions %}
+                        <label><input type="checkbox" value="{{ r }}" checked> {{ r }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="map-filter-right">
+            <label class="map-pop-label">
+                Pop. min
+                <input id="map-population-filter" type="range" min="0" max="5000000" step="50000" value="0">
+                <span id="map-population-value" class="helper-text">0</span>
+            </label>
+            <span id="map-visible-count" class="map-visible-count">{{ map_payload.mapped_count }} villes</span>
+            <button type="button" id="map-reset-filters" class="map-reset-link">Réinitialiser</button>
+        </div>
     </div>
 
     <div id="city-map" class="map-canvas" style="width:100%;height:600px;min-height:480px;"></div>
@@ -72,38 +87,6 @@
             <span class="density-swatch" style="background:#dc2626"></span>
             <span class="density-label">&gt; 6 000</span>
         </div>
-    </div>
-</section>
-
-<section class="panel">
-    <div class="panel-head">
-        <h2>Top villes cartographiées</h2>
-    </div>
-    <div class="table-wrapper">
-        <table data-sortable-table>
-            <thead>
-                <tr>
-                    <th>Ville</th>
-                    <th>Pays</th>
-                    <th>Région</th>
-                    <th>Population récente</th>
-                    <th>Pic</th>
-                    <th>Croissance récente</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for point in map_payload.top_points %}
-                <tr>
-                    <td><a href="{{ url_for('web.city_detail', city_slug=point.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">{{ point.city_name }}</a></td>
-                    <td>{{ point.country }}</td>
-                    <td>{{ point.region }}</td>
-                    <td>{{ '{:,}'.format(point.population).replace(',', ' ') }} en {{ point.year }}</td>
-                    <td>{{ '{:,}'.format(point.peak_population).replace(',', ' ') if point.peak_population else 'n/a' }}{% if point.peak_year %} en {{ point.peak_year }}{% endif %}</td>
-                    <td>{% if point.latest_growth_pct is not none %}{{ point.latest_growth_pct }}% ({{ point.latest_growth_decade }}){% else %}n/a{% endif %}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 </section>
 {% endblock %}

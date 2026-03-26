@@ -233,7 +233,6 @@
                     <div class="ann-search-input-wrap" id="ann-search-input-wrap">
                         <input type="text" id="ann-manual-input" placeholder="Glissez des mots-clés ici ou tapez…" autocomplete="off">
                     </div>
-                    <button type="button" class="primary-button" id="ann-manual-search-btn">Rechercher</button>
                 </div>
                 <p class="helper-text" id="ann-manual-status"></p>
                 <div class="photo-search-grid" id="ann-manual-grid"></div>
@@ -246,7 +245,10 @@
         </div>
         <div class="photo-search-modal-footer">
             <span id="ann-photo-count">Cliquez pour sélectionner</span>
-            <button type="button" class="secondary-button" id="ann-photo-save-btn" disabled>Associer la photo</button>
+            <div class="ann-footer-buttons">
+                <button type="button" class="primary-button ann-manual-search-btn" id="ann-manual-search-btn" style="display:none;">Rechercher</button>
+                <button type="button" class="secondary-button" id="ann-photo-save-btn" disabled>Associer la photo</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1057,6 +1059,50 @@
     /* ---- Keyword pills for manual search ---- */
     var FR_STOP = new Set(['le','la','les','de','du','des','un','une','et','en','au','aux','ce','ces','se','sa','son','ses','sur','par','pour','dans','est','qui','que','avec','vers','pas','plus','très','tout','mais']);
 
+    var FR_EN = {
+        'fusion':'merger','annexion':'annexation','construction':'construction',
+        'inauguration':'inauguration','fondation':'founding','incorporation':'incorporation',
+        'incendie':'fire','inondation':'flood','tremblement':'earthquake',
+        'explosion':'explosion','explose':'explosion','ouverture':'opening',
+        'fermeture':'closure','création':'creation','abolition':'abolition',
+        'démolition':'demolition','reconstruction':'rebuilding','rénovation':'renovation',
+        'expansion':'expansion','effondrement':'collapse','épidémie':'epidemic',
+        'pandémie':'pandemic','grève':'strike','émeute':'riot','élection':'election',
+        'référendum':'referendum','sommet':'summit','expo':'exposition',
+        'exposition':'exhibition','olympiques':'olympics','jeux':'games',
+        'stade':'stadium','aéroport':'airport','métro':'subway','tramway':'streetcar',
+        'pont':'bridge','autoroute':'highway','gare':'station','église':'church',
+        'cathédrale':'cathedral','université':'university','hôpital':'hospital',
+        'musée':'museum','bibliothèque':'library','parc':'park','port':'harbor',
+        'barrage':'dam','centrale':'power plant','usine':'factory','mine':'mining',
+        'guerre':'war','bataille':'battle','traité':'treaty','loi':'law',
+        'arrondissement':'borough','quartier':'neighborhood','séparation':'separation',
+        'regroupement':'consolidation','défusion':'demerger',
+        'ville':'city','production':'production','croissance':'growth',
+        'déclin':'decline','population':'population','développement':'development',
+        'transport':'transportation','industrie':'industry','commerce':'trade',
+        'immigration':'immigration','colonisation':'colonization','découverte':'discovery',
+        'naissance':'birth','mort':'death','gouvernement':'government',
+        'économie':'economy','culture':'culture','architecture':'architecture',
+        'technologie':'technology','environnement':'environment','énergie':'energy',
+        'pétrole':'oil','sable':'sand','bitumineux':'bituminous','raffinerie':'refinery',
+        'froide':'cold','nucléaire':'nuclear','nucléaires':'nuclear',
+        'armes':'weapons','armée':'army','militaire':'military',
+        'bombe':'bomb','atomique':'atomic','missile':'missile',
+        'récession':'recession','dépression':'depression','crise':'crisis',
+        'incendiaire':'arson','tempête':'storm','ouragan':'hurricane',
+        'tornade':'tornado','sécheresse':'drought','verglas':'ice storm',
+        'neige':'snow','hiver':'winter','été':'summer',
+        'chemin':'railway','fer':'iron','acier':'steel',
+        'charbon':'coal','gaz':'gas','électricité':'electricity',
+        'rivière':'river','fleuve':'river','lac':'lake','montagne':'mountain',
+        'forêt':'forest','prairie':'prairie','désert':'desert',
+        'mondial':'world','mondiale':'world','international':'international',
+        'fédéral':'federal','provincial':'provincial','municipal':'municipal',
+        'premier':'first','nouveau':'new','nouvelle':'new','grand':'great','grande':'great',
+        'ancien':'old','moderne':'modern','historique':'historical'
+    };
+
     function buildPills(label) {
         annPillTray.innerHTML = '';
         // Clean label
@@ -1072,23 +1118,30 @@
         });
         // Deduplicate
         var seen = new Set();
-        var pills = [];
+        var frPills = [];
+        var enPills = [];
         words.forEach(function(w) {
             var lw = w.toLowerCase();
-            if (!seen.has(lw)) { seen.add(lw); pills.push(w); }
+            if (!seen.has(lw)) {
+                seen.add(lw);
+                frPills.push(w);
+                // Add English translation if available
+                var en = FR_EN[lw];
+                if (en && en.toLowerCase() !== lw) enPills.push(en);
+            }
         });
         // Add city name if not already in pills
         var cityName = '{{ city.city_name }}';
-        if (!seen.has(cityName.toLowerCase())) pills.push(cityName);
+        if (!seen.has(cityName.toLowerCase())) frPills.push(cityName);
         // Add year
-        if (year && !seen.has(year)) pills.push(year);
+        if (year && !seen.has(year)) frPills.push(year);
         // Add region if available
         var region = '{{ city.region|default("", true) }}';
-        if (region && !seen.has(region.toLowerCase())) pills.push(region);
+        if (region && !seen.has(region.toLowerCase())) frPills.push(region);
 
-        pills.forEach(function(text) {
+        function makePill(text, isEn) {
             var pill = document.createElement('span');
-            pill.className = 'ann-keyword-pill';
+            pill.className = 'ann-keyword-pill' + (isEn ? ' ann-keyword-pill-en' : '');
             pill.textContent = text;
             pill.draggable = true;
             pill.dataset.keyword = text;
@@ -1099,12 +1152,14 @@
             pill.addEventListener('dragend', function() {
                 pill.classList.remove('dragging');
             });
-            // Click to add pill to search bar
             pill.addEventListener('click', function() {
                 addPillToSearch(text);
             });
-            annPillTray.appendChild(pill);
-        });
+            return pill;
+        }
+
+        frPills.forEach(function(text) { annPillTray.appendChild(makePill(text, false)); });
+        enPills.forEach(function(text) { annPillTray.appendChild(makePill(text, true)); });
     }
 
     function addPillToSearch(text) {
@@ -1203,6 +1258,7 @@
         // Toggle panels
         annAutoPanel.style.display = (tab === 'manual') ? 'none' : '';
         annManualPanel.style.display = (tab === 'manual') ? '' : 'none';
+        annManualSearchBtn.style.display = (tab === 'manual') ? '' : 'none';
 
         if (tab === 'manual') {
             buildPills(currentAnnLabel);

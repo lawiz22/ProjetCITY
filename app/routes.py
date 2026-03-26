@@ -143,11 +143,14 @@ def compare() -> str:
 def city_map() -> str:
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
+    filter_options = service.get_filter_options()
     return render_template(
         "web/map.html",
-        page_title="City Map",
+        page_title="Carte",
         filters=filters,
         map_payload=service.get_map_payload(filters),
+        countries=filter_options["countries"],
+        regions=filter_options["regions"],
     )
 
 
@@ -381,6 +384,19 @@ def add_city_import() -> Response:
             )
             if photo_result["success"]:
                 messages.append(f"Photo importée: {photo_result['filename']}")
+                # Also register in photo library (dim_city_photo)
+                try:
+                    from .services.city_photos import save_photo_to_library, CITY_PHOTO_DIR
+                    photo_path = CITY_PHOTO_DIR / photo_result["filename"]
+                    if photo_path.exists():
+                        save_photo_to_library(
+                            conn, city_id, stats["city_slug"],
+                            photo_path.read_bytes(), photo_result["filename"],
+                            source_url=photo_result.get("source_page", ""),
+                            attribution="Wikipedia/Wikimedia — vérifier les licences.",
+                        )
+                except Exception as exc_lib:
+                    messages.append(f"⚠️ Bibliothèque photo: {exc_lib}")
             else:
                 messages.append(f"Photo: {photo_result['error']}")
         except Exception as exc:
@@ -982,3 +998,239 @@ def reference_population() -> str:
         page_title="Population de référence",
         **data,
     )
+
+
+# ------------------------------------------------------------------
+#  Options / Mammouth AI settings
+# ------------------------------------------------------------------
+
+@web.route("/options", methods=["GET"])
+def options() -> str:
+    from .services.mammouth_ai import load_settings, fetch_models
+
+    settings = load_settings()
+    models = fetch_models()
+    return render_template(
+        "web/options.html",
+        page_title="Options",
+        settings=settings,
+        models=models,
+    )
+
+
+@web.route("/ai-lab")
+def ai_lab() -> str:
+    from .services.mammouth_ai import load_settings, fetch_models, load_prompt
+
+    settings = load_settings()
+    models = fetch_models()
+    prompt_city = load_prompt("city_data_step1.txt")
+    prompt_details = load_prompt("city_data_step2.txt")
+    prompt_fiche = load_prompt("city_data_step3.txt")
+    return render_template(
+        "web/ai_lab.html",
+        page_title="AI Lab",
+        settings=settings,
+        models=models,
+        prompt_city=prompt_city,
+        prompt_details=prompt_details,
+        prompt_fiche=prompt_fiche,
+    )
+
+
+@web.route("/options/save", methods=["POST"])
+def options_save() -> Response:
+    from .services.mammouth_ai import load_settings, save_settings
+
+    settings = load_settings()
+    settings["api_key"] = request.form.get("api_key", "").strip()
+    settings["model"] = request.form.get("model", "gpt-4.1-mini").strip()
+    save_settings(settings)
+    flash("Paramètres enregistrés.", "success")
+    return redirect(url_for("web.options"))
+
+
+@web.route("/options/test", methods=["POST"])
+def options_test() -> Response:
+    from .services.mammouth_ai import test_connection
+
+    api_key = request.form.get("api_key", "").strip()
+    model = request.form.get("model", "gpt-4.1-mini").strip()
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API fournie."})
+    result = test_connection(api_key, model)
+    if result.get("success"):
+        from .services.mammouth_ai import load_settings
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/options/reset-tokens", methods=["POST"])
+def options_reset_tokens() -> Response:
+    from .services.mammouth_ai import reset_tokens
+    reset_tokens()
+    return jsonify({"success": True, "tokens_used": 0})
+
+
+@web.route("/options/generate", methods=["POST"])
+def options_generate() -> Response:
+    from .services.mammouth_ai import load_settings, generate_city
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée. Enregistrez d'abord votre clé."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    city_input = request.form.get("city_input", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not city_input:
+        return jsonify({"success": False, "error": "Veuillez entrer un nom de ville."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    max_tokens = int(request.form.get("max_tokens", 2000))
+    result = generate_city(api_key, model, city_input, prompt_text, max_tokens=max_tokens)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/import", methods=["POST"])
+def ai_lab_import() -> Response:
+    """AJAX import from AI Lab — returns JSON instead of redirect."""
+    stats_text = request.form.get("stats_text", "").strip()
+    periods_text = request.form.get("periods_text", "").strip()
+    fiche_text = request.form.get("fiche_text", "").strip()
+    skip_pop = request.form.get("skip_population") == "on"
+    skip_periods = request.form.get("skip_periods") == "on"
+    skip_fiche = request.form.get("skip_fiche") == "on"
+    skip_photo = request.form.get("skip_photo") == "on"
+
+    if not stats_text:
+        return jsonify({"success": False, "error": "Le champ population (Step 1) est vide."})
+
+    try:
+        stats = parse_stats_text(stats_text)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": f"Erreur de parsing population: {exc}"})
+
+    from .db import get_db
+    conn = get_db()
+    messages = []
+
+    if skip_pop:
+        cursor = conn.execute(
+            """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
+               VALUES (?, ?, ?, ?, ?, ?)
+               ON CONFLICT(city_slug) DO UPDATE SET
+                   city_name = excluded.city_name, region = excluded.region,
+                   country = excluded.country, city_color = excluded.city_color,
+                   source_file = excluded.source_file
+               RETURNING city_id""",
+            (stats["city_name"], stats["city_slug"], stats["region"],
+             stats["country"], stats["city_color"], "ai-lab-import"),
+        )
+        city_id = cursor.fetchone()[0]
+        conn.commit()
+        messages.append("Population conservée (non remplacée).")
+    else:
+        try:
+            city_id = import_city_stats(conn, stats)
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            return jsonify({"success": False, "error": f"Erreur DB (population): {exc}"})
+        messages.append(
+            f"Population importée — {len(stats['years'])} années, "
+            f"{len(stats['annotations'])} annotations."
+        )
+
+    # Auto-geocode
+    existing_coords = conn.execute(
+        "SELECT latitude, longitude FROM dim_city WHERE city_id = ?", (city_id,)
+    ).fetchone()
+    if existing_coords and (existing_coords[0] is None or existing_coords[1] is None):
+        from .services.city_coordinates import geocode_city
+        coords = geocode_city(stats["city_name"], stats["region"], stats["country"])
+        if coords:
+            conn.execute(
+                "UPDATE dim_city SET latitude = ?, longitude = ? WHERE city_id = ?",
+                (coords["lat"], coords["lng"], city_id),
+            )
+            conn.commit()
+            messages.append(f"Coordonnées géocodées ({coords['lat']}, {coords['lng']}).")
+
+    # Periods
+    if periods_text and not skip_periods:
+        sections = parse_period_details_text(periods_text)
+        if sections:
+            try:
+                count = import_city_periods(conn, city_id, stats["city_slug"], sections)
+                save_period_details_file(stats["city_slug"], periods_text)
+                conn.commit()
+                messages.append(f"{count} périodes détaillées importées.")
+            except Exception as exc:
+                conn.rollback()
+                messages.append(f"Erreur périodes: {exc}")
+    elif skip_periods:
+        messages.append("Périodes conservées (non remplacées).")
+
+    # Fiche
+    if fiche_text and not skip_fiche:
+        try:
+            _header, fiche_sections = parse_fiche_text(fiche_text)
+            if fiche_sections:
+                import_city_fiche(conn, city_id, stats["city_slug"], fiche_text, fiche_sections)
+                conn.commit()
+                messages.append(f"{len(fiche_sections)} sections fiche complète importées.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"Erreur fiche complète: {exc}")
+
+    # Photo
+    if not skip_photo:
+        try:
+            photo_result = fetch_and_save_city_photo(
+                stats["city_slug"], stats["city_name"], stats["region"], stats["country"],
+            )
+            if photo_result["success"]:
+                messages.append(f"Photo importée: {photo_result['filename']}")
+                # Also register in photo library (dim_city_photo)
+                try:
+                    from .services.city_photos import save_photo_to_library, CITY_PHOTO_DIR
+                    photo_path = CITY_PHOTO_DIR / photo_result["filename"]
+                    if photo_path.exists():
+                        save_photo_to_library(
+                            conn, city_id, stats["city_slug"],
+                            photo_path.read_bytes(), photo_result["filename"],
+                            source_url=photo_result.get("source_page", ""),
+                            attribution="Wikipedia/Wikimedia — vérifier les licences.",
+                        )
+                except Exception as exc_lib:
+                    messages.append(f"⚠️ Bibliothèque photo: {exc_lib}")
+            else:
+                messages.append(f"Photo: {photo_result['error']}")
+        except Exception as exc:
+            messages.append(f"Erreur photo: {exc}")
+    else:
+        messages.append("Photo conservée (non remplacée).")
+
+    # Sync villestats_RAW.py
+    try:
+        from scripts.export_villestats_raw import export_all
+        from pathlib import Path
+        raw_path = Path(__file__).resolve().parent.parent / "villestats_RAW.py"
+        raw_path.write_text(export_all(), encoding="utf-8")
+        messages.append("villestats_RAW.py synchronisé.")
+    except Exception as exc:
+        messages.append(f"⚠️ villestats_RAW.py: {exc}")
+
+    return jsonify({
+        "success": True,
+        "city_name": stats["city_name"],
+        "city_slug": stats["city_slug"],
+        "messages": messages,
+        "redirect": url_for("web.city_detail", city_slug=stats["city_slug"]),
+    })
