@@ -21,6 +21,8 @@ SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
 SEARCH_URL = "https://en.wikipedia.org/w/api.php?action=query&list=search&utf8=1&format=json&srlimit=5&srsearch={query}"
 WIKI_IMAGES_URL = "https://en.wikipedia.org/w/api.php?action=query&titles={title}&prop=images&imlimit=50&format=json"
 WIKI_IMAGEINFO_URL = "https://en.wikipedia.org/w/api.php?action=query&titles={titles}&prop=imageinfo&iiprop=url|size|mime|thumbmime&iiurlwidth=400&format=json"
+COMMONS_SEARCH_URL = "https://commons.wikimedia.org/w/api.php?action=query&list=search&srnamespace=6&srsearch={query}&srlimit=40&format=json"
+COMMONS_IMAGEINFO_URL = "https://commons.wikimedia.org/w/api.php?action=query&titles={titles}&prop=imageinfo&iiprop=url|size|mime&iiurlwidth=400&format=json"
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -480,3 +482,293 @@ def download_web_image(url: str) -> tuple[bytes, str] | None:
             ext = ".jpg"
 
     return data, ext
+
+
+# ---------------------------------------------------------------------------
+# Wikimedia Commons image search
+# ---------------------------------------------------------------------------
+
+def search_commons_images(city_name: str, region: str | None, country: str | None) -> list[dict[str, Any]]:
+    """Search Wikimedia Commons for city images. Returns list of candidates with thumbnails."""
+    query_parts = [city_name]
+    if region:
+        query_parts.append(region)
+    if country:
+        query_parts.append(country)
+    search_query = " ".join(query_parts)
+
+    try:
+        url = COMMONS_SEARCH_URL.format(query=quote(search_query))
+        data = _http_get_json(url)
+    except Exception:
+        return []
+
+    results = data.get("query", {}).get("search", [])
+    if not results:
+        return []
+
+    # Collect File: titles from search results
+    file_titles = []
+    for r in results:
+        title = r.get("title", "")
+        if title and any(title.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".webp")):
+            file_titles.append(title)
+
+    if not file_titles:
+        return []
+
+    images: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+
+    # Batch imageinfo requests (10 at a time)
+    for batch_start in range(0, min(len(file_titles), 30), 10):
+        batch = file_titles[batch_start:batch_start + 10]
+        titles_param = "|".join(batch)
+        try:
+            info_url = COMMONS_IMAGEINFO_URL.format(titles=quote(titles_param, safe="|_(),.-"))
+            info_data = _http_get_json(info_url)
+        except Exception:
+            continue
+
+        info_pages = info_data.get("query", {}).get("pages", {})
+        for ipage in info_pages.values():
+            ii_list = ipage.get("imageinfo", [])
+            if not ii_list:
+                continue
+            ii = ii_list[0]
+            img_url = ii.get("url", "")
+            mime = ii.get("mime", "")
+            if not img_url or img_url in seen_urls:
+                continue
+            if mime not in ("image/jpeg", "image/png", "image/webp"):
+                continue
+            width = ii.get("width", 0)
+            height = ii.get("height", 0)
+            if width < 200 or height < 150:
+                continue
+
+            seen_urls.add(img_url)
+            thumb_url = ii.get("thumburl", img_url)
+            page_title = ipage.get("title", "").replace("File:", "").replace(" ", "_")
+
+            images.append({
+                "url": img_url,
+                "thumb_url": thumb_url,
+                "title": ipage.get("title", ""),
+                "width": width,
+                "height": height,
+                "source_page": f"https://commons.wikimedia.org/wiki/File:{quote(page_title, safe='_(),.-')}",
+            })
+
+    return images[:20]
+
+
+# ---------------------------------------------------------------------------
+# Annotation photo search (smart query with translation)
+# ---------------------------------------------------------------------------
+
+ANNOTATION_PHOTO_DIR = PROJECT_ROOT / "static" / "images" / "annotations"
+
+WIKTIONARY_TRANSLATE_URL = (
+    "https://en.wikipedia.org/w/api.php?action=query&list=search"
+    "&utf8=1&format=json&srlimit=1&srsearch={query}"
+)
+
+
+def _translate_label_to_english(label: str) -> str | None:
+    """Try to find an English equivalent of a French annotation label via Wikipedia search."""
+    import re
+    # Strip emoji and parenthesized year
+    cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label)  # remove emoji
+    cleaned = re.sub(r'\(\d{4}\)', '', cleaned).strip()  # remove (year)
+    cleaned = re.sub(r'\s*—\s*', ' ', cleaned)  # replace em-dash with space
+    if not cleaned:
+        return None
+    try:
+        url = WIKTIONARY_TRANSLATE_URL.format(query=quote(cleaned))
+        data = _http_get_json(url)
+        results = data.get("query", {}).get("search", [])
+        if results:
+            return results[0].get("title")
+    except Exception:
+        pass
+    return None
+
+
+def _build_annotation_search_queries(label: str, city_name: str) -> list[str]:
+    """Build multiple search queries from an annotation label for better image results."""
+    import re
+    # Clean label: remove emoji
+    cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label).strip()
+    # Extract text before and after em-dash
+    parts = [p.strip() for p in cleaned.split('—') if p.strip()]
+    # Remove year in parentheses
+    parts = [re.sub(r'\(\d{4}\)', '', p).strip() for p in parts]
+
+    queries = []
+    # Full cleaned label + city
+    full = ' '.join(parts)
+    if full:
+        queries.append(f"{full} {city_name}")
+        queries.append(full)
+    # First part alone (usually the key event)
+    if len(parts) > 1 and parts[0]:
+        queries.append(f"{parts[0]} {city_name}")
+
+    return queries
+
+
+def search_annotation_images(
+    label: str, city_name: str, region: str | None, country: str | None
+) -> list[dict[str, Any]]:
+    """Search Wikipedia + Wikimedia Commons for annotation-related images.
+
+    Uses the annotation label as query, tries English translation too.
+    """
+    queries = _build_annotation_search_queries(label, city_name)
+
+    # Try English translation for more results
+    en_title = _translate_label_to_english(label)
+    if en_title and en_title not in queries:
+        queries.append(f"{en_title} {city_name}")
+        queries.append(en_title)
+
+    images: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+
+    for query in queries[:4]:
+        # Search Wikimedia Commons
+        try:
+            url = COMMONS_SEARCH_URL.format(query=quote(query))
+            data = _http_get_json(url)
+        except Exception:
+            continue
+
+        results = data.get("query", {}).get("search", [])
+        file_titles = [
+            r["title"] for r in results
+            if r.get("title") and any(r["title"].lower().endswith(ext)
+                                      for ext in (".jpg", ".jpeg", ".png", ".webp"))
+        ]
+
+        for batch_start in range(0, min(len(file_titles), 20), 10):
+            batch = file_titles[batch_start:batch_start + 10]
+            titles_param = "|".join(batch)
+            try:
+                info_url = COMMONS_IMAGEINFO_URL.format(
+                    titles=quote(titles_param, safe="|_(),.-")
+                )
+                info_data = _http_get_json(info_url)
+            except Exception:
+                continue
+
+            info_pages = info_data.get("query", {}).get("pages", {})
+            for ipage in info_pages.values():
+                ii_list = ipage.get("imageinfo", [])
+                if not ii_list:
+                    continue
+                ii = ii_list[0]
+                img_url = ii.get("url", "")
+                mime = ii.get("mime", "")
+                if not img_url or img_url in seen_urls:
+                    continue
+                if mime not in ("image/jpeg", "image/png", "image/webp"):
+                    continue
+                width = ii.get("width", 0)
+                height = ii.get("height", 0)
+                if width < 200 or height < 150:
+                    continue
+
+                seen_urls.add(img_url)
+                thumb_url = ii.get("thumburl", img_url)
+                page_title = ipage.get("title", "").replace("File:", "").replace(" ", "_")
+
+                images.append({
+                    "url": img_url,
+                    "thumb_url": thumb_url,
+                    "title": ipage.get("title", ""),
+                    "width": width,
+                    "height": height,
+                    "source_page": f"https://commons.wikimedia.org/wiki/File:{quote(page_title, safe='_(),.-')}",
+                })
+
+        if len(images) >= 20:
+            break
+
+    return images[:20]
+
+
+def save_annotation_photo(
+    conn: Any,
+    annotation_id: int,
+    image_url: str,
+    source_page: str = "",
+) -> dict[str, Any]:
+    """Download and save a photo for an annotation."""
+    result = download_web_image(image_url)
+    if not result:
+        return {"success": False, "error": "Impossible de télécharger l'image."}
+
+    file_bytes, ext = result
+    ANNOTATION_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+    filename = f"ann_{annotation_id}_{uuid.uuid4().hex[:8]}{ext}"
+    dest = ANNOTATION_PHOTO_DIR / filename
+    dest.write_bytes(file_bytes)
+
+    # Remove old photo if exists
+    old = conn.execute(
+        "SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?",
+        (annotation_id,),
+    ).fetchone()
+    if old and old["photo_filename"]:
+        old_path = ANNOTATION_PHOTO_DIR / old["photo_filename"]
+        if old_path.exists():
+            old_path.unlink()
+
+    conn.execute(
+        "UPDATE dim_annotation SET photo_filename = ?, photo_source_url = ? WHERE annotation_id = ?",
+        (filename, source_page, annotation_id),
+    )
+    conn.commit()
+    return {"success": True, "filename": filename}
+
+
+def link_existing_photo_to_annotation(
+    conn: Any,
+    annotation_id: int,
+    city_slug: str,
+    photo_id: int,
+) -> dict[str, Any]:
+    """Link an existing city photo to an annotation by copying it."""
+    row = conn.execute(
+        "SELECT filename FROM dim_city_photo WHERE photo_id = ?", (photo_id,)
+    ).fetchone()
+    if not row:
+        return {"success": False, "error": "Photo introuvable."}
+
+    src_path = CITY_PHOTO_DIR / city_slug / row["filename"]
+    if not src_path.exists():
+        return {"success": False, "error": "Fichier introuvable."}
+
+    ANNOTATION_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+    ext = Path(row["filename"]).suffix
+    new_filename = f"ann_{annotation_id}_{uuid.uuid4().hex[:8]}{ext}"
+    dest = ANNOTATION_PHOTO_DIR / new_filename
+    dest.write_bytes(src_path.read_bytes())
+
+    # Remove old photo if exists
+    old = conn.execute(
+        "SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?",
+        (annotation_id,),
+    ).fetchone()
+    if old and old["photo_filename"]:
+        old_path = ANNOTATION_PHOTO_DIR / old["photo_filename"]
+        if old_path.exists():
+            old_path.unlink()
+
+    conn.execute(
+        "UPDATE dim_annotation SET photo_filename = ?, photo_source_url = '' WHERE annotation_id = ?",
+        (new_filename, annotation_id),
+    )
+    conn.commit()
+    return {"success": True, "filename": new_filename}

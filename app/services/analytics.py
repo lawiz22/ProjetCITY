@@ -936,7 +936,8 @@ class AnalyticsService:
         connection = get_db()
         rows = connection.execute(
             f"""
-            SELECT year, annotation_label, annotation_color, annotation_type
+            SELECT annotation_id, year, annotation_label, annotation_color, annotation_type,
+                   annotation_photo_filename, annotation_photo_source_url
             FROM vw_city_population_analysis
             WHERE city_slug = ?
               AND annotation_label IS NOT NULL

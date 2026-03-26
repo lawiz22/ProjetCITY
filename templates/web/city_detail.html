@@ -196,6 +196,10 @@
             <h3>🔍 Recherche de photos — {{ city.city_name }}</h3>
             <button type="button" class="photo-search-modal-close">&times;</button>
         </div>
+        <div class="photo-search-tabs">
+            <button type="button" class="photo-search-tab active" data-tab="wikipedia">📖 Wikipedia</button>
+            <button type="button" class="photo-search-tab" data-tab="commons">🖼️ Wikimedia Commons</button>
+        </div>
         <div class="photo-search-modal-body">
             <p class="helper-text" id="photo-search-status">Recherche en cours…</p>
             <div class="photo-search-grid" id="photo-search-grid"></div>
@@ -207,6 +211,29 @@
     </div>
 </div>
 
+<!-- Annotation photo search modal -->
+<div class="photo-search-modal" id="ann-photo-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content">
+        <div class="photo-search-modal-header">
+            <h3 id="ann-photo-modal-title">🔍 Recherche de photo</h3>
+            <button type="button" class="photo-search-modal-close">&times;</button>
+        </div>
+        <div class="photo-search-tabs">
+            <button type="button" class="photo-search-tab active" data-ann-tab="search">🌐 Recherche web</button>
+            <button type="button" class="photo-search-tab" data-ann-tab="existing">📎 Photos existantes</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <p class="helper-text" id="ann-photo-status">Recherche en cours…</p>
+            <div class="photo-search-grid" id="ann-photo-grid"></div>
+        </div>
+        <div class="photo-search-modal-footer">
+            <span id="ann-photo-count">Cliquez pour sélectionner</span>
+            <button type="button" class="secondary-button" id="ann-photo-save-btn" disabled>Associer la photo</button>
+        </div>
+    </div>
+</div>
+
 <section class="panel annotation-story-panel" id="city-annotations">
     <div class="panel-head">
         <h2>Annotations temporelles</h2>
@@ -214,18 +241,26 @@
     </div>
     <div class="annotation-story-grid">
         {% for annotation in annotations %}
-        <article class="annotation-card" data-annotation-card data-annotation-id="annotation-{{ loop.index0 }}" data-annotation-year="{{ annotation.year }}" data-annotation-label="{{ annotation.annotation_label }}" data-annotation-color="{{ annotation.annotation_color }}" data-annotation-type="{{ annotation.annotation_type }}">
-            <div class="annotation-card-head">
-                <div class="annotation-card-meta">
-                    <span class="annotation-dot annotation-dot-large" style="background: {{ annotation.annotation_color }}"></span>
-                    <div>
-                        <strong>{{ annotation.year }}</strong>
-                        <p>{{ annotation.annotation_type }}</p>
+        <article class="annotation-card{% if annotation.annotation_photo_filename %} has-photo{% endif %}" data-annotation-card data-annotation-id="annotation-{{ loop.index0 }}" data-annotation-db-id="{{ annotation.annotation_id }}" data-annotation-year="{{ annotation.year }}" data-annotation-label="{{ annotation.annotation_label }}" data-annotation-color="{{ annotation.annotation_color }}" data-annotation-type="{{ annotation.annotation_type }}">
+            {% if annotation.annotation_photo_filename %}
+            <div class="annotation-card-photo" style="background-image: url('{{ url_for('static', filename='images/annotations/' + annotation.annotation_photo_filename) }}');"></div>
+            {% endif %}
+            <div class="annotation-card-body">
+                <div class="annotation-card-head">
+                    <div class="annotation-card-meta">
+                        <span class="annotation-dot annotation-dot-large" style="background: {{ annotation.annotation_color }}"></span>
+                        <div>
+                            <strong>{{ annotation.year }}</strong>
+                            <p>{{ annotation.annotation_type }}</p>
+                        </div>
                     </div>
                 </div>
+                <h3>{{ annotation.annotation_label }}</h3>
+                <div class="annotation-photo-actions">
+                    <button type="button" class="annotation-photo-btn" data-ann-link="{{ annotation.annotation_id }}" title="Associer une photo existante">📎</button>
+                    <button type="button" class="annotation-photo-btn" data-ann-search="{{ annotation.annotation_id }}" data-ann-label="{{ annotation.annotation_label }}" title="Rechercher sur le web">🔍</button>
+                </div>
             </div>
-            <h3>{{ annotation.annotation_label }}</h3>
-            <button type="button" class="annotation-card-cta" data-annotation-open data-annotation-year="{{ annotation.year }}">Voir la période</button>
         </article>
         {% else %}
         <p>Aucune annotation disponible pour cette ville.</p>
@@ -374,46 +409,74 @@
     var status = document.getElementById('photo-search-status');
     var countSpan = document.getElementById('photo-search-selected-count');
     var importBtn = document.getElementById('photo-search-import-btn');
+    var tabs = modal.querySelectorAll('.photo-search-tab');
     var slug = searchBtn.dataset.citySlug;
     var selected = {};
+    var activeTab = 'wikipedia';
+    var cache = {};  // cache results per tab
 
-    function openModal() {
-        modal.style.display = '';
+    var tabEndpoints = {
+        wikipedia: '/cities/' + encodeURIComponent(slug) + '/photos/search',
+        commons: '/cities/' + encodeURIComponent(slug) + '/photos/search-commons'
+    };
+
+    function renderImages(images) {
         grid.innerHTML = '';
+        if (!images || images.length === 0) {
+            status.textContent = 'Aucune image trouvée.';
+            return;
+        }
+        status.textContent = images.length + ' image(s) trouvée(s) — cliquez pour sélectionner.';
+        images.forEach(function(img) {
+            var card = document.createElement('div');
+            card.className = 'photo-search-card';
+            if (selected[img.url]) card.className += ' photo-search-selected';
+            card.innerHTML = '<img src="' + img.thumb_url + '" alt="' + (img.title || '') + '" loading="lazy" onerror="this.style.display=\'none\'">'
+                + '<span class="photo-search-check">✓</span>'
+                + '<span class="photo-search-size">' + img.width + '×' + img.height + '</span>';
+            card.addEventListener('click', function() {
+                if (selected[img.url]) {
+                    delete selected[img.url];
+                    card.classList.remove('photo-search-selected');
+                } else {
+                    selected[img.url] = img;
+                    card.classList.add('photo-search-selected');
+                }
+                updateCount();
+            });
+            grid.appendChild(card);
+        });
+    }
+
+    function loadTab(tab) {
+        activeTab = tab;
+        tabs.forEach(function(t) {
+            t.classList.toggle('active', t.dataset.tab === tab);
+        });
+        grid.innerHTML = '';
+        if (cache[tab]) {
+            renderImages(cache[tab]);
+            return;
+        }
         status.textContent = 'Recherche en cours…';
-        importBtn.disabled = true;
-        selected = {};
-        updateCount();
-        fetch('/cities/' + encodeURIComponent(slug) + '/photos/search')
+        fetch(tabEndpoints[tab])
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                if (!data.images || data.images.length === 0) {
-                    status.textContent = 'Aucune image trouvée.';
-                    return;
-                }
-                status.textContent = data.images.length + ' image(s) trouvée(s) — cliquez pour sélectionner.';
-                data.images.forEach(function(img) {
-                    var card = document.createElement('div');
-                    card.className = 'photo-search-card';
-                    card.innerHTML = '<img src="' + img.thumb_url + '" alt="' + (img.title || '') + '" loading="lazy" onerror="this.style.display=\'none\'">'
-                        + '<span class="photo-search-check">✓</span>'
-                        + '<span class="photo-search-size">' + img.width + '×' + img.height + '</span>';
-                    card.addEventListener('click', function() {
-                        if (selected[img.url]) {
-                            delete selected[img.url];
-                            card.classList.remove('photo-search-selected');
-                        } else {
-                            selected[img.url] = img;
-                            card.classList.add('photo-search-selected');
-                        }
-                        updateCount();
-                    });
-                    grid.appendChild(card);
-                });
+                cache[tab] = data.images || [];
+                renderImages(cache[tab]);
             })
             .catch(function() {
                 status.textContent = 'Erreur lors de la recherche.';
             });
+    }
+
+    function openModal() {
+        modal.style.display = '';
+        importBtn.disabled = true;
+        selected = {};
+        cache = {};
+        updateCount();
+        loadTab('wikipedia');
     }
 
     function closeModal() { modal.style.display = 'none'; }
@@ -427,6 +490,12 @@
     searchBtn.addEventListener('click', openModal);
     backdrop.addEventListener('click', closeModal);
     closeBtn.addEventListener('click', closeModal);
+
+    tabs.forEach(function(t) {
+        t.addEventListener('click', function() {
+            loadTab(t.dataset.tab);
+        });
+    });
 
     importBtn.addEventListener('click', function() {
         var images = Object.values(selected);
@@ -471,6 +540,192 @@
             overlay.innerHTML = '<img src="' + src + '" alt="Photo">';
             overlay.addEventListener('click', function() { overlay.remove(); });
             document.body.appendChild(overlay);
+        });
+    });
+})();
+</script>
+
+<!-- Annotation photo modal JS -->
+<script>
+(function() {
+    var annModal = document.getElementById('ann-photo-modal');
+    if (!annModal) return;
+
+    var annBackdrop = annModal.querySelector('.photo-search-modal-backdrop');
+    var annCloseBtn = annModal.querySelector('.photo-search-modal-close');
+    var annGrid = document.getElementById('ann-photo-grid');
+    var annStatus = document.getElementById('ann-photo-status');
+    var annCountSpan = document.getElementById('ann-photo-count');
+    var annSaveBtn = document.getElementById('ann-photo-save-btn');
+    var annTitle = document.getElementById('ann-photo-modal-title');
+    var annTabs = annModal.querySelectorAll('[data-ann-tab]');
+    var slug = '{{ city.city_slug }}';
+    var currentAnnId = null;
+    var currentAnnLabel = '';
+    var selectedImage = null;
+    var selectedPhotoId = null;
+    var annActiveTab = 'search';
+    var annCache = {};
+
+    // Existing city photos data for the "existing" tab
+    var existingPhotos = [
+        {% for photo in city_photos %}
+        { photo_id: {{ photo.photo_id }}, filename: '{{ photo.filename }}', path: '{{ url_for("static", filename=photo.photo_path) }}' }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    function renderAnnCards(items, mode) {
+        annGrid.innerHTML = '';
+        if (!items || items.length === 0) {
+            annStatus.textContent = mode === 'existing' ? 'Aucune photo dans la bibliothèque.' : 'Aucune image trouvée.';
+            return;
+        }
+        annStatus.textContent = items.length + ' image(s) — cliquez pour sélectionner.';
+        items.forEach(function(img) {
+            var card = document.createElement('div');
+            card.className = 'photo-search-card';
+            var thumbSrc = mode === 'existing' ? img.path : img.thumb_url;
+            card.innerHTML = '<img src="' + thumbSrc + '" loading="lazy" onerror="this.style.display=\'none\'">'
+                + '<span class="photo-search-check">✓</span>';
+            if (img.width && img.height) {
+                card.innerHTML += '<span class="photo-search-size">' + img.width + '×' + img.height + '</span>';
+            }
+            card.addEventListener('click', function() {
+                annGrid.querySelectorAll('.photo-search-selected').forEach(function(el) {
+                    el.classList.remove('photo-search-selected');
+                });
+                card.classList.add('photo-search-selected');
+                if (mode === 'existing') {
+                    selectedPhotoId = img.photo_id;
+                    selectedImage = null;
+                } else {
+                    selectedImage = img;
+                    selectedPhotoId = null;
+                }
+                annCountSpan.textContent = '1 sélectionnée';
+                annSaveBtn.disabled = false;
+            });
+            annGrid.appendChild(card);
+        });
+    }
+
+    function loadAnnTab(tab) {
+        annActiveTab = tab;
+        annTabs.forEach(function(t) { t.classList.toggle('active', t.dataset.annTab === tab); });
+        annGrid.innerHTML = '';
+        selectedImage = null;
+        selectedPhotoId = null;
+        annSaveBtn.disabled = true;
+        annCountSpan.textContent = 'Cliquez pour sélectionner';
+
+        if (tab === 'existing') {
+            renderAnnCards(existingPhotos, 'existing');
+            return;
+        }
+
+        // Web search tab
+        if (annCache[currentAnnId]) {
+            renderAnnCards(annCache[currentAnnId], 'search');
+            return;
+        }
+        annStatus.textContent = 'Recherche en cours…';
+        fetch('/cities/' + encodeURIComponent(slug) + '/annotations/' + currentAnnId + '/photo/search')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                annCache[currentAnnId] = data.images || [];
+                renderAnnCards(annCache[currentAnnId], 'search');
+            })
+            .catch(function() { annStatus.textContent = 'Erreur lors de la recherche.'; });
+    }
+
+    function openAnnModal(annId, label) {
+        currentAnnId = annId;
+        currentAnnLabel = label;
+        annTitle.textContent = '🔍 Photo — ' + label;
+        annModal.style.display = '';
+        annCache = {};
+        selectedImage = null;
+        selectedPhotoId = null;
+        annSaveBtn.disabled = true;
+        annCountSpan.textContent = 'Cliquez pour sélectionner';
+        loadAnnTab('search');
+    }
+
+    function closeAnnModal() { annModal.style.display = 'none'; }
+
+    annBackdrop.addEventListener('click', closeAnnModal);
+    annCloseBtn.addEventListener('click', closeAnnModal);
+
+    annTabs.forEach(function(t) {
+        t.addEventListener('click', function() { loadAnnTab(t.dataset.annTab); });
+    });
+
+    // Search button on annotation cards
+    document.querySelectorAll('[data-ann-search]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openAnnModal(btn.dataset.annSearch, btn.dataset.annLabel);
+        });
+    });
+
+    // Link existing photo button — opens modal on existing tab
+    document.querySelectorAll('[data-ann-link]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var annId = btn.dataset.annLink;
+            var label = btn.closest('.annotation-card').querySelector('h3').textContent;
+            currentAnnId = annId;
+            currentAnnLabel = label;
+            annTitle.textContent = '📎 Photo — ' + label;
+            annModal.style.display = '';
+            annCache = {};
+            selectedImage = null;
+            selectedPhotoId = null;
+            annSaveBtn.disabled = true;
+            annCountSpan.textContent = 'Cliquez pour sélectionner';
+            loadAnnTab('existing');
+        });
+    });
+
+    // Save button
+    annSaveBtn.addEventListener('click', function() {
+        annSaveBtn.disabled = true;
+        annSaveBtn.textContent = 'Enregistrement…';
+
+        var url, body;
+        if (selectedPhotoId) {
+            url = '/cities/' + encodeURIComponent(slug) + '/annotations/' + currentAnnId + '/photo/link';
+            body = JSON.stringify({ photo_id: selectedPhotoId });
+        } else if (selectedImage) {
+            url = '/cities/' + encodeURIComponent(slug) + '/annotations/' + currentAnnId + '/photo/save';
+            body = JSON.stringify({ url: selectedImage.url, source_page: selectedImage.source_page || '' });
+        } else {
+            return;
+        }
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: body
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                annSaveBtn.textContent = data.error || 'Erreur';
+                setTimeout(function() {
+                    annSaveBtn.textContent = 'Associer la photo';
+                    annSaveBtn.disabled = false;
+                }, 2000);
+            }
+        })
+        .catch(function() {
+            annSaveBtn.textContent = 'Erreur';
+            setTimeout(function() {
+                annSaveBtn.textContent = 'Associer la photo';
+                annSaveBtn.disabled = false;
+            }, 2000);
         });
     });
 })();

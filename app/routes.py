@@ -509,6 +509,23 @@ def city_photo_search(city_slug: str) -> Response:
     return jsonify({"images": images})
 
 
+@web.route("/cities/<city_slug>/photos/search-commons")
+def city_photo_search_commons(city_slug: str) -> Response:
+    """AJAX: search Wikimedia Commons for city images and return candidates."""
+    from .db import get_db
+    from .services.city_photos import search_commons_images
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_name, region, country FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not row:
+        return jsonify({"error": "Ville introuvable.", "images": []})
+
+    images = search_commons_images(row["city_name"], row["region"], row["country"])
+    return jsonify({"images": images})
+
+
 @web.route("/cities/<city_slug>/photos/import-web", methods=["POST"])
 def city_photo_import_web(city_slug: str) -> Response:
     """Import selected web images into the city library."""
@@ -579,6 +596,65 @@ def city_photo_set_primary(city_slug: str, photo_id: int) -> Response:
     set_photo_primary(conn, photo_id, row["city_id"])
     flash("Photo principale mise à jour.", "success")
     return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+
+# ---- Annotation photo routes ----
+
+@web.route("/cities/<city_slug>/annotations/<int:annotation_id>/photo/search")
+def annotation_photo_search(city_slug: str, annotation_id: int) -> Response:
+    """AJAX: search web images for an annotation."""
+    from .db import get_db
+    from .services.city_photos import search_annotation_images
+
+    conn = get_db()
+    city_row = conn.execute(
+        "SELECT city_name, region, country FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    ann_row = conn.execute(
+        "SELECT annotation_label FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)
+    ).fetchone()
+    if not city_row or not ann_row:
+        return jsonify({"error": "Introuvable.", "images": []})
+
+    images = search_annotation_images(
+        ann_row["annotation_label"], city_row["city_name"],
+        city_row["region"], city_row["country"],
+    )
+    return jsonify({"images": images})
+
+
+@web.route("/cities/<city_slug>/annotations/<int:annotation_id>/photo/save", methods=["POST"])
+def annotation_photo_save(city_slug: str, annotation_id: int) -> Response:
+    """Save a web image as the annotation photo."""
+    from .db import get_db
+    from .services.city_photos import save_annotation_photo
+
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data or not data.get("url"):
+        return jsonify({"success": False, "error": "URL manquante."})
+
+    result = save_annotation_photo(
+        conn, annotation_id, data["url"], data.get("source_page", ""),
+    )
+    return jsonify(result)
+
+
+@web.route("/cities/<city_slug>/annotations/<int:annotation_id>/photo/link", methods=["POST"])
+def annotation_photo_link(city_slug: str, annotation_id: int) -> Response:
+    """Link an existing city photo to an annotation."""
+    from .db import get_db
+    from .services.city_photos import link_existing_photo_to_annotation
+
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data or not data.get("photo_id"):
+        return jsonify({"success": False, "error": "photo_id manquant."})
+
+    result = link_existing_photo_to_annotation(
+        conn, annotation_id, city_slug, int(data["photo_id"]),
+    )
+    return jsonify(result)
 
 
 @web.route("/cities/<city_slug>/fiche", methods=["POST"])

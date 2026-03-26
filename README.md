@@ -35,6 +35,11 @@ Une première version web locale est maintenant disponible avec Flask + Jinja.
 - bandes verticales colorées sur les graphiques des villes pour matérialiser les annotations historiques
 - filtres à cocher sur les annotations des fiches ville pour afficher, masquer et réafficher librement les événements voulus
 - cache local d'images par ville dans static/images/cities/
+- bibliothèque de photos multi-images par ville avec upload, recherche web et gestion
+- recherche de photos sur Wikipedia et Wikimedia Commons avec 2 onglets dans la fenêtre de recherche
+- galerie photo avec badges EXIF (GPS, date, appareil), lightbox plein écran et gestion principale/suppression
+- photos d'annotation : chaque événement peut être illustré par une photo (recherche web intelligente ou photo existante)
+- recherche d'images d'annotation avec traduction anglaise automatique pour maximiser les résultats
 - timeline visuelle pour les périodes détaillées des fiches ville
 - repères d'annotations directement reliés aux périodes dans la timeline des fiches ville
 - surbrillance croisée web entre période, annotation et bande graphique active
@@ -49,9 +54,7 @@ Sous Windows PowerShell:
 3. Lancer le serveur web: `python run_web.py`
 4. Ouvrir le navigateur sur `http://127.0.0.1:5000`
 
-Pour générer ou rafraîchir les images locales des villes depuis Wikipedia/Wikimedia:
-
-`python scripts\fetch_city_photos.py`
+Les photos des villes et des annotations sont gérées directement depuis l'interface web (upload, recherche Wikipedia / Wikimedia Commons, sélection).
 
 ### Variables d'environnement disponibles
 
@@ -72,13 +75,14 @@ Le mode écriture est désactivé tant que `PROJETCITY_SQL_ENABLE_WRITE=1` n'est
 
 - un environnement virtuel local `.venv`
 - une base SQLite locale dans `data/city_analysis.db`
-- un schéma en étoile / snowflake minimal avec 6 tables:
+- un schéma en étoile / snowflake minimal avec 7 tables:
   - `fact_city_population`
   - `dim_city`
   - `dim_time`
   - `dim_annotation`
   - `dim_city_period_detail`
   - `dim_city_period_detail_item`
+  - `dim_city_photo`
 - une dimension détaillée des périodes urbaines à partir des fichiers `.txt`
 - une vue analytique prête à interroger: `vw_city_population_analysis`
 - cinq vues analytiques supplémentaires prêtes à l'emploi
@@ -136,6 +140,15 @@ Dimension descriptive:
 - texte de l'annotation
 - couleur unique associée à l'annotation
 - type d'annotation
+- photo associée (fichier et URL source)
+
+### `dim_city_photo`
+Bibliothèque de photos par ville:
+- ville liée à `dim_city`
+- nom du fichier image
+- légende, URL source, attribution
+- indicateur de photo principale
+- métadonnées EXIF (GPS, date, appareil)
 
 ### `dim_city_period_detail`
 Dimension détaillée des périodes par ville:

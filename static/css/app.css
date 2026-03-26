@@ -2157,6 +2157,54 @@ dt {
     transform: translateY(0);
 }
 
+/* Annotation card photo */
+.annotation-card.has-photo {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0;
+}
+.annotation-card-photo {
+    width: 120px;
+    min-height: 100%;
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+    border-radius: 22px 0 0 22px;
+}
+.annotation-card-body {
+    padding: 18px;
+    flex: 1;
+    min-width: 0;
+}
+.annotation-card:not(.has-photo) .annotation-card-body {
+    padding: 0;
+}
+.annotation-photo-actions {
+    display: flex;
+    gap: .4rem;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 160ms ease;
+}
+.annotation-card:hover .annotation-photo-actions {
+    opacity: 1;
+}
+.annotation-photo-btn {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: .8rem;
+    transition: background .15s, border-color .15s;
+}
+.annotation-photo-btn:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
 .annotation-card.is-related {
     border-color: rgba(239, 108, 61, 0.28);
     box-shadow: 0 14px 30px rgba(239, 108, 61, 0.08);
@@ -3789,7 +3837,7 @@ td {
 
 .photo-exif-badge {
     background: var(--accent-3);
-    color: var(--fg);
+    color: #fff;
     padding: 2px 6px;
     border-radius: 4px;
     font-size: .72rem;
@@ -3841,7 +3889,7 @@ td {
 }
 .photo-search-modal-content {
     position: relative;
-    background: var(--bg-card);
+    background: var(--panel-strong);
     border-radius: 12px;
     width: min(90vw, 900px);
     max-height: 85vh;
@@ -3867,6 +3915,31 @@ td {
     cursor: pointer;
     color: var(--fg);
     padding: 0 .3rem;
+}
+.photo-search-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--line);
+    padding: 0 1.2rem;
+}
+.photo-search-tab {
+    padding: .6rem 1.2rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    font-size: .9rem;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color .15s, border-color .15s;
+}
+.photo-search-tab:hover {
+    color: var(--ink);
+}
+.photo-search-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
 }
 .photo-search-modal-body {
     padding: 1rem 1.2rem;

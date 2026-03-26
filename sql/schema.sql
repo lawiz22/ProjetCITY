@@ -30,6 +30,8 @@ CREATE TABLE dim_annotation (
     annotation_label TEXT NOT NULL,
     annotation_color TEXT NOT NULL,
     annotation_type TEXT NOT NULL DEFAULT 'event',
+    photo_filename TEXT,
+    photo_source_url TEXT,
     UNIQUE(annotation_label, annotation_color)
 );
 
@@ -177,6 +179,8 @@ SELECT
     da.annotation_label,
     da.annotation_color,
     da.annotation_type,
+    da.photo_filename AS annotation_photo_filename,
+    da.photo_source_url AS annotation_photo_source_url,
     f.source_file
 FROM fact_city_population f
 INNER JOIN dim_city dc
