@@ -92,12 +92,17 @@ def city_detail(city_slug: str) -> str:
     from .db import get_db
     fiche = get_city_fiche(get_db(), city["city_id"])
 
+    from .services.city_photos import get_city_photos
+    conn = get_db()
+    city_photos = get_city_photos(conn, city_slug)
+
     return render_template(
         "web/city_detail.html",
         page_title=city["city_name"],
         filters=filters,
         city=city,
         fiche=fiche,
+        city_photos=city_photos,
         periods=service.get_city_periods(city_slug, filters),
         annotations=service.get_city_annotations(city_slug, filters),
         chart_payload=service.get_city_chart_payload(city_slug, filters),
@@ -268,7 +273,7 @@ def add_city_check_slug() -> Response:
             "SELECT COUNT(*) FROM dim_city_fiche_section WHERE fiche_id = ?", (fiche[0],)
         ).fetchone()[0]
     from app.services.city_photos import get_city_photo
-    has_photo = get_city_photo(row["city_slug"]).get("has_photo", False)
+    has_photo = get_city_photo(row["city_slug"], conn).get("has_photo", False)
     return jsonify({
         "exists": True,
         "city_name": row["city_name"],
@@ -445,6 +450,134 @@ def city_photo_import(city_slug: str) -> Response:
         flash(f"Photo importée: {result['filename']}", "success")
     else:
         flash(result["error"], "error")
+    return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+
+# ------------------------------------------------------------------
+#  Photo Library
+# ------------------------------------------------------------------
+
+@web.route("/cities/<city_slug>/photos/upload", methods=["POST"])
+def city_photo_upload(city_slug: str) -> Response:
+    """Upload one or more photos to the city library."""
+    from .db import get_db
+    from .services.city_photos import save_photo_to_library
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_id FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not row:
+        flash("Ville introuvable.", "error")
+        return redirect(url_for("web.city_directory"))
+
+    files = request.files.getlist("photo_files")
+    if not files or all(not f.filename for f in files):
+        flash("Aucun fichier sélectionné.", "error")
+        return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+    imported = 0
+    for f in files:
+        if not f.filename:
+            continue
+        result = save_photo_to_library(
+            conn, row["city_id"], city_slug,
+            f.read(), f.filename,
+            attribution="Photo uploadée manuellement.",
+        )
+        if result["success"]:
+            imported += 1
+
+    flash(f"{imported} photo(s) ajoutée(s) à la bibliothèque.", "success")
+    return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+
+@web.route("/cities/<city_slug>/photos/search")
+def city_photo_search(city_slug: str) -> Response:
+    """AJAX: search Wikipedia for city images and return candidates."""
+    from .db import get_db
+    from .services.city_photos import search_wikipedia_images
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_name, region, country FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not row:
+        return jsonify({"error": "Ville introuvable.", "images": []})
+
+    images = search_wikipedia_images(row["city_name"], row["region"], row["country"])
+    return jsonify({"images": images})
+
+
+@web.route("/cities/<city_slug>/photos/import-web", methods=["POST"])
+def city_photo_import_web(city_slug: str) -> Response:
+    """Import selected web images into the city library."""
+    from .db import get_db
+    from .services.city_photos import download_web_image, save_photo_to_library
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_id FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not row:
+        return jsonify({"error": "Ville introuvable.", "imported": 0})
+
+    data = request.get_json(silent=True)
+    if not data or not isinstance(data.get("images"), list):
+        return jsonify({"error": "Aucune image sélectionnée.", "imported": 0})
+
+    imported = 0
+    for img in data["images"]:
+        url = img.get("url", "")
+        if not url:
+            continue
+        result = download_web_image(url)
+        if not result:
+            continue
+        file_bytes, ext = result
+        save_result = save_photo_to_library(
+            conn, row["city_id"], city_slug,
+            file_bytes, f"web-import{ext}",
+            source_url=img.get("source_page", ""),
+            attribution="Wikipedia/Wikimedia — vérifier les licences.",
+        )
+        if save_result["success"]:
+            imported += 1
+
+    return jsonify({"imported": imported})
+
+
+@web.route("/cities/<city_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+def city_photo_delete(city_slug: str, photo_id: int) -> Response:
+    """Delete a photo from the library."""
+    from .db import get_db
+    from .services.city_photos import delete_photo_from_library
+
+    conn = get_db()
+    deleted = delete_photo_from_library(conn, photo_id, city_slug)
+    if deleted:
+        flash("Photo supprimée.", "success")
+    else:
+        flash("Photo introuvable.", "error")
+    return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+
+@web.route("/cities/<city_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+def city_photo_set_primary(city_slug: str, photo_id: int) -> Response:
+    """Set a photo as the primary for the city."""
+    from .db import get_db
+    from .services.city_photos import set_photo_primary
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_id FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not row:
+        flash("Ville introuvable.", "error")
+        return redirect(url_for("web.city_directory"))
+
+    set_photo_primary(conn, photo_id, row["city_id"])
+    flash("Photo principale mise à jour.", "success")
     return redirect(url_for("web.city_detail", city_slug=city_slug))
 
 

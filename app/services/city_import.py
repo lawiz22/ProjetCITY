@@ -104,7 +104,9 @@ def parse_stats_text(text: str) -> dict[str, Any]:
     """Parse the Python-style stats block (CITY_NAME, CITY_COLOR, years, population, annotations)."""
     result: dict[str, Any] = {}
 
-    city_match = re.search(r'CITY_NAME\s*=\s*["\'](.+?)["\']', text)
+    city_match = re.search(r'CITY_NAME\s*=\s*"([^"]+)"', text)
+    if not city_match:
+        city_match = re.search(r"CITY_NAME\s*=\s*'([^']+)'", text)
     if not city_match:
         raise ValueError("CITY_NAME introuvable dans le texte.")
     result["raw_city_name"] = city_match.group(1)

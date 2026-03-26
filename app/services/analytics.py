@@ -760,7 +760,7 @@ class AnalyticsService:
                 record["trend_label"] = "En croissance"
             else:
                 record["trend_label"] = "Stable"
-            record.update(get_city_photo(record["city_slug"]))
+            record.update(get_city_photo(record["city_slug"], connection))
             result.append(record)
         return result
 
@@ -847,7 +847,7 @@ class AnalyticsService:
         else:
             record["trend_label"] = "Stable"
             record["trend_symbol"] = "•"
-        record.update(get_city_photo(record["city_slug"]))
+        record.update(get_city_photo(record["city_slug"], connection))
         return record
 
     def get_city_periods(self, city_slug: str, filters: dict[str, str | None]) -> list[dict[str, Any]]:
@@ -1432,7 +1432,7 @@ class AnalyticsService:
         results = []
         for r in rows:
             d = dict(r)
-            d["has_photo"] = get_city_photo(d["city_slug"]).get("has_photo", False)
+            d["has_photo"] = get_city_photo(d["city_slug"], get_db()).get("has_photo", False)
             results.append(d)
         return results
 

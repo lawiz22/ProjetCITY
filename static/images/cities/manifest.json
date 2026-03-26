@@ -790,5 +790,131 @@
     "source_page": "https://en.wikipedia.org/wiki/Lincoln%2C_Nebraska",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Aerial_view_of_the_old_Haymarket_and_West_Haymarket%2C_Lincoln%2C_Nebraska%2C_USA.jpg/330px-Aerial_view_of_the_old_Haymarket_and_West_Haymarket%2C_Lincoln%2C_Nebraska%2C_USA.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "lethbridge-alberta": {
+    "filename": "lethbridge-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Lethbridge",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Lethbridge_downtown.jpg/330px-Lethbridge_downtown.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "everett-washington": {
+    "filename": "everett-washington.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Everett%2C_Washington",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Everett_Station_and_Everett_skyline%2C_April_2020.jpg/330px-Everett_Station_and_Everett_skyline%2C_April_2020.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "penticton-british-columbia": {
+    "filename": "penticton-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Penticton",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Penticton_British_Columbia.jpg/330px-Penticton_British_Columbia.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "walla-walla-washington": {
+    "filename": "walla-walla-washington.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Walla_Walla%2C_Washington",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Second_and_Main_in_Walla_Walla.jpg/330px-Second_and_Main_in_Walla_Walla.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "spokane-washington": {
+    "filename": "spokane-washington.png",
+    "source_page": "https://en.wikipedia.org/wiki/Spokane%2C_Washington",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Spokane_aerial%2C_May_2023_%28cropped%29.png/330px-Spokane_aerial%2C_May_2023_%28cropped%29.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "fredericton-new-brunswick": {
+    "filename": "fredericton-new-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Fredericton",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Fredericton%2C_NB_%28cropped%29.jpg/330px-Fredericton%2C_NB_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "perce-quebec": {
+    "filename": "perce-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Perc%C3%A9%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Perc%C3%A9%2C_Quebec%2C_Canada_1.jpg/330px-Perc%C3%A9%2C_Quebec%2C_Canada_1.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "plattsburgh-new-york": {
+    "filename": "plattsburgh-new-york.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Plattsburgh%2C_New_York",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Plattsburgh%2C_New_York.jpg/330px-Plattsburgh%2C_New_York.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "salina-kansas": {
+    "filename": "salina-kansas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Salina%2C_Kansas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Salina_water_tower.jpg/330px-Salina_water_tower.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "topeka-kansas": {
+    "filename": "topeka-kansas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Topeka%2C_Kansas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Kansas_Capitol.jpg/330px-Kansas_Capitol.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "portland-maine": {
+    "filename": "portland-maine.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Portland%2C_Maine",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/TheOldPort.jpg/330px-TheOldPort.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "ogunquit-maine": {
+    "filename": "ogunquit-maine.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Ogunquit%2C_Maine",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Ogunquit_Public_Library.JPG/330px-Ogunquit_Public_Library.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-john-new-brunswick": {
+    "filename": "saint-john-new-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saint_John%2C_New_Brunswick",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Saint_John%2C_New_Brunswick%2C_Canada.jpg/330px-Saint_John%2C_New_Brunswick%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "oak-island-nova-scotia": {
+    "filename": "oak-island-nova-scotia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Oak_Island",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Island_and_Wharf%2C_Oak_Island%2C_Nova_Scotia%2C_Canada%2C_August_1931.jpg/330px-Island_and_Wharf%2C_Oak_Island%2C_Nova_Scotia%2C_Canada%2C_August_1931.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "lincoln-ontario": {
+    "filename": "lincoln-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Lincoln%2C_Ontario",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/King_Street%2C_Beamsville%2C_Ontario.jpg/330px-King_Street%2C_Beamsville%2C_Ontario.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "niagara-falls-ontario": {
+    "filename": "niagara-falls-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Niagara_Falls",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/3Falls_Niagara.jpg/330px-3Falls_Niagara.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-hyacinthe-quebec": {
+    "filename": "saint-hyacinthe-quebec.png",
+    "source_page": "https://en.wikipedia.org/wiki/Saint-Hyacinthe",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Saint-Hyacinthe%2C_Quebec.png/330px-Saint-Hyacinthe%2C_Quebec.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "baie-comeau-quebec": {
+    "filename": "baie-comeau-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Baie-Comeau",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Commerce_boulevard_Lasalle%2C_Baie-Comeau.JPG/330px-Commerce_boulevard_Lasalle%2C_Baie-Comeau.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "carleton-sur-mer-quebec": {
+    "filename": "carleton-sur-mer-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Carleton-sur-Mer",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Carleton%2C_Quebec%2C_Canada.jpg/330px-Carleton%2C_Quebec%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-georges-quebec": {
+    "filename": "saint-georges-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saint-Georges%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Pont_David-Roy_04-2024.jpg/330px-Pont_David-Roy_04-2024.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "val-d-or": {
+    "filename": "val-d-or.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Val-d'Or",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Ville_de_Val-d%27or.jpg/330px-Ville_de_Val-d%27or.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

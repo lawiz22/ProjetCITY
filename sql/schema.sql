@@ -14,6 +14,7 @@ DROP VIEW IF EXISTS vw_city_period_detail_with_population;
 DROP VIEW IF EXISTS vw_city_period_detail_analysis;
 DROP VIEW IF EXISTS vw_city_population_analysis;
 
+DROP TABLE IF EXISTS dim_city_photo;
 DROP TABLE IF EXISTS fact_city_population;
 DROP TABLE IF EXISTS ref_population;
 DROP TABLE IF EXISTS dim_city_fiche_section;
@@ -124,6 +125,22 @@ CREATE TABLE dim_city_fiche_section (
     FOREIGN KEY (fiche_id) REFERENCES dim_city_fiche(fiche_id)
 );
 
+CREATE TABLE dim_city_photo (
+    photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    city_id INTEGER NOT NULL,
+    filename TEXT NOT NULL,
+    caption TEXT,
+    source_url TEXT,
+    attribution TEXT,
+    is_primary INTEGER NOT NULL DEFAULT 0 CHECK (is_primary IN (0, 1)),
+    exif_lat REAL,
+    exif_lon REAL,
+    exif_date TEXT,
+    exif_camera TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (city_id) REFERENCES dim_city(city_id)
+);
+
 CREATE INDEX idx_city_slug ON dim_city (city_slug);
 CREATE INDEX idx_city_country ON dim_city (country, region);
 CREATE INDEX idx_period_detail_city ON dim_city_period_detail (city_id, period_order);
@@ -134,6 +151,7 @@ CREATE INDEX idx_fact_time ON fact_city_population (time_id);
 CREATE INDEX idx_fact_annotation ON fact_city_population (annotation_id);
 CREATE INDEX idx_fiche_city ON dim_city_fiche (city_id);
 CREATE INDEX idx_fiche_section ON dim_city_fiche_section (fiche_id, section_order);
+CREATE INDEX idx_photo_city ON dim_city_photo (city_id);
 
 CREATE VIEW vw_city_population_analysis AS
 SELECT

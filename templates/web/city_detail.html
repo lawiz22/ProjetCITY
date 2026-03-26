@@ -13,6 +13,7 @@
         </div>
         <nav class="city-sticky-nav" aria-label="Navigation rapide ville">
             <a href="#city-chart">Courbe</a>
+            <a href="#city-photos">Photos</a>
             <a href="#city-annotations">Annotations</a>
             <a href="#city-timeline">Timeline</a>
             <a href="#city-fiche">Fiche</a>
@@ -87,26 +88,6 @@
     </article>
 </section>
 
-{% if not city.has_photo %}
-<section class="panel-grid panel-grid-1">
-    <article class="panel">
-        <div class="panel-head">
-            <h2>Photo manquante</h2>
-            <span>Importer une photo pour {{ city.city_name }}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
-            <form method="post" action="{{ url_for('web.city_photo_import', city_slug=city.city_slug) }}" style="display:inline;">
-                <button type="submit" class="secondary-button">Chercher sur Wikipedia</button>
-            </form>
-            <form method="post" action="{{ url_for('web.city_photo_import', city_slug=city.city_slug) }}" enctype="multipart/form-data" style="display:inline-flex;align-items:center;gap:.6rem;">
-                <input type="file" name="photo_file" accept=".jpg,.jpeg,.png,.webp" style="font-size:.85rem;">
-                <button type="submit" class="secondary-button">Uploader</button>
-            </form>
-        </div>
-    </article>
-</section>
-{% endif %}
-
 <section class="panel city-chart-panel" id="city-chart">
         <div class="panel-head">
             <h2>Courbe démographique</h2>
@@ -151,6 +132,80 @@
             </aside>
         </div>
 </section>
+
+<section class="panel-grid panel-grid-1" id="city-photos">
+    <article class="panel">
+        <div class="panel-head">
+            <div>
+                <h2>📷 Bibliothèque de photos</h2>
+                <span>{{ city_photos|length }} photo{% if city_photos|length != 1 %}s{% endif %}</span>
+            </div>
+            <div class="photo-lib-actions">
+                <form method="post" action="{{ url_for('web.city_photo_upload', city_slug=city.city_slug) }}" enctype="multipart/form-data" style="display:inline-flex;align-items:center;gap:.5rem;">
+                    <input type="file" name="photo_files" accept=".jpg,.jpeg,.png,.webp" multiple style="font-size:.82rem;max-width:240px;">
+                    <button type="submit" class="secondary-button">Uploader</button>
+                </form>
+                <button type="button" class="secondary-button" id="photo-web-search-btn" data-city-slug="{{ city.city_slug }}">🔍 Rechercher sur le web</button>
+            </div>
+        </div>
+
+        {% if city_photos %}
+        <div class="photo-gallery">
+            {% for photo in city_photos %}
+            <div class="photo-card{% if photo.is_primary %} photo-card-primary{% endif %}">
+                <div class="photo-card-img" style="background-image: url('{{ url_for('static', filename=photo.photo_path) }}');" data-photo-full="{{ url_for('static', filename=photo.photo_path) }}"></div>
+                <div class="photo-card-info">
+                    {% if photo.is_primary %}<span class="photo-badge-primary">★ Principale</span>{% endif %}
+                    {% if photo.exif_lat and photo.exif_lon %}
+                    <span class="photo-exif-badge" title="GPS: {{ photo.exif_lat }}, {{ photo.exif_lon }}">📍 {{ "%.4f"|format(photo.exif_lat) }}, {{ "%.4f"|format(photo.exif_lon) }}</span>
+                    {% endif %}
+                    {% if photo.exif_date %}
+                    <span class="photo-exif-badge" title="Date EXIF">📅 {{ photo.exif_date }}</span>
+                    {% endif %}
+                    {% if photo.exif_camera %}
+                    <span class="photo-exif-badge" title="Appareil">📷 {{ photo.exif_camera }}</span>
+                    {% endif %}
+                    {% if photo.source_url %}
+                    <a href="{{ photo.source_url }}" target="_blank" class="photo-exif-badge photo-source-link">🔗 Source</a>
+                    {% endif %}
+                    <div class="photo-card-actions">
+                        {% if not photo.is_primary %}
+                        <form method="post" action="{{ url_for('web.city_photo_set_primary', city_slug=city.city_slug, photo_id=photo.photo_id) }}" style="display:inline;">
+                            <button type="submit" class="photo-action-btn" title="Définir comme photo principale">★</button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{{ url_for('web.city_photo_delete', city_slug=city.city_slug, photo_id=photo.photo_id) }}" style="display:inline;" onsubmit="return confirm('Supprimer cette photo ?');">
+                            <button type="submit" class="photo-action-btn photo-action-delete" title="Supprimer">🗑</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="helper-text" style="padding:1rem 0;">Aucune photo dans la bibliothèque. Utilisez les boutons ci-dessus pour en ajouter.</p>
+        {% endif %}
+    </article>
+</section>
+
+<!-- Photo search modal -->
+<div class="photo-search-modal" id="photo-search-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content">
+        <div class="photo-search-modal-header">
+            <h3>🔍 Recherche de photos — {{ city.city_name }}</h3>
+            <button type="button" class="photo-search-modal-close">&times;</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <p class="helper-text" id="photo-search-status">Recherche en cours…</p>
+            <div class="photo-search-grid" id="photo-search-grid"></div>
+        </div>
+        <div class="photo-search-modal-footer">
+            <span id="photo-search-selected-count">0 sélectionnée(s)</span>
+            <button type="button" class="secondary-button" id="photo-search-import-btn" disabled>Importer la sélection</button>
+        </div>
+    </div>
+</div>
 
 <section class="panel annotation-story-panel" id="city-annotations">
     <div class="panel-head">
@@ -306,5 +361,119 @@
     </form>
 </section>
 {% endif %}
+
+<script>
+(function() {
+    var searchBtn = document.getElementById('photo-web-search-btn');
+    var modal = document.getElementById('photo-search-modal');
+    if (!searchBtn || !modal) return;
+
+    var backdrop = modal.querySelector('.photo-search-modal-backdrop');
+    var closeBtn = modal.querySelector('.photo-search-modal-close');
+    var grid = document.getElementById('photo-search-grid');
+    var status = document.getElementById('photo-search-status');
+    var countSpan = document.getElementById('photo-search-selected-count');
+    var importBtn = document.getElementById('photo-search-import-btn');
+    var slug = searchBtn.dataset.citySlug;
+    var selected = {};
+
+    function openModal() {
+        modal.style.display = '';
+        grid.innerHTML = '';
+        status.textContent = 'Recherche en cours…';
+        importBtn.disabled = true;
+        selected = {};
+        updateCount();
+        fetch('/cities/' + encodeURIComponent(slug) + '/photos/search')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data.images || data.images.length === 0) {
+                    status.textContent = 'Aucune image trouvée.';
+                    return;
+                }
+                status.textContent = data.images.length + ' image(s) trouvée(s) — cliquez pour sélectionner.';
+                data.images.forEach(function(img) {
+                    var card = document.createElement('div');
+                    card.className = 'photo-search-card';
+                    card.innerHTML = '<img src="' + img.thumb_url + '" alt="' + (img.title || '') + '" loading="lazy" onerror="this.style.display=\'none\'">'
+                        + '<span class="photo-search-check">✓</span>'
+                        + '<span class="photo-search-size">' + img.width + '×' + img.height + '</span>';
+                    card.addEventListener('click', function() {
+                        if (selected[img.url]) {
+                            delete selected[img.url];
+                            card.classList.remove('photo-search-selected');
+                        } else {
+                            selected[img.url] = img;
+                            card.classList.add('photo-search-selected');
+                        }
+                        updateCount();
+                    });
+                    grid.appendChild(card);
+                });
+            })
+            .catch(function() {
+                status.textContent = 'Erreur lors de la recherche.';
+            });
+    }
+
+    function closeModal() { modal.style.display = 'none'; }
+
+    function updateCount() {
+        var n = Object.keys(selected).length;
+        countSpan.textContent = n + ' sélectionnée(s)';
+        importBtn.disabled = n === 0;
+    }
+
+    searchBtn.addEventListener('click', openModal);
+    backdrop.addEventListener('click', closeModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    importBtn.addEventListener('click', function() {
+        var images = Object.values(selected);
+        if (images.length === 0) return;
+        importBtn.disabled = true;
+        importBtn.textContent = 'Importation…';
+
+        fetch('/cities/' + encodeURIComponent(slug) + '/photos/import-web', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ images: images })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.imported > 0) {
+                location.reload();
+            } else {
+                importBtn.textContent = 'Aucune image importée';
+                setTimeout(function() {
+                    importBtn.textContent = 'Importer la sélection';
+                    importBtn.disabled = false;
+                }, 2000);
+            }
+        })
+        .catch(function() {
+            importBtn.textContent = 'Erreur';
+            setTimeout(function() {
+                importBtn.textContent = 'Importer la sélection';
+                importBtn.disabled = false;
+            }, 2000);
+        });
+    });
+
+    // Lightbox on gallery photos
+    document.querySelectorAll('.photo-card-img').forEach(function(el) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function() {
+            var src = el.dataset.photoFull;
+            if (!src) return;
+            var overlay = document.createElement('div');
+            overlay.className = 'photo-lightbox';
+            overlay.innerHTML = '<img src="' + src + '" alt="Photo">';
+            overlay.addEventListener('click', function() { overlay.remove(); });
+            document.body.appendChild(overlay);
+        });
+    });
+})();
+</script>
 
 {% endblock %}
