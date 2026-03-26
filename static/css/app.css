@@ -3988,6 +3988,9 @@ td {
     align-items: center;
     justify-content: center;
 }
+/* Form modal sits at 9000, photo modal on top at 9100 */
+#ann-form-modal  { z-index: 9000; }
+#ann-photo-modal { z-index: 9100; }
 .photo-search-modal-backdrop {
     position: absolute;
     inset: 0;
