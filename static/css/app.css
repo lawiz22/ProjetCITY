@@ -2205,6 +2205,112 @@ dt {
     border-color: var(--accent);
 }
 
+/* Annotation band hover tooltip on chart */
+.ann-band-tooltip {
+    position: absolute;
+    z-index: 100;
+    pointer-events: none;
+    max-width: 220px;
+    background: var(--panel-strong, #fffdfa);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.15);
+    overflow: hidden;
+}
+.ann-band-tooltip-inner {
+    display: flex;
+    flex-direction: column;
+}
+.ann-band-tooltip-img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    display: block;
+}
+.ann-band-tooltip-text {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.ann-band-tooltip-text strong {
+    font-size: .82rem;
+}
+.ann-band-tooltip-text span {
+    font-size: .75rem;
+    color: var(--muted);
+    line-height: 1.3;
+}
+
+/* Annotation photo thumbnails in timeline period cards */
+.timeline-annotation-photos {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.timeline-annotation-photo-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px 3px 3px;
+    background: rgba(255,255,255,.7);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: .72rem;
+    color: var(--muted);
+    position: relative;
+    cursor: pointer;
+}
+.timeline-annotation-photo-chip > img {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+.timeline-annotation-photo-chip > span {
+    line-height: 1.2;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Large preview on hover */
+.timeline-annotation-photo-chip .photo-chip-preview {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    z-index: 120;
+    width: 240px;
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.22);
+    overflow: hidden;
+    pointer-events: none;
+}
+.timeline-annotation-photo-chip:hover .photo-chip-preview {
+    display: block;
+}
+.photo-chip-preview img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 0;
+}
+.photo-chip-preview .photo-chip-preview-label {
+    padding: 6px 10px;
+    font-size: .78rem;
+    color: var(--ink);
+    line-height: 1.3;
+    white-space: normal;
+    max-width: none;
+    overflow: visible;
+    text-overflow: unset;
+}
+
 .annotation-card.is-related {
     border-color: rgba(239, 108, 61, 0.28);
     box-shadow: 0 14px 30px rgba(239, 108, 61, 0.08);

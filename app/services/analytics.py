@@ -891,7 +891,8 @@ class AnalyticsService:
                 f.year,
                 da.annotation_label,
                 da.annotation_color,
-                da.annotation_type
+                da.annotation_type,
+                da.photo_filename AS annotation_photo_filename
             FROM dim_city_period_detail pd
             INNER JOIN dim_city city
                 ON city.city_id = pd.city_id
@@ -912,12 +913,16 @@ class AnalyticsService:
         ).fetchall()
         annotation_map: dict[int, list[dict[str, Any]]] = defaultdict(list)
         for annotation in period_annotations:
+            photo_url = ""
+            if annotation["annotation_photo_filename"]:
+                photo_url = f"/static/images/annotations/{annotation['annotation_photo_filename']}"
             annotation_map[annotation["period_detail_id"]].append(
                 {
                     "year": annotation["year"],
                     "label": annotation["annotation_label"],
                     "color": annotation["annotation_color"],
                     "type": annotation["annotation_type"],
+                    "photoUrl": photo_url,
                 }
             )
 
@@ -972,6 +977,9 @@ class AnalyticsService:
 
         for index, annotation in enumerate(annotations):
             year = annotation["year"]
+            photo_url = ""
+            if annotation.get("annotation_photo_filename"):
+                photo_url = f"/static/images/annotations/{annotation['annotation_photo_filename']}"
             indexed_annotations.append(
                 {
                     "id": f"annotation-{index}",
@@ -981,6 +989,7 @@ class AnalyticsService:
                     "type": annotation["annotation_type"],
                     "xMin": year - default_band_width,
                     "xMax": year + default_band_width,
+                    "photoUrl": photo_url,
                 }
             )
 

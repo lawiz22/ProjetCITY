@@ -295,6 +295,21 @@
                     <span>Variation {{ period.population_change_pct or 'n/a' }}%</span>
                 </div>
                 {% if period.linked_annotations %}
+                {% set ann_with_photos = period.linked_annotations | selectattr('photoUrl') | list %}
+                {% if ann_with_photos %}
+                <div class="timeline-annotation-photos">
+                    {% for annotation in ann_with_photos %}
+                    <div class="timeline-annotation-photo-chip" style="border-left: 3px solid {{ annotation.color or '#ef6c3d' }}">
+                        <img src="{{ annotation.photoUrl }}" alt="{{ annotation.label }}" loading="lazy">
+                        <span>{{ annotation.year }} · {{ annotation.label }}</span>
+                        <div class="photo-chip-preview">
+                            <img src="{{ annotation.photoUrl }}" alt="{{ annotation.label }}">
+                            <div class="photo-chip-preview-label">{{ annotation.year }} · {{ annotation.label }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 <div class="timeline-annotation-links">
                     <button type="button" class="secondary-button timeline-filter-button" data-period-only-annotations data-period-id="period-{{ period.period_detail_id }}">Ouvrir uniquement ces annotations</button>
                     {% for annotation in period.linked_annotations %}

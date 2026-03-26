@@ -571,32 +571,50 @@ ANNOTATION_PHOTO_DIR = PROJECT_ROOT / "static" / "images" / "annotations"
 
 WIKTIONARY_TRANSLATE_URL = (
     "https://en.wikipedia.org/w/api.php?action=query&list=search"
-    "&utf8=1&format=json&srlimit=1&srsearch={query}"
+    "&utf8=1&format=json&srlimit=3&srsearch={query}"
 )
 
 
-def _translate_label_to_english(label: str) -> str | None:
-    """Try to find an English equivalent of a French annotation label via Wikipedia search."""
+_FR_STOPWORDS = {
+    "le", "la", "les", "de", "du", "des", "un", "une", "et", "en", "au", "aux",
+    "ce", "ces", "se", "sa", "son", "ses", "sur", "par", "pour", "dans", "est",
+    "qui", "que", "avec", "vers", "pas", "plus", "très", "tout", "mais",
+}
+
+
+def _translate_label_to_english(label: str) -> list[str]:
+    """Try to find English equivalents of a French annotation label via Wikipedia search."""
     import re
-    # Strip emoji and parenthesized year
-    cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label)  # remove emoji
-    cleaned = re.sub(r'\(\d{4}\)', '', cleaned).strip()  # remove (year)
-    cleaned = re.sub(r'\s*—\s*', ' ', cleaned)  # replace em-dash with space
+    cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label)
+    cleaned = re.sub(r'\(\d{4}\)', '', cleaned).strip()
+    cleaned = re.sub(r'\s*—\s*', ' ', cleaned)
     if not cleaned:
-        return None
+        return []
+    results_out: list[str] = []
     try:
         url = WIKTIONARY_TRANSLATE_URL.format(query=quote(cleaned))
         data = _http_get_json(url)
         results = data.get("query", {}).get("search", [])
-        if results:
-            return results[0].get("title")
+        for r in results[:3]:
+            t = r.get("title", "")
+            if t:
+                results_out.append(t)
     except Exception:
         pass
-    return None
+    return results_out
 
 
-def _build_annotation_search_queries(label: str, city_name: str) -> list[str]:
-    """Build multiple search queries from an annotation label for better image results."""
+def _extract_keywords(text: str) -> list[str]:
+    """Extract meaningful keywords from a cleaned label, removing French stopwords."""
+    import re
+    words = re.findall(r'[a-zA-ZÀ-ÿ\'-]{3,}', text)
+    return [w for w in words if w.lower() not in _FR_STOPWORDS]
+
+
+def _build_annotation_search_queries(
+    label: str, city_name: str, region: str | None, country: str | None
+) -> list[str]:
+    """Build many search queries from an annotation label for better image results."""
     import re
     # Clean label: remove emoji
     cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label).strip()
@@ -604,18 +622,195 @@ def _build_annotation_search_queries(label: str, city_name: str) -> list[str]:
     parts = [p.strip() for p in cleaned.split('—') if p.strip()]
     # Remove year in parentheses
     parts = [re.sub(r'\(\d{4}\)', '', p).strip() for p in parts]
+    # Extract standalone year
+    year_match = re.search(r'\((\d{4})\)', cleaned)
+    year = year_match.group(1) if year_match else ""
 
-    queries = []
-    # Full cleaned label + city
+    queries: list[str] = []
+    seen_lower: set[str] = set()
+
+    def _add(q: str) -> None:
+        q = q.strip()
+        if q and q.lower() not in seen_lower:
+            seen_lower.add(q.lower())
+            queries.append(q)
+
     full = ' '.join(parts)
+    # Full label combos
     if full:
-        queries.append(f"{full} {city_name}")
-        queries.append(full)
-    # First part alone (usually the key event)
-    if len(parts) > 1 and parts[0]:
-        queries.append(f"{parts[0]} {city_name}")
+        _add(f"{full} {city_name}")
+        if country:
+            _add(f"{full} {country}")
+        _add(full)
+    # Each part with city / alone
+    for p in parts:
+        if p:
+            _add(f"{p} {city_name}")
+            if year:
+                _add(f"{p} {city_name} {year}")
+            _add(p)
+    # Keyword combos (take 2-3 most meaningful words)
+    keywords = _extract_keywords(full)
+    if len(keywords) >= 2:
+        kw_str = ' '.join(keywords[:3])
+        _add(f"{kw_str} {city_name}")
+        if country:
+            _add(f"{kw_str} {country}")
+        _add(kw_str)
+    # Named entities: words starting with uppercase (likely proper nouns)
+    proper = [w for w in re.findall(r'[A-ZÀ-Ý][a-zà-ÿ]{2,}', full)]
+    if proper:
+        _add(' '.join(proper) + f" {city_name}")
+        _add(' '.join(proper))
+    # Acronyms / special tokens (e.g. STELCO, NORAD, I-95)
+    specials = re.findall(r'[A-Z]{2,}[\w-]*', full)
+    for sp in specials[:2]:
+        _add(f"{sp} {city_name}")
+        _add(sp)
 
     return queries
+
+
+def _search_commons_batch(
+    query: str, seen_urls: set[str], limit: int = 30
+) -> list[dict[str, Any]]:
+    """Search Wikimedia Commons for a query and return image dicts."""
+    images: list[dict[str, Any]] = []
+    try:
+        url = COMMONS_SEARCH_URL.format(query=quote(query))
+        data = _http_get_json(url)
+    except Exception:
+        return images
+
+    results = data.get("query", {}).get("search", [])
+    file_titles = [
+        r["title"] for r in results
+        if r.get("title") and any(r["title"].lower().endswith(ext)
+                                  for ext in (".jpg", ".jpeg", ".png", ".webp"))
+    ]
+
+    for batch_start in range(0, min(len(file_titles), limit), 10):
+        batch = file_titles[batch_start:batch_start + 10]
+        titles_param = "|".join(batch)
+        try:
+            info_url = COMMONS_IMAGEINFO_URL.format(
+                titles=quote(titles_param, safe="|_(),.-")
+            )
+            info_data = _http_get_json(info_url)
+        except Exception:
+            continue
+
+        info_pages = info_data.get("query", {}).get("pages", {})
+        for ipage in info_pages.values():
+            ii_list = ipage.get("imageinfo", [])
+            if not ii_list:
+                continue
+            ii = ii_list[0]
+            img_url = ii.get("url", "")
+            mime = ii.get("mime", "")
+            if not img_url or img_url in seen_urls:
+                continue
+            if mime not in ("image/jpeg", "image/png", "image/webp"):
+                continue
+            width = ii.get("width", 0)
+            height = ii.get("height", 0)
+            if width < 200 or height < 150:
+                continue
+
+            seen_urls.add(img_url)
+            thumb_url = ii.get("thumburl", img_url)
+            page_title = ipage.get("title", "").replace("File:", "").replace(" ", "_")
+
+            images.append({
+                "url": img_url,
+                "thumb_url": thumb_url,
+                "title": ipage.get("title", ""),
+                "width": width,
+                "height": height,
+                "source_page": f"https://commons.wikimedia.org/wiki/File:{quote(page_title, safe='_(),.-')}",
+            })
+
+    return images
+
+
+def _search_wiki_article_images(
+    query: str, seen_urls: set[str]
+) -> list[dict[str, Any]]:
+    """Search Wikipedia for an article matching the query, then return its images."""
+    images: list[dict[str, Any]] = []
+    # Find article via search
+    try:
+        search_url = WIKTIONARY_TRANSLATE_URL.format(query=quote(query))
+        data = _http_get_json(search_url)
+    except Exception:
+        return images
+
+    results = data.get("query", {}).get("search", [])
+    if not results:
+        return images
+
+    page_title = results[0].get("title", "")
+    if not page_title:
+        return images
+
+    # Get images from article
+    try:
+        url = WIKI_IMAGES_URL.format(title=quote(page_title.replace(" ", "_"), safe="_(),.-"))
+        data = _http_get_json(url)
+    except Exception:
+        return images
+
+    pages = data.get("query", {}).get("pages", {})
+    image_titles: list[str] = []
+    for page in pages.values():
+        for img in page.get("images", []):
+            title = img.get("title", "")
+            if title and any(title.lower().endswith(ext)
+                            for ext in (".jpg", ".jpeg", ".png", ".webp")):
+                image_titles.append(title)
+
+    if not image_titles:
+        return images
+
+    for batch_start in range(0, min(len(image_titles), 20), 10):
+        batch = image_titles[batch_start:batch_start + 10]
+        titles_param = "|".join(batch)
+        try:
+            info_url = WIKI_IMAGEINFO_URL.format(titles=quote(titles_param, safe="|_(),.-"))
+            info_data = _http_get_json(info_url)
+        except Exception:
+            continue
+
+        info_pages = info_data.get("query", {}).get("pages", {})
+        for ipage in info_pages.values():
+            ii_list = ipage.get("imageinfo", [])
+            if not ii_list:
+                continue
+            ii = ii_list[0]
+            img_url = ii.get("url", "")
+            mime = ii.get("mime", "")
+            if not img_url or img_url in seen_urls:
+                continue
+            if mime not in ("image/jpeg", "image/png", "image/webp"):
+                continue
+            width = ii.get("width", 0)
+            height = ii.get("height", 0)
+            if width < 200 or height < 150:
+                continue
+
+            seen_urls.add(img_url)
+            thumb_url = ii.get("thumburl", img_url)
+
+            images.append({
+                "url": img_url,
+                "thumb_url": thumb_url,
+                "title": ipage.get("title", ""),
+                "width": width,
+                "height": height,
+                "source_page": f"https://en.wikipedia.org/wiki/{quote(page_title.replace(' ', '_'), safe='_(),.-')}",
+            })
+
+    return images
 
 
 def search_annotation_images(
@@ -623,79 +818,63 @@ def search_annotation_images(
 ) -> list[dict[str, Any]]:
     """Search Wikipedia + Wikimedia Commons for annotation-related images.
 
-    Uses the annotation label as query, tries English translation too.
+    Generates many query variations from the label, searches Commons and
+    Wikipedia articles, and tries English translations for broader results.
+    Strategy: English and short queries first (Commons has English metadata),
+    then French, then Wikipedia article images as fallback.
     """
-    queries = _build_annotation_search_queries(label, city_name)
+    import re
 
-    # Try English translation for more results
-    en_title = _translate_label_to_english(label)
-    if en_title and en_title not in queries:
-        queries.append(f"{en_title} {city_name}")
-        queries.append(en_title)
+    fr_queries = _build_annotation_search_queries(label, city_name, region, country)
+
+    # Get English translations FIRST — these work much better on Commons
+    en_titles = _translate_label_to_english(label)
+    en_queries: list[str] = []
+    for en_title in en_titles:
+        en_queries.append(f"{en_title} {city_name}")
+        en_queries.append(en_title)
+
+    # Also extract acronyms / proper nouns for direct short queries
+    cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label).strip()
+    specials = re.findall(r'[A-Z]{2,}[\w-]*', cleaned)
+    short_queries: list[str] = []
+    for sp in specials:
+        short_queries.append(f"{sp} {city_name}")
+        short_queries.append(sp)
+
+    # Build prioritized query list: English > short/acronyms > French
+    seen_lower: set[str] = set()
+    ordered_queries: list[str] = []
+    for q in en_queries + short_queries + fr_queries:
+        ql = q.strip().lower()
+        if ql and ql not in seen_lower:
+            seen_lower.add(ql)
+            ordered_queries.append(q.strip())
 
     images: list[dict[str, Any]] = []
     seen_urls: set[str] = set()
 
-    for query in queries[:4]:
-        # Search Wikimedia Commons
-        try:
-            url = COMMONS_SEARCH_URL.format(query=quote(query))
-            data = _http_get_json(url)
-        except Exception:
-            continue
-
-        results = data.get("query", {}).get("search", [])
-        file_titles = [
-            r["title"] for r in results
-            if r.get("title") and any(r["title"].lower().endswith(ext)
-                                      for ext in (".jpg", ".jpeg", ".png", ".webp"))
-        ]
-
-        for batch_start in range(0, min(len(file_titles), 20), 10):
-            batch = file_titles[batch_start:batch_start + 10]
-            titles_param = "|".join(batch)
-            try:
-                info_url = COMMONS_IMAGEINFO_URL.format(
-                    titles=quote(titles_param, safe="|_(),.-")
-                )
-                info_data = _http_get_json(info_url)
-            except Exception:
-                continue
-
-            info_pages = info_data.get("query", {}).get("pages", {})
-            for ipage in info_pages.values():
-                ii_list = ipage.get("imageinfo", [])
-                if not ii_list:
-                    continue
-                ii = ii_list[0]
-                img_url = ii.get("url", "")
-                mime = ii.get("mime", "")
-                if not img_url or img_url in seen_urls:
-                    continue
-                if mime not in ("image/jpeg", "image/png", "image/webp"):
-                    continue
-                width = ii.get("width", 0)
-                height = ii.get("height", 0)
-                if width < 200 or height < 150:
-                    continue
-
-                seen_urls.add(img_url)
-                thumb_url = ii.get("thumburl", img_url)
-                page_title = ipage.get("title", "").replace("File:", "").replace(" ", "_")
-
-                images.append({
-                    "url": img_url,
-                    "thumb_url": thumb_url,
-                    "title": ipage.get("title", ""),
-                    "width": width,
-                    "height": height,
-                    "source_page": f"https://commons.wikimedia.org/wiki/File:{quote(page_title, safe='_(),.-')}",
-                })
-
-        if len(images) >= 20:
+    # Phase 1: Search Wikimedia Commons with up to 12 queries
+    for query in ordered_queries[:12]:
+        batch = _search_commons_batch(query, seen_urls, limit=30)
+        images.extend(batch)
+        if len(images) >= 30:
             break
 
-    return images[:20]
+    # Phase 2: Search Wikipedia article images as fallback
+    wiki_queries = (en_queries[:2] if en_queries else []) + ordered_queries[:2]
+    seen_wq: set[str] = set()
+    for query in wiki_queries:
+        ql = query.lower()
+        if ql in seen_wq:
+            continue
+        seen_wq.add(ql)
+        if len(images) >= 40:
+            break
+        batch = _search_wiki_article_images(query, seen_urls)
+        images.extend(batch)
+
+    return images[:40]
 
 
 def save_annotation_photo(

@@ -5,7 +5,7 @@ from pathlib import Path
 from flask import Flask
 
 from .config import Config
-from .db import close_db
+from .db import close_db, run_migrations
 from .routes import web
 
 
@@ -19,4 +19,5 @@ def create_app() -> Flask:
     app.config.from_object(Config())
     app.register_blueprint(web)
     app.teardown_appcontext(close_db)
+    run_migrations(app.config["DATABASE_PATH"])
     return app

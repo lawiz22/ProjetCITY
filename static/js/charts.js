@@ -60,6 +60,54 @@ const cityAnnotationPlugin = {
         });
 
         context.restore();
+    },
+    afterEvent(chart, args) {
+        const event = args.event;
+        const bands = chart.$annotationBands || [];
+        if (!bands.length) return;
+
+        let tooltip = chart.canvas.parentElement.querySelector('.ann-band-tooltip');
+
+        if (event.type === 'mouseout') {
+            if (tooltip) tooltip.style.display = 'none';
+            return;
+        }
+        if (event.type !== 'mousemove') return;
+
+        const x = event.x;
+        const y = event.y;
+        const hit = bands.find(b => x >= b.left && x <= b.right && y >= b.top && y <= b.bottom);
+
+        if (!hit) {
+            if (tooltip) tooltip.style.display = 'none';
+            return;
+        }
+
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'ann-band-tooltip';
+            chart.canvas.parentElement.style.position = 'relative';
+            chart.canvas.parentElement.appendChild(tooltip);
+        }
+
+        let html = '<div class="ann-band-tooltip-inner">';
+        if (hit.photoUrl) {
+            html += '<img src="' + hit.photoUrl + '" alt="" class="ann-band-tooltip-img">';
+        }
+        html += '<div class="ann-band-tooltip-text">';
+        html += '<strong style="color:' + hit.color + '">' + hit.year + '</strong>';
+        html += '<span>' + (hit.label || '') + '</span>';
+        html += '</div></div>';
+        tooltip.innerHTML = html;
+        tooltip.style.display = 'block';
+
+        const rect = chart.canvas.parentElement.getBoundingClientRect();
+        const tipWidth = 220;
+        let left = hit.right + 8;
+        if (left + tipWidth > rect.width) left = hit.left - tipWidth - 8;
+        if (left < 0) left = 4;
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = (hit.top + 10) + 'px';
     }
 };
 
