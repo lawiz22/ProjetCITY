@@ -53,6 +53,8 @@ CREATE TABLE dim_city (
     city_color TEXT,
     latitude REAL,
     longitude REAL,
+    area_km2 REAL,
+    density REAL,
     source_file TEXT NOT NULL
 );
 
@@ -166,6 +168,8 @@ SELECT
     dc.city_color,
     dc.latitude,
     dc.longitude,
+    dc.area_km2,
+    dc.density,
     dt.time_id,
     dt.year,
     dt.decade,

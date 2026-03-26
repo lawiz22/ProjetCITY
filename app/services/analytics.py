@@ -719,6 +719,8 @@ class AnalyticsService:
                 v.city_color,
                 v.population,
                 v.year,
+                v.area_km2,
+                v.density,
                 peak.peak_population,
                 peak.peak_year,
                 first_population.first_population_year,

@@ -854,7 +854,65 @@ def import_city_fiche(conn: sqlite3.Connection, city_id: int, city_slug: str,
     # Save raw text to file
     save_fiche_file(city_slug, raw_text)
 
+    # Extract density/area from geography section and update dim_city
+    _update_density_from_fiche(conn, city_id, sections)
+
     return fiche_id
+
+
+def _parse_fiche_number(val: str) -> float | None:
+    """Extract numeric value from fiche strings like '~1 050 hab./km²' or '**~420 km²**'."""
+    val = val.replace("\u202f", " ").replace("\xa0", " ")
+    val = val.replace("**", "").replace("~", "").strip()
+    val = re.sub(r"\s*(hab\.?/km²|km²|hectares?|m\b).*", "", val, flags=re.IGNORECASE)
+    val = val.replace(" ", "")
+    if val.count(",") == 1 and val.count(".") == 0:
+        val = val.replace(",", ".")
+    else:
+        val = val.replace(",", "")
+    try:
+        return float(val)
+    except ValueError:
+        return None
+
+
+def _update_density_from_fiche(conn: sqlite3.Connection, city_id: int,
+                               sections: list[dict[str, Any]]) -> None:
+    """Extract area_km2 and density from fiche geography section and update dim_city."""
+    area: float | None = None
+    density: float | None = None
+
+    for section in sections:
+        title = section.get("title", "").lower()
+        if "ographie" not in title and "ensit" not in title:
+            continue
+        for block in section.get("blocks", []):
+            if block.get("type") == "table":
+                for row in block.get("rows", []):
+                    if len(row) < 2:
+                        continue
+                    label = row[0].lower()
+                    if area is None and ("superficie" in label or "surface" in label) \
+                            and "rmr" not in label and "brûlé" not in label:
+                        area = _parse_fiche_number(row[1])
+                    elif density is None and "densit" in label and "manhattan" not in label:
+                        density = _parse_fiche_number(row[1])
+            elif block.get("type") == "text":
+                text = block.get("value", "")
+                if area is None:
+                    m = re.search(r"Superficie\s*[~:]?\s*([\d\s,.]+)\s*km", text)
+                    if m:
+                        area = _parse_fiche_number(m.group(1))
+                if density is None:
+                    m = re.search(r"Densit[eé]\s*[~:]?\s*([\d\s,.]+)\s*hab", text)
+                    if m:
+                        density = _parse_fiche_number(m.group(1))
+
+    if area is not None or density is not None:
+        conn.execute(
+            "UPDATE dim_city SET area_km2 = COALESCE(?, area_km2), density = COALESCE(?, density) WHERE city_id = ?",
+            (area, density, city_id),
+        )
 
 
 def delete_city_fiche(conn: sqlite3.Connection, city_id: int, city_slug: str) -> bool:

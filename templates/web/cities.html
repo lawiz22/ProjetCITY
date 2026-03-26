@@ -42,6 +42,8 @@
                     <option value="name-desc">Nom Z → A</option>
                     <option value="pop-desc">Population ↓</option>
                     <option value="pop-asc">Population ↑</option>
+                    <option value="density-desc">Densité ↓</option>
+                    <option value="density-asc">Densité ↑</option>
                 </select>
             </div>
             <!-- View switcher -->
@@ -91,7 +93,8 @@
            data-city-name="{{ city.city_name }}"
            data-city-pop="{{ city.population }}"
            data-city-country="{{ city.country }}"
-           data-city-region="{{ city.region }}">
+           data-city-region="{{ city.region }}"
+           data-city-density="{{ city.density or 0 }}">
             <div class="city-card-media">
                 <img src="{{ url_for('static', filename=city.photo_path) }}" alt="Vue de {{ city.city_name }}" loading="lazy">
                 <div class="city-card-overlay"></div>
@@ -150,6 +153,10 @@
                     <li>
                         <span>Pic historique</span>
                         <strong>{{ '{:,}'.format(city.peak_population).replace(',', ' ') }} en {{ city.peak_year }}</strong>
+                    </li>
+                    <li>
+                        <span>Densité</span>
+                        <strong>{{ '{:,.0f}'.format(city.density).replace(',', ' ') if city.density else 'n.d.' }} hab./km²</strong>
                     </li>
                 </ul>
             </div>
@@ -289,6 +296,10 @@
                 var va = (a.dataset.cityName || '').toLowerCase();
                 var vb = (b.dataset.cityName || '').toLowerCase();
                 return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else if (field === 'density') {
+                var va = parseFloat(a.dataset.cityDensity) || 0;
+                var vb = parseFloat(b.dataset.cityDensity) || 0;
+                return dir === 'asc' ? va - vb : vb - va;
             } else {
                 var va = parseInt(a.dataset.cityPop, 10) || 0;
                 var vb = parseInt(b.dataset.cityPop, 10) || 0;
