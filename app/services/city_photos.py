@@ -22,7 +22,7 @@ SEARCH_URL = "https://en.wikipedia.org/w/api.php?action=query&list=search&utf8=1
 WIKI_IMAGES_URL = "https://en.wikipedia.org/w/api.php?action=query&titles={title}&prop=images&imlimit=50&format=json"
 WIKI_IMAGEINFO_URL = "https://en.wikipedia.org/w/api.php?action=query&titles={titles}&prop=imageinfo&iiprop=url|size|mime|thumbmime&iiurlwidth=400&format=json"
 COMMONS_SEARCH_URL = "https://commons.wikimedia.org/w/api.php?action=query&list=search&srnamespace=6&srsearch={query}&srlimit=40&format=json"
-COMMONS_IMAGEINFO_URL = "https://commons.wikimedia.org/w/api.php?action=query&titles={titles}&prop=imageinfo&iiprop=url|size|mime&iiurlwidth=400&format=json"
+COMMONS_IMAGEINFO_URL = "https://commons.wikimedia.org/w/api.php?action=query&titles={titles}&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiurlwidth=400&format=json"
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -575,6 +575,13 @@ WIKTIONARY_TRANSLATE_URL = (
 )
 
 
+import re as _re_module
+
+def _strip_html(text: str) -> str:
+    """Remove HTML tags from text."""
+    return _re_module.sub(r'<[^>]+>', '', text).strip()
+
+
 _FR_STOPWORDS = {
     "le", "la", "les", "de", "du", "des", "un", "une", "et", "en", "au", "aux",
     "ce", "ces", "se", "sa", "son", "ses", "sur", "par", "pour", "dans", "est",
@@ -582,22 +589,112 @@ _FR_STOPWORDS = {
 }
 
 
+_FR_EN_ANNOTATION_DICT: dict[str, str] = {
+    "fusion": "merger amalgamation",
+    "annexion": "annexation",
+    "construction": "construction",
+    "inauguration": "inauguration opening",
+    "fondation": "founding foundation",
+    "incorporation": "incorporation",
+    "incendie": "fire disaster",
+    "inondation": "flood flooding",
+    "tremblement": "earthquake",
+    "explosion": "explosion disaster",
+    "ouverture": "opening",
+    "fermeture": "closing closure",
+    "création": "creation establishment",
+    "abolition": "abolition",
+    "démolition": "demolition",
+    "reconstruction": "reconstruction rebuilding",
+    "rénovation": "renovation",
+    "expansion": "expansion growth",
+    "effondrement": "collapse",
+    "épidémie": "epidemic outbreak",
+    "pandémie": "pandemic",
+    "grève": "strike labor",
+    "émeute": "riot",
+    "élection": "election",
+    "référendum": "referendum",
+    "sommet": "summit conference",
+    "expo": "exposition world fair",
+    "exposition": "exposition exhibition",
+    "olympiques": "olympics olympic games",
+    "jeux": "games",
+    "stade": "stadium",
+    "aéroport": "airport",
+    "métro": "metro subway",
+    "tramway": "tramway streetcar",
+    "pont": "bridge",
+    "autoroute": "highway freeway",
+    "gare": "station railway",
+    "église": "church",
+    "cathédrale": "cathedral",
+    "université": "university",
+    "hôpital": "hospital",
+    "musée": "museum",
+    "bibliothèque": "library",
+    "parc": "park",
+    "port": "port harbor",
+    "barrage": "dam",
+    "centrale": "power plant",
+    "usine": "factory plant",
+    "mine": "mine mining",
+    "chemin de fer": "railway railroad",
+    "guerre": "war",
+    "bataille": "battle",
+    "traité": "treaty",
+    "loi": "law act",
+    "arrondissement": "borough district",
+    "quartier": "neighborhood district",
+    "séparation": "separation",
+    "regroupement": "regrouping consolidation",
+    "défusion": "demerger municipal demerger",
+}
+
+
 def _translate_label_to_english(label: str) -> list[str]:
-    """Try to find English equivalents of a French annotation label via Wikipedia search."""
+    """Translate a French annotation label to English using a dictionary + Wikipedia.
+
+    Uses a built-in French-English dictionary for common annotation terms first,
+    then falls back to Wikipedia search with relevance validation.
+    """
     import re
     cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label)
     cleaned = re.sub(r'\(\d{4}\)', '', cleaned).strip()
     cleaned = re.sub(r'\s*—\s*', ' ', cleaned)
+    cleaned = re.sub(r'[=+]', ' ', cleaned).strip()
     if not cleaned:
         return []
+
     results_out: list[str] = []
+    words_lower = cleaned.lower().split()
+
+    # Phase 1: Dictionary-based translation of key French terms
+    en_parts: list[str] = []
+    for word in words_lower:
+        if word in _FR_EN_ANNOTATION_DICT:
+            en_parts.append(_FR_EN_ANNOTATION_DICT[word])
+        elif word not in _FR_STOPWORDS and len(word) >= 3:
+            en_parts.append(word)  # Keep proper nouns as-is
+    if en_parts:
+        results_out.append(" ".join(en_parts))
+
+    # Phase 2: Wikipedia search with relevance validation
+    # Extract meaningful keywords for the search
+    label_keywords = set(w for w in words_lower
+                         if w not in _FR_STOPWORDS and len(w) >= 3)
     try:
         url = WIKTIONARY_TRANSLATE_URL.format(query=quote(cleaned))
         data = _http_get_json(url)
         results = data.get("query", {}).get("search", [])
         for r in results[:3]:
             t = r.get("title", "")
-            if t:
+            if not t:
+                continue
+            # Validate: the Wikipedia result must share at least one keyword
+            # with the annotation label to be considered relevant
+            title_words = set(t.lower().split())
+            if title_words & label_keywords:
                 results_out.append(t)
     except Exception:
         pass
@@ -611,64 +708,111 @@ def _extract_keywords(text: str) -> list[str]:
     return [w for w in words if w.lower() not in _FR_STOPWORDS]
 
 
+# Geo-context terms appended to queries to avoid off-topic results
+_GEO_CONTEXT = ["city", "ville", "municipality", "history", "historical"]
+
+
 def _build_annotation_search_queries(
     label: str, city_name: str, region: str | None, country: str | None
-) -> list[str]:
-    """Build many search queries from an annotation label for better image results."""
+) -> dict[str, list[str]]:
+    """Build tiered search queries from an annotation label.
+
+    Returns a dict with three tiers:
+      - "specific": keyword + city + year  (best match)
+      - "medium":   keyword + city          (good match)
+      - "generic":  keyword + year or keyword alone (fallback for topic photos)
+
+    The city name is always included in specific/medium tiers.
+    Generic tier intentionally omits the city to find at least *some*
+    relevant topical photos (e.g. a fire, a flood, an inauguration).
+    """
     import re
-    # Clean label: remove emoji
+    # Clean label: remove emoji and special chars like = +
     cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label).strip()
     # Extract text before and after em-dash
     parts = [p.strip() for p in cleaned.split('—') if p.strip()]
-    # Remove year in parentheses
+    # Remove year in parentheses, = signs, + signs
     parts = [re.sub(r'\(\d{4}\)', '', p).strip() for p in parts]
+    parts = [re.sub(r'[=+]', ' ', p).strip() for p in parts]
+    parts = [re.sub(r'\s{2,}', ' ', p).strip() for p in parts if p.strip()]
     # Extract standalone year
     year_match = re.search(r'\((\d{4})\)', cleaned)
     year = year_match.group(1) if year_match else ""
 
-    queries: list[str] = []
+    # Build geo-context strings
+    geo_ctx = [city_name]
+    if region:
+        geo_ctx.append(f"{city_name} {region}")
+    if country:
+        geo_ctx.append(f"{city_name} {country}")
+
+    specific: list[str] = []
+    medium: list[str] = []
+    generic: list[str] = []
     seen_lower: set[str] = set()
 
-    def _add(q: str) -> None:
+    def _add(tier: list[str], q: str) -> None:
         q = q.strip()
         if q and q.lower() not in seen_lower:
             seen_lower.add(q.lower())
-            queries.append(q)
+            tier.append(q)
 
     full = ' '.join(parts)
-    # Full label combos
+    keywords = _extract_keywords(full)
+    kw_str = ' '.join(keywords[:3]) if keywords else full
+
+    # --- SPECIFIC tier: full label + city + year ---
+    if full and year:
+        for geo in geo_ctx:
+            _add(specific, f"{full} {geo} {year}")
+        _add(specific, f"{kw_str} {city_name} {year}")
+
+    # --- MEDIUM tier: label/keywords + city (no year constraint) ---
     if full:
-        _add(f"{full} {city_name}")
-        if country:
-            _add(f"{full} {country}")
-        _add(full)
-    # Each part with city / alone
+        for geo in geo_ctx:
+            _add(medium, f"{full} {geo}")
     for p in parts:
         if p:
-            _add(f"{p} {city_name}")
+            _add(medium, f"{p} {city_name}")
             if year:
-                _add(f"{p} {city_name} {year}")
-            _add(p)
-    # Keyword combos (take 2-3 most meaningful words)
-    keywords = _extract_keywords(full)
+                _add(medium, f"{p} {city_name} {year}")
     if len(keywords) >= 2:
-        kw_str = ' '.join(keywords[:3])
-        _add(f"{kw_str} {city_name}")
-        if country:
-            _add(f"{kw_str} {country}")
-        _add(kw_str)
-    # Named entities: words starting with uppercase (likely proper nouns)
-    proper = [w for w in re.findall(r'[A-ZÀ-Ý][a-zà-ÿ]{2,}', full)]
-    if proper:
-        _add(' '.join(proper) + f" {city_name}")
-        _add(' '.join(proper))
-    # Acronyms / special tokens (e.g. STELCO, NORAD, I-95)
+        for geo in geo_ctx[:2]:
+            _add(medium, f"{kw_str} {geo}")
+    if year:
+        _add(medium, f"{city_name} history {year}")
+    _add(medium, f"{city_name} historical")
+    # Acronyms / special tokens with city context
     specials = re.findall(r'[A-Z]{2,}[\w-]*', full)
     for sp in specials[:2]:
-        _add(f"{sp} {city_name}")
-        _add(sp)
+        _add(medium, f"{sp} {city_name}")
 
-    return queries
+    # --- GENERIC tier: keywords WITHOUT city (topic fallback) ---
+    # These find at least a photo of the right topic (fire, flood, etc.)
+    # Prioritize keywords that are in the FR-EN dictionary (topic words)
+    # over generic adjectives like "grand", "petit", etc.
+    dict_keywords = [k for k in keywords if k.lower() in _FR_EN_ANNOTATION_DICT]
+    other_keywords = [k for k in keywords if k.lower() not in _FR_EN_ANNOTATION_DICT]
+    ranked_keywords = dict_keywords + other_keywords
+    if ranked_keywords:
+        main_kw = ranked_keywords[0]  # most important topic keyword
+        if year:
+            _add(generic, f"{main_kw} {year}")
+            if len(ranked_keywords) >= 2:
+                _add(generic, f"{' '.join(ranked_keywords[:3])} {year}")
+        _add(generic, f"{main_kw} historical")
+        if len(ranked_keywords) >= 2:
+            _add(generic, f"{' '.join(ranked_keywords[:3])}")
+        # English translation of main keyword for generic fallback
+        en_main = _FR_EN_ANNOTATION_DICT.get(main_kw.lower(), "")
+        if en_main:
+            first_en = en_main.split()[0]
+            if year:
+                _add(generic, f"{first_en} {year}")
+                _add(generic, f"{first_en} historical {year}")
+            _add(generic, f"{first_en} historical")
+
+    return {"specific": specific, "medium": medium, "generic": generic}
 
 
 def _search_commons_batch(
@@ -721,10 +865,23 @@ def _search_commons_batch(
             thumb_url = ii.get("thumburl", img_url)
             page_title = ipage.get("title", "").replace("File:", "").replace(" ", "_")
 
+            # Extract description and categories from extmetadata
+            extmeta = ii.get("extmetadata", {})
+            desc = (
+                extmeta.get("ImageDescription", {}).get("value", "")
+                or extmeta.get("ObjectName", {}).get("value", "")
+            )
+            desc = _strip_html(desc)
+            if len(desc) > 200:
+                desc = desc[:197] + "..."
+            cats = extmeta.get("Categories", {}).get("value", "")
+
             images.append({
                 "url": img_url,
                 "thumb_url": thumb_url,
                 "title": ipage.get("title", ""),
+                "description": desc,
+                "categories": cats,
                 "width": width,
                 "height": height,
                 "source_page": f"https://commons.wikimedia.org/wiki/File:{quote(page_title, safe='_(),.-')}",
@@ -805,6 +962,7 @@ def _search_wiki_article_images(
                 "url": img_url,
                 "thumb_url": thumb_url,
                 "title": ipage.get("title", ""),
+                "description": "",
                 "width": width,
                 "height": height,
                 "source_page": f"https://en.wikipedia.org/wiki/{quote(page_title.replace(' ', '_'), safe='_(),.-')}",
@@ -818,61 +976,123 @@ def search_annotation_images(
 ) -> list[dict[str, Any]]:
     """Search Wikipedia + Wikimedia Commons for annotation-related images.
 
-    Generates many query variations from the label, searches Commons and
-    Wikipedia articles, and tries English translations for broader results.
-    Strategy: English and short queries first (Commons has English metadata),
-    then French, then Wikipedia article images as fallback.
+    Uses a **tiered progressive strategy**:
+      1. Specific: keyword + city + year (best match)
+      2. Medium: keyword + city (good match)
+      3. Generic: keyword + year or keyword alone (topic fallback)
+      4. Wikipedia article images as final fallback
+
+    City name is always present in tier 1-2. Tier 3 drops the city to
+    guarantee at least *some* topical photos (e.g. a fire, flood, etc.).
     """
     import re
 
-    fr_queries = _build_annotation_search_queries(label, city_name, region, country)
+    tiers = _build_annotation_search_queries(label, city_name, region, country)
 
-    # Get English translations FIRST — these work much better on Commons
+    # Get English translations — these work better on Commons
     en_titles = _translate_label_to_english(label)
-    en_queries: list[str] = []
-    for en_title in en_titles:
-        en_queries.append(f"{en_title} {city_name}")
-        en_queries.append(en_title)
 
-    # Also extract acronyms / proper nouns for direct short queries
+    # Extract year from label for English queries
+    year_match = re.search(r'\((\d{4})\)', label)
+    year = year_match.group(1) if year_match else ""
+
+    # Build English queries in same tiers
+    en_specific: list[str] = []
+    en_medium: list[str] = []
+    en_generic: list[str] = []
+    for en_title in en_titles:
+        if year:
+            en_specific.append(f"{en_title} {city_name} {year}")
+        en_medium.append(f"{en_title} {city_name}")
+        if year:
+            en_generic.append(f"{en_title} {year}")
+        en_generic.append(en_title)
+
+    # Also extract acronyms / proper nouns
     cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label).strip()
     specials = re.findall(r'[A-Z]{2,}[\w-]*', cleaned)
-    short_queries: list[str] = []
     for sp in specials:
-        short_queries.append(f"{sp} {city_name}")
-        short_queries.append(sp)
+        en_medium.append(f"{sp} {city_name}")
 
-    # Build prioritized query list: English > short/acronyms > French
-    seen_lower: set[str] = set()
-    ordered_queries: list[str] = []
-    for q in en_queries + short_queries + fr_queries:
-        ql = q.strip().lower()
-        if ql and ql not in seen_lower:
-            seen_lower.add(ql)
-            ordered_queries.append(q.strip())
+    # Merge English + French queries per tier, English first
+    def _dedup(queries: list[str]) -> list[str]:
+        seen: set[str] = set()
+        out: list[str] = []
+        for q in queries:
+            ql = q.strip().lower()
+            if ql and ql not in seen:
+                seen.add(ql)
+                out.append(q.strip())
+        return out
+
+    tier_specific = _dedup(en_specific + tiers["specific"])
+    tier_medium = _dedup(en_medium + tiers["medium"])
+    tier_generic = _dedup(en_generic + tiers["generic"])
 
     images: list[dict[str, Any]] = []
     seen_urls: set[str] = set()
 
-    # Phase 1: Search Wikimedia Commons with up to 12 queries
-    for query in ordered_queries[:12]:
+    # Categories/descriptions that indicate irrelevant content
+    _IRRELEVANT_CATS = {
+        "wrestler", "wrestling", "luchador", "lutte", "catch", "catcheuse",
+        "catcheur", "suplex", "lufisto", "shimmer", "wwe", "aew", "roh",
+        "boxeur", "boxer", "boxing", "boxe", "mma", "fighter",
+        "porn", "adult", "erotic",
+        "football player", "soccer player", "basketball player",
+        "baseball player", "hockey player", "athlete",
+        "singer", "musician", "actor", "actress", "model",
+        "professional wrestling", "pro wrestling",
+    }
+
+    def _is_relevant(img: dict) -> bool:
+        """Check if an image is likely relevant to the annotation subject."""
+        text = (img.get("title", "") + " " + img.get("description", "")
+                + " " + img.get("categories", "")).lower()
+        for bad in _IRRELEVANT_CATS:
+            if bad in text:
+                return False
+        return True
+
+    # --- Tier 1: SPECIFIC (keyword + city + year) ---
+    for query in tier_specific[:6]:
         batch = _search_commons_batch(query, seen_urls, limit=30)
-        images.extend(batch)
-        if len(images) >= 30:
+        images.extend(b for b in batch if _is_relevant(b))
+        if len(images) >= 20:
             break
 
-    # Phase 2: Search Wikipedia article images as fallback
-    wiki_queries = (en_queries[:2] if en_queries else []) + ordered_queries[:2]
-    seen_wq: set[str] = set()
-    for query in wiki_queries:
-        ql = query.lower()
-        if ql in seen_wq:
-            continue
-        seen_wq.add(ql)
-        if len(images) >= 40:
-            break
-        batch = _search_wiki_article_images(query, seen_urls)
-        images.extend(batch)
+    # --- Tier 2: MEDIUM (keyword + city) — only if not enough ---
+    if len(images) < 20:
+        for query in tier_medium[:8]:
+            batch = _search_commons_batch(query, seen_urls, limit=30)
+            images.extend(b for b in batch if _is_relevant(b))
+            if len(images) >= 25:
+                break
+
+    # --- Tier 3: GENERIC (keyword + year, keyword alone) — topic fallback ---
+    if len(images) < 10:
+        for query in tier_generic[:6]:
+            batch = _search_commons_batch(query, seen_urls, limit=20)
+            images.extend(b for b in batch if _is_relevant(b))
+            if len(images) >= 20:
+                break
+
+    # --- Tier 4: Wikipedia article images as final fallback ---
+    if len(images) < 15:
+        wiki_queries = []
+        if en_titles:
+            wiki_queries.append(f"{en_titles[0]} {city_name}")
+            wiki_queries.append(en_titles[0])
+        wiki_queries.extend(tier_medium[:2])
+        seen_wq: set[str] = set()
+        for query in wiki_queries:
+            ql = query.lower()
+            if ql in seen_wq:
+                continue
+            seen_wq.add(ql)
+            if len(images) >= 30:
+                break
+            batch = _search_wiki_article_images(query, seen_urls)
+            images.extend(batch)
 
     return images[:40]
 
@@ -882,8 +1102,9 @@ def save_annotation_photo(
     annotation_id: int,
     image_url: str,
     source_page: str = "",
+    city_slug: str = "",
 ) -> dict[str, Any]:
-    """Download and save a photo for an annotation."""
+    """Download and save a photo for an annotation, and also add it to the city photo library."""
     result = download_web_image(image_url)
     if not result:
         return {"success": False, "error": "Impossible de télécharger l'image."}
@@ -894,7 +1115,7 @@ def save_annotation_photo(
     dest = ANNOTATION_PHOTO_DIR / filename
     dest.write_bytes(file_bytes)
 
-    # Remove old photo if exists
+    # Remove old annotation photo if exists
     old = conn.execute(
         "SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?",
         (annotation_id,),
@@ -908,6 +1129,32 @@ def save_annotation_photo(
         "UPDATE dim_annotation SET photo_filename = ?, photo_source_url = ? WHERE annotation_id = ?",
         (filename, source_page, annotation_id),
     )
+
+    # Also add to city photo library if city_slug is provided
+    if city_slug:
+        ann_row = conn.execute(
+            "SELECT da.annotation_label, dc.city_id "
+            "FROM dim_annotation da "
+            "JOIN fact_city_population fcp ON fcp.annotation_id = da.annotation_id "
+            "JOIN dim_city dc ON dc.city_id = fcp.city_id "
+            "WHERE da.annotation_id = ? AND dc.city_slug = ? "
+            "LIMIT 1",
+            (annotation_id, city_slug),
+        ).fetchone()
+        if ann_row:
+            import re
+            label = re.sub(r'[\U00010000-\U0010ffff]', '', ann_row["annotation_label"]).strip()
+            save_photo_to_library(
+                conn,
+                city_id=ann_row["city_id"],
+                city_slug=city_slug,
+                file_bytes=file_bytes,
+                original_filename=f"annotation{ext}",
+                source_url=source_page,
+                attribution="Wikimedia Commons",
+                caption=label,
+            )
+
     conn.commit()
     return {"success": True, "filename": filename}
 

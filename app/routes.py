@@ -600,6 +600,20 @@ def city_photo_set_primary(city_slug: str, photo_id: int) -> Response:
 
 # ---- Annotation photo routes ----
 
+@web.route("/cities/<city_slug>/annotations/manual-search")
+def annotation_manual_search(city_slug: str) -> Response:
+    """AJAX: search Commons with a user-provided query string."""
+    from .services.city_photos import _search_commons_batch
+
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"images": []})
+
+    seen_urls: set[str] = set()
+    images = _search_commons_batch(query, seen_urls, limit=40)
+    return jsonify({"images": images})
+
+
 @web.route("/cities/<city_slug>/annotations/<int:annotation_id>/photo/search")
 def annotation_photo_search(city_slug: str, annotation_id: int) -> Response:
     """AJAX: search web images for an annotation."""
@@ -636,6 +650,7 @@ def annotation_photo_save(city_slug: str, annotation_id: int) -> Response:
 
     result = save_annotation_photo(
         conn, annotation_id, data["url"], data.get("source_page", ""),
+        city_slug=city_slug,
     )
     return jsonify(result)
 
@@ -655,6 +670,196 @@ def annotation_photo_link(city_slug: str, annotation_id: int) -> Response:
         conn, annotation_id, city_slug, int(data["photo_id"]),
     )
     return jsonify(result)
+
+
+# ---- Annotation CRUD routes ----
+
+@web.route("/cities/<city_slug>/annotations/years")
+def annotation_available_years(city_slug: str) -> Response:
+    """AJAX: return years available for annotation linking."""
+    from .db import get_db
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT fcp.year, fcp.population_id, fcp.annotation_id
+        FROM fact_city_population fcp
+        JOIN dim_city dc ON dc.city_id = fcp.city_id
+        WHERE dc.city_slug = ?
+        ORDER BY fcp.year
+        """,
+        (city_slug,),
+    ).fetchall()
+    years = [{"year": r["year"], "has_annotation": r["annotation_id"] is not None} for r in rows]
+    return jsonify({"years": years})
+
+
+@web.route("/cities/<city_slug>/annotations", methods=["POST"])
+def annotation_create(city_slug: str) -> Response:
+    """AJAX: create a new annotation and link it to a year."""
+    from .db import get_db
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "error": "Données manquantes."})
+
+    label = (data.get("label") or "").strip()
+    color = (data.get("color") or "red").strip()
+    ann_type = (data.get("type") or "event").strip()
+    year = data.get("year")
+
+    if not label or not year:
+        return jsonify({"success": False, "error": "Label et année requis."})
+
+    try:
+        year = int(year)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Année invalide."})
+
+    # Verify the year exists for this city
+    pop_row = conn.execute(
+        """
+        SELECT fcp.population_id, fcp.annotation_id
+        FROM fact_city_population fcp
+        JOIN dim_city dc ON dc.city_id = fcp.city_id
+        WHERE dc.city_slug = ? AND fcp.year = ?
+        """,
+        (city_slug, year),
+    ).fetchone()
+    if not pop_row:
+        return jsonify({"success": False, "error": f"Année {year} introuvable pour cette ville."})
+    if pop_row["annotation_id"]:
+        return jsonify({"success": False, "error": f"L'année {year} a déjà une annotation."})
+
+    # Insert annotation
+    cur = conn.execute(
+        "INSERT INTO dim_annotation (annotation_label, annotation_color, annotation_type) VALUES (?, ?, ?)",
+        (label, color, ann_type),
+    )
+    annotation_id = cur.lastrowid
+
+    # Link to year
+    conn.execute(
+        "UPDATE fact_city_population SET annotation_id = ? WHERE population_id = ?",
+        (annotation_id, pop_row["population_id"]),
+    )
+    conn.commit()
+    return jsonify({"success": True, "annotation_id": annotation_id})
+
+
+@web.route("/cities/<city_slug>/annotations/<int:annotation_id>", methods=["PUT"])
+def annotation_update(city_slug: str, annotation_id: int) -> Response:
+    """AJAX: update an existing annotation."""
+    from .db import get_db
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "error": "Données manquantes."})
+
+    label = (data.get("label") or "").strip()
+    color = (data.get("color") or "").strip()
+    ann_type = (data.get("type") or "").strip()
+    new_year = data.get("year")
+
+    if not label:
+        return jsonify({"success": False, "error": "Label requis."})
+
+    # Update annotation fields
+    updates = ["annotation_label = ?"]
+    params: list = [label]
+    if color:
+        updates.append("annotation_color = ?")
+        params.append(color)
+    if ann_type:
+        updates.append("annotation_type = ?")
+        params.append(ann_type)
+    params.append(annotation_id)
+
+    conn.execute(
+        f"UPDATE dim_annotation SET {', '.join(updates)} WHERE annotation_id = ?",
+        params,
+    )
+
+    # If year changed, move the annotation link
+    if new_year is not None:
+        try:
+            new_year = int(new_year)
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "error": "Année invalide."})
+
+        # Find current year link
+        old_pop = conn.execute(
+            """
+            SELECT fcp.population_id, fcp.year
+            FROM fact_city_population fcp
+            JOIN dim_city dc ON dc.city_id = fcp.city_id
+            WHERE dc.city_slug = ? AND fcp.annotation_id = ?
+            """,
+            (city_slug, annotation_id),
+        ).fetchone()
+
+        if not old_pop or old_pop["year"] != new_year:
+            # Verify new year exists and is free
+            new_pop = conn.execute(
+                """
+                SELECT fcp.population_id, fcp.annotation_id
+                FROM fact_city_population fcp
+                JOIN dim_city dc ON dc.city_id = fcp.city_id
+                WHERE dc.city_slug = ? AND fcp.year = ?
+                """,
+                (city_slug, new_year),
+            ).fetchone()
+            if not new_pop:
+                return jsonify({"success": False, "error": f"Année {new_year} introuvable."})
+            if new_pop["annotation_id"] and new_pop["annotation_id"] != annotation_id:
+                return jsonify({"success": False, "error": f"L'année {new_year} a déjà une annotation."})
+
+            # Unlink old year
+            if old_pop:
+                conn.execute(
+                    "UPDATE fact_city_population SET annotation_id = NULL WHERE population_id = ?",
+                    (old_pop["population_id"],),
+                )
+            # Link new year
+            conn.execute(
+                "UPDATE fact_city_population SET annotation_id = ? WHERE population_id = ?",
+                (annotation_id, new_pop["population_id"]),
+            )
+
+    conn.commit()
+    return jsonify({"success": True})
+
+
+@web.route("/cities/<city_slug>/annotations/<int:annotation_id>", methods=["DELETE"])
+def annotation_delete(city_slug: str, annotation_id: int) -> Response:
+    """AJAX: delete an annotation and unlink it from its year."""
+    from .db import get_db
+    from .services.city_photos import ANNOTATION_PHOTO_DIR
+    conn = get_db()
+
+    # Get annotation info (for photo cleanup)
+    ann = conn.execute(
+        "SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?",
+        (annotation_id,),
+    ).fetchone()
+    if not ann:
+        return jsonify({"success": False, "error": "Annotation introuvable."})
+
+    # Unlink from fact_city_population
+    conn.execute(
+        "UPDATE fact_city_population SET annotation_id = NULL WHERE annotation_id = ?",
+        (annotation_id,),
+    )
+
+    # Delete photo file if exists
+    if ann["photo_filename"]:
+        photo_path = ANNOTATION_PHOTO_DIR / ann["photo_filename"]
+        if photo_path.exists():
+            photo_path.unlink()
+
+    # Delete annotation
+    conn.execute("DELETE FROM dim_annotation WHERE annotation_id = ?", (annotation_id,))
+    conn.commit()
+    return jsonify({"success": True})
 
 
 @web.route("/cities/<city_slug>/fiche", methods=["POST"])

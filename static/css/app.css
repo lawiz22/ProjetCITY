@@ -4109,6 +4109,30 @@ td {
     padding: 1px 5px;
     border-radius: 3px;
 }
+.photo-search-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,.72);
+    color: #fff;
+    font-size: .68rem;
+    line-height: 1.3;
+    padding: 4px 6px;
+    opacity: 0;
+    transition: opacity .2s;
+    pointer-events: none;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+.photo-search-card:hover .photo-search-caption {
+    opacity: 1;
+}
+.photo-search-card:hover .photo-search-size {
+    opacity: 0;
+}
 .photo-search-modal-footer {
     display: flex;
     justify-content: space-between;
@@ -4116,6 +4140,213 @@ td {
     padding: .8rem 1.2rem;
     border-top: 1px solid var(--line);
     font-size: .85rem;
+}
+
+/* ---- Annotation manual search: keyword pills ---- */
+.ann-pill-tray {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-bottom: .8rem;
+}
+.ann-keyword-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    background: var(--accent-3, #264653);
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 500;
+    cursor: grab;
+    user-select: none;
+    transition: transform .12s, box-shadow .12s, opacity .12s;
+    white-space: nowrap;
+}
+.ann-keyword-pill:hover {
+    transform: scale(1.06);
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.ann-keyword-pill.dragging {
+    opacity: .5;
+}
+
+/* Search bar with pill tokens */
+.ann-search-bar {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: .6rem;
+}
+.ann-search-input-wrap {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    align-items: center;
+    padding: .35rem .5rem;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel-strong);
+    min-height: 38px;
+    transition: border-color .15s;
+}
+.ann-search-input-wrap:focus-within {
+    border-color: var(--accent);
+}
+.ann-search-input-wrap.drag-over {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--panel-strong));
+}
+.ann-search-input-wrap input {
+    flex: 1;
+    min-width: 100px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: .85rem;
+    color: var(--ink);
+    padding: .15rem 0;
+}
+.ann-search-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .2rem;
+    padding: .18rem .55rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    animation: pillPop .2s ease;
+}
+.ann-search-pill button {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.7);
+    cursor: pointer;
+    font-size: .85rem;
+    padding: 0;
+    line-height: 1;
+    margin-left: .1rem;
+}
+.ann-search-pill button:hover {
+    color: #fff;
+}
+@keyframes pillPop {
+    0%   { transform: scale(.7); opacity: 0; }
+    100% { transform: scale(1);  opacity: 1; }
+}
+
+/* ---- Annotation CRUD form ---- */
+.ann-form-group {
+    margin-bottom: .9rem;
+}
+.ann-form-group label {
+    display: block;
+    font-size: .82rem;
+    font-weight: 600;
+    margin-bottom: .3rem;
+    color: var(--ink);
+}
+.ann-form-group label .required {
+    color: var(--accent);
+}
+.ann-form-group input[type="text"],
+.ann-form-group select {
+    width: 100%;
+    padding: .45rem .6rem;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel-strong);
+    color: var(--ink);
+    font-size: .88rem;
+    transition: border-color .15s;
+}
+.ann-form-group input[type="text"]:focus,
+.ann-form-group select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.ann-form-row {
+    display: flex;
+    gap: .8rem;
+}
+.ann-form-row .ann-form-group {
+    flex: 1;
+    min-width: 0;
+}
+.ann-form-photo-zone {
+    border: 2px dashed var(--line);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    background: var(--panel-strong);
+}
+.ann-form-photo-preview {
+    position: relative;
+    display: inline-block;
+    max-width: 200px;
+    margin-bottom: .5rem;
+}
+.ann-form-photo-preview img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+}
+.ann-form-photo-remove {
+    position: absolute;
+    top: .3rem;
+    right: .3rem;
+    background: rgba(0,0,0,.6);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.ann-form-photo-remove:hover {
+    background: var(--accent);
+}
+.ann-form-photo-actions .helper-text {
+    display: block;
+    margin-top: .4rem;
+    font-size: .78rem;
+    opacity: .6;
+}
+.ann-form-error {
+    font-weight: 500;
+}
+
+/* Annotation card action buttons */
+.annotation-card-actions {
+    display: flex;
+    gap: .3rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.annotation-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: .85rem;
+    padding: .15rem .3rem;
+    border-radius: 4px;
+    opacity: .5;
+    transition: opacity .15s, background .15s;
+}
+.annotation-action-btn:hover {
+    opacity: 1;
+    background: rgba(128,128,128,.15);
+}
+.annotation-action-delete:hover {
+    color: var(--red, #e74c3c);
 }
 
 /* Photo lightbox */

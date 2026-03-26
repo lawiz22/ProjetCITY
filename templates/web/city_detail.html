@@ -220,12 +220,29 @@
             <button type="button" class="photo-search-modal-close">&times;</button>
         </div>
         <div class="photo-search-tabs">
-            <button type="button" class="photo-search-tab active" data-ann-tab="search">🌐 Recherche web</button>
+            <button type="button" class="photo-search-tab active" data-ann-tab="search">🌐 Recherche auto</button>
+            <button type="button" class="photo-search-tab" data-ann-tab="manual">🔎 Recherche manuelle</button>
             <button type="button" class="photo-search-tab" data-ann-tab="existing">📎 Photos existantes</button>
         </div>
         <div class="photo-search-modal-body">
-            <p class="helper-text" id="ann-photo-status">Recherche en cours…</p>
-            <div class="photo-search-grid" id="ann-photo-grid"></div>
+            <!-- Manual search panel (hidden by default) -->
+            <div id="ann-manual-panel" style="display:none;">
+                <p class="helper-text" style="margin:0 0 .5rem;">Cliquez ou glissez les mots-clés dans la barre de recherche :</p>
+                <div class="ann-pill-tray" id="ann-pill-tray"></div>
+                <div class="ann-search-bar">
+                    <div class="ann-search-input-wrap" id="ann-search-input-wrap">
+                        <input type="text" id="ann-manual-input" placeholder="Glissez des mots-clés ici ou tapez…" autocomplete="off">
+                    </div>
+                    <button type="button" class="primary-button" id="ann-manual-search-btn">Rechercher</button>
+                </div>
+                <p class="helper-text" id="ann-manual-status"></p>
+                <div class="photo-search-grid" id="ann-manual-grid"></div>
+            </div>
+            <!-- Auto search panel -->
+            <div id="ann-auto-panel">
+                <p class="helper-text" id="ann-photo-status">Recherche en cours…</p>
+                <div class="photo-search-grid" id="ann-photo-grid"></div>
+            </div>
         </div>
         <div class="photo-search-modal-footer">
             <span id="ann-photo-count">Cliquez pour sélectionner</span>
@@ -234,10 +251,108 @@
     </div>
 </div>
 
+<!-- Annotation add/edit modal -->
+<div class="photo-search-modal" id="ann-form-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content" style="max-width:600px;">
+        <div class="photo-search-modal-header">
+            <h3 id="ann-form-title">Nouvelle annotation</h3>
+            <button type="button" class="photo-search-modal-close" id="ann-form-close">&times;</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <form id="ann-form" autocomplete="off">
+                <div class="ann-form-group">
+                    <label for="ann-form-label">Label <span class="required">*</span></label>
+                    <input type="text" id="ann-form-label" placeholder="Ex: Grand incendie" required>
+                </div>
+                <div class="ann-form-row">
+                    <div class="ann-form-group">
+                        <label for="ann-form-year">Année <span class="required">*</span></label>
+                        <select id="ann-form-year" required>
+                            <option value="">Choisir…</option>
+                        </select>
+                    </div>
+                    <div class="ann-form-group">
+                        <label for="ann-form-color">Couleur</label>
+                        <select id="ann-form-color">
+                            <option value="red">🔴 Rouge</option>
+                            <option value="blue">🔵 Bleu</option>
+                            <option value="green">🟢 Vert</option>
+                            <option value="orange">🟠 Orange</option>
+                            <option value="purple">🟣 Violet</option>
+                            <option value="black">⚫ Noir</option>
+                            <option value="brown">🟤 Brun</option>
+                            <option value="gold">🟡 Or</option>
+                            <option value="navy">🔵 Marine</option>
+                            <option value="teal">🔵 Sarcelle</option>
+                            <option value="darkred">🔴 Rouge foncé</option>
+                            <option value="darkgreen">🟢 Vert foncé</option>
+                            <option value="pink">🩷 Rose</option>
+                            <option value="gray">⚪ Gris</option>
+                        </select>
+                    </div>
+                    <div class="ann-form-group">
+                        <label for="ann-form-type">Type</label>
+                        <select id="ann-form-type">
+                            <option value="event">Événement</option>
+                            <option value="infrastructure">Infrastructure</option>
+                            <option value="politique">Politique</option>
+                            <option value="catastrophe">Catastrophe</option>
+                            <option value="culturel">Culturel</option>
+                            <option value="économique">Économique</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Photo section -->
+                <div class="ann-form-group">
+                    <label>Photo</label>
+                    <div class="ann-form-photo-zone" id="ann-form-photo-zone">
+                        <div class="ann-form-photo-preview" id="ann-form-photo-preview" style="display:none;">
+                            <img id="ann-form-photo-img" src="" alt="">
+                            <button type="button" class="ann-form-photo-remove" id="ann-form-photo-remove" title="Retirer">&times;</button>
+                        </div>
+                        <div class="ann-form-photo-actions" id="ann-form-photo-actions">
+                            <button type="button" class="secondary-button" id="ann-form-photo-search-btn">🔍 Rechercher une photo</button>
+                            <span class="helper-text">La photo sera associée après la sauvegarde</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="helper-text ann-form-error" id="ann-form-error" style="display:none;color:var(--accent);"></p>
+            </form>
+        </div>
+        <div class="photo-search-modal-footer">
+            <button type="button" class="secondary-button" id="ann-form-cancel">Annuler</button>
+            <button type="button" class="primary-button" id="ann-form-save">💾 Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Annotation delete confirmation modal -->
+<div class="photo-search-modal" id="ann-delete-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content" style="max-width:420px;">
+        <div class="photo-search-modal-header">
+            <h3>Supprimer l'annotation</h3>
+            <button type="button" class="photo-search-modal-close" id="ann-delete-close">&times;</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <p>Êtes-vous sûr de vouloir supprimer l'annotation <strong id="ann-delete-label"></strong> ?</p>
+            <p class="helper-text">Cette action est irréversible. La photo associée sera aussi supprimée.</p>
+        </div>
+        <div class="photo-search-modal-footer">
+            <button type="button" class="secondary-button" id="ann-delete-cancel">Annuler</button>
+            <button type="button" class="primary-button" id="ann-delete-confirm" style="background:var(--red, #e74c3c);">🗑️ Supprimer</button>
+        </div>
+    </div>
+</div>
+
 <section class="panel annotation-story-panel" id="city-annotations">
     <div class="panel-head">
-        <h2>Annotations temporelles</h2>
-        <span>Ces cartes ouvrent directement la période détaillée correspondante</span>
+        <div>
+            <h2>Annotations temporelles</h2>
+            <span>Ces cartes ouvrent directement la période détaillée correspondante</span>
+        </div>
+        <button type="button" class="primary-button" id="ann-add-btn">＋ Ajouter</button>
     </div>
     <div class="annotation-story-grid">
         {% for annotation in annotations %}
@@ -253,6 +368,10 @@
                             <strong>{{ annotation.year }}</strong>
                             <p>{{ annotation.annotation_type }}</p>
                         </div>
+                    </div>
+                    <div class="annotation-card-actions">
+                        <button type="button" class="annotation-action-btn" data-ann-edit="{{ annotation.annotation_id }}" title="Modifier">✏️</button>
+                        <button type="button" class="annotation-action-btn annotation-action-delete" data-ann-delete="{{ annotation.annotation_id }}" title="Supprimer">🗑️</button>
                     </div>
                 </div>
                 <h3>{{ annotation.annotation_label }}</h3>
@@ -446,8 +565,13 @@
             var card = document.createElement('div');
             card.className = 'photo-search-card';
             if (selected[img.url]) card.className += ' photo-search-selected';
-            card.innerHTML = '<img src="' + img.thumb_url + '" alt="' + (img.title || '') + '" loading="lazy" onerror="this.style.display=\'none\'">'
+            var imgTitle = (img.title || '').replace('File:', '').replace(/_/g, ' ');
+            var imgDesc = (img.description || '').replace(/</g, '&lt;');
+            var captionText = imgDesc || imgTitle.replace(/</g, '&lt;');
+            var tooltipText = imgDesc ? (imgTitle + '\n' + imgDesc) : imgTitle;
+            card.innerHTML = '<img src="' + img.thumb_url + '" alt="' + imgTitle + '" title="' + tooltipText.replace(/"/g, '&quot;') + '" loading="lazy" onerror="this.style.display=\'none\'">'
                 + '<span class="photo-search-check">✓</span>'
+                + '<span class="photo-search-caption">' + captionText + '</span>'
                 + '<span class="photo-search-size">' + img.width + '×' + img.height + '</span>';
             card.addEventListener('click', function() {
                 if (selected[img.url]) {
@@ -560,6 +684,288 @@
 })();
 </script>
 
+<!-- Annotation CRUD JS -->
+<script>
+(function() {
+    var slug = '{{ city.city_slug }}';
+    var formModal = document.getElementById('ann-form-modal');
+    var deleteModal = document.getElementById('ann-delete-modal');
+    if (!formModal || !deleteModal) return;
+
+    // Form elements
+    var formTitle = document.getElementById('ann-form-title');
+    var formLabel = document.getElementById('ann-form-label');
+    var formYear = document.getElementById('ann-form-year');
+    var formColor = document.getElementById('ann-form-color');
+    var formType = document.getElementById('ann-form-type');
+    var formSave = document.getElementById('ann-form-save');
+    var formCancel = document.getElementById('ann-form-cancel');
+    var formClose = document.getElementById('ann-form-close');
+    var formBackdrop = formModal.querySelector('.photo-search-modal-backdrop');
+    var formError = document.getElementById('ann-form-error');
+    var photoPreview = document.getElementById('ann-form-photo-preview');
+    var photoImg = document.getElementById('ann-form-photo-img');
+    var photoActions = document.getElementById('ann-form-photo-actions');
+    var photoSearchBtn = document.getElementById('ann-form-photo-search-btn');
+    var photoRemoveBtn = document.getElementById('ann-form-photo-remove');
+
+    // Delete elements
+    var deleteLabel = document.getElementById('ann-delete-label');
+    var deleteConfirm = document.getElementById('ann-delete-confirm');
+    var deleteCancel = document.getElementById('ann-delete-cancel');
+    var deleteClose = document.getElementById('ann-delete-close');
+    var deleteBackdrop = deleteModal.querySelector('.photo-search-modal-backdrop');
+
+    var editingId = null; // null = creating, number = editing
+    var pendingPhoto = null; // {url, source_page} if user picked a photo during create/edit
+    var yearsLoaded = false;
+
+    function showFormError(msg) {
+        formError.textContent = msg;
+        formError.style.display = '';
+    }
+    function hideFormError() {
+        formError.style.display = 'none';
+    }
+
+    function loadYears(selectedYear) {
+        fetch('/cities/' + encodeURIComponent(slug) + '/annotations/years')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                formYear.innerHTML = '<option value="">Choisir…</option>';
+                (data.years || []).forEach(function(y) {
+                    var opt = document.createElement('option');
+                    opt.value = y.year;
+                    opt.textContent = y.year + (y.has_annotation ? ' (a déjà une annotation)' : '');
+                    if (y.year == selectedYear) opt.selected = true;
+                    formYear.appendChild(opt);
+                });
+                yearsLoaded = true;
+            });
+    }
+
+    function openFormModal(mode, annId, annData) {
+        editingId = annId || null;
+        hideFormError();
+        pendingPhoto = null;
+        photoPreview.style.display = 'none';
+        photoActions.style.display = '';
+
+        if (mode === 'edit' && annData) {
+            formTitle.textContent = '✏️ Modifier l\'annotation';
+            formLabel.value = annData.label || '';
+            formColor.value = annData.color || 'red';
+            formType.value = annData.type || 'event';
+            loadYears(annData.year);
+            // Show current photo if exists
+            var card = document.querySelector('[data-annotation-db-id="' + annId + '"]') ||
+                       document.querySelector('[data-ann-edit="' + annId + '"]');
+            if (card) {
+                var photoDiv = (card.closest ? card.closest('.annotation-card') : card).querySelector('.annotation-card-photo');
+                if (photoDiv) {
+                    var bg = photoDiv.style.backgroundImage.replace(/url\(['"]?/, '').replace(/['"]?\)/, '');
+                    if (bg) {
+                        photoImg.src = bg;
+                        photoPreview.style.display = '';
+                        photoActions.style.display = 'none';
+                    }
+                }
+            }
+        } else {
+            formTitle.textContent = '＋ Nouvelle annotation';
+            formLabel.value = '';
+            formColor.value = 'red';
+            formType.value = 'event';
+            loadYears(null);
+        }
+
+        formSave.disabled = false;
+        formSave.textContent = '💾 Enregistrer';
+        formModal.style.display = '';
+        formLabel.focus();
+    }
+
+    function closeFormModal() {
+        formModal.style.display = 'none';
+        editingId = null;
+        pendingPhoto = null;
+    }
+
+    // Close form
+    formBackdrop.addEventListener('click', closeFormModal);
+    formClose.addEventListener('click', closeFormModal);
+    formCancel.addEventListener('click', closeFormModal);
+
+    // Photo search button — opens the annotation photo search modal
+    // We'll trigger it after save for new annotations, but allow preview pick during edit
+    photoSearchBtn.addEventListener('click', function() {
+        if (editingId) {
+            // For edit mode, use the existing annotation search modal
+            var label = formLabel.value.trim();
+            if (!label) { showFormError('Entrez un label avant de chercher une photo.'); return; }
+            // Open annotation photo modal
+            if (typeof window._openAnnPhotoModal === 'function') {
+                window._openAnnPhotoModal(editingId, label);
+            }
+        } else {
+            // For create mode, open manual search to pick a photo
+            // We'll store the selection as pendingPhoto
+            var label = formLabel.value.trim();
+            if (!label) { showFormError('Entrez un label avant de chercher une photo.'); return; }
+            window._annFormPickMode = true;
+            if (typeof window._openAnnPhotoModal === 'function') {
+                window._openAnnPhotoModal('new', label);
+            }
+        }
+    });
+
+    photoRemoveBtn.addEventListener('click', function() {
+        photoImg.src = '';
+        photoPreview.style.display = 'none';
+        photoActions.style.display = '';
+        pendingPhoto = null;
+    });
+
+    // Called from photo modal when user picks a photo in form pick mode
+    window._annFormPhotoSelected = function(img) {
+        pendingPhoto = img;
+        photoImg.src = img.thumb_url || img.url;
+        photoPreview.style.display = '';
+        photoActions.style.display = 'none';
+    };
+
+    // Save
+    formSave.addEventListener('click', function() {
+        hideFormError();
+        var label = formLabel.value.trim();
+        var year = formYear.value;
+        var color = formColor.value;
+        var annType = formType.value;
+
+        if (!label) { showFormError('Le label est requis.'); return; }
+        if (!year) { showFormError('L\'année est requise.'); return; }
+
+        formSave.disabled = true;
+        formSave.textContent = 'Enregistrement…';
+
+        var url, method, body;
+        if (editingId) {
+            url = '/cities/' + encodeURIComponent(slug) + '/annotations/' + editingId;
+            method = 'PUT';
+            body = JSON.stringify({ label: label, year: parseInt(year), color: color, type: annType });
+        } else {
+            url = '/cities/' + encodeURIComponent(slug) + '/annotations';
+            method = 'POST';
+            body = JSON.stringify({ label: label, year: parseInt(year), color: color, type: annType });
+        }
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: body
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                var annId = editingId || data.annotation_id;
+                // If there's a pending photo, save it
+                if (pendingPhoto && annId) {
+                    return fetch('/cities/' + encodeURIComponent(slug) + '/annotations/' + annId + '/photo/save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: pendingPhoto.url, source_page: pendingPhoto.source_page || '' })
+                    }).then(function() { location.reload(); });
+                }
+                location.reload();
+            } else {
+                showFormError(data.error || 'Erreur inconnue.');
+                formSave.disabled = false;
+                formSave.textContent = '💾 Enregistrer';
+            }
+        })
+        .catch(function() {
+            showFormError('Erreur réseau.');
+            formSave.disabled = false;
+            formSave.textContent = '💾 Enregistrer';
+        });
+    });
+
+    // Add button
+    var addBtn = document.getElementById('ann-add-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            openFormModal('create');
+        });
+    }
+
+    // Edit buttons
+    document.querySelectorAll('[data-ann-edit]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var annId = btn.dataset.annEdit;
+            var card = btn.closest('.annotation-card');
+            var annData = {
+                label: card.dataset.annotationLabel,
+                year: card.dataset.annotationYear,
+                color: card.dataset.annotationColor,
+                type: card.dataset.annotationType
+            };
+            openFormModal('edit', annId, annData);
+        });
+    });
+
+    // Delete buttons
+    var deleteTargetId = null;
+    document.querySelectorAll('[data-ann-delete]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            deleteTargetId = btn.dataset.annDelete;
+            var card = btn.closest('.annotation-card');
+            deleteLabel.textContent = card.dataset.annotationLabel;
+            deleteModal.style.display = '';
+        });
+    });
+
+    function closeDeleteModal() {
+        deleteModal.style.display = 'none';
+        deleteTargetId = null;
+    }
+
+    deleteBackdrop.addEventListener('click', closeDeleteModal);
+    deleteClose.addEventListener('click', closeDeleteModal);
+    deleteCancel.addEventListener('click', closeDeleteModal);
+
+    deleteConfirm.addEventListener('click', function() {
+        if (!deleteTargetId) return;
+        deleteConfirm.disabled = true;
+        deleteConfirm.textContent = 'Suppression…';
+
+        fetch('/cities/' + encodeURIComponent(slug) + '/annotations/' + deleteTargetId, {
+            method: 'DELETE'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                deleteConfirm.textContent = data.error || 'Erreur';
+                setTimeout(function() {
+                    deleteConfirm.textContent = '🗑️ Supprimer';
+                    deleteConfirm.disabled = false;
+                }, 2000);
+            }
+        })
+        .catch(function() {
+            deleteConfirm.textContent = 'Erreur';
+            setTimeout(function() {
+                deleteConfirm.textContent = '🗑️ Supprimer';
+                deleteConfirm.disabled = false;
+            }, 2000);
+        });
+    });
+})();
+</script>
+
 <!-- Annotation photo modal JS -->
 <script>
 (function() {
@@ -574,6 +980,14 @@
     var annSaveBtn = document.getElementById('ann-photo-save-btn');
     var annTitle = document.getElementById('ann-photo-modal-title');
     var annTabs = annModal.querySelectorAll('[data-ann-tab]');
+    var annAutoPanel = document.getElementById('ann-auto-panel');
+    var annManualPanel = document.getElementById('ann-manual-panel');
+    var annPillTray = document.getElementById('ann-pill-tray');
+    var annSearchWrap = document.getElementById('ann-search-input-wrap');
+    var annManualInput = document.getElementById('ann-manual-input');
+    var annManualSearchBtn = document.getElementById('ann-manual-search-btn');
+    var annManualGrid = document.getElementById('ann-manual-grid');
+    var annManualStatus = document.getElementById('ann-manual-status');
     var slug = '{{ city.city_slug }}';
     var currentAnnId = null;
     var currentAnnLabel = '';
@@ -585,28 +999,35 @@
     // Existing city photos data for the "existing" tab
     var existingPhotos = [
         {% for photo in city_photos %}
-        { photo_id: {{ photo.photo_id }}, filename: '{{ photo.filename }}', path: '{{ url_for("static", filename=photo.photo_path) }}' }{% if not loop.last %},{% endif %}
+        { photo_id: {{ photo.photo_id }}, filename: '{{ photo.filename }}', caption: '{{ photo.caption|default("", true)|replace("'", "\\'") }}', path: '{{ url_for("static", filename=photo.photo_path) }}' }{% if not loop.last %},{% endif %}
         {% endfor %}
     ];
 
-    function renderAnnCards(items, mode) {
-        annGrid.innerHTML = '';
+    function renderAnnCards(items, mode, targetGrid, targetStatus) {
+        var grid = targetGrid || annGrid;
+        var status = targetStatus || annStatus;
+        grid.innerHTML = '';
         if (!items || items.length === 0) {
-            annStatus.textContent = mode === 'existing' ? 'Aucune photo dans la bibliothèque.' : 'Aucune image trouvée.';
+            status.textContent = mode === 'existing' ? 'Aucune photo dans la bibliothèque.' : 'Aucune image trouvée.';
             return;
         }
-        annStatus.textContent = items.length + ' image(s) — cliquez pour sélectionner.';
+        status.textContent = items.length + ' image(s) — cliquez pour sélectionner.';
         items.forEach(function(img) {
             var card = document.createElement('div');
             card.className = 'photo-search-card';
             var thumbSrc = mode === 'existing' ? img.path : img.thumb_url;
-            card.innerHTML = '<img src="' + thumbSrc + '" loading="lazy" onerror="this.style.display=\'none\'">'
-                + '<span class="photo-search-check">✓</span>';
+            var imgTitle = (mode === 'existing' ? (img.caption || img.filename) : (img.title || '')).replace('File:', '').replace(/_/g, ' ');
+            var imgDesc = (img.description || '').replace(/</g, '&lt;');
+            var captionText = imgDesc || imgTitle.replace(/</g, '&lt;');
+            var tooltipText = imgDesc ? (imgTitle + '\n' + imgDesc) : imgTitle;
+            card.innerHTML = '<img src="' + thumbSrc + '" loading="lazy" title="' + tooltipText.replace(/"/g, '&quot;') + '" onerror="this.style.display=\'none\'">'
+                + '<span class="photo-search-check">✓</span>'
+                + '<span class="photo-search-caption">' + captionText + '</span>';
             if (img.width && img.height) {
                 card.innerHTML += '<span class="photo-search-size">' + img.width + '×' + img.height + '</span>';
             }
             card.addEventListener('click', function() {
-                annGrid.querySelectorAll('.photo-search-selected').forEach(function(el) {
+                grid.querySelectorAll('.photo-search-selected').forEach(function(el) {
                     el.classList.remove('photo-search-selected');
                 });
                 card.classList.add('photo-search-selected');
@@ -619,19 +1040,181 @@
                 }
                 annCountSpan.textContent = '1 sélectionnée';
                 annSaveBtn.disabled = false;
+
+                // If CRUD form is in pick mode, send photo back to form
+                if (window._annFormPickMode && selectedImage) {
+                    if (typeof window._annFormPhotoSelected === 'function') {
+                        window._annFormPhotoSelected(selectedImage);
+                    }
+                    window._annFormPickMode = false;
+                    closeAnnModal();
+                }
             });
-            annGrid.appendChild(card);
+            grid.appendChild(card);
         });
+    }
+
+    /* ---- Keyword pills for manual search ---- */
+    var FR_STOP = new Set(['le','la','les','de','du','des','un','une','et','en','au','aux','ce','ces','se','sa','son','ses','sur','par','pour','dans','est','qui','que','avec','vers','pas','plus','très','tout','mais']);
+
+    function buildPills(label) {
+        annPillTray.innerHTML = '';
+        // Clean label
+        var cleaned = label.replace(/[\u{10000}-\u{10FFFF}]/gu, '').trim();
+        var year = '';
+        var ym = cleaned.match(/\((\d{4})\)/);
+        if (ym) year = ym[1];
+        cleaned = cleaned.replace(/\(\d{4}\)/g, '').replace(/[=+—]/g, ' ').replace(/\s+/g, ' ').trim();
+
+        // Extract keywords
+        var words = cleaned.split(/\s+/).filter(function(w) {
+            return w.length >= 3 && !FR_STOP.has(w.toLowerCase());
+        });
+        // Deduplicate
+        var seen = new Set();
+        var pills = [];
+        words.forEach(function(w) {
+            var lw = w.toLowerCase();
+            if (!seen.has(lw)) { seen.add(lw); pills.push(w); }
+        });
+        // Add city name if not already in pills
+        var cityName = '{{ city.city_name }}';
+        if (!seen.has(cityName.toLowerCase())) pills.push(cityName);
+        // Add year
+        if (year && !seen.has(year)) pills.push(year);
+        // Add region if available
+        var region = '{{ city.region|default("", true) }}';
+        if (region && !seen.has(region.toLowerCase())) pills.push(region);
+
+        pills.forEach(function(text) {
+            var pill = document.createElement('span');
+            pill.className = 'ann-keyword-pill';
+            pill.textContent = text;
+            pill.draggable = true;
+            pill.dataset.keyword = text;
+            pill.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', text);
+                pill.classList.add('dragging');
+            });
+            pill.addEventListener('dragend', function() {
+                pill.classList.remove('dragging');
+            });
+            // Click to add pill to search bar
+            pill.addEventListener('click', function() {
+                addPillToSearch(text);
+            });
+            annPillTray.appendChild(pill);
+        });
+    }
+
+    function addPillToSearch(text) {
+        // Check if already in search bar
+        var existing = annSearchWrap.querySelectorAll('.ann-search-pill');
+        for (var i = 0; i < existing.length; i++) {
+            if (existing[i].dataset.keyword.toLowerCase() === text.toLowerCase()) return;
+        }
+        var pill = document.createElement('span');
+        pill.className = 'ann-search-pill';
+        pill.dataset.keyword = text;
+        pill.innerHTML = text + '<button type="button">&times;</button>';
+        pill.querySelector('button').addEventListener('click', function(e) {
+            e.stopPropagation();
+            pill.remove();
+        });
+        annSearchWrap.insertBefore(pill, annManualInput);
+        annManualInput.value = '';
+        annManualInput.focus();
+    }
+
+    function getManualQuery() {
+        var parts = [];
+        annSearchWrap.querySelectorAll('.ann-search-pill').forEach(function(p) {
+            parts.push(p.dataset.keyword);
+        });
+        var typed = annManualInput.value.trim();
+        if (typed) parts.push(typed);
+        return parts.join(' ');
+    }
+
+    // Drag-over on search bar
+    annSearchWrap.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        annSearchWrap.classList.add('drag-over');
+    });
+    annSearchWrap.addEventListener('dragleave', function() {
+        annSearchWrap.classList.remove('drag-over');
+    });
+    annSearchWrap.addEventListener('drop', function(e) {
+        e.preventDefault();
+        annSearchWrap.classList.remove('drag-over');
+        var text = e.dataTransfer.getData('text/plain');
+        if (text) addPillToSearch(text);
+    });
+
+    // Enter key in manual input
+    annManualInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var typed = annManualInput.value.trim();
+            if (typed) addPillToSearch(typed);
+            else doManualSearch();
+        }
+        // Backspace on empty input removes last pill
+        if (e.key === 'Backspace' && !annManualInput.value) {
+            var pills = annSearchWrap.querySelectorAll('.ann-search-pill');
+            if (pills.length) pills[pills.length - 1].remove();
+        }
+    });
+
+    // Manual search button
+    annManualSearchBtn.addEventListener('click', doManualSearch);
+
+    function doManualSearch() {
+        var query = getManualQuery();
+        if (!query.trim()) return;
+        annManualStatus.textContent = 'Recherche en cours…';
+        annManualGrid.innerHTML = '';
+        annManualSearchBtn.disabled = true;
+        selectedImage = null;
+        selectedPhotoId = null;
+        annSaveBtn.disabled = true;
+        annCountSpan.textContent = 'Cliquez pour sélectionner';
+
+        fetch('/cities/' + encodeURIComponent(slug) + '/annotations/manual-search?q=' + encodeURIComponent(query))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                annManualSearchBtn.disabled = false;
+                renderAnnCards(data.images || [], 'manual', annManualGrid, annManualStatus);
+            })
+            .catch(function() {
+                annManualSearchBtn.disabled = false;
+                annManualStatus.textContent = 'Erreur lors de la recherche.';
+            });
     }
 
     function loadAnnTab(tab) {
         annActiveTab = tab;
         annTabs.forEach(function(t) { t.classList.toggle('active', t.dataset.annTab === tab); });
-        annGrid.innerHTML = '';
         selectedImage = null;
         selectedPhotoId = null;
         annSaveBtn.disabled = true;
         annCountSpan.textContent = 'Cliquez pour sélectionner';
+
+        // Toggle panels
+        annAutoPanel.style.display = (tab === 'manual') ? 'none' : '';
+        annManualPanel.style.display = (tab === 'manual') ? '' : 'none';
+
+        if (tab === 'manual') {
+            buildPills(currentAnnLabel);
+            annManualGrid.innerHTML = '';
+            annManualStatus.textContent = '';
+            // Clear search bar pills
+            annSearchWrap.querySelectorAll('.ann-search-pill').forEach(function(p) { p.remove(); });
+            annManualInput.value = '';
+            return;
+        }
+
+        annGrid.innerHTML = '';
 
         if (tab === 'existing') {
             renderAnnCards(existingPhotos, 'existing');
@@ -743,6 +1326,9 @@
             }, 2000);
         });
     });
+
+    // Expose for CRUD form photo search integration
+    window._openAnnPhotoModal = openAnnModal;
 })();
 </script>
 
