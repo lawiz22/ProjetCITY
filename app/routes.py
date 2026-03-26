@@ -23,14 +23,6 @@ from .services.pdf_reports import build_city_pdf, build_dashboard_pdf
 web = Blueprint("web", __name__)
 
 
-@web.app_context_processor
-def inject_navigation() -> dict[str, object]:
-    service = AnalyticsService()
-    return {
-        "nav_filters": service.get_filter_options(),
-    }
-
-
 @web.route("/")
 def dashboard() -> str:
     service = AnalyticsService()
@@ -71,12 +63,15 @@ def city_directory() -> str:
     view_mode = request.args.get("view", "small").strip().lower()
     if view_mode not in {"large", "medium", "small", "compact"}:
         view_mode = "small"
+    filter_options = service.get_filter_options()
     return render_template(
         "web/cities.html",
         page_title="City Directory",
         filters=filters,
         view_mode=view_mode,
         cities=service.get_city_directory(filters),
+        countries=filter_options["countries"],
+        regions=filter_options["regions"],
     )
 
 

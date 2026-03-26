@@ -469,6 +469,221 @@ button {
     border: 1px solid rgba(27, 36, 48, 0.12);
 }
 
+/* ---- Directory controls: sort, per-page, pagination ---- */
+.dir-controls {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    flex-wrap: wrap;
+}
+/* Inline filters */
+.dir-filter select,
+.dir-filter input[type="text"] {
+    padding: .3rem .5rem;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel-strong);
+    color: var(--ink);
+    font-size: .82rem;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+.dir-filter select:focus,
+.dir-filter input[type="text"]:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.dir-filter input[type="text"] {
+    min-width: 160px;
+    cursor: text;
+}
+.dir-filter-region-wrap {
+    position: relative;
+}
+.dir-region-toggle {
+    padding: .3rem .5rem;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel-strong);
+    color: var(--ink);
+    font-size: .82rem;
+    cursor: pointer;
+    transition: border-color .15s;
+    white-space: nowrap;
+}
+.dir-region-toggle:hover,
+.dir-region-toggle:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.dir-region-arrow {
+    font-size: .7rem;
+    opacity: .5;
+}
+.dir-region-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 240px;
+    max-height: 370px;
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    z-index: 500;
+    overflow: hidden;
+    flex-direction: column;
+}
+.dir-region-dropdown.is-open {
+    display: flex;
+}
+.dir-region-actions {
+    display: flex;
+    gap: .5rem;
+    padding: .55rem .7rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-strong);
+}
+.dir-region-actions button {
+    flex: 1;
+    padding: .3rem .6rem;
+    border: 1.5px solid var(--accent);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.dir-region-actions button:hover {
+    background: var(--accent);
+    color: #fff;
+}
+.dir-region-list {
+    overflow-y: auto;
+    max-height: 280px;
+    padding: .35rem 0;
+}
+.dir-region-list::-webkit-scrollbar {
+    width: 6px;
+}
+.dir-region-list::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 3px;
+}
+.dir-region-list label {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .35rem .75rem;
+    font-size: .82rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .1s;
+}
+.dir-region-list label:hover {
+    background: var(--line);
+}
+.dir-region-list input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+}
+
+.dir-sort {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .82rem;
+}
+.dir-sort label {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink);
+    opacity: .7;
+}
+.dir-sort select {
+    padding: .3rem .5rem;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel-strong);
+    color: var(--ink);
+    font-size: .82rem;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+.dir-sort select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* Pager bar — subtle footer/header strip */
+.dir-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .5rem 1rem;
+    border-top: 1px solid var(--line);
+    font-size: .8rem;
+    color: var(--ink);
+    opacity: .85;
+}
+.dir-pager:first-of-type {
+    border-top: none;
+    border-bottom: 1px solid var(--line);
+}
+.dir-pager-left,
+.dir-pager-right {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.dir-pager-label {
+    opacity: .6;
+    white-space: nowrap;
+}
+.dir-pager select {
+    padding: .2rem .35rem;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--panel-strong);
+    color: var(--ink);
+    font-size: .8rem;
+    cursor: pointer;
+}
+.dir-pager select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.dir-pager-info {
+    opacity: .65;
+    white-space: nowrap;
+    margin-right: .2rem;
+}
+.dir-pager-arrow {
+    background: none;
+    border: none;
+    color: var(--ink);
+    font-size: 1.05rem;
+    cursor: pointer;
+    padding: .15rem .35rem;
+    border-radius: 4px;
+    opacity: .6;
+    transition: opacity .12s, background .12s;
+    line-height: 1;
+}
+.dir-pager-arrow:hover:not(:disabled) {
+    opacity: 1;
+    background: rgba(128,128,128,.12);
+}
+.dir-pager-arrow:disabled {
+    opacity: .2;
+    cursor: default;
+}
+
 .metrics-grid,
 .panel-grid,
 .city-grid {

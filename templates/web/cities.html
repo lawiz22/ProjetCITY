@@ -1,40 +1,97 @@
 {% extends 'web/base.html' %}
 
-{% block filter_hidden_fields %}
-<input type="hidden" name="view" value="{{ view_mode }}">
-{% endblock %}
-
 {% block content %}
 <section class="panel">
     <div class="panel-head">
         <div>
             <h2>Annuaire analytique</h2>
-            <span>{{ cities|length }} villes</span>
+            <span id="dir-count">{{ cities|length }} villes</span>
         </div>
-        <div class="view-switcher" role="group" aria-label="Mode d'affichage">
-            <a class="secondary-button inline-button view-mode-button view-mode-button-large {% if view_mode == 'large' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='large') }}" aria-label="Vue gros bloc" title="Vue gros bloc">
-                <span class="view-mode-icon view-mode-large" aria-hidden="true"></span>
-                <span class="sr-only">Vue gros bloc</span>
-            </a>
-            <a class="secondary-button inline-button view-mode-button view-mode-button-medium {% if view_mode == 'medium' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='medium') }}" aria-label="Vue moyen bloc" title="Vue moyen bloc">
-                <span class="view-mode-icon view-mode-medium" aria-hidden="true"></span>
-                <span class="sr-only">Vue moyen bloc</span>
-            </a>
-            <a class="secondary-button inline-button view-mode-button view-mode-button-small {% if view_mode == 'small' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='small') }}" aria-label="Vue petit bloc" title="Vue petit bloc">
-                <span class="view-mode-icon view-mode-small" aria-hidden="true"></span>
-                <span class="sr-only">Vue petit bloc</span>
-            </a>
-            <a class="secondary-button inline-button view-mode-button view-mode-button-compact {% if view_mode == 'compact' %}is-active{% endif %}" href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search, view='compact') }}" aria-label="Vue compacte" title="Vue compacte">
-                <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
-                <span class="sr-only">Vue compacte</span>
-            </a>
+        <div class="dir-controls">
+            <!-- Inline filters -->
+            <div class="dir-filter">
+                <select id="dir-filter-country">
+                    <option value="">Tous les pays</option>
+                    {% for c in countries %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="dir-filter dir-filter-region-wrap">
+                <button type="button" class="dir-region-toggle" id="dir-region-toggle">Toutes les régions <span class="dir-region-arrow">▾</span></button>
+                <div class="dir-region-dropdown" id="dir-region-dropdown">
+                    <div class="dir-region-actions">
+                        <button type="button" data-region-action="all">Tout cocher</button>
+                        <button type="button" data-region-action="none">Tout décocher</button>
+                    </div>
+                    <div class="dir-region-list" id="dir-region-list">
+                        {% for r in regions %}
+                        <label><input type="checkbox" value="{{ r }}" checked> {{ r }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="dir-filter">
+                <input type="text" id="dir-filter-search" placeholder="Rechercher une ville…">
+            </div>
+            <!-- Sort -->
+            <div class="dir-sort">
+                <label for="dir-sort-select">Trier par</label>
+                <select id="dir-sort-select">
+                    <option value="name-asc">Nom A → Z</option>
+                    <option value="name-desc">Nom Z → A</option>
+                    <option value="pop-desc">Population ↓</option>
+                    <option value="pop-asc">Population ↑</option>
+                </select>
+            </div>
+            <!-- View switcher -->
+            <div class="view-switcher" role="group" aria-label="Mode d'affichage">
+                <a class="secondary-button inline-button view-mode-button view-mode-button-large {% if view_mode == 'large' %}is-active{% endif %}" href="{{ url_for('web.city_directory', view='large') }}" aria-label="Vue gros bloc" title="Vue gros bloc">
+                    <span class="view-mode-icon view-mode-large" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-medium {% if view_mode == 'medium' %}is-active{% endif %}" href="{{ url_for('web.city_directory', view='medium') }}" aria-label="Vue moyen bloc" title="Vue moyen bloc">
+                    <span class="view-mode-icon view-mode-medium" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-small {% if view_mode == 'small' %}is-active{% endif %}" href="{{ url_for('web.city_directory', view='small') }}" aria-label="Vue petit bloc" title="Vue petit bloc">
+                    <span class="view-mode-icon view-mode-small" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-compact {% if view_mode == 'compact' %}is-active{% endif %}" href="{{ url_for('web.city_directory', view='compact') }}" aria-label="Vue compacte" title="Vue compacte">
+                    <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="city-grid city-grid-photo city-grid-{{ view_mode }}">
+    <!-- Pagination top -->
+    <div class="dir-pager" id="dir-pager-top">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Villes par page:</span>
+            <select id="dir-per-page-select">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Toutes</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="dir-pager-info-top"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    <div class="city-grid city-grid-photo city-grid-{{ view_mode }}" id="dir-grid">
         {% for city in cities %}
         {% set trend_state = 'up' if city.trend_label == 'En croissance' else 'down' if city.trend_label == 'En décroissance' else 'stable' %}
-        <a class="city-card city-card-photo city-card-{{ view_mode }} city-card-trend-{{ trend_state }}" href="{{ url_for('web.city_detail', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">
+        <a class="city-card city-card-photo city-card-{{ view_mode }} city-card-trend-{{ trend_state }}"
+           href="{{ url_for('web.city_detail', city_slug=city.city_slug) }}"
+           data-city-name="{{ city.city_name }}"
+           data-city-pop="{{ city.population }}"
+           data-city-country="{{ city.country }}"
+           data-city-region="{{ city.region }}">
             <div class="city-card-media">
                 <img src="{{ url_for('static', filename=city.photo_path) }}" alt="Vue de {{ city.city_name }}" loading="lazy">
                 <div class="city-card-overlay"></div>
@@ -99,5 +156,207 @@
         </a>
         {% endfor %}
     </div>
+
+    <!-- Pagination bottom -->
+    <div class="dir-pager" id="dir-pager-bottom">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Villes par page:</span>
+            <select class="dir-per-page-mirror">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Toutes</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="dir-pager-info-bottom"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
 </section>
+
+<!-- Directory sort, filter & pagination JS -->
+<script>
+(function() {
+    var grid = document.getElementById('dir-grid');
+    var sortSelect = document.getElementById('dir-sort-select');
+    var perPageSelect = document.getElementById('dir-per-page-select');
+    var countSpan = document.getElementById('dir-count');
+    var countrySelect = document.getElementById('dir-filter-country');
+    var searchInput = document.getElementById('dir-filter-search');
+    var regionToggle = document.getElementById('dir-region-toggle');
+    var regionDropdown = document.getElementById('dir-region-dropdown');
+    var regionList = document.getElementById('dir-region-list');
+    if (!grid || !sortSelect || !perPageSelect) return;
+
+    // Mirror selects (bottom pager syncs with top)
+    var mirrors = document.querySelectorAll('.dir-per-page-mirror');
+    mirrors.forEach(function(m) {
+        m.value = perPageSelect.value;
+        m.addEventListener('change', function() {
+            perPageSelect.value = m.value;
+            currentPage = 1;
+            render();
+        });
+    });
+
+    var allCards = Array.prototype.slice.call(grid.querySelectorAll('.city-card'));
+    var filtered = allCards.slice();
+    var sorted = allCards.slice();
+    var currentPage = 1;
+
+    /* ---- Filtering ---- */
+    function getCheckedRegions() {
+        var set = new Set();
+        regionList.querySelectorAll('input[type="checkbox"]:checked').forEach(function(cb) {
+            set.add(cb.value);
+        });
+        return set;
+    }
+
+    function updateRegionLabel() {
+        var total = regionList.querySelectorAll('input[type="checkbox"]').length;
+        var checked = regionList.querySelectorAll('input[type="checkbox"]:checked').length;
+        regionToggle.firstChild.textContent = (checked === total) ? 'Toutes les régions ' : checked + ' région' + (checked > 1 ? 's' : '') + ' ';
+    }
+
+    function applyFilters() {
+        var country = countrySelect.value;
+        var regions = getCheckedRegions();
+        var search = searchInput.value.trim().toLowerCase();
+
+        filtered = allCards.filter(function(c) {
+            if (country && c.dataset.cityCountry !== country) return false;
+            if (!regions.has(c.dataset.cityRegion)) return false;
+            if (search && (c.dataset.cityName || '').toLowerCase().indexOf(search) === -1) return false;
+            return true;
+        });
+        doSort(true);
+    }
+
+    /* ---- Region dropdown toggle ---- */
+    regionToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        regionDropdown.classList.toggle('is-open');
+    });
+    document.addEventListener('click', function(e) {
+        if (!regionDropdown.contains(e.target) && e.target !== regionToggle) {
+            regionDropdown.classList.remove('is-open');
+        }
+    });
+    document.querySelectorAll('[data-region-action]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var check = btn.dataset.regionAction === 'all';
+            regionList.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = check; });
+            updateRegionLabel();
+            applyFilters();
+        });
+    });
+    regionList.addEventListener('change', function() {
+        updateRegionLabel();
+        applyFilters();
+    });
+
+    /* ---- Country & Search ---- */
+    countrySelect.addEventListener('change', function() { applyFilters(); });
+    var searchTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilters, 200);
+    });
+
+    /* ---- Sorting ---- */
+    function getPerPage() {
+        var v = perPageSelect.value;
+        return v === 'all' ? sorted.length : parseInt(v, 10);
+    }
+
+    function tp() {
+        return Math.max(1, Math.ceil(sorted.length / getPerPage()));
+    }
+
+    function doSort(resetPage) {
+        var val = sortSelect.value;
+        var field = val.split('-')[0];
+        var dir = val.split('-')[1];
+        sorted = filtered.slice();
+        sorted.sort(function(a, b) {
+            if (field === 'name') {
+                var va = (a.dataset.cityName || '').toLowerCase();
+                var vb = (b.dataset.cityName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else {
+                var va = parseInt(a.dataset.cityPop, 10) || 0;
+                var vb = parseInt(b.dataset.cityPop, 10) || 0;
+                return dir === 'asc' ? va - vb : vb - va;
+            }
+        });
+        if (resetPage) currentPage = 1;
+        render();
+    }
+
+    /* ---- Render ---- */
+    function render() {
+        var pp = getPerPage();
+        var total = tp();
+        if (currentPage > total) currentPage = total;
+        var start = (currentPage - 1) * pp;
+        var end = start + pp;
+
+        allCards.forEach(function(c) { c.style.display = 'none'; });
+        sorted.slice(start, end).forEach(function(c) { c.style.display = ''; });
+        sorted.forEach(function(c) { grid.appendChild(c); });
+
+        // Sync mirror selects
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+
+        // Update counter
+        countSpan.textContent = sorted.length + ' villes';
+
+        // Update pager info & arrows
+        var infoText = 'Page ' + currentPage + ' de ' + total;
+        document.querySelectorAll('.dir-pager-info').forEach(function(el) { el.textContent = infoText; });
+
+        var isFirst = currentPage <= 1;
+        var isLast = currentPage >= total;
+        var showPager = total > 1;
+
+        document.querySelectorAll('.dir-pager').forEach(function(pager) {
+            pager.style.display = showPager ? '' : 'none';
+            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+                var d = btn.dataset.dir;
+                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
+            });
+        });
+    }
+
+    // Arrow clicks
+    document.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var total = tp();
+            switch (btn.dataset.dir) {
+                case 'first': currentPage = 1; break;
+                case 'prev':  if (currentPage > 1) currentPage--; break;
+                case 'next':  if (currentPage < total) currentPage++; break;
+                case 'last':  currentPage = total; break;
+            }
+            render();
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    sortSelect.addEventListener('change', function() { doSort(true); });
+    perPageSelect.addEventListener('change', function() {
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+        currentPage = 1;
+        render();
+    });
+
+    doSort(false);
+})();
+</script>
 {% endblock %}
