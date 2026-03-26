@@ -5,8 +5,52 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 81
+# Nombre de villes : 128
 #
+
+# ============================================================
+# Albuquerque (United States)
+# ============================================================
+CITY_NAME = "Albuquerque, New Mexico"
+CITY_COLOR = '#8B4513'
+
+years = [1706, 1800, 1850, 1880, 1900, 1920, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [
+    500, 1000, 1500, 2300, 6200, 15000, 35000, 96000, 201000, 244000, 330000, 385000, 
+    448000, 545000, 564000
+]
+
+annotations = [
+    (1706, 500, "👑 Fondation espagnole — villa royale (1706)", 'brown'),
+    (1880, 2300, "🚂 Santa Fe Railway — New Albuquerque naît (1880)", 'orange'),
+    (1900, 6200, "🫁 Health seekers — sanatoriums tuberculose (1895)", 'green'),
+    (1920, 15000, "🛣️ Route 66 — Central Avenue (1926)", 'blue'),
+    (1940, 35000, "⚛️ Manhattan Project — Kirtland AFB (1942)", 'red'),
+    (1950, 96000, "💥 Boom Sun Belt — Sandia Labs (1949)", 'purple'),
+    (1970, 244000, "🔬 Guerre froide — armes nucléaires (1965)", 'gray'),
+    (2010, 545000, "🎥 Breaking Bad — icône mondiale (2008)", 'gold'),
+    (2020, 564000, "🎈 Balloon Fiesta — 900 ballons (2019)", 'orange'),
+]
+
+# ============================================================
+# Anchorage (United States)
+# ============================================================
+CITY_NAME = "Anchorage, Alaska"
+CITY_COLOR = '#2E5E8E'
+
+years = [1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [1856, 2724, 4229, 11254, 44237, 48081, 174431, 226338, 260283, 291826, 291247]
+
+annotations = [
+    (1920, 1856, "🚂 Alaska Railroad — fondation ville (1915)", 'brown'),
+    (1950, 11254, "⚔️ WWII — Elmendorf AFB — bases militaires (1942)", 'gray'),
+    (1960, 44237, "🏛️ Statehood Alaska — 49ème État (1959)", 'blue'),
+    (1970, 48081, "🌊 Séisme 9.2 — Vendredi Saint (1964)", 'red'),
+    (1980, 174431, "⚡ Boom pétrolier — pipeline TAPS (1977)", 'black'),
+    (1990, 226338, "🛬 Hub fret mondial — Ted Stevens (1985)", 'purple'),
+    (2000, 260283, "🌿 Tourisme arctique — croissance (2000)", 'green'),
+    (2020, 291247, "🌡️ Séisme 7.1 + réchauffement (2018)", 'orange'),
+]
 
 # ============================================================
 # Atlanta (United States)
@@ -96,6 +140,53 @@ annotations = [
 ]
 
 # ============================================================
+# Billings (United States)
+# ============================================================
+CITY_NAME = "Billings, Montana"
+CITY_COLOR = '#8B4513'
+
+years = [1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [
+    836, 3221, 3221, 10031, 15100, 16380, 23261, 31834, 40434, 61581, 66798, 81151, 
+    89847, 104170, 117116
+]
+
+annotations = [
+    (1880, 836, "🚂 Northern Pacific Railway — ville fondée (1882)", 'brown'),
+    (1910, 10031, "⛽ Premières raffineries de pétrole (1910)", 'black'),
+    (1930, 16380, "🌾 Dust Bowl — sécheresse — Grande Dépression (1930)", 'orange'),
+    (1940, 23261, "⛽ Raffineries stratégiques — WWII (1942)", 'gray'),
+    (1970, 61581, "💥 Boom pétrolier Montana Energy (1973)", 'black'),
+    (1980, 66798, "🏥 Billings Clinic — hub médical régional (1980)", 'blue'),
+    (2010, 104170, "🏔️ Bakken boom — hub services Williston (2008)", 'green'),
+    (2020, 117116, "🌆 1ère ville Montana — métropole régionale (2020)", 'purple'),
+]
+
+# ============================================================
+# Bismarck (United States)
+# ============================================================
+CITY_NAME = "Bismarck, North Dakota"
+CITY_COLOR = '#4A4A8A'
+
+years = [1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [
+    1758, 2186, 3319, 5443, 7122, 11090, 15496, 18640, 27670, 34703, 44485, 49256, 55532, 
+    61272, 73622
+]
+
+annotations = [
+    (1880, 1758, "🚂 Northern Pacific Railway — ville fondée (1873)", 'brown'),
+    (1890, 2186, "🏛️ Capitale North Dakota — statehood (1889)", 'blue'),
+    (1930, 11090, "🏗️ Capitole gratte-ciel — prairies (1934)", 'gray'),
+    (1940, 15496, "🌾 Dust Bowl — exode rural Dakota (1936)", 'orange'),
+    (1960, 27670, "💧 Garrison Dam — Lake Sakakawea (1953)", 'blue'),
+    (1970, 34703, "🚗 Interstate 94 — hub régional (1970)", 'green'),
+    (1980, 44485, "🛢️ Premier boom pétrolier — Bakken (1980)", 'black'),
+    (2010, 61272, "⚡ Révolution fracking — #2 pétrole USA (2008)", 'red'),
+    (2020, 73622, "🏗️ Expansion urbaine — pipeline Dakota (2016)", 'purple'),
+]
+
+# ============================================================
 # Boston (United States)
 # ============================================================
 CITY_NAME = "Boston, Massachusetts"
@@ -171,6 +262,52 @@ annotations = [
 ]
 
 # ============================================================
+# Brattleboro (United States)
+# ============================================================
+CITY_NAME = "Brattleboro, Vermont"
+CITY_COLOR = '#8B4513'
+
+years = [1790, 1830, 1860, 1880, 1900, 1920, 1940, 1960, 1980, 2000, 2010, 2020]
+population = [1000, 2500, 5000, 6500, 7967, 9036, 9622, 9564, 11886, 12005, 11756, 11865]
+
+annotations = [
+    (1790, 1000, "🏰 Fort Dummer — 1er établissement Vermont (1724)", 'brown'),
+    (1860, 5000, "🎹 Estey Organ Co. — capitale mondiale orgues (1852)", 'purple'),
+    (1880, 6500, "🚂 Nœud ferroviaire — centre commercial régional", 'brown'),
+    (1900, 7967, "📚 Rudyard Kipling — Livre de la Jungle (1892)", 'green'),
+    (1920, 9036, "🏥 Brattleboro Retreat — institution majeure (1834)", 'blue'),
+    (1960, 9564, "🎹 Fermeture Estey Organ — fin ère industrielle", 'red'),
+    (1980, 11886, "🌿 Contre-culture — artistes — alternatifs (1970)", 'orange'),
+    (2020, 11865, "🎨 Capitale culturelle sud Vermont (2020)", 'teal'),
+]
+
+# ============================================================
+# Brossard (Canada)
+# ============================================================
+CITY_NAME = "Brossard, Quebec"
+CITY_COLOR = '#00695C'
+
+years = [
+    1941, 1951, 1958, 1961, 1966, 1971, 1976, 1981, 1986, 1991, 1996, 2001, 2006, 2011, 
+    2016, 2021
+]
+population = [
+    500, 1500, 3000, 8000, 23000, 37000, 52000, 57000, 64000, 65000, 65000, 65000, 72000, 
+    79000, 85000, 93000
+]
+
+annotations = [
+    (1941, 500, "🌾 Zone agricole — rive sud vierge (1940)", 'green'),
+    (1958, 3000, "🏙️ Incorporation ville — veille du boom (1958)", 'brown'),
+    (1966, 23000, "🌉 Pont Champlain — suburbanisation (1962)", 'blue'),
+    (1971, 37000, "🛣️ A-10 + Taschereau — boom pavillonnaire (1970)", 'orange'),
+    (1976, 52000, "🛒 Mail Champlain — pôle commercial (1967)", 'purple'),
+    (1991, 65000, "🌍 Immigration — diversité croissante (1990)", 'red'),
+    (2006, 72000, "🛍️ Quartier DIX30 — ville nouvelle (2006)", 'teal'),
+    (2021, 93000, "🚆 REM inauguré — renaissance TOD (2023)", 'navy'),
+]
+
+# ============================================================
 # Buffalo (United States)
 # ============================================================
 CITY_NAME = "Buffalo, New York"
@@ -198,6 +335,59 @@ annotations = [
     (2000, 292648, "🕌 Réfugiés — 2e ville accueil per capita (1995)", 'purple'),
     (2010, 261310, "🏗️ Canalside — waterfront renaissance (2008)", 'teal'),
     (2020, 278349, "🏟️ Nouveau stade Bills — 1,4 Mrd USD (2022)", 'blue'),
+]
+
+# ============================================================
+# Burlington (Canada)
+# ============================================================
+CITY_NAME = "Burlington, Ontario"
+CITY_COLOR = '#1B5E20'
+
+years = [
+    1832, 1851, 1871, 1901, 1921, 1941, 1951, 1961, 1971, 1981, 1991, 2001, 2006, 2011, 
+    2016, 2021
+]
+population = [
+    500, 1200, 2000, 3000, 4500, 7000, 15000, 41000, 87000, 114000, 130000, 150000, 
+    165000, 175000, 183000, 200000
+]
+
+annotations = [
+    (1832, 500, "🏞️ Village Wellington Square — canal (1832)", 'brown'),
+    (1851, 1200, "🚂 Great Western Railway — Toronto (1853)", 'green'),
+    (1921, 4500, "🌺 Royal Botanical Gardens fondés (1941)", 'purple'),
+    (1941, 7000, "🏙️ Incorporation ville (1914)", 'blue'),
+    (1951, 15000, "🚗 QEW — boom suburbain (1940)", 'orange'),
+    (1961, 41000, "🏗️ Explosion pavillonnaire — annexion (1958)", 'red'),
+    (1971, 87000, "📈 Banlieue QEW — population ×20 (1965)", 'green'),
+    (2001, 150000, "🚉 GO Train — corridor Toronto-Hamilton (1999)", 'blue'),
+    (2021, 200000, "🏆 Top ville Canada — densification (2015)", 'gold'),
+]
+
+# ============================================================
+# Burlington (United States)
+# ============================================================
+CITY_NAME = "Burlington, Vermont"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    1000, 2111, 3533, 3861, 4271, 6110, 7713, 14387, 11365, 14590, 18640, 20468, 22779, 
+    24789, 27686, 33155, 35531, 38633, 37712, 39127, 38889, 42417, 44743
+]
+
+annotations = [
+    (1800, 1000, "🎓 UVM fondée 1791 — 1ère université du Vermont (1791)", 'green'),
+    (1850, 6110, "🚂 Vermont Central Railroad — hub bois Champlain (1849)", 'brown'),
+    (1870, 14387, "🌲 Sommet industrie bois — plus grand marché Est USA (1860)", 'darkgreen'),
+    (1900, 18640, "🍁 Québécois — Little Canada — franco-américain (1890)", 'blue'),
+    (1950, 33155, "💻 IBM Essex Junction — révolution tech régionale (1957)", 'purple'),
+    (1980, 37712, "🗳️ Bernie Sanders — maire progressiste élu (1981)", 'red'),
+    (1990, 39127, "🚶 Church Street piétonne — renaissance centre-ville (1981)", 'orange'),
+    (2020, 44743, "⚡ 100% renouvelable — 1ère ville USA (2014)", 'teal'),
 ]
 
 # ============================================================
@@ -301,6 +491,51 @@ annotations = [
     (1970, 3366957, "✊ Émeutes Convention Démo. (1968)", 'red'),
     (1980, 3005072, "📉 Désindustrialisation", 'orange'),
     (2020, 2696555, "💻 Hub finance & tech", 'blue'),
+]
+
+# ============================================================
+# Churchill (Canada)
+# ============================================================
+CITY_NAME = "Churchill, Manitoba"
+CITY_COLOR = '#1B4F72'
+
+years = [1920, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 2001, 2011, 2021]
+population = [200, 500, 1000, 2500, 5000, 2000, 1500, 1100, 1000, 900, 870]
+
+annotations = [
+    (1931, 500, "⚓ Port ouvert — grain des Prairies (1931)", 'brown'),
+    (1951, 2500, "⚔️ Fort Churchill — base militaire (1942)", 'gray'),
+    (1961, 5000, "🚀 Pic historique — recherche arctique (1960)", 'blue'),
+    (1971, 2000, "📉 Fermeture base militaire — exode (1964)", 'red'),
+    (1981, 1500, "🐻 Tourisme ours polaires — Tundra Buggy (1980)", 'green'),
+    (2001, 1000, "🐋 Bélugas + aurores — hub écotourisme (2000)", 'purple'),
+    (2021, 870, "🌡️ Crise ferroviaire résolue — Arctic Gateway (2018)", 'orange'),
+]
+
+# ============================================================
+# Châteauguay (Canada)
+# ============================================================
+CITY_NAME = "Châteauguay, Quebec"
+CITY_COLOR = '#1A237E'
+
+years = [
+    1825, 1851, 1871, 1901, 1921, 1941, 1951, 1961, 1971, 1981, 1991, 1996, 2001, 2006, 
+    2011, 2016, 2021
+]
+population = [
+    1200, 2000, 2500, 3000, 3500, 4000, 5500, 12000, 27000, 37000, 41000, 43000, 45000, 
+    45000, 46000, 47000, 50000
+]
+
+annotations = [
+    (1825, 1200, "🏞️ Seigneurie — rivière Châteauguay (1673)", 'brown'),
+    (1851, 2000, "⚔️ Bataille Châteauguay — de Salaberry (1813)", 'red'),
+    (1951, 5500, "🌉 Pont Mercier — suburbanisation (1934)", 'blue'),
+    (1961, 12000, "🏗️ Boom pavillonnaire — banlieue dortoir (1958)", 'green'),
+    (1971, 27000, "📈 Explosion démographique — A-30 (1968)", 'orange'),
+    (1981, 37000, "🏙️ Incorporation ville — services (1968)", 'purple'),
+    (1991, 41000, "🚧 Crise Oka — pont bloqué 78 jours (1990)", 'red'),
+    (2021, 50000, "🏘️ Banlieue mature — identité francophone (2015)", 'blue'),
 ]
 
 # ============================================================
@@ -518,6 +753,32 @@ annotations = [
 ]
 
 # ============================================================
+# Drummondville (Canada)
+# ============================================================
+CITY_NAME = "Drummondville, Quebec"
+CITY_COLOR = '#1565C0'
+
+years = [
+    1815, 1851, 1861, 1891, 1911, 1921, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 2001, 
+    2006, 2011, 2016, 2021
+]
+population = [
+    200, 1500, 2500, 3500, 5500, 8800, 11000, 14500, 17600, 22000, 29000, 35000, 35500, 
+    46000, 68000, 72000, 78000, 85000
+]
+
+annotations = [
+    (1815, 200, "🎖️ Fondation militaire — général Heriot (1815)", 'red'),
+    (1861, 2500, "🚂 Grand Tronc — nœud ferroviaire (1856)", 'brown'),
+    (1921, 8800, "🧵 Industrie textile — boom manufacturier (1915)", 'purple'),
+    (1941, 14500, "⚔️ Guerre — usines à plein régime (1940)", 'gray'),
+    (1961, 22000, "🛣️ Autoroute 20 — carrefour régional (1960)", 'orange'),
+    (1981, 35000, "📉 Déclin textile — reconversion (1975)", 'red'),
+    (2006, 68000, "🔀 Fusion municipale — agrandissement (2004)", 'blue'),
+    (2021, 85000, "🏭 400+ manufacturiers — capitale Centre-QC (2020)", 'green'),
+]
+
+# ============================================================
 # Edmonton (Canada)
 # ============================================================
 CITY_NAME = "Edmonton, Alberta"
@@ -541,6 +802,120 @@ annotations = [
     (1980, 657057, "🏬 West Edmonton Mall — plus grand monde (1981)", 'orange'),
     (2010, 1159869, "🏒 ICE District — Rogers Place — renouveau (2016)", 'blue'),
     (2020, 1418118, "🤖 Institut Amii — capitale IA canadienne (2017)", 'purple'),
+]
+
+# ============================================================
+# Essex (Canada)
+# ============================================================
+CITY_NAME = "Essex, Ontario"
+CITY_COLOR = '#2E7D32'
+
+years = [
+    1850, 1869, 1881, 1901, 1921, 1941, 1951, 1961, 1971, 1981, 1991, 1999, 2006, 2011, 
+    2016, 2021
+]
+population = [
+    800, 1200, 1500, 2000, 2500, 3200, 3800, 4500, 5500, 6500, 7200, 18000, 19000, 19600, 
+    20000, 20500
+]
+
+annotations = [
+    (1850, 800, "🏞️ Terminus Underground Railroad — refuge (1850)", 'brown'),
+    (1869, 1200, "🏘️ Incorporation village Essex (1869)", 'blue'),
+    (1881, 1500, "🚂 Canada Southern Railway (1873)", 'green'),
+    (1921, 2500, "🍺 Prohibition — bootlegging Détroit (1920)", 'orange'),
+    (1941, 3200, "⚔️ Usines de guerre Windsor — navetteurs (1940)", 'gray'),
+    (1971, 5500, "👷 SAWP — travailleurs saisonniers (1966)", 'purple'),
+    (1999, 18000, "🏙️ Fusion municipale — townships (1999)", 'red'),
+    (2016, 20000, "🍷 Vignobles — agrotourisme — Point Pelee (2010)", 'green'),
+    (2021, 20500, "🌉 Pont Gordie Howe — impact régional (2020)", 'blue'),
+]
+
+# ============================================================
+# Essex (United States)
+# ============================================================
+CITY_NAME = "Essex, Vermont"
+CITY_COLOR = '#1B5E20'
+
+years = [
+    1800, 1830, 1860, 1880, 1900, 1920, 1940, 1957, 1960, 1970, 1980, 1990, 2000, 2010, 
+    2015, 2020, 2022
+]
+population = [
+    500, 1500, 2800, 3200, 3500, 3800, 4500, 5000, 7500, 10951, 14392, 16498, 18626, 
+    19587, 20000, 21378, 34000
+]
+
+annotations = [
+    (1800, 500, "🏞️ Township Nouvelle-Angleterre — Abénaquis (1763)", 'brown'),
+    (1860, 2800, "🚂 Vermont Central Railroad — Essex Junction (1849)", 'green'),
+    (1920, 3800, "👨‍👩‍👧 Communauté franco-américaine — paroisses (1910)", 'blue'),
+    (1940, 4500, "⚔️ Guerre — production agricole intensifiée (1940)", 'gray'),
+    (1957, 5000, "💻 IBM s'installe — tournant technologique (1957)", 'red'),
+    (1970, 10951, "🏘️ I-89 + IBM — suburbanisation massive (1960)", 'orange'),
+    (1990, 16498, "🛒 Taft Corners — développement commercial (1985)", 'purple'),
+    (2015, 20000, "🏭 GlobalFoundries reprend IBM (2015)", 'teal'),
+    (2022, 34000, "🏙️ Fusion Essex Town + Junction (2022)", 'red'),
+]
+
+# ============================================================
+# Fairbanks (United States)
+# ============================================================
+CITY_NAME = "Fairbanks, Alaska"
+CITY_COLOR = '#1B4F8A'
+
+years = [1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [3541, 1155, 2101, 3455, 5771, 13311, 14771, 22645, 30843, 30224, 31535, 32827]
+
+annotations = [
+    (1910, 3541, "⛏️ Ruée vers l'or — Felix Pedro (1902)", 'gold'),
+    (1920, 1155, "📉 Épuisement gisements — exode (1915)", 'red'),
+    (1930, 2101, "🚂 Alaska Railroad complété (1923)", 'brown'),
+    (1950, 5771, "🛣️ Alaska Highway — bases militaires (1942)", 'green'),
+    (1960, 13311, "🏛️ Statehood Alaska — 49ème État (1959)", 'blue'),
+    (1970, 14771, "🛢️ Prudhoe Bay — pétrole découvert (1968)", 'black'),
+    (1980, 22645, "⚡ Pipeline Trans-Alaska opérationnel (1977)", 'orange'),
+    (2010, 31535, "🌌 Tourisme aurores boréales — UAF (2005)", 'purple'),
+    (2020, 32827, "🌡️ Permafrost dégèle — crise climatique (2020)", 'red'),
+]
+
+# ============================================================
+# Fermont (Canada)
+# ============================================================
+CITY_NAME = "Fermont, Québec"
+CITY_COLOR = '#B71C1C'
+
+years = [1974, 1976, 1978, 1980, 1982, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020]
+population = [500, 3000, 7000, 9000, 6000, 3500, 2800, 2500, 2600, 3000, 3200, 3400, 2800]
+
+annotations = [
+    (1974, 500, "🏗️ Fondation — Québec Cartier Mining — mur-écran (1974)", 'red'),
+    (1978, 7000, "🧱 Mur-écran achevé — chef-d'œuvre architectural (1977)", 'brown'),
+    (1980, 9000, "⛏️ Apogée — ~9 000 hab. — mine en plein boom (1980)", 'green'),
+    (1982, 6000, "📉 Schefferville ferme — prix du fer s'effondre (1982)", 'red'),
+    (1990, 2800, "🏚️ Exode massif — ville à moitié vide (1988)", 'orange'),
+    (2005, 3000, "🇨🇳 Boom Chine — fer remonte — mine relancée (2003)", 'blue'),
+    (2015, 3400, "🏭 ArcelorMittal — modernisation — stabilisation (2012)", 'teal'),
+    (2020, 2800, "✈️ Isolement total — accès avion/train seulement (2020)", 'gray'),
+]
+
+# ============================================================
+# Flin Flon (Canada)
+# ============================================================
+CITY_NAME = "Flin Flon, Manitoba"
+CITY_COLOR = '#7D3C98'
+
+years = [1928, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 2001, 2011, 2021]
+population = [500, 3000, 7000, 10000, 12000, 10500, 8800, 7200, 6200, 5592, 4900]
+
+annotations = [
+    (1928, 500, "🚂 Train The Pas–Flin Flon — ville naît du roc (1928)", 'brown'),
+    (1931, 3000, "⛏️ HBM&S — mine et fonderie — company town (1930)", 'purple'),
+    (1941, 7000, "⚔️ Guerre — cuivre & zinc — production maximale (1941)", 'gray'),
+    (1961, 12000, "🏆 Pic historique — apogée minière (1961)", 'gold'),
+    (1981, 8800, "📉 Prix métaux instables — début déclin (1975)", 'red'),
+    (2011, 5592, "🔒 Fermeture mine principale HBM&S (2010)", 'black'),
+    (2021, 4900, "🎣 Reconversion — pêche — tourisme boréal (2015)", 'green'),
 ]
 
 # ============================================================
@@ -574,6 +949,46 @@ annotations = [
 ]
 
 # ============================================================
+# Fort McMurray (Canada)
+# ============================================================
+CITY_NAME = "Fort McMurray, Alberta"
+CITY_COLOR = '#FF6600'
+
+years = [1921, 1941, 1961, 1967, 1971, 1976, 1981, 1991, 2001, 2011, 2016, 2021]
+population = [500, 1000, 1200, 5000, 8000, 18000, 31000, 34000, 47000, 76000, 66000, 73000]
+
+annotations = [
+    (1921, 500, "🚂 Chemin de fer Alberta & Great Waterways (1921)", 'brown'),
+    (1967, 5000, "🛢️ 1ère mine sables bitumineux — GCOS (1967)", 'black'),
+    (1971, 8000, "⛏️ Syncrude — construction massive (1973)", 'orange'),
+    (1976, 18000, "🚀 Crise pétrole 1973 — boom démographique (1973)", 'red'),
+    (1981, 31000, "🏗️ Syncrude en production — ville explose (1978)", 'purple'),
+    (2011, 76000, "🏆 Apogée — $150k salaires miniers (2012)", 'gold'),
+    (2016, 66000, "🔥 Incendie — 88 000 évacués — $9,9G (2016)", 'red'),
+    (2021, 73000, "🔨 Reconstruction — transition énergétique (2020)", 'blue'),
+]
+
+# ============================================================
+# Fort Pierre (United States)
+# ============================================================
+CITY_NAME = "Fort Pierre, South Dakota"
+CITY_COLOR = '#8B6914'
+
+years = [1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [310, 450, 500, 600, 700, 850, 1000, 1500, 1700, 1850, 1990, 1990, 1999, 2100]
+
+annotations = [
+    (1890, 310, "🏪 Incorporation — fur trade legacy (1892)", 'brown'),
+    (1900, 450, "🐄 Ranching capital — great plains hub (1900)", 'green'),
+    (1930, 700, "🌾 Dust Bowl — Grande Dépression (1930)", 'orange'),
+    (1950, 1000, "🏗️ Oahe Dam construction begins (1948)", 'blue'),
+    (1960, 1500, "💧 Lake Oahe créé — walleye fishing (1962)", 'blue'),
+    (1980, 1850, "🤠 Authentic western ranching hub (1980)", 'brown'),
+    (2010, 1999, "🎣 Lake Oahe — world walleye destination (2010)", 'green'),
+    (2020, 2100, "🏛️ Oldest fur trade site Dakota — 200 ans (2017)", 'purple'),
+]
+
+# ============================================================
 # Gary (United States)
 # ============================================================
 CITY_NAME = "Gary, Indiana"
@@ -594,6 +1009,28 @@ annotations = [
     (1990, 116646, "🏚️ White flight — abandon urbain (1985)", 'orange'),
     (2000, 102746, "🎰 Casino Majestic Star — espoir (1996)", 'green'),
     (2020, 69093, "🏖️ Indiana Dunes Nat'l Park — tourisme (2019)", 'blue'),
+]
+
+# ============================================================
+# Gaspé (Canada)
+# ============================================================
+CITY_NAME = "Gaspé, Quebec"
+CITY_COLOR = '#006994'
+
+years = [1871, 1880, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [
+    2000, 2400, 3500, 4200, 4800, 5600, 6500, 7800, 8600, 7969, 8300, 7800, 14819, 14284, 
+    14819
+]
+
+annotations = [
+    (1871, 2000, "⛵ Pêche morue — compagnies jersiaises Robin & Co. (1850)", 'navy'),
+    (1880, 2400, "✝️ Cartier plante croix — 1er acte souveraineté (1534)", 'brown'),
+    (1940, 6500, "⚓ Base navale HMCS Fort Ramsay — U-Boots St-Laurent (1942)", 'gray'),
+    (1960, 8600, "🛣️ Route 132 — désenclavement péninsule (1960)", 'green'),
+    (1970, 7969, "📉 Déclin morue — surpêche, villages abandonnés (1970)", 'red'),
+    (2000, 14819, "🏙️ Fusion municipale — Gaspé agrandie (2002)", 'blue'),
+    (2020, 14819, "💨 Éolien + tourisme — Croix Cartier, Musée (2015)", 'orange'),
 ]
 
 # ============================================================
@@ -620,6 +1057,57 @@ annotations = [
     (1990, 190000, "🏛️ Musée civilisations — Cardinal (1989)", 'teal'),
     (2000, 226696, "🃏 Casino Hull + fusion municipale (2002)", 'purple'),
     (2020, 291041, "🏗️ Boom immobilier — immigration franco (2015)", 'orange'),
+]
+
+# ============================================================
+# Granby (Canada)
+# ============================================================
+CITY_NAME = "Granby, Quebec"
+CITY_COLOR = '#1565C0'
+
+years = [
+    1831, 1851, 1871, 1881, 1901, 1911, 1921, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 
+    2001, 2006, 2011, 2016, 2021
+]
+population = [
+    500, 1500, 3000, 4000, 5500, 8000, 10500, 13000, 15000, 18000, 23000, 29000, 37000, 
+    42000, 45000, 55000, 63000, 67000, 70000
+]
+
+annotations = [
+    (1831, 500, "🏞️ Township loyaliste — fondation (1799)", 'brown'),
+    (1871, 3000, "🚂 Chemin de fer — essor industriel (1859)", 'brown'),
+    (1901, 5500, "🏙️ Ville incorporée — Cantons-de-l'Est (1867)", 'blue'),
+    (1931, 13000, "🏭 Granby Rubber — caoutchouc dominant (1920)", 'orange'),
+    (1941, 15000, "⚔️ Production de guerre — boom industriel (1940)", 'gray'),
+    (1961, 23000, "🦁 Zoo de Granby — fondé (1953)", 'green'),
+    (1971, 29000, "🎵 Festival de la chanson de Granby (1969)", 'purple'),
+    (1981, 37000, "📉 Déclin manufactures — reconversion (1975)", 'red'),
+    (2006, 55000, "🔀 Fusions municipales — expansion (2002)", 'teal'),
+    (2021, 70000, "🏙️ Tourisme + qualité de vie — renaissance (2010)", 'blue'),
+]
+
+# ============================================================
+# Great Falls (United States)
+# ============================================================
+CITY_NAME = "Great Falls, Montana"
+CITY_COLOR = '#8B4513'
+
+years = [1885, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [
+    1000, 3979, 14930, 13948, 24121, 28822, 29928, 39214, 55357, 60091, 56725, 55097, 
+    56690, 58505, 60442
+]
+
+annotations = [
+    (1885, 1000, "🏗️ Paris Gibson fonde la ville — vision industrielle (1884)", 'green'),
+    (1890, 3979, "🚂 Great Northern Railway — connexion continentale (1887)", 'brown'),
+    (1900, 14930, "⚡ Fonderie Anaconda — cuivre + hydroélectricité (1895)", 'orange'),
+    (1920, 24121, "🌾 Boom blé WWI — homesteaders des plaines (1915)", 'gold'),
+    (1950, 39214, "✈️ Malmstrom AFB — base militaire permanente (1942)", 'blue'),
+    (1960, 55357, "🚀 Missiles Minuteman III — Guerre Froide (1962)", 'red'),
+    (1980, 56725, "📉 Fermeture fonderie Anaconda — fin ère industrielle (1980)", 'gray'),
+    (2020, 60442, "🎨 Musée Charles Russell — art western (2000)", 'purple'),
 ]
 
 # ============================================================
@@ -701,6 +1189,29 @@ annotations = [
 ]
 
 # ============================================================
+# Havre-Saint-Pierre (Canada)
+# ============================================================
+CITY_NAME = "Havre-Saint-Pierre, Quebec"
+CITY_COLOR = '#2E6B8A'
+
+years = [
+    1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 
+    2010, 2020
+]
+population = [200, 250, 300, 400, 450, 600, 700, 900, 1200, 2000, 2800, 3400, 3500, 3384, 3240, 3098]
+
+annotations = [
+    (1870, 200, "🎣 Colons acadiens — Îles-de-la-Madeleine (1857)", 'brown'),
+    (1900, 400, "⛵ Village de pêche isolé — 0 route, 0 rail (1900)", 'navy'),
+    (1940, 900, "🌲 Pêche & forêt — isolement total (1940)", 'green'),
+    (1960, 2000, "⛏️ QIT Titane — boom ilménite (1955)", 'red'),
+    (1970, 2800, "✈️ Aéroport — premier désenclavement (1970)", 'blue'),
+    (1980, 3400, "📈 Pic historique — titane en pleine prod. (1981)", 'purple'),
+    (1990, 3500, "🏞️ Parc Archipel-de-Mingan créé (1984)", 'teal'),
+    (2000, 3384, "🛣️ Route 138 complétée — accès routier (1996)", 'orange'),
+]
+
+# ============================================================
 # Houston (United States)
 # ============================================================
 CITY_NAME = "Houston, Texas"
@@ -724,6 +1235,27 @@ annotations = [
     (1980, 1595138, "💰 Boom pétrolier maximal", 'green'),
     (1990, 1630553, "📉 Crise pétrole -1986", 'red'),
     (2020, 2304580, "🌍 Ville la + diverse USA", 'purple'),
+]
+
+# ============================================================
+# Kitchener (Canada)
+# ============================================================
+CITY_NAME = "Kitchener, Ontario"
+CITY_COLOR = '#8B0000'
+
+years = [1851, 1871, 1891, 1911, 1921, 1941, 1961, 1981, 1991, 2001, 2011, 2021]
+population = [1200, 3000, 7425, 15196, 21763, 35657, 74485, 139734, 168282, 190399, 219153, 256885]
+
+annotations = [
+    (1851, 1200, "🌾 Village Berlin — Mennonites pennsylvaniens (1806)", 'green'),
+    (1871, 3000, "🚂 Grand Trunk Railway — manufactures (1856)", 'brown'),
+    (1911, 15196, "🏭 Berlin — apogée industrielle allemande (1910)", 'blue'),
+    (1921, 21763, "🇬🇧 Rebaptisée Kitchener — trauma (1916)", 'red'),
+    (1941, 35657, "⚔️ WWII — usines reconverties — effort de guerre", 'gray'),
+    (1961, 74485, "🚗 Autoroute 401 — boom suburbain (1960)", 'orange'),
+    (1981, 139734, "🎉 Oktoberfest relancé — réconciliation (1969)", 'gold'),
+    (2001, 190399, "💻 BlackBerry/RIM — Silicon Valley Nord (1999)", 'purple'),
+    (2021, 256885, "🚋 ION LRT opérationnel — renaissance (2019)", 'teal'),
 ]
 
 # ============================================================
@@ -794,6 +1326,33 @@ annotations = [
     (1990, 314398, "😡 Vaillancourt — corruption systémique (1989)", 'darkred'),
     (2010, 401553, "🚇 Métro prolongé à Laval (2007)", 'green'),
     (2020, 438366, "🏒 Place Bell — identité culturelle propre (2017)", 'purple'),
+]
+
+# ============================================================
+# Lincoln (United States)
+# ============================================================
+CITY_NAME = "Lincoln, Nebraska"
+CITY_COLOR = '#CC0000'
+
+years = [
+    1867, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 
+    2000, 2010, 2020
+]
+population = [
+    30, 2500, 13000, 55000, 40082, 43973, 54948, 75933, 81984, 98884, 128521, 149518, 
+    171932, 191972, 225581, 258379, 291082
+]
+
+annotations = [
+    (1867, 30, "👑 Lancaster → Lincoln — capitale choisie (1867)", 'gold'),
+    (1880, 13000, "📈 Boom immobilier — rêve de métropole (1883)", 'green'),
+    (1890, 55000, "💥 Pic du boom — crash imminent (1890)", 'orange'),
+    (1900, 40082, "📉 Crash & sécheresse — perte de pop. (1893)", 'red'),
+    (1930, 75933, "🏛️ Nouveau Capitol Art Déco inauguré (1932)", 'brown'),
+    (1940, 81984, "🌾 Dust Bowl — gouvernement protège Lincoln (1935)", 'gray'),
+    (1970, 149518, "🏈 Cornhuskers — religion du Nebraska (1970)", 'red'),
+    (2000, 225581, "🌍 Réfugiés — transformation démographique (1995)", 'blue'),
+    (2020, 291082, "🏗️ Haymarket — renaissance urbaine (2013)", 'purple'),
 ]
 
 # ============================================================
@@ -897,6 +1456,78 @@ annotations = [
 ]
 
 # ============================================================
+# Lévis (Canada)
+# ============================================================
+CITY_NAME = "Lévis, Quebec"
+CITY_COLOR = '#1B5E8A'
+
+years = [
+    1851, 1861, 1871, 1881, 1901, 1911, 1921, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 
+    2001, 2011, 2021
+]
+population = [
+    5000, 8000, 10500, 12000, 13000, 15000, 17000, 19500, 22000, 28000, 38000, 55000, 
+    75000, 98000, 118000, 138000, 165000
+]
+
+annotations = [
+    (1861, 8000, "⚓ Incorporation — chantiers navals Lauzon (1861)", 'brown'),
+    (1901, 13000, "💰 1ère caisse Desjardins au monde (1900)", 'green'),
+    (1941, 22000, "🛳️ Davie — frégates & destroyers WWII (1940)", 'gray'),
+    (1961, 38000, "🌉 Pont de Québec — suburbanisation (1919)", 'navy'),
+    (1971, 55000, "🌉 Pont Pierre-Laporte — boom banlieue (1970)", 'blue'),
+    (1991, 98000, "💼 Desjardins — siège mondial Amériques (1990)", 'purple'),
+    (2001, 118000, "🔀 Fusion — 10 municipalités unifiées (2002)", 'orange'),
+    (2021, 165000, "🚢 Davie — contrats navals fédéraux (2015)", 'red'),
+]
+
+# ============================================================
+# Markham (Canada)
+# ============================================================
+CITY_NAME = "Markham, Ontario"
+CITY_COLOR = '#C41E3A'
+
+years = [1851, 1871, 1901, 1941, 1961, 1971, 1981, 1991, 2001, 2011, 2016, 2021]
+population = [11856, 13000, 14500, 16000, 25000, 56000, 77037, 153811, 208615, 301709, 328966, 355940]
+
+annotations = [
+    (1851, 11856, "🌾 Colonie Berczy — township loyaliste (1794)", 'green'),
+    (1871, 13000, "🚂 Grand Trunk Railway — village incorporé (1871)", 'brown'),
+    (1971, 56000, "💻 IBM Canada s'installe — Silicon Valley Nord (1971)", 'blue'),
+    (1981, 77037, "🏘️ Boom suburbain — autoroutes — lotissements (1975)", 'orange'),
+    (1991, 153811, "🇭🇰 Vague hongkongaise — transformation démographique", 'red'),
+    (2001, 208615, "💼 AMD, Apple, Motorola — sièges sociaux (2000)", 'purple'),
+    (2011, 301709, "🌏 Plus forte prop. résidents asiatiques Canada (2010)", 'teal'),
+    (2021, 355940, "🏙️ 9ème ville Canada — Silicon Valley Nord (2021)", 'navy'),
+]
+
+# ============================================================
+# Matane (Canada)
+# ============================================================
+CITY_NAME = "Matane, Québec"
+CITY_COLOR = '#1B4F8A'
+
+years = [
+    1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 
+    1990, 2000, 2010, 2020
+]
+population = [
+    500, 800, 1200, 2000, 2800, 3500, 4500, 5800, 7200, 8500, 9800, 11200, 13500, 14500, 
+    13000, 11400, 10280, 9500
+]
+
+annotations = [
+    (1850, 500, "🎣 Seigneurie — pêche au saumon — Saint-Laurent (1677)", 'blue'),
+    (1880, 2000, "🌲 Scieries — exploitation forestière intensive (1875)", 'green'),
+    (1910, 4500, "🏭 Usine pâtes et papiers — emplois stables (1910)", 'brown'),
+    (1930, 7200, "📉 Crise 1929 — effondrement prix du papier (1929)", 'orange'),
+    (1950, 9800, "⛴️ Traversier Matane–Baie-Comeau — lien Côte-Nord (1948)", 'navy'),
+    (1970, 13500, "🎓 CÉGEP de Matane fondé — centre régional (1968)", 'purple'),
+    (1990, 13000, "📉 Exode rural — déclin démographique amorcé (1985)", 'red'),
+    (2020, 9500, "💨 Éolien — reconversion énergétique du golfe (2000)", 'teal'),
+]
+
+# ============================================================
 # Miami (United States)
 # ============================================================
 CITY_NAME = "Miami, Florida"
@@ -943,6 +1574,29 @@ annotations = [
 ]
 
 # ============================================================
+# Mirabel (Canada)
+# ============================================================
+CITY_NAME = "Mirabel, Quebec"
+CITY_COLOR = '#1B5E20'
+
+years = [1871, 1901, 1921, 1941, 1961, 1971, 1981, 1991, 1996, 2001, 2006, 2011, 2016, 2021]
+population = [
+    8000, 9500, 10000, 11000, 13000, 17000, 18000, 22000, 27000, 35000, 41000, 48000, 
+    55000, 63000
+]
+
+annotations = [
+    (1871, 8000, "🏞️ Paroisses agricoles — Sainte-Scholastique (1837)", 'brown'),
+    (1941, 11000, "🌾 Rural stable — agriculture laitière (1920)", 'green'),
+    (1971, 17000, "✈️ Expropriation 97 000 acres — 11 000 déracinés (1969)", 'red'),
+    (1981, 18000, "🛬 Aéroport Mirabel inauguré — échec (1975)", 'orange'),
+    (1996, 27000, "🏭 Bombardier + Bell — pôle aérospatial (1990)", 'blue'),
+    (2006, 41000, "🔄 Fermeture passagers — reconversion (2004)", 'gray'),
+    (2011, 48000, "🌱 Terres rétrocédées — retour agriculture (2006)", 'green'),
+    (2021, 63000, "🚀 Boom résidentiel + aérospatiale (2015)", 'blue'),
+]
+
+# ============================================================
 # Mississauga (Canada)
 # ============================================================
 CITY_NAME = "Mississauga, Ontario"
@@ -963,6 +1617,29 @@ annotations = [
     (1990, 463388, "🏢 Bureaux — Masonville, Erin Mills (1985)", 'gray'),
     (2000, 612925, "🌏 Immigration massive — diversité (1995)", 'gold'),
     (2020, 717961, "🚝 LRT Hurontario — enfin (2024)", 'orange'),
+]
+
+# ============================================================
+# Missoula (United States)
+# ============================================================
+CITY_NAME = "Missoula, Montana"
+CITY_COLOR = '#2E8B57'
+
+years = [1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [
+    879, 3426, 4366, 12869, 12668, 14657, 18449, 22485, 27090, 29497, 33388, 42918, 
+    57053, 66788, 73489
+]
+
+annotations = [
+    (1890, 3426, "🚂 Northern Pacific Railway — connexion continentale (1883)", 'brown'),
+    (1900, 4366, "🎓 Université du Montana fondée (1893)", 'blue'),
+    (1910, 12869, "🌲 Boom forestier — scieries + Big Blowup (1910)", 'green'),
+    (1930, 14657, "🏛️ US Forest Service — siège Région 1 (1908)", 'olive'),
+    (1950, 22485, "🎓 GI Bill — boom universitaire post-WWII (1945)", 'navy'),
+    (1970, 29497, "🌿 Mouvement écologiste — conflits forestiers (1970)", 'green'),
+    (1990, 42918, "🎨 Économie culturelle et artistique émerge (1985)", 'purple'),
+    (2020, 73489, "💻 Zoom town — boom télétravailleurs (2020)", 'teal'),
 ]
 
 # ============================================================
@@ -992,6 +1669,27 @@ annotations = [
 ]
 
 # ============================================================
+# Montpelier (United States)
+# ============================================================
+CITY_NAME = "Montpelier, Vermont"
+CITY_COLOR = '#4A7C59'
+
+years = [1805, 1830, 1860, 1880, 1900, 1920, 1940, 1960, 1980, 2000, 2010, 2020]
+population = [300, 1500, 3000, 4500, 6266, 7837, 8006, 8782, 8241, 8035, 7855, 8074]
+
+annotations = [
+    (1805, 300, "👑 Désignée capitale du Vermont (1805)", 'gold'),
+    (1860, 3000, "🚂 Central Vermont Railway — arrivée du rail (1855)", 'brown'),
+    (1880, 4500, "💼 National Life Insurance — assurances (1848)", 'blue'),
+    (1920, 7837, "🏛️ Consolidation capitale — services État (1910)", 'green'),
+    (1940, 8006, "🌊 Grande inondation dévaste Montpelier (1927)", 'red'),
+    (1960, 8782, "🛣️ I-89 — accessibilité Burlington/Boston (1960)", 'orange'),
+    (1980, 8241, "📉 Stagnation — plus petite capitale USA (1980)", 'gray'),
+    (2010, 7855, "🎓 Vermont College of Fine Arts (2008)", 'purple'),
+    (2020, 8074, "🌊 Inondations majeures — résilience (2023)", 'red'),
+]
+
+# ============================================================
 # Montréal (Canada)
 # ============================================================
 CITY_NAME = "Montréal, Québec"
@@ -1018,6 +1716,24 @@ annotations = [
     (1990, 1600000, "📉 Départ sièges sociaux — crise linguistique (1980)", 'orange'),
     (2000, 1640000, "🤝 Méga-fusion des 28 municipalités (2002)", 'purple'),
     (2020, 1762000, "🏗️ Boom immobilier — REM — densification (2015)", 'teal'),
+]
+
+# ============================================================
+# Murdochville (Canada)
+# ============================================================
+CITY_NAME = "Murdochville, Quebec"
+CITY_COLOR = '#8B4513'
+
+years = [1953, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [1000, 6000, 3800, 3200, 1900, 1126, 756, 701]
+
+annotations = [
+    (1953, 1000, "⛏️ Fondation ville minière — Gaspé Copper Mines (1953)", 'brown'),
+    (1960, 6000, "✊ Grève historique vs Noranda — lutte syndicale (1957)", 'red'),
+    (1980, 3200, "📉 Déclin amorcé — fermetures progressives (1975)", 'gray'),
+    (2000, 1126, "💥 Fermeture mine & fonderie — effondrement (2002)", 'red'),
+    (2010, 756, "💨 Parc éolien — reconversion énergétique (2005)", 'blue'),
+    (2020, 701, "🌬️ Survie — ~700 hab. — ville la + isolée Québec (2020)", 'purple'),
 ]
 
 # ============================================================
@@ -1420,6 +2136,55 @@ annotations = [
 ]
 
 # ============================================================
+# Regina (Canada)
+# ============================================================
+CITY_NAME = "Regina, Saskatchewan"
+CITY_COLOR = '#006400'
+
+years = [1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [
+    1000, 2249, 2249, 30213, 34432, 53209, 58245, 71319, 89755, 139469, 162613, 179178, 
+    192800, 210556, 236481
+]
+
+annotations = [
+    (1880, 1000, "🚂 CPR arrive — Regina fondée — capitale NWT (1882)", 'brown'),
+    (1890, 2249, "⚖️ Procès et pendaison de Louis Riel à Regina (1885)", 'red'),
+    (1910, 30213, "🌾 Boom du blé — Saskatchewan province (1905)", 'gold'),
+    (1930, 53209, "🌪️ Dirty Thirties — Dust Bowl — misère des prairies (1930)", 'orange'),
+    (1940, 58245, "✊ Émeute On-to-Ottawa Trek — GRC vs chômeurs (1935)", 'darkred'),
+    (1960, 89755, "💊 Tommy Douglas — assurance maladie universelle (1962)", 'purple'),
+    (1980, 162613, "🛢️ Pétrole et potasse — boom ressources Saskatchewan", 'black'),
+    (2020, 236481, "🌍 Immigration massive — croissance démographique (2010)", 'blue'),
+]
+
+# ============================================================
+# Repentigny (Canada)
+# ============================================================
+CITY_NAME = "Repentigny, Quebec"
+CITY_COLOR = '#1565C0'
+
+years = [
+    1825, 1851, 1871, 1901, 1921, 1941, 1951, 1961, 1971, 1981, 1991, 2001, 2006, 2011, 
+    2016, 2021
+]
+population = [
+    1500, 2500, 3200, 3800, 4500, 5500, 7000, 18000, 35000, 52000, 61000, 72000, 76000, 
+    82000, 84000, 84285
+]
+
+annotations = [
+    (1825, 1500, "🏞️ Seigneurie de Repentigny — fondée 1647 (1825)", 'green'),
+    (1851, 2500, "🌾 Village agricole — plaine laurentienne (1850)", 'brown'),
+    (1961, 18000, "🌉 Pont Le Gardeur — suburbanisation (1954)", 'blue'),
+    (1971, 35000, "🛣️ Autoroute 40 — explosion pavillonnaire (1970)", 'orange'),
+    (1981, 52000, "📈 Croissance record — banlieue Montréal (1975)", 'red'),
+    (2001, 72000, "🔀 Fusion — Repentigny + Le Gardeur (2002)", 'purple'),
+    (2011, 82000, "🌊 Inondations récurrentes — enjeu climatique (2011)", 'navy'),
+    (2021, 84285, "🌊 Inondations 2017 & 2019 — résilience urbaine", 'red'),
+]
+
+# ============================================================
 # Richmond (Canada)
 # ============================================================
 CITY_NAME = "Richmond, British Columbia"
@@ -1442,6 +2207,78 @@ annotations = [
     (1970, 62121, "🌾 Agricultural Land Reserve protège terres (1973)", 'green'),
     (2000, 164345, "🏮 Immigration HK/Chine — ville sino-canadienne (1990)", 'red'),
     (2010, 190473, "🚝 Canada Line SkyTrain — City Centre (2009)", 'blue'),
+]
+
+# ============================================================
+# Rimouski (Canada)
+# ============================================================
+CITY_NAME = "Rimouski, Québec"
+CITY_COLOR = '#1B4F72'
+
+years = [
+    1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 
+    1990, 2000, 2010, 2020
+]
+population = [
+    1500, 2500, 4000, 5500, 7000, 8500, 10000, 12000, 14000, 16000, 17000, 22000, 27000, 
+    35000, 41000, 45000, 47000, 48664
+]
+
+annotations = [
+    (1860, 2500, "⛵ Port — escale paquebots transatlantiques (1855)", 'navy'),
+    (1870, 4000, "🚂 Intercolonial Railway — connexion Canada (1873)", 'brown'),
+    (1880, 5500, "⛪ Évêché — capitale religieuse BSL (1867)", 'purple'),
+    (1910, 10000, "🌲 Scieries — pâtes papiers — boom forestier (1905)", 'green'),
+    (1950, 17000, "🔥 Grand incendie — centre-ville détruit (1950)", 'red'),
+    (1970, 27000, "🎓 UQAR fondée — université régionale (1969)", 'blue'),
+    (1990, 41000, "🌊 ISMER — océanographie mondiale (1985)", 'teal'),
+    (2020, 48664, "🏡 Néo-ruraux — télétravail — UQAR croît (2020)", 'orange'),
+]
+
+# ============================================================
+# Rivière-du-Loup (Canada)
+# ============================================================
+CITY_NAME = "Rivière-du-Loup, Québec"
+CITY_COLOR = '#2E4A7A'
+
+years = [
+    1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 
+    1990, 2000, 2010, 2020
+]
+population = [
+    1200, 2000, 3500, 5000, 6200, 7000, 8500, 9800, 11000, 12000, 13500, 15000, 17500, 
+    19000, 18500, 19000, 19447, 21824
+]
+
+annotations = [
+    (1860, 2000, "🚂 Grand Tronc — nœud ferroviaire majeur (1860)", 'brown'),
+    (1880, 5000, "🌲 Scieries hydrauliques — chutes de la rivière (1875)", 'green'),
+    (1910, 8500, "⛴️ Traversier vers Saint-Siméon — lien Charlevoix (1909)", 'navy'),
+    (1920, 9800, "🏙️ Rebaptisée Rivière-du-Loup — fin Fraserville (1919)", 'purple'),
+    (1940, 12000, "🏛️ Capitale services BSL occidental — consolidation", 'gray'),
+    (1970, 17500, "🎓 CÉGEP fondé — autoroute 20 — carrefour (1967)", 'blue'),
+    (1990, 18500, "🔀 Jonction A-20 / Rte 185 — logistique Maritimes (1985)", 'orange'),
+    (2020, 21824, "🏡 Néo-ruraux — télétravail — croissance reprise (2020)", 'teal'),
+]
+
+# ============================================================
+# Rouyn-Noranda (Canada)
+# ============================================================
+CITY_NAME = "Rouyn-Noranda, Québec"
+CITY_COLOR = '#7D3C98'
+
+years = [1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [500, 8000, 15000, 21000, 27000, 30000, 35000, 39000, 41000, 42000, 42334]
+
+annotations = [
+    (1920, 500, "⛏️ Découverte cuivre — Edmund Horne (1920)", 'red'),
+    (1930, 8000, "🏭 Fonderie Horne — Noranda Mines (1926)", 'brown'),
+    (1940, 15000, "🌍 Immigrants — Ukrainiens, Finlandais, Italiens", 'green'),
+    (1950, 21000, "🥇 Apogée minière — cuivre, or, argent (1945)", 'gold'),
+    (1970, 30000, "🎓 UQAT fondée — université régionale (1970)", 'blue'),
+    (1980, 35000, "🤝 Fusion Rouyn + Noranda — ville unifiée (1986)", 'purple'),
+    (2000, 41000, "☣️ Arsenic fonderie Horne — scandale santé (2021)", 'red'),
+    (2020, 42334, "🔋 Lithium — cobalt — nouveau cycle minier (2020)", 'teal'),
 ]
 
 # ============================================================
@@ -1522,6 +2359,33 @@ annotations = [
     (1980, 50000, "🎈 Festival montgolfières — 400k visiteurs (1982)", 'orange'),
     (2000, 79600, "🏙️ Fusion — Saint-Jean absorbe Iberville (2001)", 'purple'),
     (2020, 95000, "🚗 A-35 complète — boom navetteurs Montréal (2018)", 'gold'),
+]
+
+# ============================================================
+# Saint-Jérôme (Canada)
+# ============================================================
+CITY_NAME = "Saint-Jérôme, Quebec"
+CITY_COLOR = '#2E7D32'
+
+years = [
+    1834, 1851, 1871, 1881, 1901, 1911, 1921, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 
+    2001, 2006, 2011, 2016, 2021
+]
+population = [
+    300, 1200, 2000, 3500, 5000, 7500, 10000, 12500, 14800, 18000, 23000, 30000, 36000, 
+    40000, 43000, 63000, 68000, 74000, 80000
+]
+
+annotations = [
+    (1834, 300, "⛪ Fondation paroisse — colonisation (1834)", 'brown'),
+    (1881, 3500, "🚂 Chemin de fer du Nord — porte Laurentides (1876)", 'brown'),
+    (1901, 5000, "👑 Curé Labelle — Roi du Nord (1876-1891)", 'purple'),
+    (1921, 10000, "👟 Manufactures chaussures — capitale régionale", 'orange'),
+    (1941, 14800, "⚔️ Guerre — usines à plein régime (1940)", 'gray'),
+    (1961, 23000, "🛣️ Autoroute des Laurentides A-15 (1960)", 'green'),
+    (1981, 36000, "📉 Déclin manufactures — défis sociaux (1975)", 'red'),
+    (2006, 63000, "🔀 Fusion municipale — métropole (2002)", 'blue'),
+    (2021, 80000, "🚆 Train exo + renaissance urbaine (2015)", 'teal'),
 ]
 
 # ============================================================
@@ -1627,6 +2491,32 @@ annotations = [
 ]
 
 # ============================================================
+# Schefferville (Canada)
+# ============================================================
+CITY_NAME = "Schefferville, Québec"
+CITY_COLOR = '#4A0000'
+
+years = [
+    1954, 1956, 1958, 1960, 1963, 1966, 1969, 1972, 1976, 1979, 1981, 1983, 1986, 1991, 
+    2001, 2011, 2021
+]
+population = [
+    200, 1500, 2800, 3500, 4200, 5000, 4700, 4300, 3800, 3200, 2700, 350, 320, 320, 285, 
+    213, 175
+]
+
+annotations = [
+    (1954, 200, "🏗️ Fondation IOC — chemin de fer QNS&L (1954)", 'red'),
+    (1960, 3500, "⛏️ Boom minier — minerai de fer vers Sept-Îles (1958)", 'green'),
+    (1966, 5000, "🔝 Apogée — ~5 000 hab. — ville prospère (1966)", 'blue'),
+    (1976, 3800, "⚠️ Concurrence Brésil/Australie — déclin amorcé (1975)", 'orange'),
+    (1981, 2700, "📉 Prix du fer s'effondre — IOC annonce fermeture (1981)", 'red'),
+    (1983, 350, "💀 Fermeture brutale IOC — ville se vide (1982)", 'black'),
+    (2001, 285, "🏘️ Seules communautés autochtones restent (1990)", 'brown'),
+    (2021, 175, "✈️ Ville fantôme — accès avion/train seulement (2020)", 'gray'),
+]
+
+# ============================================================
 # Seattle (United States)
 # ============================================================
 CITY_NAME = "Seattle, Washington"
@@ -1652,6 +2542,46 @@ annotations = [
     (1980, 493846, "😟 Panneau : Last one out...", 'black'),
     (2000, 563374, "💻 Microsoft & Amazon arrivent", 'teal'),
     (2020, 737255, "🚀 Tech boom — ville transformée", 'cyan'),
+]
+
+# ============================================================
+# Sept-Îles (Canada)
+# ============================================================
+CITY_NAME = "Sept-Îles, Quebec"
+CITY_COLOR = '#8B4513'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [500, 600, 1000, 1200, 1500, 3000, 14000, 24320, 29262, 25224, 25224, 27827, 26580]
+
+annotations = [
+    (1900, 500, "🪶 Territoire innu — poste de traite isolé (1900)", 'brown'),
+    (1950, 3000, "🚂 QNS&L Railway — fer du Labrador annoncé (1950)", 'navy'),
+    (1960, 14000, "⛏️ IOC — boom ferrifère — ville transformée (1955)", 'red'),
+    (1970, 24320, "🔝 Apogée du fer — port #1 Canada minéralier (1970)", 'green'),
+    (1980, 29262, "📈 Pic historique — 29 000 hab. (1981)", 'purple'),
+    (1990, 25224, "📉 Choc Schefferville — fermeture mine (1982)", 'orange'),
+    (2010, 27827, "🏭 Alouette + Bloom Lake — renaissance (2005)", 'blue'),
+    (2020, 26580, "🪶 Droits innus — enjeux territoriaux (2020)", 'gray'),
+]
+
+# ============================================================
+# Shawinigan (Canada)
+# ============================================================
+CITY_NAME = "Shawinigan, Quebec"
+CITY_COLOR = '#B22222'
+
+years = [1901, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [1000, 8000, 12000, 16000, 19000, 25000, 32169, 28000, 24000, 21000, 19000, 50060, 48930]
+
+annotations = [
+    (1901, 1000, "⚡ Shawinigan Water & Power — naissance de la ville (1899)", 'navy'),
+    (1910, 8000, "🏭 Aluminium, carbure, chimie — capitaux USA/UK (1905)", 'brown'),
+    (1940, 19000, "⚔️ Production de guerre — aluminium stratégique (1940)", 'gray'),
+    (1960, 32169, "🔝 Apogée démographique — 32 000 hab. (1961)", 'green'),
+    (1970, 28000, "🏛️ Nationalisation Hydro-Québec — fin d'une ère (1963)", 'red'),
+    (1980, 24000, "📉 Désindustrialisation — fermetures usines (1975)", 'orange'),
+    (2000, 19000, "🏙️ Cité de l'énergie — reconversion culturelle (1997)", 'blue'),
+    (2010, 50060, "🔄 Fusion municipale — Grand-Mère intégrée (2002)", 'purple'),
 ]
 
 # ============================================================
@@ -1706,6 +2636,27 @@ annotations = [
     (1990, 17800, "📉 Désindustrialisation navale (1985)", 'red'),
     (2000, 34000, "🤝 Fusion Sorel + Tracy = Sorel-Tracy (2000)", 'blue'),
     (2020, 35200, "🌿 UNESCO Lac St-Pierre + Rio Tinto (2000)", 'teal'),
+]
+
+# ============================================================
+# South Burlington (United States)
+# ============================================================
+CITY_NAME = "South Burlington, Vermont"
+CITY_COLOR = '#1565C0'
+
+years = [1850, 1880, 1900, 1920, 1940, 1950, 1960, 1971, 1980, 1990, 2000, 2010, 2020]
+population = [800, 1200, 1500, 2000, 3200, 5000, 8800, 10000, 10679, 12809, 15814, 17904, 20292]
+
+annotations = [
+    (1850, 800, "🏞️ Zone agricole — séparation de Burlington (1865)", 'brown'),
+    (1920, 2000, "✈️ Premières installations militaires aériennes (1920)", 'gray'),
+    (1940, 3200, "⚔️ Base aérienne Ethan Allen — WWII (1940)", 'red'),
+    (1960, 8800, "🚗 I-89 + suburbanisation massive (1955)", 'orange'),
+    (1971, 10000, "🏙️ Incorporation comme City (1971)", 'blue'),
+    (1980, 10679, "🛒 University Mall — 1er grand mall VT (1979)", 'purple'),
+    (2000, 15814, "✈️ BTV aéroport international — porte Vermont (1990)", 'teal'),
+    (2010, 17904, "🏗️ City Center project — quête centre-ville (2010)", 'green'),
+    (2020, 20292, "💰 Ville la plus riche du Vermont (2020)", 'gold'),
 ]
 
 # ============================================================
@@ -1807,6 +2758,58 @@ annotations = [
     (1990, 245173, "🏙️ Incorporation officielle City of Surrey (1993)", 'blue'),
     (2000, 347825, "🚝 SkyTrain étendu — redéveloppement Whalley (1994)", 'purple'),
     (2020, 568322, "🌍 2e ville CB — immigration Asie du Sud (2020)", 'red'),
+]
+
+# ============================================================
+# Terrebonne (Canada)
+# ============================================================
+CITY_NAME = "Terrebonne, Quebec"
+CITY_COLOR = '#2E7D32'
+
+years = [
+    1825, 1851, 1871, 1901, 1921, 1941, 1951, 1961, 1971, 1981, 1991, 2001, 2006, 2011, 
+    2016, 2021
+]
+population = [
+    2000, 3500, 4200, 5000, 6500, 8000, 10000, 18000, 35000, 55000, 75000, 94000, 100000, 
+    106000, 111000, 120000
+]
+
+annotations = [
+    (1825, 2000, "💰 Joseph Masson — 1er millionnaire canadien-fr. (1832)", 'green'),
+    (1851, 3500, "⚙️ Île des Moulins — complexe industriel majeur (1850)", 'brown'),
+    (1901, 5000, "🚂 Chemin de fer du Nord — désenclavement (1876)", 'orange'),
+    (1961, 18000, "🚗 Baby-boom — explosion banlieue pavillonnaire (1960)", 'blue'),
+    (1971, 35000, "🛣️ Autoroute 25 — boom démographique (1970)", 'red'),
+    (1991, 75000, "📈 Croissance rapide — couronne nord (1985)", 'purple'),
+    (2001, 94000, "🔀 Fusion — Terrebonne+Lachenaie+La Plaine (2001)", 'orange'),
+    (2016, 111000, "🚆 Train de l'Est — lien Montréal (2014)", 'navy'),
+]
+
+# ============================================================
+# Thetford Mines (Canada)
+# ============================================================
+CITY_NAME = "Thetford Mines, Québec"
+CITY_COLOR = '#5D6D7E'
+
+years = [
+    1876, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 
+    2010, 2020
+]
+population = [
+    200, 600, 2500, 5000, 9000, 12000, 16000, 18000, 21000, 28000, 30000, 29000, 27000, 
+    26000, 25500, 24500
+]
+
+annotations = [
+    (1876, 200, "⛏️ Découverte amiante — Joseph Fecteau (1876)", 'gray'),
+    (1900, 5000, "🚂 Chemin de fer — export mondial amiante (1885)", 'brown'),
+    (1920, 12000, "🌍 Capitale mondiale chrysotile (1915)", 'green'),
+    (1950, 21000, "✊ Grève amiante — naissance QC moderne (1949)", 'red'),
+    (1960, 28000, "🏭 Apogée production — demande max (1960)", 'blue'),
+    (1980, 29000, "☠️ Interdictions amiante — occident (1975)", 'black'),
+    (2000, 26000, "📉 Fermetures mines — exode jeunes (1995)", 'orange'),
+    (2020, 24500, "🏛️ Musée minier — tourisme industriel (2010)", 'teal'),
 ]
 
 # ============================================================
@@ -1931,6 +2934,26 @@ annotations = [
 ]
 
 # ============================================================
+# Vaughan (Canada)
+# ============================================================
+CITY_NAME = "Vaughan, Ontario"
+CITY_COLOR = '#006400'
+
+years = [1851, 1871, 1901, 1941, 1961, 1971, 1981, 1991, 2001, 2011, 2016, 2021]
+population = [9234, 10500, 7800, 8500, 17000, 49000, 92000, 154069, 182022, 288301, 306233, 344084]
+
+annotations = [
+    (1851, 9234, "🌾 Township loyaliste — Mennonites — hameaux (1792)", 'green'),
+    (1871, 10500, "🚂 Northern Railway — Maple et Woodbridge (1853)", 'brown'),
+    (1971, 49000, "🇮🇹 Vague italienne — Woodbridge — capitale italienne", 'red'),
+    (1981, 92000, "🎢 Canada's Wonderland ouvert (1981)", 'purple'),
+    (1991, 154069, "🏘️ Lotissements massifs — boom suburbain (1985)", 'orange'),
+    (2001, 182022, "🛍️ Vaughan Mills — méga centre commercial (2004)", 'blue'),
+    (2011, 288301, "🚇 Subway VMC annoncé — densification (2010)", 'teal'),
+    (2021, 344084, "🏗️ VMC opérationnel — nouveau downtown (2017)", 'navy'),
+]
+
+# ============================================================
 # Verchères (Canada)
 # ============================================================
 CITY_NAME = "Verchères, Québec"
@@ -1980,6 +3003,32 @@ annotations = [
     (1970, 61761, "🎓 UVic — université complète (1963)", 'blue'),
     (2000, 74125, "🌸 Tourisme — 'Most livable' (1995)", 'pink'),
     (2020, 92141, "🏗️ Densification — crise logement (2018)", 'orange'),
+]
+
+# ============================================================
+# Victoriaville (Canada)
+# ============================================================
+CITY_NAME = "Victoriaville, Québec"
+CITY_COLOR = '#2E7D32'
+
+years = [
+    1861, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 
+    2000, 2010, 2020
+]
+population = [
+    400, 900, 2000, 3500, 5000, 7000, 9000, 11000, 13000, 16000, 19000, 22000, 27000, 
+    38000, 40000, 43000, 50000
+]
+
+annotations = [
+    (1861, 400, "👑 Fondation — nommée en honneur reine Victoria (1861)", 'purple'),
+    (1880, 2000, "🚂 Grand Tronc — rail transforme le village (1864)", 'brown'),
+    (1900, 5000, "🪑 Industrie du meuble — spécialité régionale (1895)", 'green'),
+    (1910, 7000, "🍁 Wilfrid Laurier — PM Canada — Arthabaska (1896)", 'red'),
+    (1950, 16000, "🏭 Apogée manufactures — meuble & laitier (1950)", 'blue'),
+    (1970, 22000, "🎓 Cégep de Victoriaville fondé (1971)", 'teal'),
+    (1990, 38000, "♻️ Pionnière développement durable (1990)", 'green'),
+    (2010, 43000, "🏙️ Fusion Victoriaville-Arthabaska (2002)", 'orange'),
 ]
 
 # ============================================================
@@ -2036,6 +3085,47 @@ annotations = [
     (1980, 638333, "📉 Crise urbaine & criminalité", 'orange'),
     (2000, 572059, "📉 Creux démographique", 'red'),
     (2020, 689545, "📈 Gentrification & renaissance", 'cyan'),
+]
+
+# ============================================================
+# Whitehorse (Canada)
+# ============================================================
+CITY_NAME = "Whitehorse, Yukon"
+CITY_COLOR = '#1B4F72'
+
+years = [1898, 1900, 1911, 1921, 1941, 1944, 1951, 1961, 1971, 1981, 1991, 2001, 2011, 2021]
+population = [500, 1200, 1500, 1200, 1000, 5000, 2500, 5031, 11084, 14814, 17925, 19058, 23276, 28201]
+
+annotations = [
+    (1898, 500, "🥇 Ruée vers l'or du Klondike — camp de tente (1896)", 'gold'),
+    (1900, 1200, "🚂 White Pass Railway — Skagway–Whitehorse (1900)", 'brown'),
+    (1944, 5000, "⚔️ Alaska Highway — boom militaire américain (1942)", 'green'),
+    (1951, 2500, "📉 Démobilisation — soldats repartent (1945)", 'red'),
+    (1961, 5031, "🏛️ Whitehorse devient capitale du Yukon (1953)", 'blue'),
+    (1971, 11084, "⛏️ Mine de Faro — plomb-zinc — boom (1969)", 'orange'),
+    (2001, 19058, "📜 Accords Premières Nations — autonomie (1995)", 'purple'),
+    (2021, 28201, "🎓 Université du Yukon fondée (2020)", 'teal'),
+]
+
+# ============================================================
+# Windsor (Canada)
+# ============================================================
+CITY_NAME = "Windsor, Ontario"
+CITY_COLOR = '#00308F'
+
+years = [1851, 1871, 1891, 1911, 1921, 1931, 1941, 1961, 1981, 2001, 2011, 2021]
+population = [1500, 4000, 10000, 17829, 38591, 63108, 105311, 114367, 192083, 208402, 210891, 229660]
+
+annotations = [
+    (1851, 1500, "🇫🇷 Paroisse Assomption — colons français (1767)", 'blue'),
+    (1891, 10000, "🥃 Hiram Walker — distillerie Walkerville (1858)", 'brown'),
+    (1911, 17829, "🚗 Ford du Canada fondée à Windsor (1904)", 'red'),
+    (1921, 38591, "🍺 Prohibition USA — contrebande — boom (1920)", 'gold'),
+    (1931, 63108, "🌉 Pont Ambassador + Tunnel auto (1929-1930)", 'gray'),
+    (1941, 105311, "⚔️ WWII — usines auto reconverties (1939)", 'darkred'),
+    (1981, 192083, "📉 Crises pétrolières — vulnérabilité auto (1973)", 'orange'),
+    (2011, 210891, "📉 Faillites GM & Chrysler — chômage (2008)", 'red'),
+    (2021, 229660, "⚡ NextStar gigafactory EV — $5G (2022)", 'green'),
 ]
 
 # ============================================================

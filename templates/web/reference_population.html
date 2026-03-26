@@ -39,6 +39,10 @@
     <div class="ref-tabs">
         <button class="ref-tab active" data-country="Canada">🇨🇦 Canada</button>
         <button class="ref-tab" data-country="United States">🇺🇸 États-Unis</button>
+        <div class="ref-multi-select" id="national-year-select">
+            <button class="ref-multi-btn" type="button">Années <span class="ref-multi-count"></span> ▾</button>
+            <div class="ref-multi-dropdown"></div>
+        </div>
     </div>
 
     <div class="table-scroll">
@@ -55,7 +59,7 @@
             </thead>
             <tbody>
                 {% for r in country_rows %}
-                <tr data-country="{{ r.country }}">
+                <tr data-country="{{ r.country }}" data-year="{{ r.year }}">
                     <td class="cell-year">{{ r.year_label }}</td>
                     <td class="num cell-pop">{{ "{:,}".format(r.ref_population)|replace(",", " ") }}</td>
                     <td class="num cell-pop cell-pop-db">{{ "{:,}".format(r.db_population)|replace(",", " ") }}</td>
@@ -96,6 +100,10 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="ref-multi-select" id="regional-year-select">
+            <button class="ref-multi-btn" type="button">Années <span class="ref-multi-count"></span> ▾</button>
+            <div class="ref-multi-dropdown"></div>
+        </div>
     </div>
 
     <div class="table-scroll">
@@ -115,7 +123,7 @@
             <tbody>
                 {% for r in region_rows %}
                 {% if (r.country, r.region) in active_regions %}
-                <tr data-region="{{ r.region }}" data-country-r="{{ r.country }}">
+                <tr data-region="{{ r.region }}" data-country-r="{{ r.country }}" data-year="{{ r.year }}">
                     <td>{{ r.country }}</td>
                     <td>{{ r.region }}</td>
                     <td class="cell-year">{{ r.year_label }}</td>
@@ -150,17 +158,112 @@ document.querySelectorAll('.ref-main-tab').forEach(btn => {
     });
 });
 
-/* ── Country sub-tabs (national panel) ── */
+/* ── Multi-select year dropdown builder ── */
+function buildYearDropdown(tableId, containerId) {
+    const years = new Set();
+    document.querySelectorAll('#' + tableId + ' tbody tr').forEach(tr => {
+        if (tr.dataset.year) years.add(tr.dataset.year);
+    });
+    const sorted = [...years].sort();
+    const container = document.getElementById(containerId);
+    const dropdown = container.querySelector('.ref-multi-dropdown');
+    const btn = container.querySelector('.ref-multi-btn');
+    const countSpan = container.querySelector('.ref-multi-count');
+
+    // "Toutes" checkbox
+    const allLabel = document.createElement('label');
+    allLabel.className = 'ref-multi-item';
+    allLabel.innerHTML = '<input type="checkbox" value="__all__" checked> Toutes';
+    dropdown.appendChild(allLabel);
+
+    sorted.forEach(y => {
+        const label = document.createElement('label');
+        label.className = 'ref-multi-item';
+        label.innerHTML = '<input type="checkbox" value="' + y + '" checked> ' + y;
+        dropdown.appendChild(label);
+    });
+
+    // Toggle dropdown
+    btn.addEventListener('click', e => {
+        e.stopPropagation();
+        // Close other dropdowns
+        document.querySelectorAll('.ref-multi-select.open').forEach(el => {
+            if (el !== container) el.classList.remove('open');
+        });
+        container.classList.toggle('open');
+    });
+
+    // Handle checkbox logic
+    dropdown.addEventListener('change', e => {
+        const cb = e.target;
+        const allCb = dropdown.querySelector('input[value="__all__"]');
+        const yearCbs = [...dropdown.querySelectorAll('input:not([value="__all__"])')]; 
+
+        if (cb.value === '__all__') {
+            yearCbs.forEach(c => c.checked = cb.checked);
+        } else {
+            const allChecked = yearCbs.every(c => c.checked);
+            const noneChecked = yearCbs.every(c => !c.checked);
+            allCb.checked = allChecked;
+            allCb.indeterminate = !allChecked && !noneChecked;
+        }
+
+        // Update count badge
+        const checked = yearCbs.filter(c => c.checked).length;
+        if (checked === yearCbs.length || checked === 0) {
+            countSpan.textContent = '';
+        } else {
+            countSpan.textContent = '(' + checked + ')';
+        }
+
+        container.dispatchEvent(new Event('filter'));
+    });
+
+    return {
+        getSelectedYears() {
+            const allCb = dropdown.querySelector('input[value="__all__"]');
+            if (allCb.checked) return null; // null = all
+            return new Set(
+                [...dropdown.querySelectorAll('input:not([value="__all__"]):checked')].map(c => c.value)
+            );
+        }
+    };
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', () => {
+    document.querySelectorAll('.ref-multi-select.open').forEach(el => el.classList.remove('open'));
+});
+document.querySelectorAll('.ref-multi-dropdown').forEach(dd => {
+    dd.addEventListener('click', e => e.stopPropagation());
+});
+
+const nationalYearFilter = buildYearDropdown('country-table', 'national-year-select');
+const regionalYearFilter = buildYearDropdown('region-table', 'regional-year-select');
+
+/* ── National: active country + year state ── */
+let nationalCountry = 'Canada';
+
+function filterNationalTable() {
+    const years = nationalYearFilter.getSelectedYears();
+    document.querySelectorAll('#country-table tbody tr').forEach(tr => {
+        let show = tr.dataset.country === nationalCountry;
+        if (show && years) show = years.has(tr.dataset.year);
+        tr.style.display = show ? '' : 'none';
+    });
+}
+
+/* Country sub-tabs */
 document.querySelectorAll('.ref-tab').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.ref-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const country = btn.dataset.country;
-        document.querySelectorAll('#country-table tbody tr').forEach(tr => {
-            tr.style.display = tr.dataset.country === country ? '' : 'none';
-        });
+        nationalCountry = btn.dataset.country;
+        filterNationalTable();
     });
 });
+
+document.getElementById('national-year-select').addEventListener('filter', filterNationalTable);
 document.querySelector('.ref-tab[data-country="Canada"]').click();
 
 /* ── Regional filters ── */
@@ -170,27 +273,28 @@ const regionSel = document.getElementById('region-select');
 function filterRegionTable() {
     const cty = regionCountrySel.value;
     const reg = regionSel.value;
+    const years = regionalYearFilter.getSelectedYears();
     document.querySelectorAll('#region-table tbody tr').forEach(tr => {
         let show = true;
         if (cty !== '__all__' && tr.dataset.countryR !== cty) show = false;
         if (reg !== '__all__' && tr.dataset.region !== reg) show = false;
+        if (show && years) show = years.has(tr.dataset.year);
         tr.style.display = show ? '' : 'none';
     });
 }
 
 regionCountrySel.addEventListener('change', function() {
     const cty = this.value;
-    // Filter region dropdown options based on selected country
     regionSel.querySelectorAll('option').forEach(opt => {
         if (opt.value === '__all__') return;
         opt.style.display = (cty === '__all__' || opt.dataset.country === cty) ? '' : 'none';
     });
-    // Reset region to "Toutes" when switching country
     regionSel.value = '__all__';
     filterRegionTable();
 });
 
 regionSel.addEventListener('change', filterRegionTable);
+document.getElementById('regional-year-select').addEventListener('filter', filterRegionTable);
 </script>
 
 {% endblock %}

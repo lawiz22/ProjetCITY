@@ -1,0 +1,239 @@
+# SECTION 1 — Copier-Coller 1
+
+---
+
+Murdochville, Québec — Niveau 3
+
+1800-1850 — ORIGINES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏞️ Territoire gaspésien isolé — montagnes McGerrigle, aucune présence permanente notable
+🚢 Aucune activité économique structurée — forêt boréale et terres sauvages
+👥 Population quasi nulle — territoire non colonisé, passages autochtones sporadiques
+= La région n'existe pas encore comme entité habitée ; c'est une wilderness gaspésienne isolée
+
+1850-1900 — INDUSTRIALISATION / EXPANSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏗️ Premières explorations géologiques révèlent des dépôts minéraux dans les Chic-Chocs
+📈 Population toujours quasi absente — aucune ville, aucun village établi
+🔥 Intérêt croissant pour les ressources naturelles de la Gaspésie
+= La région reste endormie mais les indices miniers commencent à attirer l'attention
+
+1900-1945 — CONSOLIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏙️ Découverte de gisements de cuivre importants dans les années 1900-1910
+🏭 Noranda Mines (Gaspé Copper Mines) planifie l'exploitation du gisement
+⚔️ La guerre stimule la demande en cuivre — accélère les projets miniers
+= La ville n'existe pas encore formellement, mais le projet minier est en gestation active
+
+1945-1980 — APRÈS-GUERRE / SUBURBANISATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚗 Fondation officielle de Murdochville en 1953 — ville minière planifiée de toutes pièces
+🏢 Gaspé Copper Mines (Noranda) — fonderie de cuivre, emplois massifs, population culminant ~10 000 hab.
+⚠️ Grève historique de 1957 — conflit majeur contre Noranda, dureté légendaire dans l'histoire syndicale québécoise
+= Ville-compagnie classique : boom rapide, forte identité ouvrière, mais dépendance totale à un seul employeur
+
+1980-AUJOURD'HUI — RENAISSANCE / ÈRE CONTEMPORAINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💻 Fermeture de la mine et de la fonderie en 2002 — effondrement économique brutal
+🏗️ Reconversion vers l'énergie éolienne — parc éolien de la Gaspésie, nouveau souffle économique
+🌍 Population chutée à ~700 habitants (2021) — ville en survie, symbole des défis des villes mono-industrielles québécoises
+= Murdochville incarne la tragédie et la résilience des villes minières : du boom à l'abandon, avec une reconversion timide mais réelle
+
+---
+
+**Population :**
+
+| Année | Population |
+|-------|-----------|
+| 1953 | ~1 000 (fondation) |
+| 1960 | ~6 000 ⬆️ Boom minier |
+| 1971 | ~3 711 |
+| 1981 | ~3 323 |
+| 1991 | ~1 847 📉 Début déclin |
+| 2001 | ~1 126 |
+| 2006 | ~867 |
+| 2011 | ~756 |
+| 2016 | ~647 |
+| 2021 | ~701 |
+
+> ⚠️ Fondée en 1953 — données antérieures non applicables
+> 📉 Perte de ~90% de la population depuis le sommet des années 1960
+> 🏭 Fermeture Gaspé Copper Mines (2002) — choc démographique majeur
+
+---
+---
+
+# SECTION 2 — Copier-Coller 2
+
+```python
+CITY_NAME = "Murdochville, Quebec"
+CITY_COLOR = '#8B4513'
+
+years = [1953, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+population = [1000, 6000, 3800, 3200, 1900, 1126, 756, 701]
+
+annotations = [
+    (1953, 1000,  "⛏️ Fondation ville minière — Gaspé Copper Mines (1953)",  'brown',  (1953, 4500)),
+    (1960, 6000,  "🏭 Apogée — fonderie cuivre Noranda — ~6000 hab. (1960)", 'orange', (1958, 6800)),
+    (1960, 6000,  "✊ Grève historique vs Noranda — lutte syndicale (1957)",  'red',    (1955, 5500)),
+    (1980, 3200,  "📉 Déclin amorcé — fermetures progressives (1975)",        'gray',   (1972, 4200)),
+    (2000, 1126,  "💥 Fermeture mine & fonderie — effondrement (2002)",       'red',    (1992, 2500)),
+    (2010, 756,   "💨 Parc éolien — reconversion énergétique (2005)",         'blue',   (2003, 1800)),
+    (2020, 701,   "🌬️ Survie — ~700 hab. — ville la + isolée Québec (2020)", 'purple', (2012, 1200)),
+]
+```
+
+---
+---
+
+# SECTION 3 — Copier-Coller 3
+
+```markdown
+# Murdochville, Québec — Fiche Complète
+
+## 📍 Informations Générales
+
+| Catégorie | Détails |
+|-----------|---------|
+| Ville | Murdochville |
+| Province | Québec |
+| Surnom | "La capitale du cuivre" 🏭 |
+| Statut | Ville (municipalité locale, MRC de La Haute-Gaspésie) |
+| Maire | Brandy Little (récent) |
+| Fondation | 1953 |
+| Incorporation | 1953 |
+
+---
+
+## 👥 Population
+
+| Année | Population |
+|-------|-----------|
+| 1960 | ~6 000 (sommet) |
+| 1981 | 3 323 |
+| 2001 | 1 126 |
+| 2016 | 647 |
+| 2021 | 701 |
+
+📉 Perte de ~90% de la population depuis le sommet des années 1960
+⚠️ L'une des villes les plus dépopulées du Québec
+🔄 Légère remontée entre 2016 et 2021 grâce aux projets éoliens
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée | Valeur |
+|--------|--------|
+| Superficie | ~337 km² |
+| Densité | ~2 hab./km² |
+| Massif | Chic-Chocs (Appalaches) |
+| Altitude | ~550 m |
+
+- Située à ~170 km de Gaspé
+- À ~380 km de Québec (ville)
+- Entourée de montagnes et de forêt boréale dense
+- Ville la plus isolée et la plus haute en altitude au Québec habité
+
+---
+
+## 🏛️ Économie
+
+### Secteurs Principaux :
+
+- 🏭 **Mines (historique)** — Gaspé Copper Mines / Noranda — fonderie de cuivre (1953–2002)
+- 💨 **Énergie éolienne** — Parc éolien de la Gaspésie (Seigneurie de Beaupré, Le Nordais)
+- 🎿 **Tourisme hivernal** — Station de ski Mont-Lyall
+- 🌲 **Foresterie** — exploitation forestière secondaire
+- 🏛️ **Services publics** — emplois municipaux et gouvernementaux
+
+> ⚠️ Économie extrêmement fragile — ancienne ville-compagnie cherchant sa reconversion
+
+---
+
+## 🏭 Histoire Industrielle
+
+- **1953** — Fondation par Noranda Mines / Gaspé Copper Mines
+- **1957** — Grève historique et brutale : symbole majeur du mouvement syndical québécois
+- **1960s** — Apogée : ~6 000 habitants, fonderie pleinement opérationnelle
+- **2002** — Fermeture définitive de la mine et de la fonderie
+- La grève de 1957 est étudiée dans les cours d'histoire et de sociologie au Québec
+
+---
+
+## 🎿 Sports & Loisirs
+
+| Activité | Détails |
+|----------|---------|
+| Ski alpin | Station Mont-Lyall |
+| Motoneige | Réseau Trans-Québec — sentiers en Gaspésie |
+| Randonnée | Parc national de la Gaspésie (à proximité) |
+| VTT | Sentiers régionaux |
+
+- Porte d'entrée vers les monts Chic-Chocs
+- Accès proche au parc national de la Gaspésie (mont Jacques-Cartier)
+
+---
+
+## 🌲 Environnement & Nature
+
+- Située au cœur des Chic-Chocs — chaîne des Appalaches
+- Forêt boréale dense — épinettes, sapins, bouleaux
+- Caribous forestiers présents dans la région
+- Proximité du mont Jacques-Cartier (1 268 m — point culminant du Québec méridional)
+- Hivers longs et rigoureux — enneigement exceptionnel
+
+---
+
+## 🚗 Transport
+
+| Mode | Détails |
+|------|---------|
+| Route | Route 198 — seul accès principal |
+| Distance | ~170 km de Gaspé |
+| Distance | ~120 km de Sainte-Anne-des-Monts |
+| Aéroport | Aéroport de Gaspé (YGP) — le plus proche |
+| Bus | Service limité — liaisons interurbaines réduites |
+
+- Aucun accès ferroviaire
+- Route parfois difficile en hiver
+- Isolement géographique significatif
+
+---
+
+## 🌡️ Climat
+
+| Saison | Température moyenne |
+|--------|-------------------|
+| Hiver (Jan) | -15°C |
+| Printemps (Avr) | +2°C |
+| Été (Juil) | +18°C |
+| Automne (Oct) | +5°C |
+
+- Climat subarctique / continental rigoureux
+- Enneigement moyen : ~400 cm/an
+- Un des endroits les plus froids et enneigés du Québec habité
+
+---
+
+## 📊 Comparaison avec d'Autres Villes de la Gaspésie
+
+| Ville | Population (2021) |
+|-------|------------------|
+| Gaspé | 14 819 |
+| Matane | 14 155 |
+| Sainte-Anne-des-Monts | 6 557 |
+| New Richmond | 3 784 |
+| Murdochville | 701 |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- ✊ La grève de Murdochville (1957) est l'une des plus violentes et symboliques de l'histoire syndicale québécoise — Jean Marchand, Gérard Pelletier et Pierre Elliott Trudeau l'ont soutenue publiquement
+- 🏔️ La ville est construite en altitude dans les Appalaches — paysage spectaculaire
+- 💨 Murdochville est devenue un site pilote pour l'énergie éolienne au Québec
+- 👻 Des quartiers entiers de la ville sont abandonnés — rues vides, maisons désertes
+- 🎬 L'histoire de Murdochville a inspiré plusieurs documentaires et œuvres sur le déclin des villes minières
+- ⛏️ Le nom vient de James Murdoch, président de Noranda Mines

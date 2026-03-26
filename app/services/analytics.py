@@ -1396,7 +1396,8 @@ class AnalyticsService:
                 pop.max_year,
                 CASE WHEN f.fiche_id IS NOT NULL THEN 1 ELSE 0 END AS has_fiche,
                 COALESCE(fs.section_count, 0) AS fiche_sections,
-                CASE WHEN pd.cnt > 0 THEN 1 ELSE 0 END AS has_periods
+                CASE WHEN pd.cnt > 0 THEN 1 ELSE 0 END AS has_periods,
+                COALESCE(ann.annotation_count, 0) AS annotation_count
             FROM dim_city c
             LEFT JOIN (
                 SELECT city_id,
@@ -1417,6 +1418,12 @@ class AnalyticsService:
                 FROM dim_city_period_detail
                 GROUP BY city_id
             ) pd ON pd.city_id = c.city_id
+            LEFT JOIN (
+                SELECT city_id, COUNT(*) AS annotation_count
+                FROM fact_city_population
+                WHERE annotation_id IS NOT NULL
+                GROUP BY city_id
+            ) ann ON ann.city_id = c.city_id
             ORDER BY c.city_name
             """
         ).fetchall()
@@ -1453,15 +1460,23 @@ class AnalyticsService:
             if not city_years:
                 continue
             min_year = min(city_years)
-            # Align to decade floor
+            # Align to nearest decade (±1 tolerance means 1851→1850 is covered)
             start_decade = (min_year // 10) * 10
+            # If the min_year is within ±1 of start_decade, keep it;
+            # otherwise start at the next decade
+            if min_year - start_decade > 1:
+                start_decade += 10
             # Include current year as the last expected checkpoint
-            expected = list(range(start_decade, max_decade + 1, 10))
-            if current_year not in expected:
-                expected.append(current_year)
-            expected.sort()
+            # but exclude the current decade if census data isn't out yet
+            effective_max = max_decade - 10 if max_decade >= current_year else max_decade
+            expected = list(range(start_decade, effective_max + 1, 10))
 
-            missing = [y for y in expected if y not in city_years]
+            # Check coverage with ±1 year tolerance (Canadian census years
+            # are offset by 1: 1851, 1871, 1901, 1921, 1941, … vs decades)
+            def _covered(exp_year: int) -> bool:
+                return any(y in city_years for y in (exp_year, exp_year - 1, exp_year + 1))
+
+            missing = [y for y in expected if not _covered(y)]
             if missing:
                 results.append({
                     "city_id": city["city_id"],

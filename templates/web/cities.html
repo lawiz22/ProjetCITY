@@ -64,12 +64,10 @@
                         <span>Population récente</span>
                         <strong>{{ '{:,}'.format(city.population).replace(',', ' ') }} en {{ city.year }}</strong>
                     </li>
-                    {% if city.foundation_year %}
                     <li>
                         <span>Fondation</span>
-                        <strong>{{ city.foundation_year }}</strong>
+                        <strong>{{ city.foundation_year if city.foundation_year else '—' }}</strong>
                     </li>
-                    {% endif %}
                     <li>
                         <span>Première population</span>
                         <strong>
