@@ -386,7 +386,7 @@
   "blainville-quebec": {
     "filename": "blainville-quebec.jpg",
     "source_page": "https://en.wikipedia.org/wiki/Blainville%2C_Quebec",
-    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Blainville_QC_1.jpg/330px-Blainville_QC_1.jpg",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Blainville_QC_1.jpg/1280px-Blainville_QC_1.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   },
   "victoriaville-quebec": {
@@ -1101,6 +1101,192 @@
     "filename": "jackson-mississippi.jpg",
     "source_page": "https://en.wikipedia.org/wiki/Jackson%2C_Mississippi",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Mississippi_State_Capitol_Building_%2826815684617%29.jpg/1280px-Mississippi_State_Capitol_Building_%2826815684617%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "charleston-south-carolina": {
+    "filename": "charleston-south-carolina.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Charleston%2C_South_Carolina",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/East_Battery_Street_Charleston_Aug2010.jpg/1280px-East_Battery_Street_Charleston_Aug2010.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "charleston-west-virginia": {
+    "filename": "charleston-west-virginia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Charleston%2C_West_Virginia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/The_West_Virginia_State_Capitol_building_-_Image03.jpg/1280px-The_West_Virginia_State_Capitol_building_-_Image03.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "louisville-kentucky": {
+    "filename": "louisville-kentucky.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Louisville%2C_Kentucky",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Louisville_Skyline_2021_%283%29.jpg/1280px-Louisville_Skyline_2021_%283%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "charlotte-north-carolina": {
+    "filename": "charlotte-north-carolina.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Charlotte%2C_North_Carolina",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Uptown_Charlotte_2018_taking_by_DJI_Phantom_4_pro.jpg/1280px-Uptown_Charlotte_2018_taking_by_DJI_Phantom_4_pro.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "iqaluit-nunavut": {
+    "filename": "iqaluit-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Iqaluit",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Leg_Building_Iqaluit_2000-08-27.jpg/1280px-Leg_Building_Iqaluit_2000-08-27.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "wilmington-delaware": {
+    "filename": "wilmington-delaware.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Wilmington%2C_Delaware",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Wilmington%2C_Delaware%2C_USA.jpg/1280px-Wilmington%2C_Delaware%2C_USA.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "honolulu-hawaii": {
+    "filename": "honolulu-hawaii.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Honolulu",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/2022_Views_from_Diamond_Head_02.jpg/1280px-2022_Views_from_Diamond_Head_02.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "hay-river-northwest-territories": {
+    "filename": "hay-river-northwest-territories.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Hay_River%2C_Northwest_Territories",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/The_High_Rise_in_Hay_River_02.jpg/1280px-The_High_Rise_in_Hay_River_02.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "providence-rhode-island": {
+    "filename": "providence-rhode-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Providence%2C_Rhode_Island",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Providence_RI_skyline.jpg/1280px-Providence_RI_skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "milwaukee-wisconsin": {
+    "filename": "milwaukee-wisconsin.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Milwaukee",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Milwaukee_Skyline_w_New_NW_Mutual_Building_2025_by_Isaac_Rowlett.jpg/1280px-Milwaukee_Skyline_w_New_NW_Mutual_Building_2025_by_Isaac_Rowlett.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "oklahoma-city-oklahoma": {
+    "filename": "oklahoma-city-oklahoma.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Oklahoma_City",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Oklahoma_city_downtown.JPG/1280px-Oklahoma_city_downtown.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "dawson-city-yukon": {
+    "filename": "dawson-city-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Dawson_City",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Dawson_Yukon_June_07.jpg/1280px-Dawson_Yukon_June_07.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "inuvik-northwest-territories": {
+    "filename": "inuvik-northwest-territories.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Inuvik",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Front_view_of_Our_Lady_of_Victory_Church%2C_Inuvik%2C_NT.jpg/1280px-Front_view_of_Our_Lady_of_Victory_Church%2C_Inuvik%2C_NT.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "prince-albert-saskatchewan": {
+    "filename": "prince-albert-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Prince_Albert%2C_Saskatchewan",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Prince_Albert_Saskatchewan_in_fall_01.JPG/1280px-Prince_Albert_Saskatchewan_in_fall_01.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "summerside-prince-edward-island": {
+    "filename": "summerside-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Summerside%2C_Prince_Edward_Island",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Summerside%2C_Prince_Edward_Island.jpg/1280px-Summerside%2C_Prince_Edward_Island.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "rankin-inlet-nunavut": {
+    "filename": "rankin-inlet-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Rankin_Inlet",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Rankin_Inlet_From_Air.jpg/1280px-Rankin_Inlet_From_Air.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "manchester-new-hampshire": {
+    "filename": "manchester-new-hampshire.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Manchester",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Deansgate_Square_-_geograph.org.uk_-_7803711.jpg/1280px-Deansgate_Square_-_geograph.org.uk_-_7803711.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "montague-prince-edward-island": {
+    "filename": "montague-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Montague%2C_Prince_Edward_Island",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Montague%2C_Prince_Edward_Island%2C_Canada.jpg/1280px-Montague%2C_Prince_Edward_Island%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sydney-nova-scotia": {
+    "filename": "sydney-nova-scotia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Sydney",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Sydney_Opera_House_and_Harbour_Bridge_Dusk_%282%29_2019-06-21.jpg/1280px-Sydney_Opera_House_and_Harbour_Bridge_Dusk_%282%29_2019-06-21.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "corner-brook-newfoundland-and-labrador": {
+    "filename": "corner-brook-newfoundland-and-labrador.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Corner_Brook",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Corner_Brook_from_above.jpg/1280px-Corner_Brook_from_above.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "dieppe-nouveau-brunswick": {
+    "filename": "dieppe-nouveau-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Dieppe",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/2022-07-09_12-19-07_-_Dieppe_-_Vue_g%C3%A9n%C3%A9rale.jpg/1280px-2022-07-09_12-19-07_-_Dieppe_-_Vue_g%C3%A9n%C3%A9rale.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "fort-smith-northwest-territories": {
+    "filename": "fort-smith-northwest-territories.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Fort_Smith%2C_Northwest_Territories",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Salt_River_First_Nation_development_property.JPG/1280px-Salt_River_First_Nation_development_property.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "birmingham-alabama": {
+    "filename": "birmingham-alabama.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Birmingham",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Birmingham_Council_House_and_103_Colmore_Row.jpg/1280px-Birmingham_Council_House_and_103_Colmore_Row.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "orlando-florida": {
+    "filename": "orlando-florida.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Orlando%2C_Florida",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Lake-eola-park-orlando-florida.jpg/1280px-Lake-eola-park-orlando-florida.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "gander-newfoundland-and-labrador": {
+    "filename": "gander-newfoundland-and-labrador.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Gander%2C_Newfoundland_and_Labrador",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Landing_in_Gander.jpg/1280px-Landing_in_Gander.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "haines-junction-yukon": {
+    "filename": "haines-junction-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Haines_Junction",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Haines_junction.jpg/1280px-Haines_junction.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "cornwall-prince-edward-island": {
+    "filename": "cornwall-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Cornwall",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/St_Michael%27s_Mount_View.jpg/1280px-St_Michael%27s_Mount_View.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-sauveur-quebec": {
+    "filename": "saint-sauveur-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saint-Sauveur%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/St-Sauveur_Quebec.jpg/1280px-St-Sauveur_Quebec.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "happy-valley-goose-bay-newfoundland-and-labrador": {
+    "filename": "happy-valley-goose-bay-newfoundland-and-labrador.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Happy_Valley-Goose_Bay",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Goose_Bay_Labrador_%282513512285%29.jpg/1280px-Goose_Bay_Labrador_%282513512285%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sainte-therese-quebec": {
+    "filename": "sainte-therese-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Sainte-Th%C3%A9r%C3%A8se%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Coll%C3%A8ge_Lionel-Groulx_%28entr%C3%A9e_du_vieux_s%C3%A9minaire%29.jpg/1280px-Coll%C3%A8ge_Lionel-Groulx_%28entr%C3%A9e_du_vieux_s%C3%A9minaire%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "red-deer-alberta": {
+    "filename": "red-deer-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Red_deer",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Cervus_elaphus_Luc_Viatour_6.jpg/1280px-Cervus_elaphus_Luc_Viatour_6.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

@@ -47,8 +47,16 @@
             </div>
             <div class="ai-lab-field" style="flex:2;">
                 <label class="opt-label" for="ai-city-input">Ville à générer</label>
-                <div style="display:flex;gap:8px;align-items:center;">
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                     <input type="text" id="ai-city-input" class="opt-input" placeholder="ex: Burlington, Vermont" spellcheck="false" style="flex:1;min-width:220px;">
+                    <select id="ai-suggest-country" class="suggest-filter-select" title="Filtrer par pays">
+                        <option value="">🌍 Tout</option>
+                        <option value="Canada">🇨🇦 Canada</option>
+                        <option value="United States">🇺🇸 États-Unis</option>
+                    </select>
+                    <select id="ai-suggest-region" class="suggest-filter-select" title="Filtrer par région" disabled>
+                        <option value="">📍 Toutes</option>
+                    </select>
                     <button type="button" id="ai-suggest-btn" class="suggest-city-btn" title="Suggérer une ville manquante">🎲 Suggérer</button>
                 </div>
             </div>
@@ -178,10 +186,48 @@
     /* ---- Shared refs ---- */
     var cityInput   = document.getElementById('ai-city-input');
     var modelSelect = document.getElementById('ai-model-select');
+
+    /* Pre-fill city from URL ?city=... */
+    var urlCity = new URLSearchParams(window.location.search).get('city');
+    if (urlCity) { cityInput.value = urlCity; }
     var tokenEl     = document.getElementById('token-mammouth');
     var resetBtn    = document.getElementById('token-reset-mammouth');
     var generateUrl = '{{ url_for("web.options_generate") }}';
     var suggestUrl  = '{{ url_for("web.ai_lab_suggest_city") }}';
+
+    /* ---- Suggest filters (country / region) ---- */
+    var suggestCountry = document.getElementById('ai-suggest-country');
+    var suggestRegion  = document.getElementById('ai-suggest-region');
+    var CA_REGIONS = [
+        'Alberta','British Columbia','Manitoba','New Brunswick',
+        'Newfoundland and Labrador','Northwest Territories','Nova Scotia',
+        'Nunavut','Ontario','Prince Edward Island','Québec',
+        'Saskatchewan','Yukon'
+    ];
+    var US_STATES = [
+        'Alabama','Alaska','Arizona','Arkansas','California','Colorado',
+        'Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho',
+        'Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana',
+        'Maine','Maryland','Massachusetts','Michigan','Minnesota',
+        'Mississippi','Missouri','Montana','Nebraska','Nevada',
+        'New Hampshire','New Jersey','New Mexico','New York',
+        'North Carolina','North Dakota','Ohio','Oklahoma','Oregon',
+        'Pennsylvania','Rhode Island','South Carolina','South Dakota',
+        'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
+        'West Virginia','Wisconsin','Wyoming'
+    ];
+    suggestCountry.addEventListener('change', function () {
+        var c = suggestCountry.value;
+        suggestRegion.innerHTML = '<option value="">📍 Toutes</option>';
+        if (!c) { suggestRegion.disabled = true; return; }
+        var list = c === 'Canada' ? CA_REGIONS : US_STATES;
+        list.forEach(function (r) {
+            var o = document.createElement('option');
+            o.value = r; o.textContent = r;
+            suggestRegion.appendChild(o);
+        });
+        suggestRegion.disabled = false;
+    });
 
     /* ---- Suggest city button ---- */
     var suggestBtn = document.getElementById('ai-suggest-btn');
@@ -190,6 +236,8 @@
         suggestBtn.textContent = '⏳ …';
         var fd = new FormData();
         fd.append('model', modelSelect.value);
+        if (suggestCountry.value) fd.append('country', suggestCountry.value);
+        if (suggestRegion.value) fd.append('region', suggestRegion.value);
         fetch(suggestUrl, { method: 'POST', body: fd })
             .then(function (r) { return r.json(); })
             .then(function (d) {

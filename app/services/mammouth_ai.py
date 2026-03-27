@@ -119,7 +119,7 @@ def load_prompt(name: str) -> str:
     return ""
 
 
-def generate_city(api_key: str, model: str, city_input: str, prompt_text: str, *, max_tokens: int = 2000) -> dict[str, Any]:
+def generate_city(api_key: str, model: str, city_input: str, prompt_text: str, *, max_tokens: int = 2000, temperature: float = 0.3) -> dict[str, Any]:
     """Send a city generation prompt and return the AI response."""
     try:
         final_prompt = prompt_text.replace("{CITY_INPUT}", city_input)
@@ -133,7 +133,7 @@ def generate_city(api_key: str, model: str, city_input: str, prompt_text: str, *
                 "model": model,
                 "messages": [{"role": "user", "content": final_prompt}],
                 "max_tokens": max_tokens,
-                "temperature": 0.3,
+                "temperature": temperature,
             },
             timeout=300,
         )

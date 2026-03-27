@@ -1,0 +1,4545 @@
+{
+  "Canada|Alberta": [
+    {
+      "city_name": "Calgary",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 1239220,
+      "rank": 1
+    },
+    {
+      "city_name": "Edmonton",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 1062646,
+      "rank": 2
+    },
+    {
+      "city_name": "Red Deer",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 103588,
+      "rank": 3
+    },
+    {
+      "city_name": "Lethbridge",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 101482,
+      "rank": 4
+    },
+    {
+      "city_name": "St. Albert",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 66999,
+      "rank": 5
+    },
+    {
+      "city_name": "Medicine Hat",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 63392,
+      "rank": 6
+    },
+    {
+      "city_name": "Grande Prairie",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 63909,
+      "rank": 7
+    },
+    {
+      "city_name": "Airdrie",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 69889,
+      "rank": 8
+    },
+    {
+      "city_name": "Spruce Grove",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 34910,
+      "rank": 9
+    },
+    {
+      "city_name": "Lloydminster",
+      "region": "Alberta",
+      "country": "Canada",
+      "population": 31788,
+      "rank": 10
+    }
+  ],
+  "Canada|British Columbia": [
+    {
+      "city_name": "Vancouver",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 662248,
+      "rank": 1
+    },
+    {
+      "city_name": "Surrey",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 517887,
+      "rank": 2
+    },
+    {
+      "city_name": "Burnaby",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 249125,
+      "rank": 3
+    },
+    {
+      "city_name": "Richmond",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 209937,
+      "rank": 4
+    },
+    {
+      "city_name": "Coquitlam",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 148625,
+      "rank": 5
+    },
+    {
+      "city_name": "Langley",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 132603,
+      "rank": 6
+    },
+    {
+      "city_name": "Saanich",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 114148,
+      "rank": 7
+    },
+    {
+      "city_name": "Delta",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 102238,
+      "rank": 8
+    },
+    {
+      "city_name": "North Vancouver",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 88320,
+      "rank": 9
+    },
+    {
+      "city_name": "Kamloops",
+      "region": "British Columbia",
+      "country": "Canada",
+      "population": 90997,
+      "rank": 10
+    }
+  ],
+  "Canada|Manitoba": [
+    {
+      "city_name": "Winnipeg",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 749607,
+      "rank": 1
+    },
+    {
+      "city_name": "Brandon",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 51300,
+      "rank": 2
+    },
+    {
+      "city_name": "Steinbach",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 17200,
+      "rank": 3
+    },
+    {
+      "city_name": "Thompson",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 13600,
+      "rank": 4
+    },
+    {
+      "city_name": "Portage la Prairie",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 13000,
+      "rank": 5
+    },
+    {
+      "city_name": "Winkler",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 13000,
+      "rank": 6
+    },
+    {
+      "city_name": "Selkirk",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 10500,
+      "rank": 7
+    },
+    {
+      "city_name": "Morden",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 9000,
+      "rank": 8
+    },
+    {
+      "city_name": "Flin Flon",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 5500,
+      "rank": 9
+    },
+    {
+      "city_name": "Dauphin",
+      "region": "Manitoba",
+      "country": "Canada",
+      "population": 8500,
+      "rank": 10
+    }
+  ],
+  "Canada|New Brunswick": [
+    {
+      "city_name": "Moncton",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 79189,
+      "rank": 1
+    },
+    {
+      "city_name": "Saint John",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 67254,
+      "rank": 2
+    },
+    {
+      "city_name": "Fredericton",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 58174,
+      "rank": 3
+    },
+    {
+      "city_name": "Dieppe",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 28194,
+      "rank": 4
+    },
+    {
+      "city_name": "Riverview",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 19156,
+      "rank": 5
+    },
+    {
+      "city_name": "Quispamsis",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 17742,
+      "rank": 6
+    },
+    {
+      "city_name": "Miramichi",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 17053,
+      "rank": 7
+    },
+    {
+      "city_name": "Edmundston",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 16140,
+      "rank": 8
+    },
+    {
+      "city_name": "Oromocto",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 9240,
+      "rank": 9
+    },
+    {
+      "city_name": "Bathurst",
+      "region": "New Brunswick",
+      "country": "Canada",
+      "population": 12000,
+      "rank": 10
+    }
+  ],
+  "Canada|Newfoundland and Labrador": [
+    {
+      "city_name": "St. John's",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 114600,
+      "rank": 1
+    },
+    {
+      "city_name": "Mount Pearl",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 23000,
+      "rank": 2
+    },
+    {
+      "city_name": "Conception Bay South",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 27000,
+      "rank": 3
+    },
+    {
+      "city_name": "Paradise",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 21000,
+      "rank": 4
+    },
+    {
+      "city_name": "Corner Brook",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 19000,
+      "rank": 5
+    },
+    {
+      "city_name": "Grand Falls-Windsor",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 14000,
+      "rank": 6
+    },
+    {
+      "city_name": "Gander",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 11000,
+      "rank": 7
+    },
+    {
+      "city_name": "Portugal Cove-St. Philip's",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 8000,
+      "rank": 8
+    },
+    {
+      "city_name": "Happy Valley-Goose Bay",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 8500,
+      "rank": 9
+    },
+    {
+      "city_name": "Stephenville",
+      "region": "Newfoundland and Labrador",
+      "country": "Canada",
+      "population": 6500,
+      "rank": 10
+    }
+  ],
+  "Canada|Northwest Territories": [
+    {
+      "city_name": "Yellowknife",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 20095,
+      "rank": 1
+    },
+    {
+      "city_name": "Hay River",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 3500,
+      "rank": 2
+    },
+    {
+      "city_name": "Inuvik",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 3400,
+      "rank": 3
+    },
+    {
+      "city_name": "Fort Smith",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 2500,
+      "rank": 4
+    },
+    {
+      "city_name": "Behchokǫ̀",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 1800,
+      "rank": 5
+    },
+    {
+      "city_name": "Fort Simpson",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 1200,
+      "rank": 6
+    },
+    {
+      "city_name": "Tsiigehtchic",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 150,
+      "rank": 7
+    },
+    {
+      "city_name": "Norman Wells",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 1200,
+      "rank": 8
+    },
+    {
+      "city_name": "Fort Liard",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 500,
+      "rank": 9
+    },
+    {
+      "city_name": "Wrigley",
+      "region": "Northwest Territories",
+      "country": "Canada",
+      "population": 250,
+      "rank": 10
+    }
+  ],
+  "Canada|Nova Scotia": [
+    {
+      "city_name": "Halifax",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 439819,
+      "rank": 1
+    },
+    {
+      "city_name": "Sydney",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 32000,
+      "rank": 2
+    },
+    {
+      "city_name": "Truro",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 12300,
+      "rank": 3
+    },
+    {
+      "city_name": "New Glasgow",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 9400,
+      "rank": 4
+    },
+    {
+      "city_name": "Glace Bay",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 9000,
+      "rank": 5
+    },
+    {
+      "city_name": "Kentville",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 6500,
+      "rank": 6
+    },
+    {
+      "city_name": "Amherst",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 9500,
+      "rank": 7
+    },
+    {
+      "city_name": "Dartmouth",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 70000,
+      "rank": 8
+    },
+    {
+      "city_name": "Bridgewater",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 8800,
+      "rank": 9
+    },
+    {
+      "city_name": "Wolfville",
+      "region": "Nova Scotia",
+      "country": "Canada",
+      "population": 4300,
+      "rank": 10
+    }
+  ],
+  "Canada|Nunavut": [
+    {
+      "city_name": "Iqaluit",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 7745,
+      "rank": 1
+    },
+    {
+      "city_name": "Rankin Inlet",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 2646,
+      "rank": 2
+    },
+    {
+      "city_name": "Arviat",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 2630,
+      "rank": 3
+    },
+    {
+      "city_name": "Cambridge Bay",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 1640,
+      "rank": 4
+    },
+    {
+      "city_name": "Pangnirtung",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 1535,
+      "rank": 5
+    },
+    {
+      "city_name": "Kugluktuk",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 1290,
+      "rank": 6
+    },
+    {
+      "city_name": "Igloolik",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 1680,
+      "rank": 7
+    },
+    {
+      "city_name": "Gjoa Haven",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 1200,
+      "rank": 8
+    },
+    {
+      "city_name": "Taloyoak",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 934,
+      "rank": 9
+    },
+    {
+      "city_name": "Sanikiluaq",
+      "region": "Nunavut",
+      "country": "Canada",
+      "population": 800,
+      "rank": 10
+    }
+  ],
+  "Canada|Ontario": [
+    {
+      "city_name": "Toronto",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 2731571,
+      "rank": 1
+    },
+    {
+      "city_name": "Ottawa",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 1018000,
+      "rank": 2
+    },
+    {
+      "city_name": "Mississauga",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 717961,
+      "rank": 3
+    },
+    {
+      "city_name": "Brampton",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 656480,
+      "rank": 4
+    },
+    {
+      "city_name": "Hamilton",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 569353,
+      "rank": 5
+    },
+    {
+      "city_name": "London",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 422324,
+      "rank": 6
+    },
+    {
+      "city_name": "Markham",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 338503,
+      "rank": 7
+    },
+    {
+      "city_name": "Vaughan",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 323103,
+      "rank": 8
+    },
+    {
+      "city_name": "Kitchener",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 256885,
+      "rank": 9
+    },
+    {
+      "city_name": "Windsor",
+      "region": "Ontario",
+      "country": "Canada",
+      "population": 233763,
+      "rank": 10
+    }
+  ],
+  "Canada|Prince Edward Island": [
+    {
+      "city_name": "Charlottetown",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 38801,
+      "rank": 1
+    },
+    {
+      "city_name": "Summerside",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 14854,
+      "rank": 2
+    },
+    {
+      "city_name": "Stratford",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 9500,
+      "rank": 3
+    },
+    {
+      "city_name": "Cornwall",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 6500,
+      "rank": 4
+    },
+    {
+      "city_name": "Montague",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 6000,
+      "rank": 5
+    },
+    {
+      "city_name": "Souris",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 1500,
+      "rank": 6
+    },
+    {
+      "city_name": "Kensington",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 1600,
+      "rank": 7
+    },
+    {
+      "city_name": "Borden-Carleton",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 800,
+      "rank": 8
+    },
+    {
+      "city_name": "Georgetown",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 700,
+      "rank": 9
+    },
+    {
+      "city_name": "O'Leary",
+      "region": "Prince Edward Island",
+      "country": "Canada",
+      "population": 600,
+      "rank": 10
+    }
+  ],
+  "Canada|Québec": [
+    {
+      "city_name": "Québec",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 542298,
+      "rank": 1
+    },
+    {
+      "city_name": "Lévis",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 149683,
+      "rank": 2
+    },
+    {
+      "city_name": "Gatineau",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 288349,
+      "rank": 3
+    },
+    {
+      "city_name": "Longueuil",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 239700,
+      "rank": 4
+    },
+    {
+      "city_name": "Sherbrooke",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 172950,
+      "rank": 5
+    },
+    {
+      "city_name": "Saguenay",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 144746,
+      "rank": 6
+    },
+    {
+      "city_name": "Trois-Rivières",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 134413,
+      "rank": 7
+    },
+    {
+      "city_name": "Terrebonne",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 114544,
+      "rank": 8
+    },
+    {
+      "city_name": "Saint-Jean-sur-Richelieu",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 96000,
+      "rank": 9
+    },
+    {
+      "city_name": "Repentigny",
+      "region": "Québec",
+      "country": "Canada",
+      "population": 85000,
+      "rank": 10
+    }
+  ],
+  "Canada|Saskatchewan": [
+    {
+      "city_name": "Saskatoon",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 330674,
+      "rank": 1
+    },
+    {
+      "city_name": "Regina",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 226404,
+      "rank": 2
+    },
+    {
+      "city_name": "Prince Albert",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 35000,
+      "rank": 3
+    },
+    {
+      "city_name": "Moose Jaw",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 33000,
+      "rank": 4
+    },
+    {
+      "city_name": "Yorkton",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 19000,
+      "rank": 5
+    },
+    {
+      "city_name": "Swift Current",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 16000,
+      "rank": 6
+    },
+    {
+      "city_name": "North Battleford",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 14000,
+      "rank": 7
+    },
+    {
+      "city_name": "Warman",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 13000,
+      "rank": 8
+    },
+    {
+      "city_name": "Martensville",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 12000,
+      "rank": 9
+    },
+    {
+      "city_name": "Estevan",
+      "region": "Saskatchewan",
+      "country": "Canada",
+      "population": 11000,
+      "rank": 10
+    }
+  ],
+  "Canada|Yukon": [
+    {
+      "city_name": "Whitehorse",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 28241,
+      "rank": 1
+    },
+    {
+      "city_name": "Dawson City",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 1375,
+      "rank": 2
+    },
+    {
+      "city_name": "Watson Lake",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 790,
+      "rank": 3
+    },
+    {
+      "city_name": "Haines Junction",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 688,
+      "rank": 4
+    },
+    {
+      "city_name": "Carmacks",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 579,
+      "rank": 5
+    },
+    {
+      "city_name": "Teslin",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 450,
+      "rank": 6
+    },
+    {
+      "city_name": "Burwash Landing",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 80,
+      "rank": 7
+    },
+    {
+      "city_name": "Mayo",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 430,
+      "rank": 8
+    },
+    {
+      "city_name": "Carcross",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 301,
+      "rank": 9
+    },
+    {
+      "city_name": "Faro",
+      "region": "Yukon",
+      "country": "Canada",
+      "population": 350,
+      "rank": 10
+    }
+  ],
+  "United States|Alabama": [
+    {
+      "city_name": "Birmingham",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 200733,
+      "rank": 1
+    },
+    {
+      "city_name": "Montgomery",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 198525,
+      "rank": 2
+    },
+    {
+      "city_name": "Huntsville",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 215006,
+      "rank": 3
+    },
+    {
+      "city_name": "Mobile",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 187041,
+      "rank": 4
+    },
+    {
+      "city_name": "Tuscaloosa",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 101129,
+      "rank": 5
+    },
+    {
+      "city_name": "Hoover",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 92115,
+      "rank": 6
+    },
+    {
+      "city_name": "Dothan",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 68864,
+      "rank": 7
+    },
+    {
+      "city_name": "Auburn",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 63311,
+      "rank": 8
+    },
+    {
+      "city_name": "Decatur",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 54003,
+      "rank": 9
+    },
+    {
+      "city_name": "Madison",
+      "region": "Alabama",
+      "country": "United States",
+      "population": 50653,
+      "rank": 10
+    }
+  ],
+  "United States|Alaska": [
+    {
+      "city_name": "Anchorage",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 291538,
+      "rank": 1
+    },
+    {
+      "city_name": "Fairbanks",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 31516,
+      "rank": 2
+    },
+    {
+      "city_name": "Juneau",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 31275,
+      "rank": 3
+    },
+    {
+      "city_name": "Sitka",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 8881,
+      "rank": 4
+    },
+    {
+      "city_name": "Ketchikan",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 8143,
+      "rank": 5
+    },
+    {
+      "city_name": "Wasilla",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 10073,
+      "rank": 6
+    },
+    {
+      "city_name": "Kenai",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 7365,
+      "rank": 7
+    },
+    {
+      "city_name": "Kodiak",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 5567,
+      "rank": 8
+    },
+    {
+      "city_name": "Bethel",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 6365,
+      "rank": 9
+    },
+    {
+      "city_name": "Palmer",
+      "region": "Alaska",
+      "country": "United States",
+      "population": 7100,
+      "rank": 10
+    }
+  ],
+  "United States|Arizona": [
+    {
+      "city_name": "Phoenix",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 1680992,
+      "rank": 1
+    },
+    {
+      "city_name": "Tucson",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 542629,
+      "rank": 2
+    },
+    {
+      "city_name": "Mesa",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 508958,
+      "rank": 3
+    },
+    {
+      "city_name": "Chandler",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 275987,
+      "rank": 4
+    },
+    {
+      "city_name": "Glendale",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 248325,
+      "rank": 5
+    },
+    {
+      "city_name": "Scottsdale",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 241361,
+      "rank": 6
+    },
+    {
+      "city_name": "Gilbert",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 267918,
+      "rank": 7
+    },
+    {
+      "city_name": "Tempe",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 195805,
+      "rank": 8
+    },
+    {
+      "city_name": "Peoria",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 175961,
+      "rank": 9
+    },
+    {
+      "city_name": "Surprise",
+      "region": "Arizona",
+      "country": "United States",
+      "population": 143148,
+      "rank": 10
+    }
+  ],
+  "United States|Arkansas": [
+    {
+      "city_name": "Little Rock",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 204405,
+      "rank": 1
+    },
+    {
+      "city_name": "Fort Smith",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 89144,
+      "rank": 2
+    },
+    {
+      "city_name": "Fayetteville",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 87416,
+      "rank": 3
+    },
+    {
+      "city_name": "Springdale",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 81812,
+      "rank": 4
+    },
+    {
+      "city_name": "Jonesboro",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 78352,
+      "rank": 5
+    },
+    {
+      "city_name": "North Little Rock",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 65799,
+      "rank": 6
+    },
+    {
+      "city_name": "Conway",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 67244,
+      "rank": 7
+    },
+    {
+      "city_name": "Rogers",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 68695,
+      "rank": 8
+    },
+    {
+      "city_name": "Pine Bluff",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 41835,
+      "rank": 9
+    },
+    {
+      "city_name": "Bentonville",
+      "region": "Arkansas",
+      "country": "United States",
+      "population": 54403,
+      "rank": 10
+    }
+  ],
+  "United States|California": [
+    {
+      "city_name": "Los Angeles",
+      "region": "California",
+      "country": "United States",
+      "population": 3979576,
+      "rank": 1
+    },
+    {
+      "city_name": "San Diego",
+      "region": "California",
+      "country": "United States",
+      "population": 1423851,
+      "rank": 2
+    },
+    {
+      "city_name": "San Jose",
+      "region": "California",
+      "country": "United States",
+      "population": 1026908,
+      "rank": 3
+    },
+    {
+      "city_name": "San Francisco",
+      "region": "California",
+      "country": "United States",
+      "population": 815201,
+      "rank": 4
+    },
+    {
+      "city_name": "Fresno",
+      "region": "California",
+      "country": "United States",
+      "population": 542107,
+      "rank": 5
+    },
+    {
+      "city_name": "Sacramento",
+      "region": "California",
+      "country": "United States",
+      "population": 525041,
+      "rank": 6
+    },
+    {
+      "city_name": "Long Beach",
+      "region": "California",
+      "country": "United States",
+      "population": 466742,
+      "rank": 7
+    },
+    {
+      "city_name": "Oakland",
+      "region": "California",
+      "country": "United States",
+      "population": 440646,
+      "rank": 8
+    },
+    {
+      "city_name": "Bakersfield",
+      "region": "California",
+      "country": "United States",
+      "population": 403455,
+      "rank": 9
+    },
+    {
+      "city_name": "Anaheim",
+      "region": "California",
+      "country": "United States",
+      "population": 346824,
+      "rank": 10
+    }
+  ],
+  "United States|Colorado": [
+    {
+      "city_name": "Denver",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 715522,
+      "rank": 1
+    },
+    {
+      "city_name": "Colorado Springs",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 478221,
+      "rank": 2
+    },
+    {
+      "city_name": "Aurora",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 386261,
+      "rank": 3
+    },
+    {
+      "city_name": "Fort Collins",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 169810,
+      "rank": 4
+    },
+    {
+      "city_name": "Lakewood",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 155984,
+      "rank": 5
+    },
+    {
+      "city_name": "Thornton",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 144186,
+      "rank": 6
+    },
+    {
+      "city_name": "Arvada",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 124402,
+      "rank": 7
+    },
+    {
+      "city_name": "Westminster",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 116317,
+      "rank": 8
+    },
+    {
+      "city_name": "Pueblo",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 111876,
+      "rank": 9
+    },
+    {
+      "city_name": "Centennial",
+      "region": "Colorado",
+      "country": "United States",
+      "population": 110345,
+      "rank": 10
+    }
+  ],
+  "United States|Connecticut": [
+    {
+      "city_name": "Bridgeport",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 148654,
+      "rank": 1
+    },
+    {
+      "city_name": "New Haven",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 134023,
+      "rank": 2
+    },
+    {
+      "city_name": "Stamford",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 135470,
+      "rank": 3
+    },
+    {
+      "city_name": "Hartford",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 121054,
+      "rank": 4
+    },
+    {
+      "city_name": "Waterbury",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 114403,
+      "rank": 5
+    },
+    {
+      "city_name": "Norwalk",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 91284,
+      "rank": 6
+    },
+    {
+      "city_name": "Danbury",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 84716,
+      "rank": 7
+    },
+    {
+      "city_name": "New Britain",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 73143,
+      "rank": 8
+    },
+    {
+      "city_name": "West Hartford",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 64000,
+      "rank": 9
+    },
+    {
+      "city_name": "Bristol",
+      "region": "Connecticut",
+      "country": "United States",
+      "population": 60289,
+      "rank": 10
+    }
+  ],
+  "United States|Delaware": [
+    {
+      "city_name": "Wilmington",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 70556,
+      "rank": 1
+    },
+    {
+      "city_name": "Dover",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 38079,
+      "rank": 2
+    },
+    {
+      "city_name": "Newark",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 33168,
+      "rank": 3
+    },
+    {
+      "city_name": "Middletown",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 22946,
+      "rank": 4
+    },
+    {
+      "city_name": "Smyrna",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 11143,
+      "rank": 5
+    },
+    {
+      "city_name": "Milford",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 10203,
+      "rank": 6
+    },
+    {
+      "city_name": "Seaford",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 7911,
+      "rank": 7
+    },
+    {
+      "city_name": "Elkton",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 7200,
+      "rank": 8
+    },
+    {
+      "city_name": "New Castle",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 5700,
+      "rank": 9
+    },
+    {
+      "city_name": "Claymont",
+      "region": "Delaware",
+      "country": "United States",
+      "population": 5600,
+      "rank": 10
+    }
+  ],
+  "United States|Florida": [
+    {
+      "city_name": "Jacksonville",
+      "region": "Florida",
+      "country": "United States",
+      "population": 949611,
+      "rank": 1
+    },
+    {
+      "city_name": "Miami",
+      "region": "Florida",
+      "country": "United States",
+      "population": 442241,
+      "rank": 2
+    },
+    {
+      "city_name": "Tampa",
+      "region": "Florida",
+      "country": "United States",
+      "population": 384959,
+      "rank": 3
+    },
+    {
+      "city_name": "Orlando",
+      "region": "Florida",
+      "country": "United States",
+      "population": 309154,
+      "rank": 4
+    },
+    {
+      "city_name": "St. Petersburg",
+      "region": "Florida",
+      "country": "United States",
+      "population": 258308,
+      "rank": 5
+    },
+    {
+      "city_name": "Hialeah",
+      "region": "Florida",
+      "country": "United States",
+      "population": 223109,
+      "rank": 6
+    },
+    {
+      "city_name": "Port St. Lucie",
+      "region": "Florida",
+      "country": "United States",
+      "population": 204851,
+      "rank": 7
+    },
+    {
+      "city_name": "Cape Coral",
+      "region": "Florida",
+      "country": "United States",
+      "population": 194495,
+      "rank": 8
+    },
+    {
+      "city_name": "Fort Lauderdale",
+      "region": "Florida",
+      "country": "United States",
+      "population": 182437,
+      "rank": 9
+    },
+    {
+      "city_name": "Pembroke Pines",
+      "region": "Florida",
+      "country": "United States",
+      "population": 171178,
+      "rank": 10
+    }
+  ],
+  "United States|Georgia": [
+    {
+      "city_name": "Atlanta",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 498715,
+      "rank": 1
+    },
+    {
+      "city_name": "Augusta",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 202081,
+      "rank": 2
+    },
+    {
+      "city_name": "Columbus",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 206922,
+      "rank": 3
+    },
+    {
+      "city_name": "Macon",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 153159,
+      "rank": 4
+    },
+    {
+      "city_name": "Savannah",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 147780,
+      "rank": 5
+    },
+    {
+      "city_name": "Athens",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 127315,
+      "rank": 6
+    },
+    {
+      "city_name": "Sandy Springs",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 108080,
+      "rank": 7
+    },
+    {
+      "city_name": "Roswell",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 94000,
+      "rank": 8
+    },
+    {
+      "city_name": "Johns Creek",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 85000,
+      "rank": 9
+    },
+    {
+      "city_name": "Warner Robins",
+      "region": "Georgia",
+      "country": "United States",
+      "population": 80000,
+      "rank": 10
+    }
+  ],
+  "United States|Hawaii": [
+    {
+      "city_name": "Honolulu",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 345064,
+      "rank": 1
+    },
+    {
+      "city_name": "East Honolulu",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 50112,
+      "rank": 2
+    },
+    {
+      "city_name": "Pearl City",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 47662,
+      "rank": 3
+    },
+    {
+      "city_name": "Hilo",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 44944,
+      "rank": 4
+    },
+    {
+      "city_name": "Waipahu",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 38141,
+      "rank": 5
+    },
+    {
+      "city_name": "Kailua",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 38111,
+      "rank": 6
+    },
+    {
+      "city_name": "Kāneʻohe",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 34900,
+      "rank": 7
+    },
+    {
+      "city_name": "Mililani Town",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 28367,
+      "rank": 8
+    },
+    {
+      "city_name": "Kāneʻohe",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 34900,
+      "rank": 7
+    },
+    {
+      "city_name": "Waimea",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 10200,
+      "rank": 9
+    },
+    {
+      "city_name": "Wahiawā",
+      "region": "Hawaii",
+      "country": "United States",
+      "population": 16500,
+      "rank": 10
+    }
+  ],
+  "United States|Idaho": [
+    {
+      "city_name": "Boise",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 235829,
+      "rank": 1
+    },
+    {
+      "city_name": "Meridian",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 125592,
+      "rank": 2
+    },
+    {
+      "city_name": "Nampa",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 101694,
+      "rank": 3
+    },
+    {
+      "city_name": "Idaho Falls",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 62000,
+      "rank": 4
+    },
+    {
+      "city_name": "Caldwell",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 59000,
+      "rank": 5
+    },
+    {
+      "city_name": "Pocatello",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 56000,
+      "rank": 6
+    },
+    {
+      "city_name": "Coeur d'Alene",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 52000,
+      "rank": 7
+    },
+    {
+      "city_name": "Twin Falls",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 51000,
+      "rank": 8
+    },
+    {
+      "city_name": "Lewiston",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 34000,
+      "rank": 9
+    },
+    {
+      "city_name": "Post Falls",
+      "region": "Idaho",
+      "country": "United States",
+      "population": 35000,
+      "rank": 10
+    }
+  ],
+  "United States|Illinois": [
+    {
+      "city_name": "Chicago",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 2695598,
+      "rank": 1
+    },
+    {
+      "city_name": "Aurora",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 197899,
+      "rank": 2
+    },
+    {
+      "city_name": "Naperville",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 148449,
+      "rank": 3
+    },
+    {
+      "city_name": "Joliet",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 147344,
+      "rank": 4
+    },
+    {
+      "city_name": "Rockford",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 147051,
+      "rank": 5
+    },
+    {
+      "city_name": "Springfield",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 114230,
+      "rank": 6
+    },
+    {
+      "city_name": "Elgin",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 114797,
+      "rank": 7
+    },
+    {
+      "city_name": "Peoria",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 111388,
+      "rank": 8
+    },
+    {
+      "city_name": "Champaign",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 87892,
+      "rank": 9
+    },
+    {
+      "city_name": "Waukegan",
+      "region": "Illinois",
+      "country": "United States",
+      "population": 86521,
+      "rank": 10
+    }
+  ],
+  "United States|Indiana": [
+    {
+      "city_name": "Indianapolis",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 887642,
+      "rank": 1
+    },
+    {
+      "city_name": "Fort Wayne",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 263886,
+      "rank": 2
+    },
+    {
+      "city_name": "Evansville",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 117298,
+      "rank": 3
+    },
+    {
+      "city_name": "South Bend",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 101168,
+      "rank": 4
+    },
+    {
+      "city_name": "Carmel",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 101068,
+      "rank": 5
+    },
+    {
+      "city_name": "Fishers",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 97946,
+      "rank": 6
+    },
+    {
+      "city_name": "Bloomington",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 85359,
+      "rank": 7
+    },
+    {
+      "city_name": "Hammond",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 76399,
+      "rank": 8
+    },
+    {
+      "city_name": "Gary",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 69432,
+      "rank": 9
+    },
+    {
+      "city_name": "Lafayette",
+      "region": "Indiana",
+      "country": "United States",
+      "population": 72052,
+      "rank": 10
+    }
+  ],
+  "United States|Iowa": [
+    {
+      "city_name": "Des Moines",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 214237,
+      "rank": 1
+    },
+    {
+      "city_name": "Cedar Rapids",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 137710,
+      "rank": 2
+    },
+    {
+      "city_name": "Davenport",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 101724,
+      "rank": 3
+    },
+    {
+      "city_name": "Sioux City",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 82559,
+      "rank": 4
+    },
+    {
+      "city_name": "Iowa City",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 76215,
+      "rank": 5
+    },
+    {
+      "city_name": "Waterloo",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 67831,
+      "rank": 6
+    },
+    {
+      "city_name": "Ames",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 66903,
+      "rank": 7
+    },
+    {
+      "city_name": "West Des Moines",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 67698,
+      "rank": 8
+    },
+    {
+      "city_name": "Council Bluffs",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 62099,
+      "rank": 9
+    },
+    {
+      "city_name": "Ankeny",
+      "region": "Iowa",
+      "country": "United States",
+      "population": 67582,
+      "rank": 10
+    }
+  ],
+  "United States|Kansas": [
+    {
+      "city_name": "Wichita",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 397532,
+      "rank": 1
+    },
+    {
+      "city_name": "Overland Park",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 195494,
+      "rank": 2
+    },
+    {
+      "city_name": "Kansas City",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 156607,
+      "rank": 3
+    },
+    {
+      "city_name": "Olathe",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 141290,
+      "rank": 4
+    },
+    {
+      "city_name": "Topeka",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 126587,
+      "rank": 5
+    },
+    {
+      "city_name": "Lawrence",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 100710,
+      "rank": 6
+    },
+    {
+      "city_name": "Shawnee",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 67053,
+      "rank": 7
+    },
+    {
+      "city_name": "Manhattan",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 54758,
+      "rank": 8
+    },
+    {
+      "city_name": "Lenexa",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 54435,
+      "rank": 9
+    },
+    {
+      "city_name": "Salina",
+      "region": "Kansas",
+      "country": "United States",
+      "population": 46650,
+      "rank": 10
+    }
+  ],
+  "United States|Kentucky": [
+    {
+      "city_name": "Louisville",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 633045,
+      "rank": 1
+    },
+    {
+      "city_name": "Lexington",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 323152,
+      "rank": 2
+    },
+    {
+      "city_name": "Bowling Green",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 72272,
+      "rank": 3
+    },
+    {
+      "city_name": "Owensboro",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 59089,
+      "rank": 4
+    },
+    {
+      "city_name": "Covington",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 40456,
+      "rank": 5
+    },
+    {
+      "city_name": "Richmond",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 35709,
+      "rank": 6
+    },
+    {
+      "city_name": "Georgetown",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 37103,
+      "rank": 7
+    },
+    {
+      "city_name": "Florence",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 31571,
+      "rank": 8
+    },
+    {
+      "city_name": "Hopkinsville",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 31194,
+      "rank": 9
+    },
+    {
+      "city_name": "Nicholasville",
+      "region": "Kentucky",
+      "country": "United States",
+      "population": 30920,
+      "rank": 10
+    }
+  ],
+  "United States|Louisiana": [
+    {
+      "city_name": "New Orleans",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 383997,
+      "rank": 1
+    },
+    {
+      "city_name": "Baton Rouge",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 227470,
+      "rank": 2
+    },
+    {
+      "city_name": "Shreveport",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 187112,
+      "rank": 3
+    },
+    {
+      "city_name": "Lafayette",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 121374,
+      "rank": 4
+    },
+    {
+      "city_name": "Lake Charles",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 78496,
+      "rank": 5
+    },
+    {
+      "city_name": "Kenner",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 66529,
+      "rank": 6
+    },
+    {
+      "city_name": "Bossier City",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 68433,
+      "rank": 7
+    },
+    {
+      "city_name": "Monroe",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 47702,
+      "rank": 8
+    },
+    {
+      "city_name": "Alexandria",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 46666,
+      "rank": 9
+    },
+    {
+      "city_name": "Houma",
+      "region": "Louisiana",
+      "country": "United States",
+      "population": 33300,
+      "rank": 10
+    }
+  ],
+  "United States|Maine": [
+    {
+      "city_name": "Portland",
+      "region": "Maine",
+      "country": "United States",
+      "population": 68294,
+      "rank": 1
+    },
+    {
+      "city_name": "Lewiston",
+      "region": "Maine",
+      "country": "United States",
+      "population": 36474,
+      "rank": 2
+    },
+    {
+      "city_name": "Bangor",
+      "region": "Maine",
+      "country": "United States",
+      "population": 31889,
+      "rank": 3
+    },
+    {
+      "city_name": "South Portland",
+      "region": "Maine",
+      "country": "United States",
+      "population": 25810,
+      "rank": 4
+    },
+    {
+      "city_name": "Auburn",
+      "region": "Maine",
+      "country": "United States",
+      "population": 23512,
+      "rank": 5
+    },
+    {
+      "city_name": "Biddeford",
+      "region": "Maine",
+      "country": "United States",
+      "population": 21996,
+      "rank": 6
+    },
+    {
+      "city_name": "Sanford",
+      "region": "Maine",
+      "country": "United States",
+      "population": 21126,
+      "rank": 7
+    },
+    {
+      "city_name": "Saco",
+      "region": "Maine",
+      "country": "United States",
+      "population": 19539,
+      "rank": 8
+    },
+    {
+      "city_name": "Westbrook",
+      "region": "Maine",
+      "country": "United States",
+      "population": 17967,
+      "rank": 9
+    },
+    {
+      "city_name": "Augusta",
+      "region": "Maine",
+      "country": "United States",
+      "population": 18395,
+      "rank": 10
+    }
+  ],
+  "United States|Maryland": [
+    {
+      "city_name": "Baltimore",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 585708,
+      "rank": 1
+    },
+    {
+      "city_name": "Columbia",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 104681,
+      "rank": 2
+    },
+    {
+      "city_name": "Germantown",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 90823,
+      "rank": 3
+    },
+    {
+      "city_name": "Silver Spring",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 81015,
+      "rank": 4
+    },
+    {
+      "city_name": "Waldorf",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 75810,
+      "rank": 5
+    },
+    {
+      "city_name": "Ellicott City",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 72233,
+      "rank": 6
+    },
+    {
+      "city_name": "Frederick",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 72719,
+      "rank": 7
+    },
+    {
+      "city_name": "Gaithersburg",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 68650,
+      "rank": 8
+    },
+    {
+      "city_name": "Bowie",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 57803,
+      "rank": 9
+    },
+    {
+      "city_name": "Rockville",
+      "region": "Maryland",
+      "country": "United States",
+      "population": 61360,
+      "rank": 10
+    }
+  ],
+  "United States|Massachusetts": [
+    {
+      "city_name": "Boston",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 675647,
+      "rank": 1
+    },
+    {
+      "city_name": "Worcester",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 206518,
+      "rank": 2
+    },
+    {
+      "city_name": "Springfield",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 155929,
+      "rank": 3
+    },
+    {
+      "city_name": "Cambridge",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 118403,
+      "rank": 4
+    },
+    {
+      "city_name": "Lowell",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 115554,
+      "rank": 5
+    },
+    {
+      "city_name": "Brockton",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 105643,
+      "rank": 6
+    },
+    {
+      "city_name": "Quincy",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 101636,
+      "rank": 7
+    },
+    {
+      "city_name": "Lynn",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 101253,
+      "rank": 8
+    },
+    {
+      "city_name": "New Bedford",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 101079,
+      "rank": 9
+    },
+    {
+      "city_name": "Fall River",
+      "region": "Massachusetts",
+      "country": "United States",
+      "population": 94245,
+      "rank": 10
+    }
+  ],
+  "United States|Michigan": [
+    {
+      "city_name": "Detroit",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 639111,
+      "rank": 1
+    },
+    {
+      "city_name": "Grand Rapids",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 198917,
+      "rank": 2
+    },
+    {
+      "city_name": "Warren",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 134587,
+      "rank": 3
+    },
+    {
+      "city_name": "Sterling Heights",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 132438,
+      "rank": 4
+    },
+    {
+      "city_name": "Ann Arbor",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 123851,
+      "rank": 5
+    },
+    {
+      "city_name": "Lansing",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 112644,
+      "rank": 6
+    },
+    {
+      "city_name": "Flint",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 94781,
+      "rank": 7
+    },
+    {
+      "city_name": "Dearborn",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 93000,
+      "rank": 8
+    },
+    {
+      "city_name": "Livonia",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 93389,
+      "rank": 9
+    },
+    {
+      "city_name": "Westland",
+      "region": "Michigan",
+      "country": "United States",
+      "population": 81000,
+      "rank": 10
+    }
+  ],
+  "United States|Minnesota": [
+    {
+      "city_name": "Minneapolis",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 429606,
+      "rank": 1
+    },
+    {
+      "city_name": "Saint Paul",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 311527,
+      "rank": 2
+    },
+    {
+      "city_name": "Rochester",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 121395,
+      "rank": 3
+    },
+    {
+      "city_name": "Duluth",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 86368,
+      "rank": 4
+    },
+    {
+      "city_name": "Bloomington",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 85042,
+      "rank": 5
+    },
+    {
+      "city_name": "Brooklyn Park",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 81316,
+      "rank": 6
+    },
+    {
+      "city_name": "Plymouth",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 79996,
+      "rank": 7
+    },
+    {
+      "city_name": "St. Cloud",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 68693,
+      "rank": 8
+    },
+    {
+      "city_name": "Eagan",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 67532,
+      "rank": 9
+    },
+    {
+      "city_name": "Woodbury",
+      "region": "Minnesota",
+      "country": "United States",
+      "population": 67500,
+      "rank": 10
+    }
+  ],
+  "United States|Mississippi": [
+    {
+      "city_name": "Jackson",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 153701,
+      "rank": 1
+    },
+    {
+      "city_name": "Gulfport",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 71546,
+      "rank": 2
+    },
+    {
+      "city_name": "Southaven",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 54464,
+      "rank": 3
+    },
+    {
+      "city_name": "Hattiesburg",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 46623,
+      "rank": 4
+    },
+    {
+      "city_name": "Biloxi",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 45690,
+      "rank": 5
+    },
+    {
+      "city_name": "Meridian",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 35052,
+      "rank": 6
+    },
+    {
+      "city_name": "Tupelo",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 34777,
+      "rank": 7
+    },
+    {
+      "city_name": "Olive Branch",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 38368,
+      "rank": 8
+    },
+    {
+      "city_name": "Greenville",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 29300,
+      "rank": 9
+    },
+    {
+      "city_name": "Horn Lake",
+      "region": "Mississippi",
+      "country": "United States",
+      "population": 26820,
+      "rank": 10
+    }
+  ],
+  "United States|Missouri": [
+    {
+      "city_name": "Kansas City",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 508090,
+      "rank": 1
+    },
+    {
+      "city_name": "St. Louis",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 301578,
+      "rank": 2
+    },
+    {
+      "city_name": "Springfield",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 169176,
+      "rank": 3
+    },
+    {
+      "city_name": "Columbia",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 126853,
+      "rank": 4
+    },
+    {
+      "city_name": "Independence",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 123011,
+      "rank": 5
+    },
+    {
+      "city_name": "Lee's Summit",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 101108,
+      "rank": 6
+    },
+    {
+      "city_name": "O'Fallon",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 89933,
+      "rank": 7
+    },
+    {
+      "city_name": "St. Joseph",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 76203,
+      "rank": 8
+    },
+    {
+      "city_name": "St. Charles",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 70529,
+      "rank": 9
+    },
+    {
+      "city_name": "St. Peters",
+      "region": "Missouri",
+      "country": "United States",
+      "population": 54805,
+      "rank": 10
+    }
+  ],
+  "United States|Montana": [
+    {
+      "city_name": "Billings",
+      "region": "Montana",
+      "country": "United States",
+      "population": 117116,
+      "rank": 1
+    },
+    {
+      "city_name": "Missoula",
+      "region": "Montana",
+      "country": "United States",
+      "population": 75394,
+      "rank": 2
+    },
+    {
+      "city_name": "Great Falls",
+      "region": "Montana",
+      "country": "United States",
+      "population": 58668,
+      "rank": 3
+    },
+    {
+      "city_name": "Bozeman",
+      "region": "Montana",
+      "country": "United States",
+      "population": 55281,
+      "rank": 4
+    },
+    {
+      "city_name": "Butte",
+      "region": "Montana",
+      "country": "United States",
+      "population": 34225,
+      "rank": 5
+    },
+    {
+      "city_name": "Helena",
+      "region": "Montana",
+      "country": "United States",
+      "population": 32315,
+      "rank": 6
+    },
+    {
+      "city_name": "Kalispell",
+      "region": "Montana",
+      "country": "United States",
+      "population": 23301,
+      "rank": 7
+    },
+    {
+      "city_name": "Havre",
+      "region": "Montana",
+      "country": "United States",
+      "population": 9390,
+      "rank": 8
+    },
+    {
+      "city_name": "Anaconda",
+      "region": "Montana",
+      "country": "United States",
+      "population": 9200,
+      "rank": 9
+    },
+    {
+      "city_name": "Miles City",
+      "region": "Montana",
+      "country": "United States",
+      "population": 8319,
+      "rank": 10
+    }
+  ],
+  "United States|Nebraska": [
+    {
+      "city_name": "Omaha",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 486051,
+      "rank": 1
+    },
+    {
+      "city_name": "Lincoln",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 291082,
+      "rank": 2
+    },
+    {
+      "city_name": "Bellevue",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 64274,
+      "rank": 3
+    },
+    {
+      "city_name": "Grand Island",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 51869,
+      "rank": 4
+    },
+    {
+      "city_name": "Kearney",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 33310,
+      "rank": 5
+    },
+    {
+      "city_name": "Fremont",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 26346,
+      "rank": 6
+    },
+    {
+      "city_name": "Hastings",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 24416,
+      "rank": 7
+    },
+    {
+      "city_name": "North Platte",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 23839,
+      "rank": 8
+    },
+    {
+      "city_name": "Norfolk",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 24250,
+      "rank": 9
+    },
+    {
+      "city_name": "Columbus",
+      "region": "Nebraska",
+      "country": "United States",
+      "population": 22272,
+      "rank": 10
+    }
+  ],
+  "United States|Nevada": [
+    {
+      "city_name": "Las Vegas",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 641903,
+      "rank": 1
+    },
+    {
+      "city_name": "Henderson",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 317610,
+      "rank": 2
+    },
+    {
+      "city_name": "Reno",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 264165,
+      "rank": 3
+    },
+    {
+      "city_name": "North Las Vegas",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 262527,
+      "rank": 4
+    },
+    {
+      "city_name": "Sparks",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 108445,
+      "rank": 5
+    },
+    {
+      "city_name": "Carson City",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 55916,
+      "rank": 6
+    },
+    {
+      "city_name": "Elko",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 20840,
+      "rank": 7
+    },
+    {
+      "city_name": "Mesquite",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 20817,
+      "rank": 8
+    },
+    {
+      "city_name": "Boulder City",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 15846,
+      "rank": 9
+    },
+    {
+      "city_name": "Fernley",
+      "region": "Nevada",
+      "country": "United States",
+      "population": 21733,
+      "rank": 10
+    }
+  ],
+  "United States|New Hampshire": [
+    {
+      "city_name": "Manchester",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 115409,
+      "rank": 1
+    },
+    {
+      "city_name": "Nashua",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 91035,
+      "rank": 2
+    },
+    {
+      "city_name": "Concord",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 43732,
+      "rank": 3
+    },
+    {
+      "city_name": "Derry",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 34591,
+      "rank": 4
+    },
+    {
+      "city_name": "Rochester",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 31120,
+      "rank": 5
+    },
+    {
+      "city_name": "Salem",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 29850,
+      "rank": 6
+    },
+    {
+      "city_name": "Hudson",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 24700,
+      "rank": 7
+    },
+    {
+      "city_name": "Londonderry",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 24700,
+      "rank": 8
+    },
+    {
+      "city_name": "Keene",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 23000,
+      "rank": 9
+    },
+    {
+      "city_name": "Portsmouth",
+      "region": "New Hampshire",
+      "country": "United States",
+      "population": 21000,
+      "rank": 10
+    }
+  ],
+  "United States|New Jersey": [
+    {
+      "city_name": "Newark",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 311549,
+      "rank": 1
+    },
+    {
+      "city_name": "Jersey City",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 292449,
+      "rank": 2
+    },
+    {
+      "city_name": "Paterson",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 159732,
+      "rank": 3
+    },
+    {
+      "city_name": "Elizabeth",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 137298,
+      "rank": 4
+    },
+    {
+      "city_name": "Edison",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 107588,
+      "rank": 5
+    },
+    {
+      "city_name": "Woodbridge Township",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 103639,
+      "rank": 6
+    },
+    {
+      "city_name": "Lakewood Township",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 102242,
+      "rank": 7
+    },
+    {
+      "city_name": "Toms River",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 95000,
+      "rank": 8
+    },
+    {
+      "city_name": "Hamilton Township",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 88000,
+      "rank": 9
+    },
+    {
+      "city_name": "Trenton",
+      "region": "New Jersey",
+      "country": "United States",
+      "population": 83109,
+      "rank": 10
+    }
+  ],
+  "United States|New Mexico": [
+    {
+      "city_name": "Albuquerque",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 542107,
+      "rank": 1
+    },
+    {
+      "city_name": "Las Cruces",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 111385,
+      "rank": 2
+    },
+    {
+      "city_name": "Rio Rancho",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 104046,
+      "rank": 3
+    },
+    {
+      "city_name": "Santa Fe",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 84983,
+      "rank": 4
+    },
+    {
+      "city_name": "Roswell",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 47745,
+      "rank": 5
+    },
+    {
+      "city_name": "Farmington",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 43997,
+      "rank": 6
+    },
+    {
+      "city_name": "Clovis",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 38969,
+      "rank": 7
+    },
+    {
+      "city_name": "Hobbs",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 34918,
+      "rank": 8
+    },
+    {
+      "city_name": "Carlsbad",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 29800,
+      "rank": 9
+    },
+    {
+      "city_name": "Gallup",
+      "region": "New Mexico",
+      "country": "United States",
+      "population": 21984,
+      "rank": 10
+    }
+  ],
+  "United States|New York": [
+    {
+      "city_name": "New York",
+      "region": "New York",
+      "country": "United States",
+      "population": 8419600,
+      "rank": 1
+    },
+    {
+      "city_name": "Buffalo",
+      "region": "New York",
+      "country": "United States",
+      "population": 255284,
+      "rank": 2
+    },
+    {
+      "city_name": "Rochester",
+      "region": "New York",
+      "country": "United States",
+      "population": 210565,
+      "rank": 3
+    },
+    {
+      "city_name": "Yonkers",
+      "region": "New York",
+      "country": "United States",
+      "population": 200370,
+      "rank": 4
+    },
+    {
+      "city_name": "Syracuse",
+      "region": "New York",
+      "country": "United States",
+      "population": 142749,
+      "rank": 5
+    },
+    {
+      "city_name": "Albany",
+      "region": "New York",
+      "country": "United States",
+      "population": 96460,
+      "rank": 6
+    },
+    {
+      "city_name": "New Rochelle",
+      "region": "New York",
+      "country": "United States",
+      "population": 79200,
+      "rank": 7
+    },
+    {
+      "city_name": "Mount Vernon",
+      "region": "New York",
+      "country": "United States",
+      "population": 67600,
+      "rank": 8
+    },
+    {
+      "city_name": "Schenectady",
+      "region": "New York",
+      "country": "United States",
+      "population": 66000,
+      "rank": 9
+    },
+    {
+      "city_name": "Utica",
+      "region": "New York",
+      "country": "United States",
+      "population": 59000,
+      "rank": 10
+    }
+  ],
+  "United States|North Carolina": [
+    {
+      "city_name": "Charlotte",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 874579,
+      "rank": 1
+    },
+    {
+      "city_name": "Raleigh",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 474069,
+      "rank": 2
+    },
+    {
+      "city_name": "Greensboro",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 294722,
+      "rank": 3
+    },
+    {
+      "city_name": "Durham",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 283506,
+      "rank": 4
+    },
+    {
+      "city_name": "Winston-Salem",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 249545,
+      "rank": 5
+    },
+    {
+      "city_name": "Fayetteville",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 211657,
+      "rank": 6
+    },
+    {
+      "city_name": "Cary",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 174721,
+      "rank": 7
+    },
+    {
+      "city_name": "Wilmington",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 122607,
+      "rank": 8
+    },
+    {
+      "city_name": "High Point",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 114059,
+      "rank": 9
+    },
+    {
+      "city_name": "Concord",
+      "region": "North Carolina",
+      "country": "United States",
+      "population": 105240,
+      "rank": 10
+    }
+  ],
+  "United States|North Dakota": [
+    {
+      "city_name": "Fargo",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 125804,
+      "rank": 1
+    },
+    {
+      "city_name": "Bismarck",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 74994,
+      "rank": 2
+    },
+    {
+      "city_name": "Grand Forks",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 57339,
+      "rank": 3
+    },
+    {
+      "city_name": "Minot",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 47414,
+      "rank": 4
+    },
+    {
+      "city_name": "West Fargo",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 38864,
+      "rank": 5
+    },
+    {
+      "city_name": "Williston",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 28000,
+      "rank": 6
+    },
+    {
+      "city_name": "Dickinson",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 25400,
+      "rank": 7
+    },
+    {
+      "city_name": "Mandan",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 23400,
+      "rank": 8
+    },
+    {
+      "city_name": "Jamestown",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 15600,
+      "rank": 9
+    },
+    {
+      "city_name": "Hazelton",
+      "region": "North Dakota",
+      "country": "United States",
+      "population": 15000,
+      "rank": 10
+    }
+  ],
+  "United States|Ohio": [
+    {
+      "city_name": "Columbus",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 905748,
+      "rank": 1
+    },
+    {
+      "city_name": "Cleveland",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 372624,
+      "rank": 2
+    },
+    {
+      "city_name": "Cincinnati",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 309317,
+      "rank": 3
+    },
+    {
+      "city_name": "Toledo",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 270871,
+      "rank": 4
+    },
+    {
+      "city_name": "Akron",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 190469,
+      "rank": 5
+    },
+    {
+      "city_name": "Dayton",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 137644,
+      "rank": 6
+    },
+    {
+      "city_name": "Parma",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 78456,
+      "rank": 7
+    },
+    {
+      "city_name": "Canton",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 70492,
+      "rank": 8
+    },
+    {
+      "city_name": "Youngstown",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 64000,
+      "rank": 9
+    },
+    {
+      "city_name": "Lorain",
+      "region": "Ohio",
+      "country": "United States",
+      "population": 63797,
+      "rank": 10
+    }
+  ],
+  "United States|Oklahoma": [
+    {
+      "city_name": "Oklahoma City",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 681054,
+      "rank": 1
+    },
+    {
+      "city_name": "Tulsa",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 401190,
+      "rank": 2
+    },
+    {
+      "city_name": "Norman",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 128026,
+      "rank": 3
+    },
+    {
+      "city_name": "Broken Arrow",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 113540,
+      "rank": 4
+    },
+    {
+      "city_name": "Edmond",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 94500,
+      "rank": 5
+    },
+    {
+      "city_name": "Moore",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 62601,
+      "rank": 6
+    },
+    {
+      "city_name": "Midwest City",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 57939,
+      "rank": 7
+    },
+    {
+      "city_name": "Enid",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 50192,
+      "rank": 8
+    },
+    {
+      "city_name": "Stillwater",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 49493,
+      "rank": 9
+    },
+    {
+      "city_name": "Muskogee",
+      "region": "Oklahoma",
+      "country": "United States",
+      "population": 37656,
+      "rank": 10
+    }
+  ],
+  "United States|Oregon": [
+    {
+      "city_name": "Portland",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 652503,
+      "rank": 1
+    },
+    {
+      "city_name": "Salem",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 175535,
+      "rank": 2
+    },
+    {
+      "city_name": "Eugene",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 176654,
+      "rank": 3
+    },
+    {
+      "city_name": "Gresham",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 114247,
+      "rank": 4
+    },
+    {
+      "city_name": "Hillsboro",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 106447,
+      "rank": 5
+    },
+    {
+      "city_name": "Beaverton",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 99000,
+      "rank": 6
+    },
+    {
+      "city_name": "Bend",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 100421,
+      "rank": 7
+    },
+    {
+      "city_name": "Medford",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 84700,
+      "rank": 8
+    },
+    {
+      "city_name": "Springfield",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 62000,
+      "rank": 9
+    },
+    {
+      "city_name": "Corvallis",
+      "region": "Oregon",
+      "country": "United States",
+      "population": 59000,
+      "rank": 10
+    }
+  ],
+  "United States|Pennsylvania": [
+    {
+      "city_name": "Philadelphie",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 1584064,
+      "rank": 1
+    },
+    {
+      "city_name": "Pittsburgh",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 302407,
+      "rank": 2
+    },
+    {
+      "city_name": "Allentown",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 125845,
+      "rank": 3
+    },
+    {
+      "city_name": "Erie",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 95483,
+      "rank": 4
+    },
+    {
+      "city_name": "Reading",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 88761,
+      "rank": 5
+    },
+    {
+      "city_name": "Scranton",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 76389,
+      "rank": 6
+    },
+    {
+      "city_name": "Bethlehem",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 74994,
+      "rank": 7
+    },
+    {
+      "city_name": "Lancaster",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 59290,
+      "rank": 8
+    },
+    {
+      "city_name": "Harrisburg",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 49528,
+      "rank": 9
+    },
+    {
+      "city_name": "York",
+      "region": "Pennsylvania",
+      "country": "United States",
+      "population": 43737,
+      "rank": 10
+    }
+  ],
+  "United States|Rhode Island": [
+    {
+      "city_name": "Providence",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 190934,
+      "rank": 1
+    },
+    {
+      "city_name": "Cranston",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 81015,
+      "rank": 2
+    },
+    {
+      "city_name": "Warwick",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 82000,
+      "rank": 3
+    },
+    {
+      "city_name": "Pawtucket",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 72000,
+      "rank": 4
+    },
+    {
+      "city_name": "East Providence",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 47000,
+      "rank": 5
+    },
+    {
+      "city_name": "Woonsocket",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 41000,
+      "rank": 6
+    },
+    {
+      "city_name": "Coventry",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 36000,
+      "rank": 7
+    },
+    {
+      "city_name": "Cumberland",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 36000,
+      "rank": 8
+    },
+    {
+      "city_name": "North Providence",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 35000,
+      "rank": 9
+    },
+    {
+      "city_name": "South Kingstown",
+      "region": "Rhode Island",
+      "country": "United States",
+      "population": 30000,
+      "rank": 10
+    }
+  ],
+  "United States|South Carolina": [
+    {
+      "city_name": "Charleston",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 150227,
+      "rank": 1
+    },
+    {
+      "city_name": "Columbia",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 136632,
+      "rank": 2
+    },
+    {
+      "city_name": "North Charleston",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 114852,
+      "rank": 3
+    },
+    {
+      "city_name": "Mount Pleasant",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 91298,
+      "rank": 4
+    },
+    {
+      "city_name": "Rock Hill",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 74389,
+      "rank": 5
+    },
+    {
+      "city_name": "Greenville",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 70490,
+      "rank": 6
+    },
+    {
+      "city_name": "Summerville",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 50822,
+      "rank": 7
+    },
+    {
+      "city_name": "Goose Creek",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 45243,
+      "rank": 8
+    },
+    {
+      "city_name": "Sumter",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 41939,
+      "rank": 9
+    },
+    {
+      "city_name": "Hilton Head Island",
+      "region": "South Carolina",
+      "country": "United States",
+      "population": 39200,
+      "rank": 10
+    }
+  ],
+  "United States|South Dakota": [
+    {
+      "city_name": "Sioux Falls",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 192517,
+      "rank": 1
+    },
+    {
+      "city_name": "Rapid City",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 75996,
+      "rank": 2
+    },
+    {
+      "city_name": "Aberdeen",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 28324,
+      "rank": 3
+    },
+    {
+      "city_name": "Brookings",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 24244,
+      "rank": 4
+    },
+    {
+      "city_name": "Watertown",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 22215,
+      "rank": 5
+    },
+    {
+      "city_name": "Mitchell",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 15396,
+      "rank": 6
+    },
+    {
+      "city_name": "Yankton",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 14620,
+      "rank": 7
+    },
+    {
+      "city_name": "Pierre",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 14246,
+      "rank": 8
+    },
+    {
+      "city_name": "Huron",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 13713,
+      "rank": 9
+    },
+    {
+      "city_name": "Vermillion",
+      "region": "South Dakota",
+      "country": "United States",
+      "population": 11012,
+      "rank": 10
+    }
+  ],
+  "United States|Tennessee": [
+    {
+      "city_name": "Nashville",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 715891,
+      "rank": 1
+    },
+    {
+      "city_name": "Memphis",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 633104,
+      "rank": 2
+    },
+    {
+      "city_name": "Knoxville",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 190740,
+      "rank": 3
+    },
+    {
+      "city_name": "Chattanooga",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 181099,
+      "rank": 4
+    },
+    {
+      "city_name": "Clarksville",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 166722,
+      "rank": 5
+    },
+    {
+      "city_name": "Murfreesboro",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 146900,
+      "rank": 6
+    },
+    {
+      "city_name": "Franklin",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 83189,
+      "rank": 7
+    },
+    {
+      "city_name": "Jackson",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 67844,
+      "rank": 8
+    },
+    {
+      "city_name": "Johnson City",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 67260,
+      "rank": 9
+    },
+    {
+      "city_name": "Bartlett",
+      "region": "Tennessee",
+      "country": "United States",
+      "population": 57486,
+      "rank": 10
+    }
+  ],
+  "United States|Texas": [
+    {
+      "city_name": "Houston",
+      "region": "Texas",
+      "country": "United States",
+      "population": 2320268,
+      "rank": 1
+    },
+    {
+      "city_name": "San Antonio",
+      "region": "Texas",
+      "country": "United States",
+      "population": 1547253,
+      "rank": 2
+    },
+    {
+      "city_name": "Dallas",
+      "region": "Texas",
+      "country": "United States",
+      "population": 1343573,
+      "rank": 3
+    },
+    {
+      "city_name": "Austin",
+      "region": "Texas",
+      "country": "United States",
+      "population": 1010119,
+      "rank": 4
+    },
+    {
+      "city_name": "Fort Worth",
+      "region": "Texas",
+      "country": "United States",
+      "population": 918915,
+      "rank": 5
+    },
+    {
+      "city_name": "El Paso",
+      "region": "Texas",
+      "country": "United States",
+      "population": 678815,
+      "rank": 6
+    },
+    {
+      "city_name": "Arlington",
+      "region": "Texas",
+      "country": "United States",
+      "population": 394266,
+      "rank": 7
+    },
+    {
+      "city_name": "Corpus Christi",
+      "region": "Texas",
+      "country": "United States",
+      "population": 327423,
+      "rank": 8
+    },
+    {
+      "city_name": "Plano",
+      "region": "Texas",
+      "country": "United States",
+      "population": 289547,
+      "rank": 9
+    },
+    {
+      "city_name": "Laredo",
+      "region": "Texas",
+      "country": "United States",
+      "population": 261639,
+      "rank": 10
+    }
+  ],
+  "United States|Utah": [
+    {
+      "city_name": "Salt Lake City",
+      "region": "Utah",
+      "country": "United States",
+      "population": 199000,
+      "rank": 1
+    },
+    {
+      "city_name": "West Valley City",
+      "region": "Utah",
+      "country": "United States",
+      "population": 136000,
+      "rank": 2
+    },
+    {
+      "city_name": "Provo",
+      "region": "Utah",
+      "country": "United States",
+      "population": 116000,
+      "rank": 3
+    },
+    {
+      "city_name": "West Jordan",
+      "region": "Utah",
+      "country": "United States",
+      "population": 116000,
+      "rank": 4
+    },
+    {
+      "city_name": "Orem",
+      "region": "Utah",
+      "country": "United States",
+      "population": 98000,
+      "rank": 5
+    },
+    {
+      "city_name": "Sandy",
+      "region": "Utah",
+      "country": "United States",
+      "population": 96000,
+      "rank": 6
+    },
+    {
+      "city_name": "Ogden",
+      "region": "Utah",
+      "country": "United States",
+      "population": 87000,
+      "rank": 7
+    },
+    {
+      "city_name": "St. George",
+      "region": "Utah",
+      "country": "United States",
+      "population": 90000,
+      "rank": 8
+    },
+    {
+      "city_name": "Layton",
+      "region": "Utah",
+      "country": "United States",
+      "population": 83000,
+      "rank": 9
+    },
+    {
+      "city_name": "Taylorsville",
+      "region": "Utah",
+      "country": "United States",
+      "population": 60000,
+      "rank": 10
+    }
+  ],
+  "United States|Vermont": [
+    {
+      "city_name": "Burlington",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 44743,
+      "rank": 1
+    },
+    {
+      "city_name": "South Burlington",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 19203,
+      "rank": 2
+    },
+    {
+      "city_name": "Rutland",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 15313,
+      "rank": 3
+    },
+    {
+      "city_name": "Essex Junction",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 10394,
+      "rank": 4
+    },
+    {
+      "city_name": "Barre",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 8480,
+      "rank": 5
+    },
+    {
+      "city_name": "Montpelier",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 7855,
+      "rank": 6
+    },
+    {
+      "city_name": "St. Albans",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 7014,
+      "rank": 7
+    },
+    {
+      "city_name": "Winooski",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 7057,
+      "rank": 8
+    },
+    {
+      "city_name": "Milton",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 10106,
+      "rank": 9
+    },
+    {
+      "city_name": "Colchester",
+      "region": "Vermont",
+      "country": "United States",
+      "population": 17825,
+      "rank": 10
+    }
+  ],
+  "United States|Virginia": [
+    {
+      "city_name": "Virginia Beach",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 450189,
+      "rank": 1
+    },
+    {
+      "city_name": "Norfolk",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 238005,
+      "rank": 2
+    },
+    {
+      "city_name": "Chesapeake",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 244835,
+      "rank": 3
+    },
+    {
+      "city_name": "Richmond",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 226610,
+      "rank": 4
+    },
+    {
+      "city_name": "Newport News",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 180719,
+      "rank": 5
+    },
+    {
+      "city_name": "Alexandria",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 159428,
+      "rank": 6
+    },
+    {
+      "city_name": "Hampton",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 137148,
+      "rank": 7
+    },
+    {
+      "city_name": "Roanoke",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 100011,
+      "rank": 8
+    },
+    {
+      "city_name": "Portsmouth",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 94936,
+      "rank": 9
+    },
+    {
+      "city_name": "Suffolk",
+      "region": "Virginia",
+      "country": "United States",
+      "population": 94953,
+      "rank": 10
+    }
+  ],
+  "United States|Washington": [
+    {
+      "city_name": "Seattle",
+      "region": "Washington",
+      "country": "United States",
+      "population": 737015,
+      "rank": 1
+    },
+    {
+      "city_name": "Spokane",
+      "region": "Washington",
+      "country": "United States",
+      "population": 228989,
+      "rank": 2
+    },
+    {
+      "city_name": "Tacoma",
+      "region": "Washington",
+      "country": "United States",
+      "population": 219205,
+      "rank": 3
+    },
+    {
+      "city_name": "Vancouver",
+      "region": "Washington",
+      "country": "United States",
+      "population": 190915,
+      "rank": 4
+    },
+    {
+      "city_name": "Bellevue",
+      "region": "Washington",
+      "country": "United States",
+      "population": 151854,
+      "rank": 5
+    },
+    {
+      "city_name": "Kent",
+      "region": "Washington",
+      "country": "United States",
+      "population": 136588,
+      "rank": 6
+    },
+    {
+      "city_name": "Everett",
+      "region": "Washington",
+      "country": "United States",
+      "population": 111475,
+      "rank": 7
+    },
+    {
+      "city_name": "Renton",
+      "region": "Washington",
+      "country": "United States",
+      "population": 106785,
+      "rank": 8
+    },
+    {
+      "city_name": "Federal Way",
+      "region": "Washington",
+      "country": "United States",
+      "population": 101030,
+      "rank": 9
+    },
+    {
+      "city_name": "Spokane Valley",
+      "region": "Washington",
+      "country": "United States",
+      "population": 102976,
+      "rank": 10
+    }
+  ],
+  "United States|West Virginia": [
+    {
+      "city_name": "Charleston",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 46240,
+      "rank": 1
+    },
+    {
+      "city_name": "Huntington",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 46044,
+      "rank": 2
+    },
+    {
+      "city_name": "Morgantown",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 30356,
+      "rank": 3
+    },
+    {
+      "city_name": "Parkersburg",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 29359,
+      "rank": 4
+    },
+    {
+      "city_name": "Wheeling",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 27121,
+      "rank": 5
+    },
+    {
+      "city_name": "Weirton",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 19603,
+      "rank": 6
+    },
+    {
+      "city_name": "Fairmont",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 18540,
+      "rank": 7
+    },
+    {
+      "city_name": "Beckley",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 17097,
+      "rank": 8
+    },
+    {
+      "city_name": "Clarksburg",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 16594,
+      "rank": 9
+    },
+    {
+      "city_name": "South Charleston",
+      "region": "West Virginia",
+      "country": "United States",
+      "population": 13406,
+      "rank": 10
+    }
+  ],
+  "United States|Wisconsin": [
+    {
+      "city_name": "Milwaukee",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 577222,
+      "rank": 1
+    },
+    {
+      "city_name": "Madison",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 269840,
+      "rank": 2
+    },
+    {
+      "city_name": "Green Bay",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 107395,
+      "rank": 3
+    },
+    {
+      "city_name": "Kenosha",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 100164,
+      "rank": 4
+    },
+    {
+      "city_name": "Racine",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 77900,
+      "rank": 5
+    },
+    {
+      "city_name": "Appleton",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 74919,
+      "rank": 6
+    },
+    {
+      "city_name": "Waukesha",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 71532,
+      "rank": 7
+    },
+    {
+      "city_name": "Eau Claire",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 68834,
+      "rank": 8
+    },
+    {
+      "city_name": "Oshkosh",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 66818,
+      "rank": 9
+    },
+    {
+      "city_name": "Janesville",
+      "region": "Wisconsin",
+      "country": "United States",
+      "population": 65472,
+      "rank": 10
+    }
+  ],
+  "United States|Wyoming": [
+    {
+      "city_name": "Cheyenne",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 64235,
+      "rank": 1
+    },
+    {
+      "city_name": "Casper",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 57648,
+      "rank": 2
+    },
+    {
+      "city_name": "Laramie",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 32000,
+      "rank": 3
+    },
+    {
+      "city_name": "Gillette",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 32000,
+      "rank": 4
+    },
+    {
+      "city_name": "Rock Springs",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 23000,
+      "rank": 5
+    },
+    {
+      "city_name": "Sheridan",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 18000,
+      "rank": 6
+    },
+    {
+      "city_name": "Green River",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 13000,
+      "rank": 7
+    },
+    {
+      "city_name": "Evanston",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 12000,
+      "rank": 8
+    },
+    {
+      "city_name": "Riverton",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 11000,
+      "rank": 9
+    },
+    {
+      "city_name": "Jackson",
+      "region": "Wyoming",
+      "country": "United States",
+      "population": 10000,
+      "rank": 10
+    }
+  ]
+}

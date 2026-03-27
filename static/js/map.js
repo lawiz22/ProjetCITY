@@ -489,9 +489,58 @@
             });
         }
 
+        /* ── focus on city from URL param (?focus=slug) ──── */
+        var focusSlug = new URLSearchParams(window.location.search).get('focus');
+        if (focusSlug) {
+            var focusPt = null;
+            for (var i = 0; i < points.length; i++) {
+                if (points[i].city_slug === focusSlug) { focusPt = points[i]; break; }
+            }
+            if (focusPt) {
+                savedView = null;           // override saved view
+                renderCalled = false;       // allow fitBounds
+                map.setView([focusPt.lat, focusPt.lng], 12);
+                renderCalled = true;        // prevent render() from resetting
+            }
+        }
+
+        /* ── zoom on search match ───────────────────────────── */
+        if (ctrls.search) {
+            ctrls.search.addEventListener('input', function () {
+                var q = (ctrls.search.value || '').trim().toLowerCase();
+                if (q.length < 2) return;
+                var matches = points.filter(function (p) {
+                    return p.city_name.toLowerCase().indexOf(q) !== -1;
+                });
+                if (matches.length === 1) {
+                    map.setView([matches[0].lat, matches[0].lng], 10);
+                } else if (matches.length > 1 && matches.length <= 10) {
+                    var bounds = matches.map(function (p) { return [p.lat, p.lng]; });
+                    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+                }
+            });
+        }
+
         /* ── first render ────────────────────────────────────── */
 
         render();
+
+        /* Open popup for focused city after render */
+        if (focusSlug) {
+            markerLayer.eachLayer(function (layer) {
+                if (layer.getLatLng) {
+                    var ll = layer.getLatLng();
+                    for (var j = 0; j < points.length; j++) {
+                        if (points[j].city_slug === focusSlug &&
+                            Math.abs(points[j].lat - ll.lat) < 0.0001 &&
+                            Math.abs(points[j].lng - ll.lng) < 0.0001) {
+                            layer.openPopup();
+                            break;
+                        }
+                    }
+                }
+            });
+        }
 
         /* Ensure Leaflet knows the container size */
         map.invalidateSize();

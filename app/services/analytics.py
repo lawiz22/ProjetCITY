@@ -850,6 +850,13 @@ class AnalyticsService:
             record["trend_label"] = "Stable"
             record["trend_symbol"] = "•"
         record.update(get_city_photo(record["city_slug"], connection))
+        coords = connection.execute(
+            "SELECT latitude, longitude FROM dim_city WHERE city_id = ?",
+            (record["city_id"],),
+        ).fetchone()
+        if coords:
+            record["latitude"] = coords["latitude"]
+            record["longitude"] = coords["longitude"]
         return record
 
     def get_city_periods(self, city_slug: str, filters: dict[str, str | None]) -> list[dict[str, Any]]:

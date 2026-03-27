@@ -1392,6 +1392,182 @@ def city_fiche_delete(city_slug: str) -> Response:
 
 
 # ------------------------------------------------------------------
+# ------------------------------------------------------------------
+#  Geographic coverage (regions / states)
+# ------------------------------------------------------------------
+
+@web.route("/geo-coverage")
+def geo_coverage() -> str:
+    """Geographic coverage: which regions/states are in the DB vs total."""
+    from .db import get_db
+
+    CA_REGIONS = [
+        "Alberta", "British Columbia", "Manitoba", "New Brunswick",
+        "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia",
+        "Nunavut", "Ontario", "Prince Edward Island", "Québec",
+        "Saskatchewan", "Yukon",
+    ]
+    US_STATES = [
+        "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+        "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+        "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+        "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+        "New Hampshire", "New Jersey", "New Mexico", "New York",
+        "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+        "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+        "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+        "West Virginia", "Wisconsin", "Wyoming",
+    ]
+
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT c.city_name, c.city_slug, c.region, c.country,
+                  MAX(f.population) AS peak_pop,
+                  COUNT(DISTINCT f.year) AS data_points
+           FROM dim_city c
+           LEFT JOIN fact_city_population f ON f.city_id = c.city_id
+           GROUP BY c.city_id
+           ORDER BY c.country, c.region, c.city_name"""
+    ).fetchall()
+
+    # Load reference cities (if table exists)
+    ref_rows: list = []
+    try:
+        ref_rows = conn.execute(
+            "SELECT city_name, region, country, population, rank FROM ref_city ORDER BY country, region, rank"
+        ).fetchall()
+    except Exception:
+        pass  # table may not exist yet
+
+    # Index ref cities by region
+    ref_by_region: dict[str, list[dict]] = {}
+    for rr in ref_rows:
+        key = f"{rr['country']}|{rr['region']}"
+        if key not in ref_by_region:
+            ref_by_region[key] = []
+        ref_by_region[key].append({
+            "city_name": rr["city_name"],
+            "population": rr["population"] or 0,
+            "rank": rr["rank"] or 0,
+        })
+
+    # Index existing city names by region for matching
+    existing_by_region: dict[str, set[str]] = {}
+    for r in rows:
+        key = f"{r['country']}|{r['region']}"
+        if key not in existing_by_region:
+            existing_by_region[key] = set()
+        existing_by_region[key].add(r["city_name"].lower().strip())
+
+    # Build per-region data
+    region_data: dict[str, dict] = {}  # key = "country|region"
+    for r in rows:
+        key = f"{r['country']}|{r['region']}"
+        if key not in region_data:
+            region_data[key] = {
+                "country": r["country"],
+                "region": r["region"],
+                "cities": [],
+            }
+        region_data[key]["cities"].append({
+            "city_name": r["city_name"],
+            "city_slug": r["city_slug"],
+            "peak_pop": r["peak_pop"],
+            "data_points": r["data_points"],
+        })
+
+    # Build country summaries
+    ca_covered = set()
+    us_covered = set()
+    for key, rd in region_data.items():
+        if rd["country"] == "Canada":
+            if rd["region"] in CA_REGIONS:
+                ca_covered.add(rd["region"])
+        else:
+            if rd["region"] in US_STATES:
+                us_covered.add(rd["region"])
+
+    ca_missing = sorted([r for r in CA_REGIONS if r not in ca_covered])
+    us_missing = sorted([s for s in US_STATES if s not in us_covered])
+
+    # Regions list with cities for template
+    ca_regions_list = []
+    for reg in CA_REGIONS:
+        key = f"Canada|{reg}"
+        cities = region_data.get(key, {}).get("cities", [])
+        ref_cities = ref_by_region.get(key, [])
+        existing_names = existing_by_region.get(key, set())
+        ref_with_status = []
+        for rc in ref_cities:
+            ref_with_status.append({
+                **rc,
+                "in_db": rc["city_name"].lower().strip() in existing_names,
+            })
+        ref_total = len(ref_with_status)
+        ref_covered = sum(1 for r in ref_with_status if r["in_db"])
+        ca_regions_list.append({
+            "name": reg,
+            "covered": reg in ca_covered,
+            "city_count": len(cities),
+            "cities": cities,
+            "ref_cities": ref_with_status,
+            "ref_total": ref_total,
+            "ref_covered": ref_covered,
+        })
+
+    us_regions_list = []
+    for st in US_STATES:
+        key = f"United States|{st}"
+        cities = region_data.get(key, {}).get("cities", [])
+        ref_cities = ref_by_region.get(key, [])
+        existing_names = existing_by_region.get(key, set())
+        ref_with_status = []
+        for rc in ref_cities:
+            ref_with_status.append({
+                **rc,
+                "in_db": rc["city_name"].lower().strip() in existing_names,
+            })
+        ref_total = len(ref_with_status)
+        ref_covered = sum(1 for r in ref_with_status if r["in_db"])
+        us_regions_list.append({
+            "name": st,
+            "covered": st in us_covered,
+            "city_count": len(cities),
+            "cities": cities,
+            "ref_cities": ref_with_status,
+            "ref_total": ref_total,
+            "ref_covered": ref_covered,
+        })
+
+    total_cities = len(rows)
+    ca_city_count = sum(1 for r in rows if r["country"] == "Canada")
+    us_city_count = sum(1 for r in rows if r["country"] != "Canada")
+    total_ref = len(ref_rows)
+    total_ref_covered = sum(
+        r["ref_covered"] for r in ca_regions_list + us_regions_list
+    )
+
+    return render_template(
+        "web/geo_coverage.html",
+        page_title="Couverture géographique",
+        total_cities=total_cities,
+        total_ref=total_ref,
+        total_ref_covered=total_ref_covered,
+        ca_total=len(CA_REGIONS),
+        ca_covered=len(ca_covered),
+        ca_missing=ca_missing,
+        ca_city_count=ca_city_count,
+        ca_regions=ca_regions_list,
+        us_total=len(US_STATES),
+        us_covered=len(us_covered),
+        us_missing=us_missing,
+        us_city_count=us_city_count,
+        us_regions=us_regions_list,
+    )
+
+
+# ------------------------------------------------------------------
 #  Coverage / completeness
 # ------------------------------------------------------------------
 
@@ -1559,6 +1735,7 @@ def ai_lab_suggest_city() -> Response:
     """Ask Mammouth to suggest a city not yet in the DB, prioritizing missing regions."""
     from .services.mammouth_ai import load_settings, generate_city
     from .db import get_db
+    import random
 
     settings = load_settings()
     api_key = settings.get("api_key", "")
@@ -1566,51 +1743,136 @@ def ai_lab_suggest_city() -> Response:
         return jsonify({"success": False, "error": "Aucune clé API configurée."})
 
     model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    filter_country = request.form.get("country", "").strip()
+    filter_region = request.form.get("region", "").strip()
 
     conn = get_db()
 
-    # Get all existing cities
+    # All Canadian provinces/territories and US states
+    CA_REGIONS = [
+        "Alberta", "British Columbia", "Manitoba", "New Brunswick",
+        "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia",
+        "Nunavut", "Ontario", "Prince Edward Island", "Québec",
+        "Saskatchewan", "Yukon",
+    ]
+    US_STATES = [
+        "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+        "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+        "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+        "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+        "New Hampshire", "New Jersey", "New Mexico", "New York",
+        "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+        "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+        "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+        "West Virginia", "Wisconsin", "Wyoming",
+    ]
+
+    # Get existing cities
     existing_rows = conn.execute(
-        "SELECT city_name, region, country FROM dim_city ORDER BY country, region, city_name"
+        "SELECT city_name, region, country FROM dim_city ORDER BY country, region"
     ).fetchall()
-    existing_cities = [f"{r['city_name']}, {r['region']}" for r in existing_rows]
-    existing_list = "\n".join(existing_cities)
 
-    # Get regions with city counts
-    region_counts = conn.execute(
-        """SELECT country, region, COUNT(*) as cnt
-           FROM dim_city GROUP BY country, region
-           ORDER BY country, cnt ASC"""
-    ).fetchall()
-    region_summary = "\n".join(
-        f"- {r['country']} / {r['region']}: {r['cnt']} ville(s)"
-        for r in region_counts
-    )
+    existing_in = set()
+    covered_ca = set()
+    covered_us = set()
+    for r in existing_rows:
+        existing_in.add(f"{r['city_name']}, {r['region']}")
+        if r["country"] == "Canada":
+            covered_ca.add(r["region"])
+        else:
+            covered_us.add(r["region"])
 
-    # All Canadian provinces and US states for reference
-    prompt = f"""Tu es un expert en géographie urbaine nord-américaine.
+    # ---- Specific region requested ----
+    if filter_country and filter_region:
+        existing_in_region = [r["city_name"] for r in existing_rows
+                              if r["region"] == filter_region and r["country"] == filter_country]
+        if existing_in_region:
+            # Shuffle to vary the prompt and get different AI responses
+            shuffled = list(existing_in_region)
+            random.shuffle(shuffled)
+            prompt = (
+                f"La région {filter_region} ({filter_country}) a déjà ces villes dans ma base: "
+                f"{', '.join(shuffled)}.\n"
+                f"Suggère UNE autre ville de {filter_region} qui n'est PAS dans cette liste. "
+                f"Choisis une ville différente à chaque fois, pas toujours la même. "
+                f"Varie entre grandes villes, villes moyennes et petites villes connues.\n"
+                f"Réponds UNIQUEMENT avec: NomVille, {filter_region}\n"
+                f"Aucun autre texte."
+            )
+        else:
+            prompt = (
+                f"Suggère la ville la plus grande et la plus connue de: {filter_region} ({filter_country}).\n"
+                f"Réponds UNIQUEMENT avec: NomVille, {filter_region}\n"
+                f"Aucun autre texte."
+            )
 
-Voici les villes DÉJÀ dans ma base de données:
-{existing_list}
+    # ---- Country filter only: pick a random missing region in that country ----
+    elif filter_country:
+        if filter_country == "Canada":
+            missing = [r for r in CA_REGIONS if r not in covered_ca]
+            all_regions = CA_REGIONS
+        else:
+            missing = [s for s in US_STATES if s not in covered_us]
+            all_regions = US_STATES
 
-Voici le nombre de villes par région:
-{region_summary}
+        if missing:
+            pick = random.choice(missing)
+            prompt = (
+                f"Suggère la ville la plus grande et la plus connue de: {pick} ({filter_country}).\n"
+                f"Réponds UNIQUEMENT avec: NomVille, {pick}\n"
+                f"Aucun autre texte."
+            )
+        else:
+            # All regions covered for this country — least represented
+            region_counts = conn.execute(
+                """SELECT region, COUNT(*) as cnt FROM dim_city
+                   WHERE country = ? GROUP BY region ORDER BY cnt ASC LIMIT 5""",
+                (filter_country,)
+            ).fetchall()
+            pick = random.choice(region_counts)
+            names = [r["city_name"] for r in existing_rows
+                     if r["region"] == pick["region"] and r["country"] == filter_country]
+            prompt = (
+                f"La région {pick['region']} ({filter_country}) a seulement {pick['cnt']} ville(s) "
+                f"dans ma base: {', '.join(names)}.\n"
+                f"Suggère UNE ville populaire et connue de cette région qui n'est PAS dans cette liste.\n"
+                f"Réponds UNIQUEMENT avec: NomVille, {pick['region']}\n"
+                f"Aucun autre texte."
+            )
 
-OBJECTIF: Suggère-moi UNE SEULE ville à ajouter. Critères de priorité:
-1. PRIORITÉ ABSOLUE: Choisir une ville dans une province canadienne ou un état américain qui n'a AUCUNE ville dans la liste ci-dessus
-2. Si toutes les provinces/états ont au moins une ville, choisir une ville dans la région la moins représentée
-3. Choisir des villes populaires, connues et peuplées (pas de petits villages)
-4. Les 10 provinces canadiennes, les 3 territoires canadiens, et les 50 états américains doivent éventuellement être couverts
+    # ---- No filter: original behaviour ----
+    else:
+        missing_ca = [r for r in CA_REGIONS if r not in covered_ca]
+        missing_us = [s for s in US_STATES if s not in covered_us]
 
-IMPORTANT: Réponds UNIQUEMENT avec le nom de la ville et sa région, dans ce format exact:
-NomVille, Région
+        if missing_ca or missing_us:
+            all_missing = [("Canada", r) for r in missing_ca] + [("United States", s) for s in missing_us]
+            pick = random.choice(all_missing)
+            prompt = (
+                f"Suggère la ville la plus grande et la plus connue de: {pick[1]} ({pick[0]}).\n"
+                f"Réponds UNIQUEMENT avec: NomVille, {pick[1]}\n"
+                f"Aucun autre texte."
+            )
+        else:
+            region_counts = conn.execute(
+                """SELECT country, region, COUNT(*) as cnt
+                   FROM dim_city GROUP BY country, region
+                   ORDER BY cnt ASC LIMIT 10"""
+            ).fetchall()
+            least = region_counts[:5]
+            pick = random.choice(least)
+            existing_in_region = [r["city_name"] for r in existing_rows
+                                  if r["region"] == pick["region"] and r["country"] == pick["country"]]
+            prompt = (
+                f"La région {pick['region']} ({pick['country']}) a seulement {pick['cnt']} ville(s) "
+                f"dans ma base: {', '.join(existing_in_region)}.\n"
+                f"Suggère UNE ville populaire et connue de cette région qui n'est PAS dans cette liste.\n"
+                f"Réponds UNIQUEMENT avec: NomVille, {pick['region']}\n"
+                f"Aucun autre texte."
+            )
 
-Par exemple: Austin, Texas
-ou: Fredericton, New Brunswick
-
-Ne mets AUCUN autre texte, aucune explication, juste la ville et la région sur une seule ligne."""
-
-    result = generate_city(api_key, model, "", prompt, max_tokens=50)
+    result = generate_city(api_key, model, "", prompt, max_tokens=50, temperature=0.9)
     if result.get("success"):
         result["tokens_total"] = load_settings().get("tokens_used", 0)
     return jsonify(result)

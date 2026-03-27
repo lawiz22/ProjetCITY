@@ -1,0 +1,236 @@
+{% extends "web/base.html" %}
+{% block content %}
+
+<!-- ===================== SUMMARY CARDS ===================== -->
+<section class="geo-summary-row">
+    <div class="metric-card geo-metric">
+        <span class="metric-value">{{ total_cities }}</span>
+        <span class="metric-label">Villes dans la BD</span>
+    </div>
+    <div class="metric-card geo-metric">
+        <span class="metric-value">{{ ca_covered + us_covered }}/{{ ca_total + us_total }}</span>
+        <span class="metric-label">Régions couvertes</span>
+    </div>
+    {% if total_ref > 0 %}
+    <div class="metric-card geo-metric">
+        <span class="metric-value">{{ total_ref_covered }}/{{ total_ref }}</span>
+        <span class="metric-label">Villes de référence couvertes</span>
+        <div class="geo-bar"><div class="geo-bar-fill geo-bar-ref" style="width:{{ (total_ref_covered / total_ref * 100)|round }}%"></div></div>
+        <span class="metric-pct">{{ (total_ref_covered / total_ref * 100)|round|int }}%</span>
+    </div>
+    {% endif %}
+    <div class="metric-card geo-metric geo-metric-ca">
+        <span class="metric-value">{{ ca_covered }}/{{ ca_total }}</span>
+        <span class="metric-label">🇨🇦 Provinces/Territoires</span>
+        <div class="geo-bar"><div class="geo-bar-fill" style="width:{{ (ca_covered / ca_total * 100)|round }}%"></div></div>
+        <span class="metric-pct">{{ (ca_covered / ca_total * 100)|round|int }}%</span>
+    </div>
+    <div class="metric-card geo-metric geo-metric-us">
+        <span class="metric-value">{{ us_covered }}/{{ us_total }}</span>
+        <span class="metric-label">🇺🇸 États américains</span>
+        <div class="geo-bar"><div class="geo-bar-fill geo-bar-us" style="width:{{ (us_covered / us_total * 100)|round }}%"></div></div>
+        <span class="metric-pct">{{ (us_covered / us_total * 100)|round|int }}%</span>
+    </div>
+</section>
+
+<!-- ===================== MISSING REGIONS QUICK VIEW ===================== -->
+{% if ca_missing or us_missing %}
+<section class="panel geo-missing-panel">
+    <h3>Régions manquantes (aucune ville)</h3>
+    <div class="geo-missing-grid">
+        {% if ca_missing %}
+        <div>
+            <h4>🇨🇦 Canada ({{ ca_missing|length }})</h4>
+            <ul class="geo-missing-list">
+                {% for r in ca_missing %}
+                <li>{{ r }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if us_missing %}
+        <div>
+            <h4>🇺🇸 États-Unis ({{ us_missing|length }})</h4>
+            <ul class="geo-missing-list">
+                {% for s in us_missing %}
+                <li>{{ s }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+<!-- ===================== TABS: CANADA / USA ===================== -->
+<div class="geo-tabs">
+    <button class="geo-tab is-active" data-geo-tab="ca">🇨🇦 Canada · {{ ca_city_count }} villes · {{ ca_covered }}/{{ ca_total }} régions</button>
+    <button class="geo-tab" data-geo-tab="us">🇺🇸 États-Unis · {{ us_city_count }} villes · {{ us_covered }}/{{ us_total }} états</button>
+</div>
+
+<!-- ===================== CANADA TAB ===================== -->
+<section class="geo-tab-content" id="geo-tab-ca">
+    <div class="geo-search-bar">
+        <input type="text" id="geo-search-ca" class="opt-input" placeholder="Rechercher une province ou une ville…" style="max-width:400px;">
+    </div>
+    <div class="geo-region-grid" id="geo-regions-ca">
+        {% for reg in ca_regions %}
+        <div class="geo-region-card {{ 'geo-missing' if not reg.covered }}" data-region-name="{{ reg.name|lower }}">
+            <div class="geo-region-header" data-toggle-region>
+                <span class="geo-region-status {{ 'geo-ok' if reg.covered else 'geo-nok' }}">{{ '✅' if reg.covered else '❌' }}</span>
+                <h4>{{ reg.name }}</h4>
+                {% if reg.ref_total > 0 %}
+                <div class="geo-region-bar"><div class="geo-region-bar-fill" style="width:{{ (reg.ref_covered / reg.ref_total * 100)|round }}%"></div></div>
+                <span class="geo-ref-badge {{ 'geo-ref-complete' if reg.ref_covered == reg.ref_total }}">{{ reg.ref_covered }}/{{ reg.ref_total }} réf.</span>
+                {% endif %}
+                <span class="geo-region-count">{{ reg.city_count }} ville{{ 's' if reg.city_count != 1 }}</span>
+                <span class="geo-chevron">▾</span>
+            </div>
+            <div class="geo-region-body" style="display:none;">
+                {% if reg.cities %}
+                <h5 class="geo-section-title">✅ Dans la BD ({{ reg.cities|length }})</h5>
+                <table class="geo-city-table">
+                    <thead><tr><th>Ville</th><th>Pop. maximale</th><th>Points</th></tr></thead>
+                    <tbody>
+                        {% for c in reg.cities %}
+                        <tr>
+                            <td><a href="{{ url_for('web.city_detail', city_slug=c.city_slug) }}">{{ c.city_name }}</a></td>
+                            <td>{{ '{:,}'.format(c.peak_pop or 0).replace(',', ' ') }}</td>
+                            <td>{{ c.data_points }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+                {% if reg.ref_cities %}
+                {% set missing_refs = reg.ref_cities | selectattr('in_db', 'false') | list %}
+                {% if missing_refs %}
+                <h5 class="geo-section-title geo-section-missing">❌ Villes de référence manquantes ({{ missing_refs|length }})</h5>
+                <table class="geo-city-table geo-ref-table">
+                    <thead><tr><th>#</th><th>Ville</th><th>Pop. estimée</th><th></th></tr></thead>
+                    <tbody>
+                        {% for rc in missing_refs %}
+                        <tr>
+                            <td>{{ rc.rank }}</td>
+                            <td class="geo-ref-city-name">{{ rc.city_name }}</td>
+                            <td>{{ '{:,}'.format(rc.population or 0).replace(',', ' ') }}</td>
+                            <td><a class="geo-gen-btn" href="{{ url_for('web.ai_lab') }}?city={{ rc.city_name | urlencode }}, {{ reg.name | urlencode }}" title="Générer dans AI Lab">🤖</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="geo-all-covered">🎉 Toutes les villes de référence sont couvertes!</p>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ===================== USA TAB ===================== -->
+<section class="geo-tab-content" id="geo-tab-us" style="display:none;">
+    <div class="geo-search-bar">
+        <input type="text" id="geo-search-us" class="opt-input" placeholder="Rechercher un état ou une ville…" style="max-width:400px;">
+    </div>
+    <div class="geo-region-grid" id="geo-regions-us">
+        {% for reg in us_regions %}
+        <div class="geo-region-card {{ 'geo-missing' if not reg.covered }}" data-region-name="{{ reg.name|lower }}">
+            <div class="geo-region-header" data-toggle-region>
+                <span class="geo-region-status {{ 'geo-ok' if reg.covered else 'geo-nok' }}">{{ '✅' if reg.covered else '❌' }}</span>
+                <h4>{{ reg.name }}</h4>
+                {% if reg.ref_total > 0 %}
+                <div class="geo-region-bar"><div class="geo-region-bar-fill" style="width:{{ (reg.ref_covered / reg.ref_total * 100)|round }}%"></div></div>
+                <span class="geo-ref-badge {{ 'geo-ref-complete' if reg.ref_covered == reg.ref_total }}">{{ reg.ref_covered }}/{{ reg.ref_total }} réf.</span>
+                {% endif %}
+                <span class="geo-region-count">{{ reg.city_count }} ville{{ 's' if reg.city_count != 1 }}</span>
+                <span class="geo-chevron">▾</span>
+            </div>
+            <div class="geo-region-body" style="display:none;">
+                {% if reg.cities %}
+                <h5 class="geo-section-title">✅ Dans la BD ({{ reg.cities|length }})</h5>
+                <table class="geo-city-table">
+                    <thead><tr><th>Ville</th><th>Pop. maximale</th><th>Points</th></tr></thead>
+                    <tbody>
+                        {% for c in reg.cities %}
+                        <tr>
+                            <td><a href="{{ url_for('web.city_detail', city_slug=c.city_slug) }}">{{ c.city_name }}</a></td>
+                            <td>{{ '{:,}'.format(c.peak_pop or 0).replace(',', ' ') }}</td>
+                            <td>{{ c.data_points }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+                {% if reg.ref_cities %}
+                {% set missing_refs = reg.ref_cities | selectattr('in_db', 'false') | list %}
+                {% if missing_refs %}
+                <h5 class="geo-section-title geo-section-missing">❌ Villes de référence manquantes ({{ missing_refs|length }})</h5>
+                <table class="geo-city-table geo-ref-table">
+                    <thead><tr><th>#</th><th>Ville</th><th>Pop. estimée</th><th></th></tr></thead>
+                    <tbody>
+                        {% for rc in missing_refs %}
+                        <tr>
+                            <td>{{ rc.rank }}</td>
+                            <td class="geo-ref-city-name">{{ rc.city_name }}</td>
+                            <td>{{ '{:,}'.format(rc.population or 0).replace(',', ' ') }}</td>
+                            <td><a class="geo-gen-btn" href="{{ url_for('web.ai_lab') }}?city={{ rc.city_name | urlencode }}, {{ reg.name | urlencode }}" title="Générer dans AI Lab">🤖</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="geo-all-covered">🎉 Toutes les villes de référence sont couvertes!</p>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+(function () {
+    /* Tabs */
+    document.querySelectorAll('.geo-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.geo-tab').forEach(function (t) { t.classList.remove('is-active'); });
+            tab.classList.add('is-active');
+            document.querySelectorAll('.geo-tab-content').forEach(function (c) { c.style.display = 'none'; });
+            document.getElementById('geo-tab-' + tab.dataset.geoTab).style.display = '';
+        });
+    });
+
+    /* Expand/collapse regions */
+    document.querySelectorAll('[data-toggle-region]').forEach(function (header) {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function () {
+            var body = header.parentElement.querySelector('.geo-region-body');
+            if (!body) return;
+            var open = body.style.display !== 'none';
+            body.style.display = open ? 'none' : '';
+            header.querySelector('.geo-chevron').textContent = open ? '▾' : '▴';
+        });
+    });
+
+    /* Search filter */
+    function wireSearch(inputId, gridId) {
+        var input = document.getElementById(inputId);
+        var grid = document.getElementById(gridId);
+        if (!input || !grid) return;
+        input.addEventListener('input', function () {
+            var q = input.value.trim().toLowerCase();
+            grid.querySelectorAll('.geo-region-card').forEach(function (card) {
+                var regionName = card.getAttribute('data-region-name') || '';
+                var cityNames = card.textContent.toLowerCase();
+                card.style.display = (!q || regionName.indexOf(q) !== -1 || cityNames.indexOf(q) !== -1) ? '' : 'none';
+            });
+        });
+    }
+    wireSearch('geo-search-ca', 'geo-regions-ca');
+    wireSearch('geo-search-us', 'geo-regions-us');
+})();
+</script>
+
+{% endblock %}

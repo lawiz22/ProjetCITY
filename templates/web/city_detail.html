@@ -42,6 +42,9 @@
             <span class="city-badge">Ville suivie jusqu'en {{ city.latest_year }}</span>
             <span class="city-badge">Pic démographique en {{ city.peak_year }}</span>
             <a class="city-badge city-header-export" href="{{ url_for('web.city_detail_pdf', city_slug=city.city_slug, country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">⇩ Export PDF</a>
+            {% if city.latitude and city.longitude %}
+            <a class="city-badge city-badge-map" href="{{ url_for('web.city_map') }}?focus={{ city.city_slug }}" target="_blank" title="Voir sur la carte">🗺️ Voir sur la carte</a>
+            {% endif %}
         </div>
         <p class="city-narrative">
             {{ city.city_name }} présente une évolution urbaine suivie sur {{ periods|length }} période{% if periods|length > 1 %}s{% endif %},

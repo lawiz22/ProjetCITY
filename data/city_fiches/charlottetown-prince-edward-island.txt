@@ -1,19 +1,17 @@
-# Charlottetown, Île-du-Prince-Édouard — Fiche Complète
-
----
+# Charlottetown, Prince Edward Island — Fiche Complète
 
 ## 📍 Informations Générales
 
 | Catégorie | Détails |
 |-----------|---------|
 | Ville | Charlottetown |
-| Province | Île-du-Prince-Édouard (IPÉ) |
-| Région | Queens County |
-| Surnom | "The Birthplace of Confederation" 🍁 / "The Cradle of Confederation" |
-| Statut | Capitale provinciale / City |
-| Maire | Philip Brown (depuis 2011) |
-| Fondation | 1764 |
-| Incorporation | 1855 |
+| Province | Île-du-Prince-Édouard |
+| Surnom | "La Cité de la Confédération" 🍁 / "La Ville aux Maisons Colorées" 🏘️ |
+| Statut | Capitale provinciale et plus grande ville de l'Île-du-Prince-Édouard |
+| Comté/Région | Queens County |
+| Maire | Dan Lee (depuis 2018) |
+| Fondation | 1765 (établissement français) ; 1768 (incorporation sous le nom Charlottetown) |
+| Université | Université de l'Île-du-Prince-Édouard (UPEI) |
 
 ---
 
@@ -21,15 +19,17 @@
 
 | Année | Population |
 |-------|-----------|
-| 2011 | 34 562 |
-| 2016 | 36 094 |
-| 2021 | 43 252 |
-| 2024 (est.) | ~46 000+ (ville) / ~90 000 (agglomération) |
+| 2000 | 32 245 |
+| 2010 | 34 562 |
+| 2020 | 36 094 |
+| 2024 (est.) | ~38 500 |
+| Grand Charlottetown (RMR) | ~65 000 |
 
-📈 Croissance de **~20%** entre 2016 et 2021 — l'une des plus fortes au Canada
-🏙️ **Capitale et plus grande ville** de l'Île-du-Prince-Édouard
-👥 L'agglomération représente plus de **50% de la population totale** de la province
-🌍 Croissance alimentée par une **immigration record** ces dernières années
+📈 Croissance modérée mais constante depuis 2000, avec une accélération depuis 2015 due à l'immigration interprovinciale et internationale.
+
+🥇 Capitale provinciale la plus petite du Canada atlantique, mais centre économique et culturel dominant de l'Île-du-Prince-Édouard.
+
+🌍 Population très homogène (environ 85 % de descendance britannique/irlandaise), mais diversification croissante avec l'arrivée d'immigrants des Philippines, Inde et Chine.
 
 ---
 
@@ -37,67 +37,115 @@
 
 | Donnée | Valeur |
 |--------|--------|
-| Superficie | ~44 km² |
-| Densité | ~985 hab./km² |
-| Cours d'eau | Hillsborough River, North River, West River |
-| Altitude | ~40 m |
+| Superficie | ~44,2 km² |
+| Densité | ~871 hab./km² |
+| Plan d'eau | Baie de Hillsborough (Northumberland Strait) |
+| Relief | Plaines côtières, légèrement ondulées |
+| Altitude | ~10 m (niveau de la mer) |
 
-📍 Située sur une **péninsule** au centre-sud de l'IPÉ
-🌊 Bordée par le **port de Charlottetown** (Northumberland Strait)
-🌊 Entourée de trois rivières formant un **havre naturel**
-🗺️ À ~200 km de **Moncton** (NB) via le pont de la Confédération
-🌉 Reliée au continent via le **Pont de la Confédération** (12,9 km — le plus long pont au-dessus d'eaux gelées au monde)
+**Distances principales :**
+- **Halifax, Nouvelle-Écosse** : ~430 km (5h30 en voiture)
+- **Montréal, Québec** : ~1 100 km (13h en voiture)
+- **Toronto, Ontario** : ~1 600 km (19h en voiture)
+- **Saint-Jean, Terre-Neuve-et-Labrador** : ~1 200 km (15h en voiture)
+
+Charlottetown est située sur la côte nord de l'Île-du-Prince-Édouard, à l'embouchure de la rivière Hillsborough, offrant un port naturel stratégique.
 
 ---
 
 ## 🏛️ Économie
 
-### Secteurs Principaux :
+Secteurs Principaux :
 
-- 🏛️ **Administration publique** — Gouvernement provincial, fonction publique
-- 🎓 **Éducation** — UPEI, Holland College
-- 🏥 **Santé** — Queen Elizabeth Hospital, soins provinciaux
-- 🌾 **Agroalimentaire** — Pommes de terre, transformation alimentaire
-- 🎭 **Tourisme & Culture** — Anne of Green Gables, patrimoine historique
-- 💻 **Technologie** — Secteur tech émergent
-- 🦞 **Fruits de mer** — Homard, moules, huîtres de l'IPÉ
-- 🎰 **Commerce & Services** — Détail, hôtellerie, restauration
+🎓 **Éducation & Recherche** — L'Université de l'Île-du-Prince-Édouard (UPEI) est le plus grand employeur privé de la ville avec ~1 200 employés. Recherche en agriculture, aquaculture et sciences marines.
 
-> Charlottetown est le **moteur économique** de l'IPÉ
-> Le tourisme génère plus de **$500 millions** annuellement pour la province
-> Le secteur **agroalimentaire** de l'IPÉ est réputé mondialement pour ses pommes de terre et fruits de mer
-> Croissance rapide du secteur **technologique** attirant des entreprises et talents
+🏥 **Santé & Services Sociaux** — Le Centre Hospitalier Régional Queen Elizabeth est un employeur majeur (~1 500 employés). Services de santé provinciaux concentrés à Charlottetown.
+
+💻 **Technologie & Innovation** — Secteur croissant avec des entreprises de développement logiciel, cybersécurité et services numériques. Incubateurs d'entreprises et hubs technologiques émergents.
+
+🏛️ **Gouvernement & Administration Publique** — Siège du gouvernement provincial de l'Île-du-Prince-Édouard. Environ 2 500 employés de la fonction publique provinciale.
+
+🎭 **Tourisme & Loisirs** — Secteur vital avec ~1,5 million de visiteurs annuels (pré-pandémie). Attractions liées à *Anne of Green Gables*, patrimoine historique, et activités côtières.
+
+🏪 **Commerce de Détail & Services** — Centre commercial régional pour l'Île-du-Prince-Édouard. Présence de grandes chaînes (Costco, Walmart, Superstore).
+
+**Synthèse :** Charlottetown fonctionne comme un centre de services régional diversifié, avec une économie basée sur les services publics, l'éducation, la santé et le tourisme. Le secteur privé reste modeste mais en croissance, particulièrement dans les technologies et les services aux entreprises.
 
 ---
 
 ## 🎓 Éducation
 
 | Institution | Type | Étudiants |
-|-------------|------|-----------|
-| University of Prince Edward Island (UPEI) | Université de recherche | ~5 500 |
-| Holland College | Collège d'arts appliqués | ~7 000 |
-| Atlantic Veterinary College | École vétérinaire | ~500 |
-| Maritime Christian College | Université privée | ~200 |
+|------------|------|-----------|
+| Université de l'Île-du-Prince-Édouard (UPEI) | Université publique | ~3 800 |
+| Holland College | Collège communautaire | ~2 200 |
+| École secondaire Charlottetown | Secondaire public | ~900 |
+| École secondaire Westisle | Secondaire public | ~800 |
 
-🐾 **Atlantic Veterinary College** (UPEI) — l'une des **4 seules** écoles vétérinaires au Canada
-🌍 UPEI accueille des étudiants de plus de **100 pays**
-📈 La population étudiante a **explosé** grâce à l'immigration internationale
-🏛️ Holland College forme des professionnels dans des dizaines de **domaines techniques et créatifs**
-🔬 UPEI est reconnue pour sa recherche en **sciences vétérinaires, marine et agroalimentaire**
+**Faits notables :**
+- UPEI est la seule université de l'Île-du-Prince-Édouard et offre des programmes en sciences, arts, commerce et agriculture.
+- Holland College est un établissement d'enseignement technique réputé pour ses programmes en informatique, santé et métiers spécialisés.
+- Taux d'alphabétisation provincial parmi les plus élevés du Canada (environ 96 %).
+- Présence croissante d'étudiants internationaux (environ 25 % de la population étudiante à UPEI).
 
 ---
 
 ## 🏥 Santé
 
-- 🏥 **Queen Elizabeth Hospital (QEH)** — principal hôpital de l'IPÉ
-- 🏥 **Hillsborough Hospital** — santé mentale
-- 🏥 **PCH (Provincial Correctional Health)**
-- 🐾 **Atlantic Veterinary College Teaching Hospital** — soins vétérinaires avancés
-- 💊 **Health PEI** — régie de santé provinciale unique
+- **Centre Hospitalier Régional Queen Elizabeth** — Hôpital général de 300 lits, principal établissement de santé de l'Île-du-Prince-Édouard.
+  - Spécialités : chirurgie générale, obstétrique, pédiatrie, cardiologie, oncologie.
+  - ~1 500 employés (médecins, infirmières, personnel de soutien).
+  - Affilié à l'Université de l'Île-du-Prince-Édouard pour la formation médicale.
 
-> Le **QEH** est le plus grand hôpital de la province et le centre de référence pour toute l'IPÉ
-> Charlottetown est le **hub médical** de la province entière
-> Défis liés à la **pénurie de médecins** — enjeu majeur pour la province
+- **Cliniques de santé primaire** — Plusieurs cliniques sans rendez-vous et cliniques de médecine familiale réparties dans la ville.
+
+- **Services de santé mentale** — Centre provincial de santé mentale et services de dépendances.
+
+- **Santé dentaire & optométrie** — Cliniques privées et services publics.
+
+---
+
+## 🎵 Culture & Musique
+
+| Artiste / Groupe / Personnalité | Lien avec la ville |
+|--------------------------------|---------------------|
+| Lucy Maud Montgomery | Auteure d'*Anne of Green Gables*, née à Nouvelle-Londres (Île-du-Prince-Édouard), inspiratrice de la culture locale |
+| The Muttonbirds | Groupe folk-rock originaire de l'Île-du-Prince-Édouard |
+| Stompin' Tom Connors | Musicien canadien légendaire, lien fort avec la culture maritime atlantique |
+| Catherine MacLellan | Auteure-compositrice-interprète de Charlottetown, primée aux Juno Awards |
+| Lennie Gallant | Musicien acadien de renommée internationale, basé à l'Île-du-Prince-Édouard |
+
+**Scène culturelle :**
+
+🎭 **Festival de Charlottetown** — Festival annuel (juillet-août) avec théâtre, musique, danse et arts visuels. Attraction majeure avec ~100 000 visiteurs.
+
+📚 **Musée de l'Île-du-Prince-Édouard** — Musée d'histoire naturelle et culturelle, situé au Parc Victoria.
+
+🏛️ **Confederation Centre of the Arts** — Centre culturel emblématique (ouvert en 1964), siège du Festival de Charlottetown, galerie d'art, théâtre de 1 100 places.
+
+🎨 **Galeries d'art** — Plusieurs galeries indépendantes et coopératives mettant en avant les artistes locaux.
+
+🎪 **Anne of Green Gables Museum** — Attraction touristique majeure basée sur le roman de Lucy Maud Montgomery.
+
+🎵 **Scène musicale live** — Nombreux bars et restaurants avec musique live, particulièrement folk et musique traditionnelle maritime.
+
+---
+
+## 🌿 Environnement & Énergie
+
+- **Baie de Hillsborough** — Écosystème côtier important pour la faune marine et les oiseaux migrateurs. Zones humides protégées.
+
+- **Parc Victoria** — Parc urbain de 40 acres avec plages, sentiers et espaces verts. Refuge pour la biodiversité locale.
+
+- **Énergie renouvelable** — L'Île-du-Prince-Édouard a l'un des plus hauts pourcentages d'énergie éolienne au Canada (environ 25 % de la production électrique). Plusieurs parcs éoliens sur l'île.
+
+- **Qualité de l'air** — Généralement excellente, avec peu de pollution industrielle majeure.
+
+- **Enjeux écologiques** :
+  - Érosion côtière due aux changements climatiques et à la montée du niveau des mers.
+  - Gestion des eaux usées et de la qualité de l'eau côtière.
+  - Préservation des écosystèmes marins et des stocks de homard.
+  - Réduction de la dépendance aux combustibles fossiles.
 
 ---
 
@@ -105,49 +153,25 @@
 
 | Équipe | Sport | Ligue |
 |--------|-------|-------|
-| Charlottetown Islanders | Hockey | LHJMQ 🏒 |
-| PEI Senators (dissous) | Hockey | AHL |
-| Charlottetown Privateers | Voile | Régates locales |
+| Panthers de l'UPEI | Football universitaire | U Sports |
+| Athlétas de l'UPEI | Divers sports | U Sports |
+| Islanders de Charlottetown | Hockey junior | Ligue de hockey junior majeure de l'Atlantique (QMJHL) |
 
-🏒 Les **Charlottetown Islanders** — franchise de la LHJMQ (anciennement appelés PEI Rockets)
-⛷️ **Stratford** offre des activités hivernales proches de la ville
-🎣 Pêche au homard et en mer — activité récréative populaire
-⛳ Plusieurs terrains de golf parmi les plus beaux de l'Est canadien
-🚴 Réseau de pistes cyclables en développement
-🏖️ Plages de **sable rouge** distinctives à proximité
+**Activités de plein air :**
 
----
+🏖️ **Plages** — Accès à plusieurs plages côtières (Brackley Beach, Cavendish Beach, Orwell Beach).
 
-## 🎭 Culture & Patrimoine
+🚴 **Cyclisme** — Réseau de pistes cyclables en expansion. L'Île-du-Prince-Édouard est réputée pour le cyclotourisme.
 
-| Site / Événement | Description |
-|-----------------|-------------|
-| Province House | Lieu de la Conférence de 1864 — Patrimoine mondial UNESCO |
-| Confederation Centre of the Arts | Centre culturel national |
-| Anne of Green Gables Museum | Hommage à l'œuvre de L.M. Montgomery |
-| Charlottetown Festival | Festival de théâtre musical annuel |
-| PEI Shellfish Festival | Festival des fruits de mer — septembre |
-| Fall Flavours Festival | Gastronomie locale — automne |
+🎣 **Pêche** — Pêche au homard, au crabe et aux poissons de fond. Excursions de pêche touristiques populaires.
 
-🍁 **Province House** — là où les Pères de la Confédération se sont réunis en **1864** pour planifier la création du Canada
-🎭 Le **Confederation Centre** est l'un des plus importants centres d'arts au Canada atlantique
-👧 **Anne of Green Gables** (Anne la Maison aux Pignons Verts) — roman de L.M. Montgomery (1908) — icône culturelle mondiale attirant des milliers de touristes japonais chaque année
-🎵 Le **Charlottetown Festival** présente la comédie musicale Anne of Green Gables depuis **1965** — la plus longue comédie musicale en cours au Canada
+⛵ **Voile & Activités nautiques** — Club de voile, kayak, canoë.
 
----
+🥾 **Randonnée** — Sentiers côtiers et forestiers, notamment le sentier de la Confédération.
 
-## 🌳 Parcs & Environnement
+🏌️ **Golf** — Plusieurs terrains de golf, dont le Dundarave Golf Club.
 
-- 🏞️ **Victoria Park** — parc historique en bordure du port
-- 🌊 **Confederation Landing Park** — front de mer animé
-- 🌿 **Brighton Centennial Park**
-- 🌲 **Hillsborough Park**
-- 🏖️ **Plages de sable rouge** — caractéristiques uniques de l'IPÉ
-- 🌾 **Parc national de l'Île-du-Prince-Édouard** — à ~25 km au nord
-
-> Le **sable rouge** de l'IPÉ est dû à la forte teneur en **oxyde de fer** dans le sol
-> L'IPÉ est l'une des provinces avec le plus de **terres agricoles** par habitant
-> Environnement côtier exceptionnel avec vues sur le **détroit de Northumberland**
+🎭 **Attractions culturelles** — Musées, galeries, théâtres, festivals.
 
 ---
 
@@ -155,17 +179,18 @@
 
 | Mode | Détails |
 |------|---------|
-| Pont de la Confédération | Lien terrestre vers le NB — 12,9 km |
-| Traversier | Wood Islands ↔ Caribou (NS) |
-| Aéroport | Charlottetown Airport (YYG) |
-| Bus urbain | T3 Transit |
-| Bus interurbain | Maritime Bus |
+| Autoroute | Route 1 (Transcanadienne) — axe principal. Routes 2, 3, 15 reliant les régions de l'île. |
+| Aéroport | Aéroport international de Charlottetown (YYG) — vols vers Toronto, Montréal, Halifax, Boston. ~500 000 passagers annuels (pré-pandémie). |
+| Transport en commun | Réseau de bus municipal (T3 Transit) — environ 10 lignes. Service limité comparé aux grandes villes. |
+| Train | Aucun service ferroviaire passagers. Historiquement, la ligne Charlottetown-Summerside a fermé en 1989. |
+| Traversier | Pont de la Confédération (1997) — 12,9 km reliant l'Île-du-Prince-Édouard au Nouveau-Brunswick. Traversier saisonnier vers la Nouvelle-Écosse (Pictou). |
 
-✈️ **Charlottetown Airport (YYG)** — vols directs vers Toronto, Montréal, Ottawa, Halifax
-🌉 Le **Pont de la Confédération** (1997) — 12,9 km — le plus long pont au-dessus d'eaux gelées saisonnièrement au monde
-⛴️ Le **traversier Wood Islands-Caribou** — lien maritime vers la Nouvelle-Écosse (75 min)
-🚌 Réseau de bus urbain limité — la voiture reste **essentielle** pour se déplacer
-🚴 Développement du réseau cyclable en cours
+**Corridors importants :**
+- **Pont de la Confédération** — Lien vital avec le continent, péage obligatoire (~$46 aller-retour pour voiture).
+- **Route 1** — Épine dorsale du réseau routier provincial.
+- **Aéroport de Charlottetown** — Porte d'entrée aérienne principale de l'île.
+
+**Mobilité urbaine :** Charlottetown est une ville très automobile-dépendante. Les distances courtes favorisent la marche et le vélo dans le centre-ville, mais les banlieues nécessitent une voiture.
 
 ---
 
@@ -173,73 +198,34 @@
 
 | Saison | Température moyenne |
 |--------|-------------------|
-| Hiver (Jan) | -8°C |
-| Printemps (Avr) | +4°C |
-| Été (Juil) | +23°C |
-| Automne (Oct) | +10°C |
+| Hiver (Jan) | -7°C |
+| Printemps (Avr) | 4°C |
+| Été (Juil) | 20°C |
+| Automne (Oct) | 10°C |
 
-🌊 Climat **maritime** influencé par la mer
-❄️ Hivers froids avec neige régulière — ~300 cm/an
-☀️ Étés chauds et agréables — saison touristique principale
-🌬️ Vents côtiers fréquents toute l'année
-🌡️ Température de l'eau en été : ~20°C dans le détroit de Northumberland — parmi les plus chaudes au nord de la Virginie
+**Description climatique :**
+
+Charlottetown a un climat continental humide avec des hivers froids et des étés modérés. Les précipitations annuelles sont d'environ 900 mm, réparties uniformément toute l'année. Les tempêtes hivernales sont fréquentes et parfois sévères, avec des accumulations de neige de 200-300 cm par saison. Les étés sont agréables avec des températures rarement dépassant 25°C. L'automne est particulièrement beau avec des couleurs de feuillage spectaculaires. Les brouillards côtiers sont courants en été et au printemps.
 
 ---
 
-## 🏙️ Quartiers & Secteurs Notables
+## 🏙️ Quartiers Notables
 
 | Quartier | Caractéristique |
 |---------|----------------|
-| Downtown | Historique, commercial, culturel |
-| Parkdale | Résidentiel, familial |
-| West Royalty | Commercial, grandes surfaces |
-| Sherwood | Développement résidentiel récent |
-| Brighton | Tranquille, maisons historiques |
-| Hillsborough Park | Vert, résidentiel |
-| Stratford (ville voisine) | Banlieue en forte croissance |
+| **Centre-ville (Downtown)** | Cœur historique et commercial de Charlottetown. Rues piétonnes, restaurants, boutiques, Confederation Centre of the Arts. Architecture victorienne et édifices gouvernementaux. |
+| **Parkdale** | Quartier résidentiel établi au nord du centre-ville. Maisons colorées typiques de l'Île-du-Prince-Édouard. Proximité du Parc Victoria et des plages. |
+| **University Avenue** | Quartier universitaire autour du campus de l'UPEI. Logements étudiants, petits commerces, cafés. Vie étudiante dynamique. |
+| **Hillsborough** | Quartier côtier au sud-est. Accès à la baie de Hillsborough. Développement résidentiel croissant. |
+| **West Royalty** | Quartier résidentiel en expansion à l'ouest. Zones commerciales modernes (centres commerciaux, chaînes de restaurants). |
+| **Stratford** | Banlieue en croissance rapide à l'est de Charlottetown. Développement résidentiel récent et zones commerciales. |
+| **Brackley** | Zone côtière touristique au nord-est. Plages populaires, restaurants, hébergements touristiques. |
 
 ---
 
-## 📊 Comparaison avec d'Autres Capitales des Maritimes
+## 📊 Comparaison — Grandes Villes de l'Île-du-Prince-Édouard
 
-| Ville | Population | Province | Superficie |
-|-------|-----------|----------|------------|
-| Halifax | ~465 000 | Nouvelle-Écosse | ~5 490 km² |
-| Moncton | ~160 000 | Nouveau-Brunswick | ~260 km² |
-| Fredericton | ~63 000 | Nouveau-Brunswick | ~131 km² |
-| Charlottetown | ~43 000 | IPÉ | ~44 km² |
-| Saint John | ~69 000 | Nouveau-Brunswick | ~316 km² |
-
----
-
-## 🌍 Démographie & Diversité
-
-| Groupe | Caractéristique |
-|--------|----------------|
-| Canadiens d'origine britannique | Groupe historiquement dominant |
-| Acadiens / Francophones | ~5% de la population |
-| Immigrants récents | Croissance explosive depuis 2015 |
-| Étudiants internationaux | Très forte présence à UPEI |
-| Autochtones (Mi'kmaq) | Présence historique sur l'île |
-
-🌍 Charlottetown a connu une **transformation démographique spectaculaire** grâce à l'immigration
-🎓 Les **étudiants internationaux** représentent une part croissante de la population
-🗣️ Le français est présent mais l'anglais domine largement
-👨‍👩‍👧 La ville est de plus en plus **multiculturelle** — changement notable depuis 2015
-
----
-
-## 💡 Le Saviez-Vous ?
-
-- 🍁 Charlottetown est officiellement surnommée **"The Birthplace of Confederation"** car c'est là que les délégués coloniaux se sont réunis en **septembre 1864** pour planifier la création du Canada — un événement historique d'une importance capitale
-- 🌉 Le **Pont de la Confédération** (1997) mesure **12,9 km** et est le plus long pont au monde traversant des **eaux gelées saisonnièrement** — un exploit d'ingénierie remarquable
-- 👧 Le roman **Anne of Green Gables** de L.M. Montgomery attire chaque année des milliers de **touristes japonais** qui vénèrent l'œuvre — le Japon est le marché touristique le plus important de l'IPÉ après le Canada
-- 🥔 L'Île-du-Prince-Édouard produit environ **25% de toutes les pommes de terre** cultivées au Canada — la pomme de terre est le symbole agricole de la province
-- 🦞 Les eaux entourant l'IPÉ produisent parmi les **meilleurs homards** au monde — la pêche au homard est une industrie de plusieurs centaines de millions de dollars
-- 🎭 La comédie musicale **Anne of Green Gables** est présentée au Charlottetown Festival depuis **1965** — ce qui en fait la **plus longue comédie musicale** toujours en production au Canada
-- 🏛️ **Province House** à Charlottetown est classée au **Patrimoine mondial de l'UNESCO** en tant que lieu historique de la Confédération canadienne
-- 🐾 L'**Atlantic Veterinary College** de l'UPEI est l'une des **4 seules** écoles vétérinaires au Canada — attirant des étudiants de partout dans le monde
-- 📈 Charlottetown a connu une croissance démographique de **~20%** entre 2016 et 2021 — l'une des plus fortes de toutes les villes canadiennes proportionnellement
-- 🌊 Les eaux du **détroit de Northumberland** atteignent ~**20°C** en été — parmi les températures les plus chaudes au nord de la Virginie sur la côte est de l'Amérique du Nord
-- 🌾 L'IPÉ est la **plus petite province** du Canada en superficie mais l'une des plus denses en population relative et en production agricole par km²
-- 🎪 Le **Fall Flavours Festival** de septembre est devenu l'un des festivals gastronomiques les plus reconnus du Canada atlantique — célébrant la cuisine locale exceptionnelle de l'île
+| Ville | Population | Caractéristique |
+|-------|-----------|----------------|
+| **Charlottetown** | **~38 500** | **Capitale provinciale, centre économique et culturel, siège du gouvernement** |
+| Summerside | ~14 500 | Deux
