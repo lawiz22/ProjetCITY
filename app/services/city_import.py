@@ -461,9 +461,23 @@ def _search_titles(query: str) -> list[str]:
 
 
 def _select_image(summary: dict) -> str | None:
+    """Pick the best image URL from a Wikipedia summary, preferring a 1280px thumbnail."""
+    import re as _re
+
+    def _make_hd_thumb(url: str) -> str:
+        """Rewrite a Wikimedia thumb URL to request 1280px width."""
+        if "/thumb/" in url:
+            parts = url.rsplit("/", 1)
+            if len(parts) == 2:
+                new_last = _re.sub(r"^\d+px-", "1280px-", parts[1])
+                return f"{parts[0]}/{new_last}"
+        return url
+
+    # Prefer thumbnail rewritten to 1280px (Wikimedia-approved)
     thumbnail = summary.get("thumbnail", {})
     if isinstance(thumbnail, dict) and isinstance(thumbnail.get("source"), str):
-        return thumbnail["source"]
+        return _make_hd_thumb(thumbnail["source"])
+    # Fallback to original
     original = summary.get("originalimage", {})
     if isinstance(original, dict) and isinstance(original.get("source"), str):
         return original["source"]

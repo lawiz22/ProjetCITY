@@ -1,0 +1,198 @@
+```markdown
+# Saratoga Springs, New York — Fiche Complète
+
+---
+
+## 📍 Informations Générales
+
+| Catégorie          | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| Ville              | Saratoga Springs                                                       |
+| État/Province      | New York (États-Unis)                                                   |
+| Surnom             | "The Spa City" 💆‍♂️ / "The Queen of Spas" 👑                           |
+| Statut             | Ville (*City*) incorporée en 1915                                      |
+| Comté              | Comté de Saratoga                                                       |
+| Maire              | **Ron Kim** (depuis 2024, premier maire asiatique-américain de la ville) |
+| Fondation          | 1819 (village), 1915 (ville) ; occupation européenne dès le XVIIIe siècle |
+| Université         | **Skidmore College** (arts libéraux, ~2,500 étudiants)                |
+
+---
+
+## 👥 Population
+
+| Année       | Population (Ville) | Population (Aire Métro*) |
+|-------------|-------------------|--------------------------|
+| 2000        | 26,186            | ~51,000                  |
+| 2010        | 26,586            | ~55,000                  |
+| 2020        | 28,491            | ~60,000                  |
+| 2024 (est.) | ~29,200           | ~62,000                  |
+
+*_Aire Métropolitaine Statistique (MSA) : **Capital/Saratoga Springs, NY** (inclut Albany-Schenectady-Troy)_
+
+📈 **Croissance modérée** : +11% depuis 2000, tirée par l’attrait touristique et les emplois dans la santé/éducation.
+🥇 **Ville la plus riche du comté** : Revenu médian des ménages ~$75,000 (vs ~$65,000 pour l’État de NY).
+🌍 **Démographie** : 89% Blancs, 4% Asiatiques, 3% Afro-Américains ; forte communauté irlandaise et italienne (héritage du XIXe siècle).
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée          | Valeur                                                                 |
+|-----------------|------------------------------------------------------------------------|
+| Superficie      | 74.5 km² (dont 1.2 km² d’eau)                                          |
+| Densité         | ~390 hab./km²                                                          |
+| Plan d’eau     | **Saratoga Lake** (12 km², source historique des eaux minérales)       |
+| Relief          | Plaines alluviales et collines douces (Adirondacks à 50 km au nord)    |
+| Altitude        | 91 m (centre-ville)                                                    |
+
+📍 **Localisation stratégique** :
+- 270 km au nord de **New York City** (3h en voiture).
+- 25 km au nord d’**Albany** (capitale de l’État).
+- Proche des **monts Adirondack** et du **lac George**.
+
+---
+
+## 🏛️ Économie
+
+**Secteurs Principaux** :
+💆‍♂️ **Tourisme & Thermalisme** — 2.5 millions de visiteurs/an (sources minérales, casinos, courses hippiques).
+🎓 **Éducation** — Skidmore College et écoles privées (emplois indirects : ~5,000).
+🏥 **Santé** — **Saratoga Hospital** (1,500 employés) et cliniques spécialisées en réhabilitation.
+💻 **Technologie** — Pôle émergent de startups (proximité d’Albany et de **GlobalFoundries**).
+🏇 **Courses hippiques** — **Saratoga Race Course** (150 ans d’histoire, $250M de paris/an).
+
+💰 **Revenu touristique** : ~$500M/an (hôtels, restaurants, événements).
+
+---
+
+## 🎓 Éducation
+
+| Institution               | Type                     | Étudiants  |
+|---------------------------|--------------------------|------------|
+| **Skidmore College**      | Université privée (arts libéraux) | ~2,500     |
+| **SUNY Empire State College** | Université publique (cours en ligne) | ~1,200 (campus local) |
+| **Saratoga Springs City School District** | Écoles publiques (K-12) | ~3,000     |
+
+📚 **Particularités** :
+- Skidmore classé **#41** des *Best Liberal Arts Colleges* (U.S. News, 2024).
+- Taux de diplomation du secondaire : **95%** (vs 85% moyenne NY).
+
+---
+
+## 🏥 Santé
+
+- **Saratoga Hospital** (affilié à **Albany Medical Center**) :
+  - 171 lits, **centre de cancérologie** et **réadaptation** réputé.
+  - **Spécialités** : Médecine sportive (liée aux courses hippiques) et soins thermaux.
+  - **Employés** : ~1,500 (2e employeur de la ville après Skidmore).
+- **Cliniques thermales** : Utilisation des **eaux minérales riches en calcium/magnésium** depuis 1800.
+
+---
+
+## 🎵 Culture & Musique
+
+| Artiste / Groupe / Personnalité       | Lien avec la ville                                  |
+|---------------------------------------|----------------------------------------------------|
+| **The Phish** (groupe rock)           | Fondé à l’**Université du Vermont** par des étudiants ayant joué à Saratoga. |
+| **Dave Matthews Band**                | A enregistré un album live au **Saratoga Performing Arts Center (SPAC)**. |
+| **Yaddo** (colonie d’artistes)       | A accueilli **Truman Capote**, **Sylvia Plath**, et **Aaron Copland**. |
+| **SPAC**                              | **Résidence d’été du New York City Ballet** et du **Philadelphia Orchestra**. |
+
+🎭 **Événements majeurs** :
+- **Saratoga Jazz Festival** (depuis 1978, 20,000 visiteurs/an).
+- **Flavorfest** (festival gastronomique avec 100+ restaurants).
+- **First Night Saratoga** (réveillon artistique, 30,000 participants).
+
+---
+## 🌿 Environnement & Énergie
+
+- **Sources minérales protégées** : 17 sources historiques (ex. **Congress Spring**), classées **National Historic Landmark**.
+- **Parcs** : **Saratoga Spa State Park** (2,400 acres, piscines géothermiques).
+- **Défi climatique** : Inondations récurrentes (ex. **2011, 2019**) dues à la proximité du **lac Saratoga** et de la **rivière Kayaderosseras**.
+- **Énergie** : Transition vers le solaire (projet **Saratoga Solar Farm**, 5 MW).
+
+---
+
+## 🏈 Sports & Loisirs
+
+| Équipe               | Sport          | Ligue                     |
+|----------------------|----------------|---------------------------|
+| **Saratoga Race Course** | Courses hippiques | NYRA (New York Racing Association) |
+| **Saratoga Red Hawks** | Baseball (collegial) | Perfect Game Collegiate Baseball League |
+
+🏞️ **Activités** :
+- **Randonnée** : **Saratoga Spa State Park** et **Adirondacks** (sentier **Northville-Placid Trail**).
+- **Golf** : **Saratoga National Golf Club** (parcours classé top 100 aux États-Unis).
+- **Ski** : **West Mountain** (30 min en voiture).
+
+---
+
+## 🚗 Transport
+
+| Mode               | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| **Autoroutes**     | **I-87** (Adirondack Northway), **Route 50**, **Route 9**               |
+| **Aéroport**       | **Albany International Airport (ALB)** à 30 min (vols directs vers NYC, Chicago, Atlanta). |
+| **Transport en commun** | **CDTA** (bus vers Albany, ligne **#450**).                          |
+| **Train**          | **Amtrak** (gare de Saratoga Springs, liaisons vers NYC et Montréal). |
+
+🚆 **Projets** :
+- Extension du **rail vers le nord** (étude pour une ligne Saratoga-Plattsburgh).
+- **Pistes cyclables** : 20 km de voies dédiées (projet **Empire State Trail**).
+
+---
+
+## 🌡️ Climat
+
+| Saison       | Température (°C) | Précipitations |
+|--------------|------------------|----------------|
+| **Hiver (Jan)** | -7°C / 0°C       | Neige (150 cm/an) |
+| **Printemps (Avr)** | 3°C / 15°C   | Pluie fréquente |
+| **Été (Juil)**    | 16°C / 28°C   | Orages occasionnels |
+| **Automne (Oct)**  | 5°C / 16°C    | Feuilles spectaculaires (tourisme) |
+
+❄️ **Hivers rigoureux** mais moins extrêmes qu’à Syracuse (effet modérateur du lac).
+☀️ **Étés chauds et humides** (idéal pour les courses hippiques).
+
+---
+
+## 🏙️ Quartiers Notables
+
+| Quartier               | Caractéristique                                                                 |
+|------------------------|---------------------------------------------------------------------------------|
+| **Downtown**           | Cœur historique (boutiques, **Broadway**, sources minérales, vie nocturne).   |
+| **East Side**          | Résidentiel aisé (maisons victoriques, proche de Skidmore College).           |
+| **West Side**          | Quartier ouvrier en gentrification (galeries d’art, **The Local Pub**).       |
+| **Saratoga Spa State Park** | Parc avec **piscines géothermiques**, musée, et **SPAC**.                |
+| **Geyser Crest**       | Lotissements haut de gamme (vues sur le lac, prix moyens ~$800K).            |
+| **Greenfield Center**  | Rural et boisé (fermes, **Yaddo**, ambiance "campagne chic").                 |
+| **Wilton**             | Banlieue familiale (écoles notées A, **Gavin Park** pour sports).            |
+
+---
+
+## 📊 Comparaison — Grandes Villes de l’État de New York
+
+| Ville               | Population (2024) | Caractéristique principale                          |
+|---------------------|-------------------|----------------------------------------------------|
+| **Saratoga Springs** | ~29,200           | **Tourisme thermal & courses hippiques**            |
+| **Albany**          | ~99,000           | Capitale de l’État, administration publique.       |
+| **Troy**            | ~51,000           | Université **RPI**, histoire industrielle.         |
+| **Schenectady**     | ~67,000           | **General Electric**, revitalisation urbaine.       |
+| **Glens Falls**     | ~14,800           | "Hometown USA" (proche des Adirondacks).            |
+
+---
+## 💡 Le Saviez-Vous ?
+
+- 🐎 **Le plus vieux hippodrome des États-Unis** : **Saratoga Race Course** (1863) est surnommé *"The Graveyard of Favorites"* car les favoris y perdent souvent. Le **Travers Stakes** (course de $1.25M) est l’un des plus prestigieux du pays.
+- 💧 **Les eaux qui ont guéri un président** : En 1815, le **président James Monroe** a bu les eaux de **Congress Spring** pour soigner ses rhumatismes, popularisant la ville comme destination spa.
+- 🎲 **Le casino qui a changé la loi** : **Saratoga Casino Hotel** (2004) a été le premier casino "racino" (courses + machines) de l’État, ouvrant la voie à la légalisation des jeux à New York.
+- 🎻 **Un ballet né à Saratoga** : Le chorégraphe **George Balanchine** a fondé le **New York City Ballet** en 1948, et son résidence d’été au **SPAC** depuis 1966 en a fait un lieu mythique.
+- 🍷 **Le vin pétillant de Saratoga** : La région produit un **vin effervescent** unique à partir des minéraux des sources, commercialisé sous le nom **"Saratoga Sparkling"**.
+- 🚂 **La gare qui a sauvé une vie** : En 1901, le **vice-président Theodore Roosevelt** apprit qu’il devenait président (après l’assassinat de McKinley)… **dans la gare de Saratoga Springs** !
+- 👻 **La maison hantée la plus célèbre** : Le **Saratoga Arms Hotel** (1870) est réputé pour être hanté par des gangsters des années 1920 (dont **Legs Diamond**).
+- 🎭 **Un festival de jazz légendaire** : Le **Saratoga Jazz Festival** a vu se produire **Miles Davis**, **Ella Fitzgerald**, et **Wynton Marsalis** dans un cadre en plein air unique.
+- 🏛️ **Un musée dédié… aux danseurs** : Le **National Museum of Dance** (1986) est le seul aux États-Unis entièrement consacré à l’histoire de la danse.
+- 🌳 **Un arbre qui a inspiré un roman** : **Sylvia Plath** a écrit une partie de *The Bell Jar* pendant son séjour à **Yaddo** en 1959.
+- 🍦 **L’invention du sundae** : Certains historiens attribuent l’invention du **sundae** (glace + sirop) à un pharmacien de Saratoga en **1881**, pour contourner les lois interdisant la vente de sodas le dimanche (*"Sunday"* → *"Sundae"*).
+- 🎲 **Le jeu de monopoly local** : Une version **Saratoga Springs Edition** du Monopoly existe, avec des rues comme **Broadway** et **Union Avenue** à la place des avenues classiques.
+```

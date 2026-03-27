@@ -230,23 +230,115 @@
         /* Shim: ctrls.theme acts like a {value} accessor */
         ctrls.theme = { get value() { return ctrls.activeTheme; }, set value(v) { ctrls.activeTheme = v; } };
 
+        /* Restore saved default view */
+        var savedView = null;
+        try { savedView = JSON.parse(localStorage.getItem('ccs-map-view')); } catch (e) {}
+        var initLat = (savedView && savedView.lat != null) ? savedView.lat : 45.5;
+        var initLng = (savedView && savedView.lng != null) ? savedView.lng : -96;
+        var initZoom = (savedView && savedView.zoom != null) ? savedView.zoom : 4;
+
         /* Create the Leaflet map */
         var map = L.map(container, {
             scrollWheelZoom: true,
             zoomControl: true,
             minZoom: 3,
             maxZoom: 18
-        }).setView([45.5, -96], 4);
+        }).setView([initLat, initLng], initZoom);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            subdomains: 'abcd',
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-        }).addTo(map);
+        /* ── Tile providers ──────────────────────────────────── */
+        var TILE_PROVIDERS = {
+            'carto-voyager': {
+                url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                options: { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>' },
+                label: 'CARTO Voyager'
+            },
+            'carto-positron': {
+                url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                options: { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>' },
+                label: 'CARTO Positron'
+            },
+            'carto-dark': {
+                url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                options: { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>' },
+                label: 'CARTO Dark Matter'
+            },
+            'osm': {
+                url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                options: { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
+                label: 'OpenStreetMap'
+            },
+            'esri-satellite': {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                options: { maxZoom: 18, attribution: '&copy; Esri, Maxar, Earthstar Geographics' },
+                label: 'Esri Satellite'
+            },
+            'esri-topo': {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+                options: { maxZoom: 18, attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap contributors' },
+                label: 'Esri Topo'
+            },
+            'opentopomap': {
+                url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+                options: { maxZoom: 17, attribution: '&copy; <a href="https://opentopomap.org/">OpenTopoMap</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' },
+                label: 'OpenTopoMap'
+            }
+        };
 
-        if (ctrls.status) ctrls.status.textContent = 'Fond de carte: CARTO Voyager';
+        var currentTileKey = (savedView && savedView.tile) || localStorage.getItem('ccs-map-tile') || 'carto-voyager';
+        if (!TILE_PROVIDERS[currentTileKey]) currentTileKey = 'carto-voyager';
+        var currentTileLayer = null;
+
+        function setTileLayer(key) {
+            var provider = TILE_PROVIDERS[key];
+            if (!provider) return;
+            if (currentTileLayer) map.removeLayer(currentTileLayer);
+            currentTileLayer = L.tileLayer(provider.url, provider.options).addTo(map);
+            currentTileKey = key;
+            localStorage.setItem('ccs-map-tile', key);
+            if (ctrls.status) ctrls.status.textContent = 'Fond de carte: ' + provider.label;
+        }
+
+        /* Set initial tile layer */
+        var tileSelect = document.getElementById('map-tile-select');
+        if (tileSelect) tileSelect.value = currentTileKey;
+        setTileLayer(currentTileKey);
+
+        /* Tile select change handler */
+        if (tileSelect) {
+            tileSelect.addEventListener('change', function () {
+                setTileLayer(this.value);
+            });
+        }
+
+        /* Restore saved theme */
+        var savedTheme = (savedView && savedView.theme) ? savedView.theme : null;
+        if (savedTheme) {
+            ctrls.activeTheme = savedTheme;
+            ctrls.themePills.forEach(function (pill) {
+                pill.classList.toggle('is-active', pill.getAttribute('data-theme') === savedTheme);
+            });
+        }
+
+        /* ── Save default view button ────────────────────────── */
+        var saveBtn = document.getElementById('map-save-default');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function () {
+                var center = map.getCenter();
+                var state = {
+                    lat: Math.round(center.lat * 10000) / 10000,
+                    lng: Math.round(center.lng * 10000) / 10000,
+                    zoom: map.getZoom(),
+                    tile: currentTileKey,
+                    theme: ctrls.activeTheme || 'population'
+                };
+                localStorage.setItem('ccs-map-view', JSON.stringify(state));
+                saveBtn.textContent = '✅';
+                setTimeout(function () { saveBtn.textContent = '💾'; }, 1500);
+            });
+        }
 
         var markerLayer = L.layerGroup().addTo(map);
+        var renderCalled = false;
 
         /* ── render markers ──────────────────────────────────── */
 
@@ -282,10 +374,13 @@
             if (densityLegend) densityLegend.style.display = theme === 'density' ? '' : 'none';
 
             if (coords.length) {
-                map.fitBounds(coords, { padding: [28, 28], maxZoom: 7 });
-            } else {
+                if (!renderCalled && !savedView) {
+                    map.fitBounds(coords, { padding: [28, 28], maxZoom: 7 });
+                }
+            } else if (!renderCalled && !savedView) {
                 map.setView([45.5, -96], 4);
             }
+            renderCalled = true;
         }
 
         /* ── event wiring ────────────────────────────────────── */

@@ -1,0 +1,204 @@
+```markdown
+# **Nicolet, Québec** — Fiche Complète
+
+---
+
+## 📍 **Informations Générales**
+
+| Catégorie          | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| **Ville**          | Nicolet                                                                 |
+| **Province**       | Québec (Canada)                                                         |
+| **Surnom**         | *"La Cité des Étudiants"* 🎓 / *"Le Berceau de l'Agriculture"* 🌾       |
+| **Statut**         | Ville (municipalité régionale de comté de Nicolet-Yamaska)             |
+| **Région**         | Centre-du-Québec                                                        |
+| **Maire**          | Donald Gagné (depuis 2021)                                              |
+| **Fondation**      | 1665 (par les Sulpiciens) / Incorporation comme ville en 1920          |
+| **Université**    | **Cégep de Nicolet** (spécialisé en agriculture et environnement)     |
+
+---
+
+## 👥 **Population**
+
+| Année       | Population (Ville) | Population (Agglomération) |
+|-------------|-------------------|----------------------------|
+| **2000**    | 7 510             | ~15 000                    |
+| **2010**    | 7 800             | ~16 200                    |
+| **2020**    | 7 981             | ~16 500                    |
+| **2024** (est.) | ~8 100       | ~16 800                    |
+
+📈 **Croissance modérée** : Stagnation relative depuis 2000 (+7% en 24 ans), liée au vieillissement de la population et à l’exode rural partiel.
+🥇 **Plus jeune population étudiante du Centre-du-Québec** (grâce au Cégep et à l’ITA).
+🌍 **Densité faible** : 1 200 hab./km² (ville), mais 25 hab./km² en zone rurale environnante (typique des régions agricoles québécoises).
+
+---
+
+## 📐 **Géographie & Densité**
+
+| Donnée          | Valeur                                                                 |
+|-----------------|-----------------------------------------------------------------------|
+| **Superficie**  | 94,27 km² (dont 88 km² terrestres)                                     |
+| **Densité**     | ~87 hab./km² (ville) / ~20 hab./km² (région)                          |
+| **Plan d’eau**  | **Rivière Nicolet** (affluent du Saint-Laurent) et **Lac Saint-Pierre** (site Ramsar) |
+| **Relief**      | Plaine agricole (bassin du Saint-Laurent) avec légères collines morainiques |
+| **Altitude**    | 10–50 m (proximité du fleuve)                                         |
+
+📍 **Localisation stratégique** :
+- **50 km à l’est de Trois-Rivières**
+- **100 km de Montréal** (1h15 en voiture)
+- **150 km de Québec** (1h45 en voiture)
+- **Proche de la Réserve nationale de faune du Lac-Saint-Pierre** (zone humide majeure).
+
+---
+
+## 🏛️ **Économie**
+
+**Secteurs Principaux** :
+🌾 **Agriculture & Agroalimentaire** — **Pôle régional** : 30% des emplois liés à l’agriculture (lait, porc, grandes cultures). Siège de l’**Institut de technologie agroalimentaire (ITA)**.
+🎓 **Éducation** — **Cégep de Nicolet** (1 200 étudiants) et **ITA** (formation technique agricole).
+🏥 **Santé & Services sociaux** — **Centre hospitalier de Nicolet** (dessert 50 000 personnes).
+🏭 **Industrie légère** — Usines de transformation alimentaire (ex : **Fromagerie Victoria**).
+🛒 **Commerce de détail** — Centre commercial **Les Galeries Nicolet** (principal pôle régional).
+
+⚠️ **Défis** : Vieillissement de la population et dépendance aux subventions agricoles. **Atout** : Positionnement comme **hub éducatif rural**.
+
+---
+
+## 🎓 **Éducation**
+
+| Institution               | Type                          | Étudiants (2024) |
+|---------------------------|-------------------------------|------------------|
+| **Cégep de Nicolet**      | Public (DEC, AEC)             | ~1 200           |
+| **ITA – Campus Nicolet**  | Formation technique agricole  | ~800             |
+| **École secondaire Jean-Nicolet** | Public (CS Riveraine)   | ~600             |
+
+💡 **Particularités** :
+- **ITA** : Seul campus au Québec offrant un **DEP en production laitière**.
+- **Cégep** : Programme unique en **Technologie de l’architecture navale** (lié à l’industrie maritime du Saint-Laurent).
+
+---
+
+## 🏥 **Santé**
+
+- **Centre hospitalier de Nicolet** (CIUSSS MCQ) :
+  - **120 lits**, urgences 24/7, spécialités en gériatrie et soins palliatifs.
+  - **300 employés**, affilié à l’**Université de Montréal** (stage médical).
+- **CLSC Nicolet** : Services de première ligne pour 20 000 usagers.
+- **Enjeu** : Pénurie de médecins (1 pour 1 500 hab., vs 1 pour 1 000 en moyenne québécoise).
+
+---
+
+## 🎵 **Culture & Musique**
+
+| Artiste / Événement          | Lien avec Nicolet                          |
+|------------------------------|--------------------------------------------|
+| **Les Cowboys Fringants**    | Y ont enregistré des démos dans les années 1990 (local légendaire *Le Bistro*). |
+| **Festival des Vendanges**   | Depuis 1985, célèbre le vin et les produits locaux (attire 10 000 visiteurs). |
+| **Musée des Religions**      | Unique au Québec, installé dans l’ancien **Monastère des Ursulines** (1863). |
+
+🎭 **Autres lieux culturels** :
+- **Théâtre du Vieux Clocher** (1975, 200 sièges).
+- **Bibliothèque Monseigneur-Courchesne** (30 000 documents).
+- **Circuit des fresques** : 15 murales racontant l’histoire locale.
+
+---
+
+## 🌿 **Environnement & Énergie**
+
+- **Lac Saint-Pierre** : **Site Ramsar** (zone humide d’importance internationale) et **Réserve mondiale de la biosphère** (UNESCO).
+- **Agriculture durable** : 40% des fermes en **agriculture raisonnée** (réduction pesticides).
+- **Énergie** :
+  - **Parc solaire** (2 MW, 2020) sur d’anciennes terres agricoles.
+  - **Biogaz** : Projet pilote avec les fumiers porcins (2023).
+- **Défi** : **Érosion des berges** de la rivière Nicolet (coûts : 2M$/an).
+
+---
+
+## 🏈 **Sports & Loisirs**
+
+| Équipe / Club          | Sport               | Ligue                     |
+|------------------------|----------------------|---------------------------|
+| **Les Riverains de Nicolet** | Hockey junior AA | Ligue de hockey junior AAA du Québec |
+| **Club de soccer Nicolet** | Soccer compétitif | Ligue régionale Centre-du-Québec |
+
+🚣 **Activités de plein air** :
+- **Parc régional de la Rivière Gentilly** (randonnée, kayak).
+- **Piste cyclable du Grand Tour** (80 km, relie Trois-Rivières).
+- **Chasse & pêche** : Zone réputée pour le **canard noir** et la **perchaude**.
+
+---
+
+## 🚗 **Transport**
+
+| Mode               | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| **Autoroutes**     | **A-20** (Québec–Montréal) et **Route 132** (panoramique le long du fleuve). |
+| **Aéroport**       | **Aéroport de Nicolet** (CYNC) – petit aéroport régional (avions privés). |
+| **Transport en commun** | **Réseau TEC Nicolet** (3 lignes, gratuit pour les étudiants). |
+| **Train**          | **Via Rail** (gare de **Trois-Rivières**, à 30 min).                  |
+
+🚗 **Distances clés** :
+- **Montréal** : 1h15 (A-20).
+- **Québec** : 1h45 (A-20).
+- **Sherbrooke** : 2h (Route 132).
+
+---
+
+## 🌡️ **Climat**
+
+| Saison       | Temp. moyenne | Précipitations |
+|--------------|---------------|----------------|
+| **Hiver (Jan)** | -12°C / -2°C  | 100 mm (neige) |
+| **Printemps (Avr)** | 0°C / 10°C | 90 mm          |
+| **Été (Juil)**    | 15°C / 26°C | 110 mm         |
+| **Automne (Oct)**  | 2°C / 12°C  | 100 mm         |
+
+🌨️ **Particularités** :
+- **Zone de rusticité 4b** (hivers froids, étés chauds).
+- **Vent dominant** : Ouest (rafales à 70 km/h en hiver).
+- **Canicules estivales** : 5–10 jours/an >30°C (record : 36°C en 2020).
+
+---
+
+## 🏙️ **Quartiers Notables**
+
+| Quartier               | Caractéristique                                                                 |
+|------------------------|-------------------------------------------------------------------------------|
+| **Centre-ville**       | Cœur historique (église 1823, commerces locaux, rue Principale piétonne l’été). |
+| **Secteur Saint-Jean-Baptiste** | Résidentiel (maisons victoriennes), proche du Cégep.                          |
+| **Domaine des Seigneurs** | Quartier huppé (maisons neuves, vue sur le fleuve).                          |
+| **Parc Industriel**   | Zone économique (Fromagerie Victoria, entreprises agroalimentaires).         |
+| **Rive-Sud**           | Bordure du lac Saint-Pierre, chalets et activités nautiques.                 |
+| **Secteur Rural (Rang St-Édouard)** | Fermes laitières et champs de maïs (paysages typiques).               |
+
+---
+
+## 📊 **Comparaison — Grandes Villes du Centre-du-Québec**
+
+| Ville          | Population (2024) | Caractéristique principale                          |
+|----------------|-------------------|----------------------------------------------------|
+| **Nicolet**    | ~8 100            | **Pôle éducatif agricole** (ITA, Cégep).           |
+| **Trois-Rivières** | ~140 000      | **Métropole régionale** (industrie, port, UQTR).   |
+| **Drummondville** | ~75 000       | **Industrie manufacturière** (textile, métallurgie). |
+| **Victoriaville** | ~45 000       | **Commerce et foires agricoles** (Expo Centre-du-Québec). |
+| **Bécancour**  | ~13 000           | **Parc industriel** (pétrochimie, aluminium).       |
+
+---
+
+## 💡 **Le Saviez-Vous ?**
+
+- 🎭 **Nicolet a failli devenir la capitale du Québec** : En 1867, la ville était candidate pour accueillir le gouvernement provincial, mais **Québec** a été choisie pour son port et son prestige historique.
+- 🐄 **La plus vieille ferme laitière du Québec** : La **Ferme des Pionniers** (1672) est toujours en activité et produit du fromage artisanal.
+- 🚂 **Premier chemin de fer du Centre-du-Québec** : La ligne **Nicolet–Trois-Rivières** (1879) a révolutionné le transport des produits agricoles.
+- 🍷 **Vignoble le plus nordique du Québec** : Le **Domaine des Coteaux Rougemont-Nicolet** (2010) produit des vins de glace malgré le climat rigoureux.
+- 🏛️ **Monastère hanté** : L’ancien **Couvent des Ursulines** (1863) serait hanté par une religieuse morte en 1902 (légende locale avec témoignages).
+- 🎓 **Record de diplômés en agriculture** : Nicolet forme **15% des agronomes du Québec** grâce à l’ITA.
+- 🚣 **Course de canots la plus ancienne** : La **Classique Nicolet–Trois-Rivières** (depuis 1934) attire 500 pagayeurs chaque été.
+- 🦆 **Sanctuaire d’oies blanches** : Le **Lac Saint-Pierre** accueille **100 000 oies** lors des migrations (automne).
+- 🎬 **Tournage de films** : Des scènes de **"La Petite Vie"** (série culte québécoise) y ont été tournées dans les années 1990.
+- 🍁 **Érable à sucre centenaire** : Un **érable de 200 ans** dans le parc des Pères-Sulpiciens produit encore du sirop.
+- ⚡ **Première centrale hydroélectrique rurale** : La **centrale de la Rivière Gentilly** (1920) a électrifié la région avant Montréal.
+- 🥇 **Championnat de tracteurs** : Nicolet organise depuis 1980 le **Festival des Moissonneurs**, avec des courses de tracteurs modifiés (vitesse >100 km/h !).
+
+---
+```

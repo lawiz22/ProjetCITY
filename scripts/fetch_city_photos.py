@@ -131,9 +131,16 @@ def search_titles(query: str) -> list[str]:
 
 
 def select_image(summary: dict) -> str | None:
+    # Prefer high-res 1280px thumbnail (Wikimedia-approved, avoids 429 on originals)
     thumbnail = summary.get("thumbnail", {})
     if isinstance(thumbnail, dict) and isinstance(thumbnail.get("source"), str):
-        return thumbnail["source"]
+        thumb_url = thumbnail["source"]
+        if "/thumb/" in thumb_url:
+            parts = thumb_url.rsplit("/", 1)
+            if len(parts) == 2:
+                new_segment = re.sub(r'^\d+px-', '1280px-', parts[1])
+                return parts[0] + "/" + new_segment
+        return thumb_url
     original = summary.get("originalimage", {})
     if isinstance(original, dict) and isinstance(original.get("source"), str):
         return original["source"]

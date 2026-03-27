@@ -19,7 +19,17 @@
             </div>
         </div>
         <div class="map-toolbar-right">
+            <select id="map-tile-select" class="map-tile-select" title="Fond de carte">
+                <option value="carto-voyager">🗺️ CARTO Voyager</option>
+                <option value="carto-positron">🗺️ CARTO Positron</option>
+                <option value="carto-dark">🌑 CARTO Dark Matter</option>
+                <option value="osm">🗺️ OpenStreetMap</option>
+                <option value="esri-satellite">🛰️ Esri Satellite</option>
+                <option value="esri-topo">⛰️ Esri Topo</option>
+                <option value="opentopomap">⛰️ OpenTopoMap</option>
+            </select>
             <input id="map-search-filter" type="text" placeholder="🔍 Rechercher une ville…" class="map-search-input">
+            <button type="button" id="map-save-default" class="map-save-pill" title="Sauvegarder cette vue par défaut">💾</button>
             <button type="button" id="map-refresh-btn" class="map-refresh-pill" title="Rafraîchir les données">⟳</button>
         </div>
     </div>
@@ -95,5 +105,5 @@
 {% block scripts_extra %}
 <script>window.__mapPoints = {{ map_payload.points | tojson }};</script>
 <script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=8"></script>
 {% endblock %}

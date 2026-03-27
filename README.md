@@ -44,6 +44,13 @@ Une première version web locale est maintenant disponible avec Flask + Jinja.
 - repères d'annotations directement reliés aux périodes dans la timeline des fiches ville
 - surbrillance croisée web entre période, annotation et bande graphique active
 - bouton par période pour n'ouvrir que les annotations liées puis retour fiable à la vue complète
+- carte interactive avec 7 fonds de carte au choix (CARTO Voyager, Positron, Dark Matter, OpenStreetMap, Esri Satellite, Esri Topo, OpenTopoMap)
+- sauvegarde de la vue carte par défaut (zoom, position, fond de carte, couche active) avec persistance localStorage
+- couches thématiques supplémentaires sur la carte: climat et densité
+- photos de villes en haute résolution (1280px) via thumbnails Wikimedia
+- AI Lab pour générer des fiches ville complètes via API OpenAI (3 étapes avec bouton « Générer les 3 étapes » et retry automatique)
+- comparaison et fusion de villes existantes depuis l'AI Lab
+- branding « Central City Scrutinizer » avec logo personnalisé dans le menu et le dashboard
 
 ### Lancer l'application web
 
@@ -100,6 +107,8 @@ Le mode écriture est désactivé tant que `PROJETCITY_SQL_ENABLE_WRITE=1` n'est
 - `scripts/validate_villestats.py` : valide les nouvelles villes ajoutées dans `villestats.py`
 - `scripts/validate_villestats_v2.py` : valide le format simplifié de `villestats_v2.py`
 - `scripts/validate_city_period_details.py` : valide les fichiers `.txt` de périodes détaillées
+- `scripts/fetch_city_photos.py` : télécharge la photo principale Wikipedia pour chaque ville
+- `scripts/upgrade_city_photos_hd.py` : met à jour toutes les photos en haute résolution (1280px)
 - `sql/schema.sql` : schéma SQL
 - `data/city_details/` : fichiers texte détaillés par ville
 - `data/city_analysis.db` : base locale générée

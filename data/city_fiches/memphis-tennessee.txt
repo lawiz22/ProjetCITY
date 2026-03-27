@@ -1,0 +1,228 @@
+```markdown
+# **Memphis, Tennessee** — Fiche Complète
+
+---
+
+## 📍 **Informations Générales**
+
+| Catégorie          | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| **Ville**          | Memphis                                                                 |
+| **État**           | Tennessee (TN)                                                           |
+| **Surnom**         | *"Blues City"* 🎸 / *"Home of the Blues"* 🎷 / *"BBQ Capital"* 🍖       |
+| **Statut**         | Ville consolidée-comté (Memphis & Shelby County depuis 1969)           |
+| **Comté**          | Shelby (siège du comté)                                                 |
+| **Maire**          | Paul Young (depuis 2023)                                                |
+| **Fondation**      | 1819 (incorporée en 1826)                                               |
+| **Université**     | Université de Memphis (1912)                                             |
+
+---
+
+## 👥 **Population**
+
+| Année       | Population (Ville) | Population (Aire Métro) |
+|-------------|-------------------|-------------------------|
+| **2000**    | 650,100           | 1,135,000               |
+| **2010**    | 646,889           | 1,316,100               |
+| **2020**    | 633,104           | 1,333,920               |
+| **2023**    | ~628,127 (est.)   | ~1,350,000 (est.)       |
+
+📈 **Stagnation démographique** : Memphis a perdu ~3% de sa population entre 2010 et 2020, en raison de l'exode vers les banlieues (ex. : Collierville, Germantown).
+🥇 **Plus grande ville du Tennessee** (devant Nashville, mais cette dernière croît plus vite).
+🌍 **Diversité ethnique** : 64% Afro-Américains (3e plus haute proportion parmi les grandes villes américaines), 28% Blancs, 7% Hispaniques.
+
+---
+
+## 📐 **Géographie & Densité**
+
+| Donnée          | Valeur                                                                 |
+|-----------------|-----------------------------------------------------------------------|
+| **Superficie**  | 845 km² (326 mi²) — **2e plus grande ville des États-Unis en superficie** après Oklahoma City. |
+| **Densité**     | 749 hab./km²                                                          |
+| **Plan d'eau**  | **Fleuve Mississippi** (frontière ouest) + **Wolf River** (affluent). |
+| **Relief**      | Plaine alluviale (risque d'inondations) + **Chickasaw Bluffs** (collines). |
+| **Altitude**    | 103 m (338 ft)                                                         |
+
+📍 **Localisation stratégique** :
+- À **330 km** de Nashville (TN) 🚗 3h30.
+- À **600 km** de Atlanta (GA) 🚗 6h.
+- À **500 km** de Saint-Louis (MO) 🚗 5h.
+
+---
+
+## 🏛️ **Économie**
+
+**Secteurs Principaux** :
+🎵 **Musique & Tourisme** — **$3,2 milliards/an** (Beale Street, Graceland, Sun Studio). Memphis est le **berceau du blues, du rock 'n' roll et du soul** (Stax Records).
+🏥 **Santé & Biotechnologies** — **Hôpital St. Jude** (recherche sur le cancer pédiatrique) + **Methodist Le Bonheur Healthcare** (13,000 employés).
+🚛 **Logistique & Transport** — **Aéroport international de Memphis (MEM)** : **1er aéroport cargo mondial** (FedEx Hub, 4,3 millions de tonnes/an).
+🏭 **Manufacturing** — **Electrolux** (électroménager), **Nike** (centre de distribution), **AutoZone** (siège social).
+🍖 **Agroalimentaire** — **BBQ industriel** (Central BBQ, Rendezvous) + **culture du coton** (historique).
+
+💡 **PIB métropolitain** : **$82 milliards** (2022) — **Économie post-industrielle en transition** vers les services et la tech (ex. : **Epicenter** pour les startups).
+
+---
+
+## 🎓 **Éducation**
+
+| Institution               | Type               | Étudiants (2023) |
+|---------------------------|--------------------|------------------|
+| **Université de Memphis** | Publique           | ~22,000          |
+| **Rhodes College**         | Privé (liberal arts)| ~2,000           |
+| **Christian Brothers Univ.** | Privé (catholique) | ~1,800           |
+| **Southwest TN Community College** | Public | ~10,000          |
+
+🎓 **Faits notables** :
+- L'**Université de Memphis** abrite le **Center for Earthquake Research** (zone sismique de New Madrid).
+- **Rhodes College** classée parmi les **"Hidden Ivies"** (élite académique du Sud).
+- **Taux d'alphabétisation** : 85% (en dessous de la moyenne nationale de 88%).
+
+---
+
+## 🏥 **Santé**
+
+- **St. Jude Children’s Research Hospital** 🏥 :
+  - **Fondé en 1962** par Danny Thomas (acteur).
+  - **Budget annuel** : $2,4 milliards (2023).
+  - **Traitements gratuits** pour les enfants (famille ne paie jamais).
+  - **Prix Nobel** : 1 lauréat (Peter Dohery, 1996, immunologie).
+- **Methodist University Hospital** :
+  - **1,200 lits**, affilié à l’**Université du Tennessee**.
+  - **Centre de traumatologie de Niveau 1**.
+
+🩺 **Problématiques** : **Espérance de vie** à Memphis = **74,3 ans** (vs. 78,5 ans aux États-Unis), liée à l’obésité et aux maladies cardiovasculaires.
+
+---
+
+## 🎵 **Culture & Musique**
+
+| Artiste / Groupe / Personnalité       | Lien avec Memphis                                  |
+|---------------------------------------|----------------------------------------------------|
+| **Elvis Presley** 👑                  | Graceland (maison-musée), mort à Memphis en 1977.  |
+| **B.B. King** 🎸                     | A commencé sa carrière sur Beale Street (1940s).   |
+| **Johnny Cash** 🎤                    | Enregistré à **Sun Studio** (1955).                |
+| **Al Green** 🎶                      | Église **Full Gospel Tabernacle** + studio **Hi Records**. |
+| **Justin Timberlake** 🎤              | Né à Memphis (1981), ancien de *NSYNC.             |
+| **Three 6 Mafia** 🎤                  | Groupe de hip-hop (Oscar pour *"It's Hard out Here for a Pimp"*, 2006). |
+
+🎭 **Événements culturels** :
+- **Memphis in May** (festival de musique, BBQ, et arts).
+- **Beale Street Music Festival** (40,000 visiteurs/an).
+- **National Civil Rights Museum** (au **Lorraine Motel**, où MLK fut assassiné en 1968).
+
+🏛️ **Musées** :
+- **Graceland** (2e maison la plus visitée aux États-Unis après la Maison Blanche).
+- **Sun Studio** (où Elvis, Cash, et Jerry Lee Lewis ont enregistré).
+- **Stax Museum of American Soul Music**.
+
+---
+
+## 🌿 **Environnement & Énergie**
+
+- **Risque sismique** : Située sur la **faille de New Madrid** (séismes de magnitude 7+ possibles, dernier en 1812).
+- **Qualité de l’air** : **Note "F"** (American Lung Association, 2023) due aux émissions industrielles et au trafic routier.
+- **Énergies renouvelables** :
+  - **TVA (Tennessee Valley Authority)** fournit 20% d’énergie solaire/hydraulique.
+  - **Projet "Memphis Solar"** (2022) : 100 MW de panneaux solaires.
+- **Défi du Mississippi** : **Pollution aux nitrates** (agriculture) + **érosion des berges**.
+
+🌱 **Initiatives vertes** :
+- **Memphis River Parks Partnership** (restauration des berges).
+- **Vélos en libre-service** (**Explore Bike Share**, 60 stations).
+
+---
+
+## 🏈 **Sports & Loisirs**
+
+| Équipe               | Sport          | Ligue               | Stade / Arène          |
+|-----------------------|----------------|---------------------|------------------------|
+| **Memphis Grizzlies** | Basketball     | NBA                 | FedExForum (18,000 places) |
+| **Memphis Redbirds**  | Baseball       | MiLB (Triple-A)     | AutoZone Park          |
+| **Memphis 901 FC**    | Soccer         | USL Championship    | AutoZone Park          |
+| **Memphis Tigers**    | Football américain (NCAA) | American Athletic Conference | Simmons Bank Liberty Stadium |
+
+🎾 **Autres activités** :
+- **Overton Park** (170 ha) : **Memphis Zoo** (pandas géants) + **Levine Children’s Hospital**.
+- **Mud Island River Park** : Réplique du Mississippi en miniature.
+- **Golf** : **TPC Southwind** (tournoi FedEx St. Jude Classic).
+
+---
+
+## 🚗 **Transport**
+
+| Mode                | Détails                                                                 |
+|---------------------|-------------------------------------------------------------------------|
+| **Autoroutes**      | I-40 (est-ouest), I-55 (nord-sud), I-240 (périphérique).               |
+| **Aéroport**        | **Memphis International (MEM)** : **1er aéroport cargo mondial** (FedEx). 4,3M tonnes/an. |
+| **Transport en commun** | **MATA** (bus + trolley vintage sur Main Street). **30 lignes de bus**. |
+| **Train**           | **Amtrak** (*City of New Orleans*), 1 train/jour vers Chicago/Nouvelle-Orléans. |
+| **Vélos**           | **120 km de pistes cyclables** (objectif : 500 km d’ici 2030).         |
+
+🚆 **Projets futurs** :
+- **Extension du trolley** vers l’aéroport (2025).
+- **Ligne de bus rapide (BRT)** sur **Poplar Avenue** (2024).
+
+---
+## 🌡️ **Climat**
+
+| Saison       | Température Moyenne | Précipitations | Particularités                          |
+|--------------|---------------------|----------------|-----------------------------------------|
+| **Hiver (Jan)** | 5°C (41°F)          | 120 mm         | Gelées fréquentes, neige rare (5 cm/an).|
+| **Printemps (Avr)** | 18°C (64°F)     | 140 mm         | Tornades possibles (allée des tornades).|
+| **Été (Juil)**   | 32°C (90°F)     | 90 mm          | **Canicules** (record : 42°C en 1980). Humidité à 90%. |
+| **Automne (Oct)**  | 20°C (68°F)     | 100 mm         | Saison des festivals (BBQ, musique).   |
+
+🌪️ **Risques naturels** :
+- **Tornades** : Memphis est dans le **"Dixie Alley"** (tornades plus meurtrières qu’au Midwest).
+- **Inondations** : Crue historique du Mississippi en **2011** (13 m au-dessus du niveau normal).
+
+---
+
+## 🏙️ **Quartiers Notables**
+
+| Quartier               | Caractéristique                                                                 |
+|------------------------|---------------------------------------------------------------------------------|
+| **Downtown**           | Cœur historique : **Beale Street** (blues), **FedExForum**, **Pyramid Arena** (bassin à alligators !). |
+| **Midtown**            | **Overton Park**, **Rhodes College**, architecture **Art Déco** (1920s).        |
+| **East Memphis**       | Quartier aisé : **shopping (Oak Court Mall)**, **parcs (Shelby Farms)**.       |
+| **South Memphis**      | **Soulsville USA** (Stax Museum), **quartier afro-américain historique**.       |
+| **North Memphis**      | **Industriel** (usines abandonnées en reconversion), **projets de revitalisation**. |
+| **Cooper-Young**       | **Bohème** : cafés, galeries d’art, **festival annuel (Cooper-Young Fest)**.   |
+| **Harbor Town**        | **Île artificielle** sur le Mississippi : maisons victoriens, marina.         |
+| **Whitehaven**         | **Graceland**, **aéroport international**, communauté ouvrière historique.      |
+
+---
+
+## 📊 **Comparaison — Grandes Villes du Tennessee**
+
+| Ville          | Population (2023) | Caractéristique principale                          | PIB Métro (2022) |
+|----------------|-------------------|----------------------------------------------------|------------------|
+| **Memphis**    | 628,127           | **Logistique (FedEx), musique (blues), BBQ**       | $82 milliards    |
+| **Nashville**  | 715,884           | **Capitale de l’État, country music, croissance tech** | $120 milliards |
+| **Knoxville**  | 190,740           | **Université du Tennessee, montagnes (Great Smoky)** | $35 milliards   |
+| **Chattanooga** | 181,099           | **Industrie automobile (VW), outdoor (Appalaches)** | $30 milliards   |
+
+💡 **Memphis vs. Nashville** :
+- **Memphis** : Plus **industrielle**, **démographie plus noire**, **coût de la vie 20% moins cher**.
+- **Nashville** : **Croissance + rapide** (+2%/an vs. -0,5% pour Memphis), **économie plus diversifiée** (tourisme, santé, tech).
+
+---
+
+## 💡 **Le Saviez-Vous ?**
+
+- 🎸 **Sun Studio** : Le **premier enregistrement d’Elvis** (*"That’s All Right"*, 1954) a coûté **$4** pour la session.
+- 🍖 **BBQ Wars** : Memphis abrite **plus de 100 restaurants de BBQ**, avec une **guerre sèche vs. saucé** (ex. : **Dry Rub chez Rendezvous** vs. **Sauce tomate chez Central BBQ**).
+- 🚢 **Le Mississippi à Memphis** est **plus large que l’Amazone** à certains endroits (1,6 km).
+- 🏀 **Les Grizzlies** sont la **seule équipe NBA à avoir un ours vivant comme mascott** (Grizz, un ours noir).
+- 🎭 **Elvis a acheté Graceland** en 1957 pour **$102,500** (équivalent à **$1M aujourd’hui**). Il y est enterré dans la **Meditation Garden**.
+- 🚂 **Memphis était un hub ferroviaire majeur** avant les autoroutes : la **gare Central Station** (1914) était la **plus grande du Sud**.
+- 🌪️ **La tornade de 2008** a détruit **1,500 maisons** en 15 minutes (EF2, vents à 200 km/h).
+- 🎬 **Memphis est le lieu de tournage** de :
+  - *"The Firm"* (1993, avec Tom Cruise).
+  - *"Walk the Line"* (2005, biopic de Johnny Cash).
+  - *"Hustle & Flow"* (2005, Oscar pour Three 6 Mafia).
+- 🏛️ **Le Lorraine Motel** (où MLK fut assassiné) est aujourd’hui le **National Civil Rights Museum**. La chambre 306 est **préservée telle quelle**.
+- 🚲 **Memphis a le taux d’obésité le plus élevé des grandes villes américaines** (38% des adultes, CDC 2022).
+- 🎤 **B.B. King** a joué **200 soirs par an** sur Beale Street dans les années 1950.
+- 🛳️ **Le *SS Sultan Med II*** (bateau à aubes) est le **dernier steamboat opérationnel** sur le Mississippi (croisières depuis Memphis).
+```

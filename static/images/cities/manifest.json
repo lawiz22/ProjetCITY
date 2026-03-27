@@ -926,8 +926,8 @@
   "timmins-on": {
     "filename": "timmins-on.jpg",
     "source_page": "https://en.wikipedia.org/wiki/Timmins",
-    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Timmins_Ontario.jpg/330px-Timmins_Ontario.jpg",
-    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Timmins_Ontario.jpg/1280px-Timmins_Ontario.jpg",
+    "attribution": "Image Wikipedia/Wikimedia — haute résolution."
   },
   "boise-idaho": {
     "filename": "boise-idaho.jpg",
@@ -938,8 +938,8 @@
   "longlac-on": {
     "filename": "longlac-on.jpg",
     "source_page": "https://en.wikipedia.org/wiki/Longlac",
-    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Longlac_ON_1.JPG/330px-Longlac_ON_1.JPG",
-    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Longlac_ON_1.JPG/1280px-Longlac_ON_1.JPG",
+    "attribution": "Image Wikipedia/Wikimedia — haute résolution."
   },
   "lac-megantic-qc": {
     "filename": "lac-megantic-qc.jpg",
@@ -1071,6 +1071,24 @@
     "filename": "salem-new-york.jpg",
     "source_page": "https://en.wikipedia.org/wiki/Salem%2C_New_York",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Buildings_on_Main_Street%2C_Salem%2C_NY.jpg/330px-Buildings_on_Main_Street%2C_Salem%2C_NY.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saratoga-springs-new-york": {
+    "filename": "saratoga-springs-new-york.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saratoga_Springs%2C_New_York",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Downtown_Saratoga_Springs.jpg/330px-Downtown_Saratoga_Springs.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "nicolet-quebec": {
+    "filename": "nicolet-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Nicolet%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Nicolet.JPG/330px-Nicolet.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "memphis-tennessee": {
+    "filename": "memphis-tennessee.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Memphis%2C_Tennessee",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Skyline_of_Memphis%2C_TN.jpg/330px-Skyline_of_Memphis%2C_TN.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

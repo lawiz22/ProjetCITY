@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 176
+# Nombre de villes : 179
 #
 
 # ============================================================
@@ -2150,6 +2150,23 @@ annotations = [
 ]
 
 # ============================================================
+# Memphis (United States)
+# ============================================================
+CITY_NAME = "Memphis, Tennessee"
+CITY_COLOR = '#125FA0'
+
+years = [
+    1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 
+    1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    500, 1000, 2200, 8841, 22623, 40226, 33592, 64453, 102320, 131105, 162351, 253143, 
+    317014, 396000, 497524, 623509, 646299, 610337, 650100, 646889, 633104
+]
+
+annotations = []
+
+# ============================================================
 # Miami (United States)
 # ============================================================
 CITY_NAME = "Miami, Florida"
@@ -2567,6 +2584,36 @@ annotations = [
     (1991, 75000, "⚠️ Désindustrialisation — fermetures (1985)", 'red'),
     (2001, 78000, "🎰 Casino Niagara — nouveau moteur (1996)", 'gold'),
     (2021, 88071, "🏨 Fallsview Casino Resort — 12-14M visiteurs (2004)", 'teal'),
+]
+
+# ============================================================
+# Nicolet (Canada)
+# ============================================================
+CITY_NAME = "Nicolet, Québec"
+CITY_COLOR = '#1E90FF'
+
+years = [
+    1672, 1700, 1750, 1800, 1850, 1861, 1871, 1881, 1891, 1901, 1911, 1921, 1931, 1941, 
+    1951, 1961, 1971, 1981, 1991, 2001, 2011, 2020
+]
+population = [
+    200, 500, 800, 1200, 1800, 2500, 3200, 3800, 4500, 5200, 5800, 6500, 7200, 8000, 
+    9500, 10500, 11200, 11800, 12000, 11800, 11500, 11200
+]
+
+annotations = [
+    (1672, 200, "⛪ Fondation — Établissement de la seigneurie de Nicolet par Jean-Baptiste Peiras (1672)", 'navy'),
+    (1700, 500, "🌾 Agriculture — Développement des premières fermes le long du fleuve Saint-Laurent (1700)", 'green'),
+    (1800, 1200, "🏗️ Croissance — Nicolet devient un centre régional pour le commerce des fourrures (1800)", 'gold'),
+    (1850, 1800, "🚢 Port — Construction du premier quai majeur sur la rivière Nicolet (1850)", 'blue'),
+    (1861, 2500, "📜 Incorporation — Nicolet est officiellement constituée en municipalité (1857)", 'purple'),
+    (1901, 5200, "🏫 Éducation — Fondation du Séminaire de Nicolet, institution clé pour l'éducation catholique (1803)", 'darkred'),
+    (1921, 6500, "🚂 Chemin de fer — Arrivée du Canadien National, boostant l'économie locale (1912)", 'black'),
+    (1951, 9500, "🏭 Industrialisation — Expansion des usines de textile et de bois (années 1950)", 'gray'),
+    (1971, 11200, "🌉 Pont — Inauguration du pont Laviolette reliant Nicolet à Trois-Rivières (1967)", 'teal'),
+    (1991, 12000, "📉 Déclin — Fermeture de plusieurs industries traditionnelles (années 1990)", 'orange'),
+    (2001, 11800, "🏛️ Patrimoine — Nicolet classée parmi les plus beaux villages du Québec (2001)", 'brown'),
+    (2020, 11200, "🌿 Tourisme — Développement des attractions écotouristiques le long de la rivière (2020)", 'green'),
 ]
 
 # ============================================================
@@ -3505,6 +3552,32 @@ annotations = [
     (1970, 459913, "🏗️ Dutch Hamann — annexions massives (1960)", 'orange'),
     (2000, 894943, "🌐 eBay fondé — dot-com boom (1995)", 'gold'),
     (2020, 1013240, "🏢 Google Downtown West — ville tech (2019)", 'cyan'),
+]
+
+# ============================================================
+# Saratoga Springs (United States)
+# ============================================================
+CITY_NAME = "Saratoga Springs, New York"
+CITY_COLOR = '#1E88A8'
+
+years = [
+    1819, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 
+    1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    2000, 3500, 5200, 7800, 12000, 15000, 18500, 22000, 25000, 26500, 28000, 29500, 
+    30200, 32000, 35000, 38000, 30000, 28000, 26700, 26586, 28491
+]
+
+annotations = [
+    (1819, 2000, "🏞️ Fondation officielle — Incorporation comme village (1819)", 'navy'),
+    (1830, 3500, "🏨 Boom touristique — Arrivée des premiers hôtels de luxe (1830)", 'gold'),
+    (1870, 15000, "🎭 Âge d'or des casinos — Interdiction du jeu en 1907 (1870-1907)", 'red'),
+    (1960, 35000, "🎵 Festival de jazz — Début du Saratoga Performing Arts Center (1960)", 'purple'),
+    (1980, 30000, "📉 Déclin démographique — Fermeture d'industries locales (1980)", 'gray'),
+    (2000, 26700, "🏗️ Revitalisation — Projets de rénovation du centre-ville (2000)", 'darkred'),
+    (2010, 26586, "🎭 Festival des arts — Renforcement du tourisme culturel (2010)", 'navy'),
+    (2020, 28491, "📈 Croissance récente — Attrait des jeunes professionnels (2020)", 'green'),
 ]
 
 # ============================================================
