@@ -120,7 +120,10 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p class="geo-all-covered">🎉 Toutes les villes de référence sont couvertes!</p>
+                <div class="geo-all-covered-row">
+                    <p class="geo-all-covered">🎉 Toutes les villes de référence sont couvertes!</p>
+                    <button class="geo-expand-btn" data-region="{{ reg.name }}" data-country="Canada" title="Ajouter 20 villes de référence">➕ 20 villes</button>
+                </div>
                 {% endif %}
                 {% endif %}
             </div>
@@ -181,7 +184,10 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p class="geo-all-covered">🎉 Toutes les villes de référence sont couvertes!</p>
+                <div class="geo-all-covered-row">
+                    <p class="geo-all-covered">🎉 Toutes les villes de référence sont couvertes!</p>
+                    <button class="geo-expand-btn" data-region="{{ reg.name }}" data-country="United States" title="Ajouter 20 villes de référence">➕ 20 villes</button>
+                </div>
                 {% endif %}
                 {% endif %}
             </div>
@@ -230,6 +236,37 @@
     }
     wireSearch('geo-search-ca', 'geo-regions-ca');
     wireSearch('geo-search-us', 'geo-regions-us');
+
+    /* Expand ref: add 20 more reference cities */
+    var expandUrl = '{{ url_for("web.geo_coverage_expand_ref") }}';
+    document.querySelectorAll('.geo-expand-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var region = btn.dataset.region;
+            var country = btn.dataset.country;
+            btn.disabled = true;
+            btn.textContent = '⏳ Chargement…';
+
+            var body = new FormData();
+            body.append('region', region);
+            body.append('country', country);
+
+            fetch(expandUrl, { method: 'POST', body: body })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        btn.textContent = '✅ ' + data.inserted + ' villes ajoutées!';
+                        setTimeout(function () { location.reload(); }, 1200);
+                    } else {
+                        btn.textContent = '❌ ' + (data.error || 'Erreur');
+                        btn.disabled = false;
+                    }
+                })
+                .catch(function () {
+                    btn.textContent = '❌ Erreur réseau';
+                    btn.disabled = false;
+                });
+        });
+    });
 })();
 </script>
 

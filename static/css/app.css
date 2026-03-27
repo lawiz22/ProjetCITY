@@ -5419,6 +5419,32 @@ td {
     color: #059669;
     margin: 12px 0 4px;
 }
+.geo-all-covered-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.geo-expand-btn {
+    font-size: .78rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(139, 92, 246, .3);
+    background: rgba(139, 92, 246, .08);
+    color: #7c3aed;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s, transform .15s;
+}
+.geo-expand-btn:hover:not(:disabled) {
+    background: rgba(139, 92, 246, .18);
+    transform: translateY(-1px);
+}
+.geo-expand-btn:disabled {
+    opacity: .7;
+    cursor: wait;
+}
 .geo-gen-btn {
     display: inline-block;
     font-size: .78rem;

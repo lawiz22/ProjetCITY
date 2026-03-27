@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 213
+# Nombre de villes : 217
 #
 
 # ============================================================
@@ -458,6 +458,29 @@ annotations = [
     (1960, 9564, "🎹 Fermeture Estey Organ — fin ère industrielle", 'red'),
     (1980, 11886, "🌿 Contre-culture — artistes — alternatifs (1970)", 'orange'),
     (2020, 11865, "🎨 Capitale culturelle sud Vermont (2020)", 'teal'),
+]
+
+# ============================================================
+# Bridgeport (United States)
+# ============================================================
+CITY_NAME = "Bridgeport, Connecticut"
+CITY_COLOR = '#0055a4'
+
+years = [1800, 1850, 1900, 1910, 1920, 1930, 1950, 1970, 1990, 2010, 2020]
+population = [6000, 12000, 102000, 146000, 146000, 147000, 148000, 140000, 140000, 144000, 148000]
+
+annotations = [
+    (1800, 6000, "🏗️ Fondation et développement initial — début du port industriel (1800)", 'brown'),
+    (1850, 12000, "🚂 Expansion ferroviaire — croissance économique rapide (1850)", 'orange'),
+    (1900, 102000, "🏭 Industrialisation majeure — centre manufacturier (1900)", 'green'),
+    (1910, 146000, "🚢 Port en pleine activité — pic industriel (1910)", 'blue'),
+    (1920, 146000, "🎭 Boom culturel — développement urbain (1920)", 'purple'),
+    (1930, 147000, "📉 Début de la Grande Dépression — ralentissement économique (1930)", 'red'),
+    (1950, 148000, "🏢 Reconstruction d'après-guerre — modernisation urbaine (1950)", 'teal'),
+    (1970, 140000, "🏚️ Déclin industriel — désindustrialisation (1970)", 'gray'),
+    (1990, 140000, "🏙️ Efforts de revitalisation urbaine — réhabilitation (1990)", 'gold'),
+    (2010, 144000, "🌆 Croissance démographique modérée — diversification (2010)", 'navy'),
+    (2020, 148000, "🌍 Développement durable — projets écologiques (2020)", 'darkred'),
 ]
 
 # ============================================================
@@ -1019,6 +1042,29 @@ annotations = [
     (1980, 5500, "⚙️ ArcelorMittal — sidérurgie lourde dominante (1980)", 'blue'),
     (2000, 6500, "🚗 Autoroute 30 — croissance résidentielle (2000)", 'orange'),
     (2020, 8800, "⚓ Terminal portuaire — projet Port de Montréal (2021)", 'navy'),
+]
+
+# ============================================================
+# Coquitlam (Canada)
+# ============================================================
+CITY_NAME = "Coquitlam, British Columbia"
+CITY_COLOR = '#2E8B57'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [500, 800, 1200, 1500, 2000, 4000, 12000, 35000, 60000, 90000, 110000, 130000, 150000]
+
+annotations = [
+    (1900, 500, "🌲 Fondation et premiers établissements — début du peuplement (1900)", 'brown'),
+    (1910, 800, "🚂 Arrivée du chemin de fer — développement du transport (1910)", 'orange'),
+    (1940, 2000, "🏭 Début de l'industrialisation locale — croissance économique (1940)", 'green'),
+    (1950, 4000, "🏘️ Expansion résidentielle — suburbanisation initiale (1950)", 'blue'),
+    (1960, 12000, "🚧 Construction d'infrastructures majeures — routes et écoles (1960)", 'red'),
+    (1970, 35000, "🏙️ Incorporation officielle en ville — urbanisation accrue (1971)", 'purple'),
+    (1980, 60000, "🛤️ Développement du réseau ferroviaire — liaison avec Vancouver (1980)", 'gray'),
+    (1990, 90000, "🏢 Croissance économique et commerciale — diversification (1990)", 'gold'),
+    (2000, 110000, "🌳 Mise en place de parcs et espaces verts — qualité de vie (2000)", 'teal'),
+    (2010, 130000, "🚇 Ouverture du SkyTrain Evergreen Line — mobilité améliorée (2016)", 'navy'),
+    (2020, 150000, "🏡 Croissance démographique soutenue — développement durable (2020)", 'black'),
 ]
 
 # ============================================================
@@ -2281,6 +2327,27 @@ annotations = [
     (2000, 8500, "📈 Expansion économique — tourisme et services (2000)", 'gray'),
     (2010, 6200, "💥 Catastrophe ferroviaire — explosion majeure (2013)", 'darkred'),
     (2020, 6000, "🔄 Reconstruction — reprise post-catastrophe (2020)", 'teal'),
+]
+
+# ============================================================
+# Lac-Mégantic (Canada)
+# ============================================================
+CITY_NAME = "Lac-Mégantic, Québec"
+CITY_COLOR = '#1E90FF'
+
+years = [1880, 1900, 1920, 1940, 1960, 1980, 2000, 2010, 2020]
+population = [1200, 3500, 4500, 5200, 6000, 6500, 6200, 6000, 5800]
+
+annotations = [
+    (1880, 1200, "🏞️ Fondation et développement initial — établissement autour du lac (1880)", 'green'),
+    (1900, 3500, "🚂 Arrivée du chemin de fer — essor économique (1900)", 'blue'),
+    (1920, 4500, "🏭 Industrialisation locale — croissance démographique (1920)", 'orange'),
+    (1940, 5200, "⚔️ Seconde Guerre mondiale — mobilisation et changements (1940)", 'gray'),
+    (1960, 6000, "🚗 Expansion routière — développement urbain (1960)", 'teal'),
+    (1980, 6500, "🏢 Modernisation des infrastructures — pic démographique (1980)", 'navy'),
+    (2000, 6200, "🏘️ Déclin démographique léger — exode rural (2000)", 'brown'),
+    (2010, 6000, "💥 Catastrophe ferroviaire — explosion majeure (2013)", 'red'),
+    (2020, 5800, "🔄 Reconstruction et résilience — reprise progressive (2020)", 'purple'),
 ]
 
 # ============================================================
@@ -4150,6 +4217,28 @@ annotations = [
     (1981, 36000, "📉 Déclin manufactures — défis sociaux (1975)", 'red'),
     (2006, 63000, "🔀 Fusion municipale — métropole (2002)", 'blue'),
     (2021, 80000, "🚆 Train exo + renaissance urbaine (2015)", 'teal'),
+]
+
+# ============================================================
+# Saint-Léonard-d'Aston (Canada)
+# ============================================================
+CITY_NAME = "Saint-Léonard-d'Aston, Québec"
+CITY_COLOR = '#4B8B3B'
+
+years = [1850, 1900, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [800, 1200, 1500, 1600, 1800, 2100, 2300, 2500, 2700, 2900]
+
+annotations = [
+    (1850, 800, "🏡 Fondation et premiers établissements — début du village (1850)", 'brown'),
+    (1900, 1200, "🚂 Arrivée du chemin de fer — développement économique (1900)", 'orange'),
+    (1950, 1500, "🏫 Construction d'écoles — croissance démographique (1950)", 'green'),
+    (1960, 1600, "🛤️ Modernisation des infrastructures — amélioration des transports (1960)", 'blue'),
+    (1970, 1800, "🏭 Développement industriel local — création d'emplois (1970)", 'red'),
+    (1980, 2100, "🌳 Mise en place d'espaces verts — qualité de vie (1980)", 'purple'),
+    (1990, 2300, "🚜 Agriculture modernisée — diversification économique (1990)", 'gray'),
+    (2000, 2500, "🏘️ Expansion résidentielle — urbanisation croissante (2000)", 'gold'),
+    (2010, 2700, "📈 Croissance stable — attractivité régionale (2010)", 'teal'),
+    (2020, 2900, "💻 Connectivité numérique améliorée — modernisation (2020)", 'navy'),
 ]
 
 # ============================================================

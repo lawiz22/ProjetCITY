@@ -1567,6 +1567,155 @@ def geo_coverage() -> str:
     )
 
 
+@web.route("/geo-coverage/expand-ref", methods=["POST"])
+def geo_coverage_expand_ref():
+    """Add 20 more reference cities for a region via Mammouth AI."""
+    import json as _json
+    from .db import get_db
+    from .services.mammouth_ai import load_settings, generate_city
+
+    region = request.form.get("region", "").strip()
+    country = request.form.get("country", "").strip()
+    if not region or not country:
+        return jsonify(success=False, error="Région et pays requis"), 400
+
+    conn = get_db()
+    existing_ref = conn.execute(
+        "SELECT city_name FROM ref_city WHERE region = ? AND country = ?",
+        (region, country),
+    ).fetchall()
+    existing_db = conn.execute(
+        "SELECT city_name FROM dim_city WHERE region = ? AND country = ?",
+        (region, country),
+    ).fetchall()
+
+    known_names = set()
+    for r in existing_ref:
+        known_names.add(r["city_name"].lower().strip())
+    for r in existing_db:
+        known_names.add(r["city_name"].lower().strip())
+
+    current_max_rank = len(existing_ref)
+    exclusion_list = ", ".join(sorted(known_names))
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    model = settings.get("model", "")
+    if not api_key:
+        return jsonify(success=False, error="Clé API non configurée"), 500
+
+    new_cities: list[dict] = []
+    TARGET = 20
+
+    # Try up to 4 rounds with progressively smaller city requests
+    prompts = [
+        (
+            f"Liste 30 villes et municipalités de {region} ({country}) "
+            f"qui ne sont PAS dans cette liste: [{exclusion_list}].\n\n"
+            f"Inclus des villes moyennes et petites (10 000 à 100 000 habitants), "
+            f"pas seulement les grandes métropoles.\n"
+            f"Réponds en JSON array: "
+            f'[{{"city_name": "Nom", "population": 12345, "rank": {current_max_rank + 1}}}]\n'
+            f"Trie par population décroissante. "
+            f"Utilise les noms courants français si applicable.\n"
+            f"UNIQUEMENT le JSON array, aucun markdown, aucun texte autour."
+        ),
+        (
+            f"Liste 30 petites villes et villages de {region} ({country}) "
+            f"de moins de 50 000 habitants.\n\n"
+            f"NE PAS inclure ces villes déjà connues: [{exclusion_list}].\n\n"
+            f"Inclus des municipalités, villages, petites villes régionales.\n"
+            f"Réponds en JSON array: "
+            f'[{{"city_name": "Nom", "population": 5000, "rank": 1}}]\n'
+            f"Trie par population décroissante.\n"
+            f"UNIQUEMENT le JSON array, aucun markdown."
+        ),
+        (
+            f"Donne-moi 30 localités/municipalités/villages de {region} ({country}) "
+            f"qui sont moins connues, entre 1 000 et 30 000 habitants.\n\n"
+            f"EXCLURE absolument: [{exclusion_list}].\n\n"
+            f"Réponds en JSON array: "
+            f'[{{"city_name": "Nom", "population": 3000, "rank": 1}}]\n'
+            f"UNIQUEMENT le JSON array."
+        ),
+        (
+            f"Nomme 30 autres communautés de {region} ({country}) "
+            f"qui ne sont dans aucune de ces listes: [{exclusion_list}].\n"
+            f"Même les très petits villages de quelques centaines d'habitants.\n"
+            f"JSON array: "
+            f'[{{"city_name": "Nom", "population": 500, "rank": 1}}]\n'
+            f"UNIQUEMENT le JSON array."
+        ),
+    ]
+
+    for prompt in prompts:
+        if len(new_cities) >= TARGET:
+            break
+
+        result = generate_city(
+            api_key, model, "", prompt,
+            max_tokens=2000, temperature=0.7,
+        )
+        if not result.get("success"):
+            continue
+
+        reply = result.get("reply", "").strip()
+        if reply.startswith("```"):
+            reply = reply.split("\n", 1)[-1]
+        if reply.endswith("```"):
+            reply = reply.rsplit("```", 1)[0]
+        reply = reply.strip()
+
+        start = reply.find("[")
+        end = reply.rfind("]")
+        if start == -1 or end == -1:
+            continue
+        try:
+            parsed = _json.loads(reply[start:end + 1])
+        except _json.JSONDecodeError:
+            continue
+
+        for c in parsed:
+            if not isinstance(c, dict) or "city_name" not in c:
+                continue
+            name = c["city_name"].strip()
+            if name.lower() in known_names:
+                continue
+            rank = current_max_rank + len(new_cities) + 1
+            new_cities.append({
+                "city_name": name,
+                "region": region,
+                "country": country,
+                "population": c.get("population", 0),
+                "rank": rank,
+            })
+            known_names.add(name.lower())
+
+        # Update exclusion list for next prompt round
+        exclusion_list = ", ".join(sorted(known_names))
+
+    if not new_cities:
+        return jsonify(success=False, error="Aucune nouvelle ville trouvée après plusieurs tentatives"), 500
+
+    # Insert into DB
+    inserted = 0
+    for c in new_cities[:TARGET]:
+        try:
+            conn.execute(
+                """INSERT OR IGNORE INTO ref_city
+                   (city_name, region, country, population, rank)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (c["city_name"], c["region"], c["country"],
+                 c["population"], c["rank"]),
+            )
+            inserted += 1
+        except Exception:
+            pass
+    conn.commit()
+
+    return jsonify(success=True, inserted=inserted, cities=[c["city_name"] for c in new_cities[:TARGET]])
+
+
 # ------------------------------------------------------------------
 #  Coverage / completeness
 # ------------------------------------------------------------------

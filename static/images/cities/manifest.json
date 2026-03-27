@@ -1288,5 +1288,29 @@
     "source_page": "https://en.wikipedia.org/wiki/Red_deer",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Cervus_elaphus_Luc_Viatour_6.jpg/1280px-Cervus_elaphus_Luc_Viatour_6.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "bridgeport-connecticut": {
+    "filename": "bridgeport-connecticut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Bridgeport%2C_Connecticut",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Bridgeport%2C_Connecticut.jpg/1280px-Bridgeport%2C_Connecticut.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "lac-megantic-quebec": {
+    "filename": "lac-megantic-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Lac-M%C3%A9gantic%2C_Quebec",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Lac-M%C3%A9gantic_mod.jpg/1280px-Lac-M%C3%A9gantic_mod.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-leonard-d-aston-quebec": {
+    "filename": "saint-leonard-d-aston-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saint-L%C3%A9onard-d'Aston",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Saint-L%C3%A9onard-d%27Aston.jpg/1280px-Saint-L%C3%A9onard-d%27Aston.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "coquitlam-british-columbia": {
+    "filename": "coquitlam-british-columbia.png",
+    "source_page": "https://en.wikipedia.org/wiki/Coquitlam",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Coquitlam_Town_Centre_2025.png/1280px-Coquitlam_Town_Centre_2025.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }
