@@ -135,7 +135,7 @@ def generate_city(api_key: str, model: str, city_input: str, prompt_text: str, *
                 "max_tokens": max_tokens,
                 "temperature": 0.3,
             },
-            timeout=120,
+            timeout=300,
         )
         if resp.status_code == 401:
             return {"success": False, "error": "Clé API invalide (401)."}

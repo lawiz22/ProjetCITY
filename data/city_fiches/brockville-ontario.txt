@@ -1,0 +1,204 @@
+```markdown
+# **Brockville, Ontario** — Fiche Complète
+
+---
+
+## 📍 **Informations Générales**
+
+| Catégorie          | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| Ville              | Brockville                                                              |
+| État/Province      | Ontario, Canada                                                         |
+| Surnom             | "La Ville des Mille Îles" 🏝️ / "The City of the 1000 Islands" 🌉       |
+| Statut             | Ville (*City*) depuis 1962                                             |
+| Comté/Région       | Comté unifié de Leeds et Grenville                                      |
+| Maire              | **Jeff Earle** (depuis 2022)                                           |
+| Fondation          | 1785 (établissement), 1832 (incorporation comme village), 1856 (ville) |
+| Université         | **St. Lawrence College** (campus local), **Queen’s University** (partenariats) |
+
+---
+
+## 👥 **Population**
+
+| Année       | Population (Ville) | Population (Agglomération) |
+|-------------|-------------------|----------------------------|
+| 2000        | 21 957            | ~45 000                    |
+| 2010        | 21 890            | ~46 500                    |
+| 2020        | 22 338            | ~48 000                    |
+| 2023 (est.) | ~22 600           | ~49 000                    |
+| Grand Brockville (RMR) | N/A (intégré à Kingston–Brockville MSA : ~200 000) |
+
+📈 **Croissance lente mais stable** : +3% depuis 2000, influencée par la proximité d’Ottawa et Kingston.
+🥇 **Plus ancienne ville de l’Est de l’Ontario** (fondée avant Ottawa et Kingston).
+🌍 **Démographie vieillissante** : 22% des habitants ont +65 ans (moyenne ontarienne : 17%).
+
+---
+
+## 📐 **Géographie & Densité**
+
+| Donnée          | Valeur                                                                 |
+|-----------------|------------------------------------------------------------------------|
+| Superficie      | 21,62 km² (terre), 3.4 km² (eau)                                      |
+| Densité         | ~1 046 hab./km²                                                        |
+| Plan d’eau      | **Fleuve Saint-Laurent** (frontière USA-Canada), **Mille Îles** 🏝️    |
+| Relief          | Plaines avec collines douces (escarpement du Bouclier canadien à l’est) |
+| Altitude        | 80–120 m                                                               |
+
+📍 **Localisation stratégique** :
+- 110 km au sud d’Ottawa
+- 60 km à l’est de Kingston
+- 30 km de la frontière américaine (Ogdensburg, NY)
+
+---
+
+## 🏛️ **Économie**
+
+**Secteurs Principaux** :
+🏥 **Santé** — **Hôpital général de Brockville** (300 employés), soins spécialisés pour la région.
+🏭 **Manufacturier** — **Procter & Gamble** (usine historique, 1968), **3M**, **Canarm** (ventilation).
+🚢 **Tourisme** — Croisières des **Mille Îles**, casinos (proche **Gananoque**).
+💻 **Tech & Éducation** — **St. Lawrence College** (programmes en cybersécurité et santé).
+🛒 **Commerce de détail** — Centre-ville revitalisé (*Downtown Brockville*).
+
+💡 **Économie en transition** : Déclin manufacturier compensé par le tourisme et les services publics.
+
+---
+
+## 🎓 **Éducation**
+
+| Institution               | Type                     | Étudiants  |
+|---------------------------|--------------------------|------------|
+| **St. Lawrence College**  | Collège public           | ~6 500 (tous campus) |
+| **Brockville Collegiate Institute** | École secondaire | ~1 200 |
+| **Fulford Academy**       | École privée internationale | ~300 |
+
+✨ **Particularités** :
+- **Fulford Academy** attire des étudiants du monde entier (programmes d’anglais intensif).
+- **Partenariats avec Queen’s University** pour des formations en santé.
+
+---
+
+## 🏥 **Santé**
+
+- **Hôpital général de Brockville (BGH)** :
+  - 150 lits, **centre de cancérologie régional**.
+  - Affilié à **Queen’s University** pour les stages médicaux.
+  - **Spécialités** : Soins palliatifs, santé mentale, urgences.
+- **Clinique de santé communautaire** : Services pour les sans-abri et les nouveaux arrivants.
+
+---
+
+## 🎵 **Culture & Musique**
+
+| Artiste / Groupe / Personnalité       | Lien avec Brockville                                  |
+|---------------------------------------|-------------------------------------------------------|
+| **The Tragically Hip** (Gord Downie)  | A joué au **Brockville Arts Centre** (1990s).        |
+| **Rush** (Alex Lifeson)               | A grandi à nearby **Kingston**, mais a donné des concerts à Brockville. |
+| **Don Cherry** (commentateur hockey)  | A vécu à Brockville dans les années 1960.             |
+
+🎭 **Lieux culturels** :
+- **Brockville Arts Centre** (1862, ancien opéra).
+- **Festival des Mille Îles** (juillet, musique et art).
+- **Musée de Brockville** (histoire locale et ferroviaire).
+
+---
+
+## 🌿 **Environnement & Énergie**
+
+- **Parc éolien de Wolfe Island** (proche) : 86 turbines, alimentent 75 000 foyers.
+- **Projet de protection du fleuve** : Lutte contre les espèces invasives (moule zébrée).
+- **Défi** : Pollution historique (anciennes usines **Domtar** et **Procter & Gamble**).
+
+🌱 **Initiatives vertes** :
+- **Programme de compostage municipal** (depuis 2010).
+- **Pistes cyclables** le long du fleuve (20 km).
+
+---
+
+## 🏈 **Sports & Loisirs**
+
+| Équipe               | Sport          | Ligue                     |
+|----------------------|----------------|---------------------------|
+| **Brockville Braves** | Hockey         | CCHL (Ligue junior A)      |
+| **Brockville Tikis** | Baseball       | NCBL (Ligue senior)        |
+| **Brockville Buccaneers** | Football canadien | Ligue amateur locale |
+
+🎣 **Activités populaires** :
+- **Pêche** (brochet, achigan) dans le fleuve.
+- **Randonnée** : **Sentier des Mille Îles**, **Parc Blockhouse Island**.
+- **Casino** : **1000 Islands Charity Casino** (jeux et spectacles).
+
+---
+
+## 🚗 **Transport**
+
+| Mode               | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| **Autoroutes**     | **Autoroute 401** (sortie 699), **Route 2** (scénique le long du fleuve). |
+| **Aéroport**       | **Aéroport de Brockville (CNL3)** – petit aéroport régional.          |
+| **Transport en commun** | **Brockville Transit** (6 lignes de bus).                      |
+| **Train**          | **Via Rail** (ligne Toronto–Montréal, arrêt à Brockville).             |
+| **Traversier**     | **1000 Islands Cruise Lines** (vers les îles et les États-Unis).       |
+
+⏱️ **Distances clés** :
+- **Ottawa** : 1h15 en voiture (401).
+- **Kingston** : 45 min (401).
+- **Montréal** : 2h30 (401 + 416).
+
+---
+
+## 🌡️ **Climat**
+
+| Saison       | Temp. Moyenne | Précipitations |
+|--------------|---------------|----------------|
+| **Hiver (Jan)** | -8°C          | Neige (150 cm/an) |
+| **Printemps (Avr)** | 8°C       | Pluie (80 mm)   |
+| **Été (Juil)**    | 22°C          | Orages fréquents |
+| **Automne (Oct)**  | 10°C          | Feuilles spectaculaires 🍁 |
+
+🌨️ **Particularités** :
+- **Hivers rigoureux** (records à -30°C).
+- **Été humide** (idéal pour les croisières).
+- **Vent dominant** : Nord-ouest (rafales à 80 km/h en hiver).
+
+---
+
+## 🏙️ **Quartiers Notables**
+
+| Quartier               | Caractéristique                                                                 |
+|------------------------|---------------------------------------------------------------------------------|
+| **Downtown**           | Cœur historique, boutiques, **Brockville Arts Centre**, pubs (ex: **The Sleigh**). |
+| **Thousand Islands Parkway** | Maisons de luxe, accès aux croisières, **Parc Blockhouse Island**.       |
+| **Gardenside**         | Résidentiel familial, écoles, **parc Mac Johnson**.                          |
+| **West End**           | Quartier ouvrier, **usine Procter & Gamble**, logements abordables.          |
+| **Lyn Valley**         | Nature, **sentiers de randonnée**, proche du **marais de Lyn**.               |
+| **East Ward**          | Développement récent, centres commerciaux (**1000 Islands Mall**).            |
+
+---
+
+## 📊 **Comparaison — Grandes Villes de l’Est de l’Ontario**
+
+| Ville          | Population (2023) | Caractéristique principale                          |
+|----------------|-------------------|----------------------------------------------------|
+| **Brockville** | ~22 600           | **Tourisme fluvial**, industrie légère.            |
+| **Kingston**   | ~140 000          | **Universités (Queen’s)**, base militaire.          |
+| **Cornwall**   | ~47 000           | **Bilingue (30% francophones)**, industrie lourde. |
+| **Gananoque**  | ~5 200            | **"Porte des Mille Îles"**, théâtre **1000 Islands Playhouse**. |
+
+---
+
+## 💡 **Le Saviez-Vous ?**
+
+- 🏗️ **Premier tunnel ferroviaire du Canada** — Creusé en 1860 sous Brockville pour le **Grand Tronc** (aujourd’hui utilisé par Via Rail).
+- 🎭 **Le plus vieux théâtre en activité au Canada** — **Brockville Arts Centre** (1862), fréquenté par Oscar Wilde en 1882.
+- 🚂 **Capitale ferroviaire historique** — Au 19e siècle, Brockville était un **nœud ferroviaire majeur** entre Toronto et Montréal.
+- 🏛️ **Bâtiment le plus hanté de l’Ontario** — **L’hôtel **Brockville Railway Tunnel** (rumeurs de fantômes de cheminots).
+- 🍁 **Arbre emblématique** — Un **chêne blanc de 200 ans** dans le **parc Blockhouse Island**, classé "arbre héritage".
+- 🎵 **Lieu de tournage secret** — Des scènes du film **"The Changeling"** (1980, avec George C. Scott) y ont été tournées.
+- 🏆 **Championne de hockey** — **Brockville est la ville natale de **Cassie Campbell****, ancienne capitaine de l’équipe féminine canadienne (or olympique 2002, 2006).
+- 🚢 **Le naufrage le plus célèbre** — L’**America** (1854), un bateau à vapeur qui a coulé près de Brockville (épave toujours visible).
+- 🍺 **Brasserie historique** — **Brockville était un centre de brassage au 19e siècle** (la **Brockville Brewery** a fermé en 1920).
+- 🌉 **Pont frontalier méconnu** — Le **pont des Mille Îles** (vers les États-Unis) était autrefois un **passage clandestin** pendant la Prohibition.
+- 📡 **Première station de radio de l’Est ontarien** — **CFJR** (1923), toujours en activité aujourd’hui.
+- 🦅 **Sanctuaire d’oiseaux** — Le **marais de Lyn** abrite des **aigles à tête blanche** en migration.
+```

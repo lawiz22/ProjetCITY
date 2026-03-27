@@ -37,7 +37,7 @@ US_STATES = {
 }
 
 REGION_ALIASES = {
-    # French names
+    # French names — US states
     "Californie": "California",
     "Floride": "Florida",
     "Pennsylvanie": "Pennsylvania",
@@ -46,6 +46,13 @@ REGION_ALIASES = {
     "Virginie": "Virginia",
     "Géorgie": "Georgia",
     "Louisiane": "Louisiana",
+    # French names — Canadian provinces
+    "Colombie-Britannique": "British Columbia",
+    "Nouveau-Brunswick": "New Brunswick",
+    "Nouvelle-Écosse": "Nova Scotia",
+    "Île-du-Prince-Édouard": "Prince Edward Island",
+    "Terre-Neuve-et-Labrador": "Newfoundland and Labrador",
+    "Territoires du Nord-Ouest": "Northwest Territories",
     # Quebec accent normalization
     "Quebec": "Québec",
     # Canadian province abbreviations
@@ -80,7 +87,7 @@ REGION_ALIASES = {
     "DC": "District of Columbia",
 }
 
-USER_AGENT = "ProjetCITY/1.0 (city photo cache)"
+USER_AGENT = "CentralCityScrutinizer/1.0 (city photo cache)"
 SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
 SEARCH_URL = "https://en.wikipedia.org/w/api.php?action=query&list=search&utf8=1&format=json&srlimit=5&srsearch={query}"
 

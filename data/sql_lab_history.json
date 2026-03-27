@@ -1,5 +1,19 @@
 [
   {
+    "timestamp": "2026-03-26T21:06:42.682318+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, period_range_label, period_title,\r\n  start_population, end_population, population_change_pct\r\nFROM vw_city_period_detail_with_population\r\nORDER BY city_name, period_order\r\nLIMIT 25;",
+    "preview": "SELECT city_name, period_range_label, period_title,"
+  },
+  {
+    "timestamp": "2026-03-26T21:06:38.289680+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, country, MAX(year) AS année, MAX(population) AS population\r\nFROM vw_city_population_analysis\r\nGROUP BY city_id\r\nORDER BY population DESC\r\nLIMIT 10;",
+    "preview": "SELECT city_name, country, MAX(year) AS année, MAX(population) AS population"
+  },
+  {
     "timestamp": "2026-03-25T20:48:43.383740+00:00",
     "action": "execute",
     "status": "read",

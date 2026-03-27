@@ -20,6 +20,7 @@
         </div>
         <div class="map-toolbar-right">
             <input id="map-search-filter" type="text" placeholder="🔍 Rechercher une ville…" class="map-search-input">
+            <button type="button" id="map-refresh-btn" class="map-refresh-pill" title="Rafraîchir les données">⟳</button>
         </div>
     </div>
 
@@ -93,6 +94,6 @@
 
 {% block scripts_extra %}
 <script>window.__mapPoints = {{ map_payload.points | tojson }};</script>
-<script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=5"></script>
 {% endblock %}

@@ -269,7 +269,7 @@ def build_dashboard_pdf(filters: dict[str, Any], metrics: dict[str, Any], growth
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=18 * mm, leftMargin=18 * mm, topMargin=16 * mm, bottomMargin=16 * mm)
     story: list[Any] = []
 
-    story.append(Paragraph("ProjetCITY Analyst - Dashboard", styles["TitleCity"]))
+    story.append(Paragraph("Central City Scrutinizer - Dashboard", styles["TitleCity"]))
     filter_text = ", ".join(f"{key}: {value}" for key, value in filters.items() if value) or "aucun filtre"
     story.append(Paragraph(f"Filtres actifs: {filter_text}", styles["Muted"]))
     story.append(Spacer(1, 8))

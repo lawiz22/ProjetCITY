@@ -1,0 +1,327 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<form method="post" action="{{ url_for('web.add_city_merge_import') }}" id="merge-form">
+<input type="hidden" name="stats_text" value="{{ stats_text|e }}">
+<input type="hidden" name="periods_text" value="{{ periods_text|e }}">
+<input type="hidden" name="fiche_text" value="{{ fiche_text|e }}">
+
+{# ── Header ── #}
+<section class="panel-grid panel-grid-1">
+    <article class="panel merge-header-panel">
+        <div class="panel-head">
+            <h2>🔀 Fusion — {{ city_name }}</h2>
+            <span>Comparez les données existantes avec les nouvelles et choisissez quoi garder</span>
+        </div>
+        <div class="merge-summary-bar">
+            <div class="merge-summary-item">
+                <strong>Population</strong>
+                <span>Existant : {{ existing_pop_count }} pts — Nouveau : {{ new_pop_count }} pts</span>
+            </div>
+            <div class="merge-summary-item">
+                <strong>Annotations</strong>
+                <span>Existant : {{ existing_ann_count }} — Nouveau : {{ new_ann_count }}</span>
+            </div>
+            <div class="merge-summary-item">
+                <strong>Périodes</strong>
+                <span>Existant : {{ existing_period_count }} — Nouveau : {{ new_period_count }}</span>
+            </div>
+            <div class="merge-summary-item">
+                <strong>Fiche</strong>
+                <span>Existant : {{ existing_fiche_sections|length }} sections — Nouveau : {{ new_fiche_sections|length }} sections</span>
+            </div>
+        </div>
+    </article>
+</section>
+
+{# ── Quick actions ── #}
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <button type="button" class="merge-quick-btn" onclick="mergeSelectAll('new')">✨ Tout remplacer par le nouveau</button>
+            <button type="button" class="merge-quick-btn" onclick="mergeSelectAll('existing')">🛡️ Tout garder l'existant</button>
+            <button type="button" class="merge-quick-btn" onclick="mergeSelectAll('merge')">🔀 Fusionner (ajouter les nouveaux)</button>
+        </div>
+    </article>
+</section>
+
+{# ── Population comparison ── #}
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>📊 Population</h2>
+            <span>Comparaison année par année</span>
+        </div>
+        <div class="merge-choice-bar">
+            <label class="merge-radio-label"><input type="radio" name="pop_action" value="keep" checked> 🛡️ Garder l'existant</label>
+            <label class="merge-radio-label"><input type="radio" name="pop_action" value="replace"> ✨ Remplacer par le nouveau</label>
+            <label class="merge-radio-label"><input type="radio" name="pop_action" value="merge"> 🔀 Fusionner (ajouter les années manquantes)</label>
+        </div>
+        <div class="merge-table-wrap">
+            <table class="merge-table">
+                <thead>
+                    <tr>
+                        <th>Année</th>
+                        <th>Existant</th>
+                        <th>Nouveau</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in pop_diff %}
+                    <tr class="merge-row merge-row-{{ row.status }}">
+                        <td>{{ row.year }}</td>
+                        <td>{{ '{:,}'.format(row.existing) if row.existing is not none else '—' }}</td>
+                        <td>{{ '{:,}'.format(row.new) if row.new is not none else '—' }}</td>
+                        <td>
+                            {% if row.status == 'same' %}<span class="merge-badge merge-badge-same">Identique</span>
+                            {% elif row.status == 'new' %}<span class="merge-badge merge-badge-new">Nouveau</span>
+                            {% elif row.status == 'only_existing' %}<span class="merge-badge merge-badge-existing">Existant uniquement</span>
+                            {% elif row.status == 'changed' %}<span class="merge-badge merge-badge-changed">Modifié</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+{# ── Annotations comparison ── #}
+{% if ann_diff %}
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>📝 Annotations</h2>
+            <span>Comparaison des annotations par année</span>
+        </div>
+        <div class="merge-choice-bar">
+            <label class="merge-radio-label"><input type="radio" name="ann_action" value="keep" checked> 🛡️ Garder l'existant</label>
+            <label class="merge-radio-label"><input type="radio" name="ann_action" value="replace"> ✨ Remplacer par le nouveau</label>
+            <label class="merge-radio-label"><input type="radio" name="ann_action" value="merge"> 🔀 Fusionner (ajouter les nouvelles)</label>
+        </div>
+        <div class="merge-table-wrap">
+            <table class="merge-table">
+                <thead>
+                    <tr>
+                        <th>Année</th>
+                        <th>Existant</th>
+                        <th>Nouveau</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in ann_diff %}
+                    <tr class="merge-row merge-row-{{ row.status }}">
+                        <td>{{ row.year }}</td>
+                        <td>
+                            {% if row.existing %}
+                            <span class="merge-ann-color" style="background:{{ row.existing.color }}"></span>
+                            {{ row.existing.label }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if row.new %}
+                            <span class="merge-ann-color" style="background:{{ row.new.color }}"></span>
+                            {{ row.new.label }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if row.status == 'same' %}<span class="merge-badge merge-badge-same">Identique</span>
+                            {% elif row.status == 'new' %}<span class="merge-badge merge-badge-new">Nouveau</span>
+                            {% elif row.status == 'only_existing' %}<span class="merge-badge merge-badge-existing">Existant uniquement</span>
+                            {% elif row.status == 'changed' %}<span class="merge-badge merge-badge-changed">Modifié</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+{% endif %}
+
+{# ── Periods comparison ── #}
+{% if period_diff %}
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>📅 Périodes historiques</h2>
+            <span>Comparaison des sections</span>
+        </div>
+        <div class="merge-choice-bar">
+            <label class="merge-radio-label"><input type="radio" name="period_action" value="keep" checked> 🛡️ Garder l'existant</label>
+            <label class="merge-radio-label"><input type="radio" name="period_action" value="replace"> ✨ Remplacer par le nouveau</label>
+            <label class="merge-radio-label"><input type="radio" name="period_action" value="merge"> 🔀 Fusionner (ajouter les nouvelles)</label>
+        </div>
+        <div class="merge-periods-grid">
+            {% for row in period_diff %}
+            <div class="merge-period-card merge-period-{{ row.status }}">
+                <div class="merge-period-range">{{ row.range }}</div>
+                <div class="merge-period-columns">
+                    <div class="merge-period-col">
+                        <div class="merge-period-col-label">Existant</div>
+                        {% if row.existing %}
+                        <strong>{{ row.existing.period_title }}</strong>
+                        <ul>
+                            {% for item in row.existing['items'][:5] %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                            {% if row.existing['items']|length > 5 %}
+                            <li class="merge-more">+{{ row.existing['items']|length - 5 }} de plus…</li>
+                            {% endif %}
+                        </ul>
+                        {% else %}
+                        <span class="merge-empty">—</span>
+                        {% endif %}
+                    </div>
+                    <div class="merge-period-col">
+                        <div class="merge-period-col-label">Nouveau</div>
+                        {% if row.new %}
+                        <strong>{{ row.new.period_title }}</strong>
+                        <ul>
+                            {% for item in row.new['items'][:5] %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                            {% if row.new['items']|length > 5 %}
+                            <li class="merge-more">+{{ row.new['items']|length - 5 }} de plus…</li>
+                            {% endif %}
+                        </ul>
+                        {% else %}
+                        <span class="merge-empty">—</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="merge-period-status">
+                    {% if row.status == 'same' %}<span class="merge-badge merge-badge-same">Identique</span>
+                    {% elif row.status == 'new' %}<span class="merge-badge merge-badge-new">Nouveau</span>
+                    {% elif row.status == 'only_existing' %}<span class="merge-badge merge-badge-existing">Existant uniquement</span>
+                    {% elif row.status == 'changed' %}<span class="merge-badge merge-badge-changed">Modifié</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endif %}
+
+{# ── Fiche comparison ── #}
+{% if existing_fiche_sections or new_fiche_sections %}
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>📋 Fiche complète</h2>
+            <span>Sections disponibles</span>
+        </div>
+        <div class="merge-choice-bar">
+            <label class="merge-radio-label"><input type="radio" name="fiche_action" value="keep" checked> 🛡️ Garder l'existant</label>
+            <label class="merge-radio-label"><input type="radio" name="fiche_action" value="replace"> ✨ Remplacer par le nouveau</label>
+        </div>
+        <div class="merge-fiche-columns">
+            <div class="merge-fiche-col">
+                <h3>Existant ({{ existing_fiche_sections|length }} sections)</h3>
+                {% for s in existing_fiche_sections %}
+                <details class="merge-fiche-detail">
+                    <summary class="merge-fiche-item">{{ s.emoji }} {{ s.title }}</summary>
+                    <div class="merge-fiche-content">
+                        {% for block in s.blocks %}
+                            {% if block.type == 'table' %}
+                            <table class="merge-fiche-table">
+                                {% if block.headers %}
+                                <thead><tr>{% for h in block.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+                                {% endif %}
+                                <tbody>
+                                {% for row in block.rows %}
+                                <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% elif block.type == 'bullets' %}
+                            <ul class="merge-fiche-bullets">
+                                {% for item in block['items'] %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% elif block.type == 'text' %}
+                            <p class="merge-fiche-text">{{ block.text }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+                {% if not existing_fiche_sections %}
+                <span class="merge-empty">Aucune fiche existante</span>
+                {% endif %}
+            </div>
+            <div class="merge-fiche-col">
+                <h3>Nouveau ({{ new_fiche_sections|length }} sections)</h3>
+                {% for s in new_fiche_sections %}
+                <details class="merge-fiche-detail">
+                    <summary class="merge-fiche-item">{{ s.emoji }} {{ s.title }}</summary>
+                    <div class="merge-fiche-content">
+                        {% for block in s.blocks %}
+                            {% if block.type == 'table' %}
+                            <table class="merge-fiche-table">
+                                {% if block.headers %}
+                                <thead><tr>{% for h in block.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+                                {% endif %}
+                                <tbody>
+                                {% for row in block.rows %}
+                                <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% elif block.type == 'bullets' %}
+                            <ul class="merge-fiche-bullets">
+                                {% for item in block['items'] %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% elif block.type == 'text' %}
+                            <p class="merge-fiche-text">{{ block.text }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+                {% if not new_fiche_sections %}
+                <span class="merge-empty">Aucune fiche fournie</span>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+</section>
+{% endif %}
+
+{# ── Submit ── #}
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
+        <div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+            <button type="submit" class="merge-submit-btn">🔀 Appliquer la fusion</button>
+            <a href="{{ url_for('web.add_city') }}" style="font-size:.9rem;">← Annuler et retourner</a>
+        </div>
+    </article>
+</section>
+
+</form>
+
+<script>
+function mergeSelectAll(mode) {
+    var radios = document.querySelectorAll('#merge-form input[type="radio"]');
+    radios.forEach(function(r) {
+        if (mode === 'new' && r.value === 'replace') r.checked = true;
+        else if (mode === 'existing' && r.value === 'keep') r.checked = true;
+        else if (mode === 'merge' && r.value === 'merge') r.checked = true;
+        else if (mode === 'merge' && r.value === 'replace') {
+            // For sections without a merge option, default to replace
+            var group = r.name;
+            var hasMerge = document.querySelector('input[name="' + group + '"][value="merge"]');
+            if (!hasMerge) r.checked = true;
+        }
+    });
+}
+</script>
+{% endblock %}

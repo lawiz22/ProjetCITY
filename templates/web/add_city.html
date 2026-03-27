@@ -120,6 +120,12 @@ Fondation	1826
             <button type="submit" id="import-btn" disabled style="font-size:1rem;padding:.7rem 2rem;">
                 Importer la ville
             </button>
+            <button type="button" id="compare-btn" style="display:none;font-size:1rem;padding:.7rem 2rem;background:var(--accent,#4f46e5);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                🔀 Comparer et fusionner
+            </button>
+            <label style="font-size:.85rem;cursor:pointer;" title="Cochez pour ignorer la validation du nom de ville par géocodage">
+                <input type="checkbox" name="force_import"> Forcer l'import (ignorer la validation du nom)
+            </label>
             <span class="helper-text" id="import-hint">Collez les données population pour activer le bouton.</span>
         </div>
     </article>
@@ -134,8 +140,10 @@ Fondation	1826
     var hint = document.getElementById('import-hint');
     var slugInfo = document.getElementById('slug-info');
     var banner = document.getElementById('existing-banner');
+    var compareBtn = document.getElementById('compare-btn');
     var lastSlug = '';
     var checkTimeout = null;
+    var cityExists = false;
 
     function extractSlug(text) {
         var m = text.match(/CITY_NAME\s*=\s*["'](.+?)["']/);
@@ -153,6 +161,8 @@ Fondation	1826
     function checkExisting(slug) {
         if (!slug) {
             banner.style.display = 'none';
+            compareBtn.style.display = 'none';
+            cityExists = false;
             return;
         }
         fetch('{{ url_for("web.add_city_check_slug") }}?slug=' + encodeURIComponent(slug))
@@ -160,6 +170,8 @@ Fondation	1826
             .then(function(data) {
                 if (!data.exists) {
                     banner.style.display = 'none';
+                    compareBtn.style.display = 'none';
+                    cityExists = false;
                     btn.textContent = 'Importer la ville';
                     // Reset checkboxes
                     document.getElementById('skip-pop').checked = false;
@@ -169,6 +181,8 @@ Fondation	1826
                     return;
                 }
                 banner.style.display = '';
+                compareBtn.style.display = '';
+                cityExists = true;
                 btn.textContent = 'Mettre à jour la ville';
                 document.getElementById('existing-city-name').textContent =
                     data.city_name + ' (' + data.country + ')';
@@ -182,7 +196,7 @@ Fondation	1826
                 document.getElementById('existing-photo').textContent =
                     data.has_photo ? 'Oui' : 'Non';
             })
-            .catch(function() { banner.style.display = 'none'; });
+            .catch(function() { banner.style.display = 'none'; compareBtn.style.display = 'none'; cityExists = false; });
     }
 
     function sync() {
@@ -208,6 +222,18 @@ Fondation	1826
 
     statsArea.addEventListener('input', sync);
     sync();
+
+    // Compare button: submit to compare route in a new tab
+    compareBtn.addEventListener('click', function() {
+        var form = document.getElementById('import-form');
+        var origAction = form.action;
+        var origTarget = form.target;
+        form.action = '{{ url_for("web.add_city_compare") }}';
+        form.target = '_blank';
+        form.submit();
+        form.action = origAction;
+        form.target = origTarget || '';
+    });
 })();
 </script>
 {% endblock %}

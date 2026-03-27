@@ -152,6 +152,9 @@
             <button type="button" class="opt-btn opt-btn-save" id="add-city-btn" style="font-size:1rem;padding:.7rem 2rem;">
                 🏙️ Ajouter la ville
             </button>
+            <button type="button" id="compare-city-btn" style="display:none;font-size:1rem;padding:.7rem 2rem;background:var(--accent,#4f46e5);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                🔀 Comparer et fusionner
+            </button>
         </div>
         <div class="opt-test-result" id="add-city-result" style="display:none;"></div>
     </div>
@@ -184,8 +187,11 @@
             panel.style.display = '';
             var city = cityInput.value.trim();
             document.getElementById('add-city-info').textContent = 'Ville : ' + city;
-            /* Check if city exists */
-            var slug = city.normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+            /* Check if city exists — use CITY_NAME from Step 1 result for accurate slug */
+            var step1Text = document.getElementById('ai1-result').value || '';
+            var cityNameMatch = step1Text.match(/CITY_NAME\s*=\s*["'](.+?)["']/);
+            var slugSource = cityNameMatch ? cityNameMatch[1] : city;
+            var slug = slugSource.normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
             fetch('{{ url_for("web.add_city_check_slug") }}?slug=' + encodeURIComponent(slug))
                 .then(function(r) { return r.json(); })
@@ -194,8 +200,10 @@
                         document.getElementById('existing-banner').style.display = '';
                         document.getElementById('existing-city-name').textContent =
                             data.city_name + ' (' + data.country + ')';
+                        document.getElementById('compare-city-btn').style.display = '';
                     } else {
                         document.getElementById('existing-banner').style.display = 'none';
+                        document.getElementById('compare-city-btn').style.display = 'none';
                     }
                 });
         }
@@ -274,6 +282,25 @@
 
     setupStep(3, 'ai3-prompt', 'ai3-generate', 'ai3-result-wrap', 'ai3-result', 'ai3-copy',
         { label: '🚀 Générer Step 3', maxTokens: 4000 });
+
+    /* ---- Compare & merge button ---- */
+    document.getElementById('compare-city-btn').addEventListener('click', function() {
+        var statsText   = document.getElementById('ai1-result').value.trim();
+        var periodsText = document.getElementById('ai2-result').value.trim();
+        var ficheText   = document.getElementById('ai3-result').value.trim();
+        if (!statsText) { alert('Le résultat Step 1 est vide.'); return; }
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("web.add_city_compare") }}';
+        form.target = '_blank';
+        function addField(n, v) { var i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); }
+        addField('stats_text', statsText);
+        addField('periods_text', periodsText);
+        addField('fiche_text', ficheText);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    });
 
     /* ---- Add city button ---- */
     var addBtn = document.getElementById('add-city-btn');

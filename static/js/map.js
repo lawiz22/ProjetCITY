@@ -302,8 +302,8 @@
 
         [ctrls.popRange, ctrls.search].forEach(function (el) {
             if (el) {
-                el.addEventListener('input', render);
-                el.addEventListener('change', render);
+                el.addEventListener('input', function () { render(); });
+                el.addEventListener('change', function () { render(); });
             }
         });
 
@@ -365,6 +365,34 @@
                 });
             });
         });
+
+        /* ── refresh button (AJAX reload) ────────────────────── */
+
+        var refreshBtn = document.getElementById('map-refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function () {
+                refreshBtn.disabled = true;
+                refreshBtn.classList.add('is-loading');
+                fetch('/map/data')
+                    .then(function (r) { return r.json(); })
+                    .then(function (newPoints) {
+                        points = newPoints;
+                        window.__mapPoints = newPoints;
+                        var _origFitBounds = map.fitBounds;
+                        var _origSetView = map.setView;
+                        map.fitBounds = function () { return map; };
+                        map.setView = function () { return map; };
+                        render();
+                        map.fitBounds = _origFitBounds;
+                        map.setView = _origSetView;
+                    })
+                    .catch(function () {})
+                    .then(function () {
+                        refreshBtn.disabled = false;
+                        refreshBtn.classList.remove('is-loading');
+                    });
+            });
+        }
 
         /* ── first render ────────────────────────────────────── */
 

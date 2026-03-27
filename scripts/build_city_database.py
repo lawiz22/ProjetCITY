@@ -42,6 +42,7 @@ CITY_OVERRIDES = {
 }
 
 REGION_ALIASES = {
+    # French names — US states
     "Californie": "California",
     "Floride": "Florida",
     "Pennsylvanie": "Pennsylvania",
@@ -50,6 +51,15 @@ REGION_ALIASES = {
     "Virginie": "Virginia",
     "Géorgie": "Georgia",
     "Louisiane": "Louisiana",
+    # French names — Canadian provinces
+    "Colombie-Britannique": "British Columbia",
+    "Nouveau-Brunswick": "New Brunswick",
+    "Nouvelle-Écosse": "Nova Scotia",
+    "Île-du-Prince-Édouard": "Prince Edward Island",
+    "Terre-Neuve-et-Labrador": "Newfoundland and Labrador",
+    "Territoires du Nord-Ouest": "Northwest Territories",
+    # Quebec accent normalization
+    "Quebec": "Québec",
 }
 
 

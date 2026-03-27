@@ -92,7 +92,7 @@ def export_all() -> str:
     header = textwrap.dedent("""\
         # -*- coding: utf-8 -*-
         # ================================================================
-        # villestats_RAW.py — Export automatique depuis la BD ProjetCITY
+        # villestats_RAW.py — Export automatique depuis la BD Central City Scrutinizer
         # Ce fichier est régénéré à chaque import de ville.
         # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
         # ================================================================

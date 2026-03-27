@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ page_title }} | ProjetCITY Analyst</title>
+    <title>{{ page_title }} | Central City Scrutinizer</title>
     <script>
         document.documentElement.dataset.theme = localStorage.getItem('projetcity-theme') || 'light';
     </script>
@@ -24,11 +24,7 @@
         <aside class="sidebar sidebar-nav">
             <div class="sidebar-nav-top">
                 <a class="brand" href="{{ url_for('web.dashboard') }}">
-                    <span class="brand-mark">PC</span>
-                    <div>
-                        <strong>ProjetCITY Analyst</strong>
-                        <span>Urban intelligence platform</span>
-                    </div>
+                    <img src="{{ url_for('static', filename='images/ccs-logo.png') }}" alt="Central City Scrutinizer" class="brand-logo">
                 </a>
                 <nav class="nav-links">
                     <a href="{{ url_for('web.dashboard') }}">Dashboard</a>
@@ -48,7 +44,7 @@
 
         <main class="main-panel">
             <header class="hero-bar">
-                <h1>{{ page_title }}</h1>
+                {% block hero_title %}<h1>{{ page_title }}</h1>{% endblock %}
             </header>
 
             {% with messages = get_flashed_messages(with_categories=true) %}

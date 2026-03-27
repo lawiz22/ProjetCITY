@@ -16,7 +16,7 @@ CITY_PHOTO_DIR = PROJECT_ROOT / "static" / "images" / "cities"
 CITY_PHOTO_MANIFEST = CITY_PHOTO_DIR / "manifest.json"
 DEFAULT_CITY_PHOTO = "images/cities/default-city.svg"
 
-USER_AGENT = "ProjetCITY/1.0 (city photo library)"
+USER_AGENT = "CentralCityScrutinizer/1.0 (city photo library)"
 SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
 SEARCH_URL = "https://en.wikipedia.org/w/api.php?action=query&list=search&utf8=1&format=json&srlimit=5&srsearch={query}"
 WIKI_IMAGES_URL = "https://en.wikipedia.org/w/api.php?action=query&titles={title}&prop=images&imlimit=50&format=json"

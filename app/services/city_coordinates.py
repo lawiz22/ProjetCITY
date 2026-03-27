@@ -28,12 +28,14 @@ CITY_COORDINATES: dict[str, dict[str, float]] = {
     "detroit-michigan": {"lat": 42.3314, "lng": -83.0458},
     "donnacona-quebec": {"lat": 46.6833, "lng": -71.7333},
     "edmonton-alberta": {"lat": 53.5461, "lng": -113.4938},
+    "field-british-columbia": {"lat": 51.3981, "lng": -116.4592},
     "flint-michigan": {"lat": 43.0125, "lng": -83.6875},
     "gary-indiana": {"lat": 41.5934, "lng": -87.3464},
     "gatineau-quebec": {"lat": 45.4765, "lng": -75.7013},
     "guelph-ontario": {"lat": 43.5448, "lng": -80.2482},
     "halifax-nova-scotia": {"lat": 44.6488, "lng": -63.5752},
     "hamilton-ontario": {"lat": 43.2557, "lng": -79.8711},
+    "hobbs-new-mexico": {"lat": 32.7126, "lng": -103.1361},
     "houston-texas": {"lat": 29.7604, "lng": -95.3698},
     "la-tuque-quebec": {"lat": 47.4333, "lng": -72.7833},
     "las-vegas-nevada": {"lat": 36.1699, "lng": -115.1398},
@@ -108,7 +110,7 @@ def geocode_city(city_name: str, region: str | None, country: str) -> dict[str, 
         "limit": "1",
     })
     url = f"https://nominatim.openstreetmap.org/search?{params}"
-    req = urllib.request.Request(url, headers={"User-Agent": "ProjetCITY/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "CentralCityScrutinizer/1.0"})
 
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:

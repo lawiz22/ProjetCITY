@@ -1,0 +1,197 @@
+```markdown
+# Cheyenne, Wyoming — Fiche Complète
+
+## 📍 Informations Générales
+
+| Catégorie          | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| Ville              | Cheyenne                                                                |
+| État/Province      | Wyoming 🇺🇸                                                            |
+| Surnom             | "The Magic City of the Plains" 🎩 / "Capital City" 🏛️                  |
+| Statut             | Capitale de l'État et siège du comté de Laramie                        |
+| Comté/Région       | Comté de Laramie                                                       |
+| Maire              | Patrick Collins (depuis 2021)                                          |
+| Fondation          | 1867 (fondée comme gare du chemin de fer Union Pacific)                |
+| Université         | Laramie County Community College (LCCC)                                |
+
+---
+
+## 👥 Population
+
+| Année       | Population  |
+|-------------|-------------|
+| 2000        | 53 011      |
+| 2010        | 59 466      |
+| 2020        | 65 132      |
+| 2023 (est.) | ~66 000     |
+| Grand Cheyenne (MSA) | ~100 000 |
+
+📈 **Croissance modérée** : Cheyenne a connu une croissance démographique stable, tirée par son rôle de capitale administrative et sa proximité avec les bases militaires (F.E. Warren AFB).
+🥇 **Rang** : 1ère ville du Wyoming en population, représentant ~11% de la population totale de l'État.
+🌍 **Contexte démographique** : Population majoritairement blanche (82%), avec une minorité hispanique en croissance (14%). Forte présence militaire (environ 3 500 personnels actifs).
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée          | Valeur                     |
+|-----------------|----------------------------|
+| Superficie      | ~70,2 km²                  |
+| Densité         | ~928 hab./km²              |
+| Plan d'eau      | Crow Creek (affluent de la South Platte) |
+| Relief          | Plaines des Grandes Plaines, altitude élevée |
+| Altitude        | ~1 848 m                   |
+
+**Distances par rapport aux grandes villes voisines** :
+- Denver (Colorado) : ~160 km (1h45 en voiture)
+- Fort Collins (Colorado) : ~100 km (1h15)
+- Casper (Wyoming) : ~270 km (3h)
+
+---
+
+## 🏛️ Économie
+
+**Secteurs Principaux** :
+🎖️ **Défense & Administration publique** — Siège du gouvernement du Wyoming et base aérienne F.E. Warren (l'une des trois bases de missiles balistiques intercontinentaux des États-Unis).
+🚂 **Transport & Logistique** — Nœud ferroviaire historique (Union Pacific) et routier (Interstate 80 et 25).
+🛢️ **Énergie** — Proximité des champs pétrolifères et gaziers du bassin de Powder River.
+🏥 **Santé** — Cheyenne Regional Medical Center (CRMC), principal employeur privé de la ville.
+🛒 **Commerce & Tourisme** — Capitale attire des visiteurs pour le Cheyenne Frontier Days (plus grand rodéo du monde).
+
+**Synthèse** : Économie diversifiée mais dépendante des fonds fédéraux et de l'énergie, avec un secteur tertiaire en expansion.
+
+---
+
+## 🎓 Éducation
+
+| Institution                     | Type               | Étudiants       |
+|---------------------------------|--------------------|-----------------|
+| Laramie County Community College | Collège communautaire | ~4 000          |
+| University of Wyoming (satellite) | Université publique | ~500 (campus local) |
+
+**Faits notables** :
+- Le Wyoming est le seul État américain à ne pas avoir d'université publique complète dans sa capitale (l'Université du Wyoming est basée à Laramie, à 70 km).
+- Forte présence de programmes liés à l'énergie et à l'agriculture, reflétant l'économie locale.
+
+---
+
+## 🏥 Santé
+
+- **Cheyenne Regional Medical Center (CRMC)** — Hôpital de 206 lits, principal centre de traumatologie de la région.
+  - **Spécialités** : Cardiologie, oncologie, pédiatrie.
+  - **Employés** : ~1 500.
+  - **Affiliations** : Partenariat avec l'Université du Wyoming pour la formation médicale.
+
+---
+
+## 🎵 Culture & Musique
+
+| Artiste / Groupe / Personnalité | Lien avec la ville                          |
+|---------------------------------|---------------------------------------------|
+| Chris LeDoux                   | Chanteur country et champion de rodéo, né à Cheyenne. |
+| Mildred Harris                 | Actrice du cinéma muet, première épouse de Charlie Chaplin. |
+| The Fray                       | Groupe de rock originaire de Denver, mais influencé par la scène musicale du Wyoming. |
+
+**Scène culturelle** :
+- **Cheyenne Frontier Days** 🤠 — Festival annuel depuis 1897, attirant 200 000 visiteurs pour des rodéos, concerts et parades.
+- **Wyoming State Museum** — Histoire naturelle et culturelle de l'État.
+- **Cheyenne Symphony Orchestra** — Orchestre professionnel fondé en 1950.
+- **Lieux emblématiques** : Historic Depot (musée ferroviaire), Atlas Theatre (théâtre historique).
+
+---
+
+## 🌿 Environnement & Énergie
+
+- **Énergie éolienne** : Le Wyoming est le 2ème État producteur d'énergie éolienne aux États-Unis, avec des parcs éoliens près de Cheyenne.
+- **Recyclage** : Programme de recyclage limité (seulement 10% des déchets sont recyclés, contre 32% en moyenne nationale).
+- **Enjeux** : Sécheresses récurrentes et gestion de l'eau (bassin de la South Platte).
+
+---
+
+## 🏈 Sports & Loisirs
+
+| Équipe               | Sport          | Ligue                     |
+|----------------------|----------------|---------------------------|
+| Cheyenne Warriors    | Football américain | Champions Indoor Football (CIF) |
+| Cheyenne Stampede    | Hockey sur glace | Western States Hockey League (WSHL) |
+
+**Activités de plein air** :
+- **Randonnée** : Vedauwoo (formations rocheuses à 40 km).
+- **Ski** : Hogadon Ski Area (à 15 km).
+- **Pêche** : Réservoirs de Sloan's Lake et Crystal Lake.
+- **Événements** : Cheyenne Frontier Days Rodeo (juillet), Snowy Range Ski & Rendezvous (hiver).
+
+---
+
+## 🚗 Transport
+
+| Mode               | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| Autoroute          | I-80 (est-ouest), I-25 (nord-sud), US-30 (Lincoln Highway historique). |
+| Aéroport           | Cheyenne Regional Airport (CYS) — vols vers Denver et Dallas.          |
+| Transport en commun | Cheyenne Transit Program (CTP) — bus urbains et paratransit.           |
+| Train              | Amtrak (ligne *California Zephyr*) — gare de Cheyenne désaffectée depuis 1983, mais projet de réouverture en discussion. |
+
+**Corridors importants** :
+- **I-80** : Corridor économique majeur reliant San Francisco à New York.
+- **Cheyenne Beltline** : Contournement routier pour désengorger le centre-ville.
+
+---
+
+## 🌡️ Climat
+
+| Saison          | Température moyenne |
+|-----------------|---------------------|
+| Hiver (Jan)     | -4°C                |
+| Printemps (Avr) | 8°C                 |
+| Été (Juil)      | 22°C                |
+| Automne (Oct)   | 10°C                |
+
+**Description** :
+- Climat semi-aride (Köppen *BSk*) avec des hivers froids et secs, et des étés chauds.
+- **Précipitations** : ~380 mm/an, avec des chutes de neige moyennes de 130 cm.
+- **Particularités** : Vents violents fréquents (surnom "Windy City" partagé avec Chicago), avec des rafales dépassant 100 km/h.
+
+---
+
+## 🏙️ Quartiers Notables
+
+| Quartier         | Caractéristique                                                                 |
+|------------------|---------------------------------------------------------------------------------|
+| Downtown         | Centre historique avec bâtiments victoriens, restaurants et bars.             |
+| Sun Valley       | Quartier résidentiel populaire, proche de l'aéroport.                          |
+| Buffalo Ridge    | Zone commerciale et résidentielle en croissance.                               |
+| West Edge        | Quartier en revitalisation, avec lofts et espaces artistiques.                 |
+| North Cheyenne   | Zone industrielle et militaire (proximité de F.E. Warren AFB).                 |
+| South Greeley    | Quartier ouvrier, mélange de résidences et d'industries légères.               |
+| Frontier Park    | Parc urbain abritant le Cheyenne Frontier Days Arena.                          |
+
+---
+
+## 📊 Comparaison — Grandes Villes du Wyoming
+
+| Ville          | Population | Caractéristique                                  |
+|----------------|------------|--------------------------------------------------|
+| **Cheyenne**   | **66 000** | **Capitale administrative et économique.**       |
+| Casper         | 59 000     | Centre pétrolier et gazier.                      |
+| Laramie        | 31 000     | Ville universitaire (Université du Wyoming).     |
+| Gillette       | 33 000     | Capitale du charbon (bassin de Powder River).    |
+| Rock Springs   | 23 000     | Histoire minière et diversité ethnique.          |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- 🤠 **Cheyenne est la capitale la plus élevée des États-Unis** — À 1 848 m d'altitude, elle surpasse Denver (1 609 m) et Santa Fe (2 194 m, mais capitale d'un État moins peuplé).
+- 🚂 **La ville a été fondée en 1867 en seulement 3 semaines** — Pour servir de gare au chemin de fer Union Pacific, attirant des milliers de travailleurs et d'aventuriers.
+- 💰 **Le Wyoming n'a pas d'impôt sur le revenu** — Cheyenne bénéficie de cette politique fiscale, attirant retraités et entreprises.
+- 🎪 **Cheyenne Frontier Days est le plus grand rodéo outdoor du monde** — Depuis 1897, il attire des cowboys et des visiteurs du monde entier.
+- 🚀 **F.E. Warren AFB abrite des missiles nucléaires** — La base est l'une des trois aux États-Unis à gérer des missiles balistiques intercontinentaux (ICBM).
+- 🌵 **Le Wyoming est l'État le moins peuplé des États-Unis** — Avec ~580 000 habitants, il a moins d'habitants que Cheyenne (capitale du Texas).
+- 🏛️ **Le Capitole de Cheyenne est une réplique miniature du Capitole de Washington** — Construit en 1888, il est inscrit au Registre national des lieux historiques.
+- 🐎 **Le "Cheyenne Club" était le repaire des barons du bétail** — Au XIXe siècle, ce club privé était le cœur de l'industrie du bétail dans l'Ouest américain.
+- 🎭 **Cheyenne a inspiré des westerns célèbres** — Des films comme *The Man from Laramie* (1955) et *Heaven's Gate* (1980) s'inspirent de son histoire.
+- 🌪️ **La ville est sujette aux "Chinook winds"** — Ces vents chauds peuvent faire monter la température de 20°C en quelques heures en hiver.
+- 📜 **Le Wyoming a été le premier État à accorder le droit de vote aux femmes** — En 1869, bien avant le 19ème amendement (1920).
+- 🛩️ **Cheyenne a failli devenir la capitale de l'aviation américaine** — Dans les années 1920, elle était en compétition avec Dayton (Ohio) pour accueillir le Wright-Patterson AFB.
+```

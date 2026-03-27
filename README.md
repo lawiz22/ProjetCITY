@@ -1,6 +1,6 @@
-# ProjetCITY
+# Central City Scrutinizer (CCS)
 
-Base locale d'analyse urbaine pour villes canadiennes et américaines.
+Urban Intelligence Analytic Platform — base locale d'analyse urbaine pour villes canadiennes et américaines.
 
 ## Plateforme web analyste
 

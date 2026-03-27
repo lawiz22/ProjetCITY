@@ -17,6 +17,7 @@ from .services.city_import import (
     parse_stats_text,
     save_period_details_file,
     save_uploaded_photo,
+    upsert_time_dimension,
 )
 from .services.pdf_reports import build_city_pdf, build_dashboard_pdf
 
@@ -29,7 +30,7 @@ def dashboard() -> str:
     filters = service.normalize_filters(request.args)
     return render_template(
         "web/dashboard.html",
-        page_title="Analyst Hub",
+        page_title="Dashboard",
         filters=filters,
         metrics=service.get_dashboard_metrics(filters),
         growth_leaders=service.get_growth_leaders(filters),
@@ -52,7 +53,7 @@ def dashboard_pdf() -> Response:
         service.get_decline_cities(filters),
     )
     response = Response(pdf_bytes, mimetype="application/pdf")
-    response.headers["Content-Disposition"] = "attachment; filename=projetcity-dashboard.pdf"
+    response.headers["Content-Disposition"] = "attachment; filename=ccs-dashboard.pdf"
     return response
 
 
@@ -152,6 +153,14 @@ def city_map() -> str:
         countries=filter_options["countries"],
         regions=filter_options["regions"],
     )
+
+
+@web.route("/map/data")
+def city_map_data():
+    service = AnalyticsService()
+    filters = service.normalize_filters(request.args)
+    payload = service.get_map_payload(filters)
+    return jsonify(payload["points"])
 
 
 @web.route("/sql-lab", methods=["GET", "POST"])
@@ -287,6 +296,438 @@ def add_city_check_slug() -> Response:
     })
 
 
+@web.route("/add-city/compare", methods=["POST"])
+def add_city_compare() -> str | Response:
+    """Show side-by-side comparison when importing a city that already exists."""
+    stats_text = request.form.get("stats_text", "").strip()
+    periods_text = request.form.get("periods_text", "").strip()
+    fiche_text = request.form.get("fiche_text", "").strip()
+
+    if not stats_text:
+        flash("Le champ population est vide.", "error")
+        return redirect(url_for("web.add_city"))
+
+    try:
+        stats = parse_stats_text(stats_text)
+    except ValueError as exc:
+        flash(f"Erreur de parsing population: {exc}", "error")
+        return redirect(url_for("web.add_city"))
+
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_id, city_name, city_slug FROM dim_city WHERE city_slug = ?",
+        (stats["city_slug"],),
+    ).fetchone()
+
+    if not row:
+        # City doesn't exist — nothing to compare
+        flash(f"La ville « {stats['city_name']} » n'existe pas encore dans la BD. Utilisez le bouton Importer.", "error")
+        return redirect(url_for("web.add_city"))
+
+    city_id = row["city_id"]
+
+    # --- Existing population data ---
+    existing_pop = {
+        r["year"]: r["population"]
+        for r in conn.execute(
+            "SELECT year, population FROM fact_city_population WHERE city_id = ? ORDER BY year",
+            (city_id,),
+        )
+    }
+    # --- Existing annotations ---
+    existing_annotations = []
+    for r in conn.execute(
+        """SELECT f.year, a.annotation_label, a.annotation_color
+           FROM fact_city_population f
+           JOIN dim_annotation a ON f.annotation_id = a.annotation_id
+           WHERE f.city_id = ? AND f.annotation_id IS NOT NULL
+           ORDER BY f.year""",
+        (city_id,),
+    ):
+        existing_annotations.append({
+            "year": r["year"],
+            "label": r["annotation_label"],
+            "color": r["annotation_color"],
+        })
+
+    # --- Existing periods ---
+    existing_periods = []
+    for r in conn.execute(
+        """SELECT period_detail_id, period_order, period_range_label, period_title,
+                  start_year, end_year, summary_text
+           FROM dim_city_period_detail WHERE city_id = ? ORDER BY period_order""",
+        (city_id,),
+    ):
+        items = [
+            i["item_text"] for i in conn.execute(
+                "SELECT item_text FROM dim_city_period_detail_item WHERE period_detail_id = ? ORDER BY item_order",
+                (r["period_detail_id"],),
+            )
+        ]
+        existing_periods.append({
+            "period_range_label": r["period_range_label"],
+            "period_title": r["period_title"],
+            "items": items,
+        })
+
+    # --- Existing fiche ---
+    existing_fiche_sections = []
+    fiche_row = conn.execute(
+        "SELECT fiche_id FROM dim_city_fiche WHERE city_id = ?", (city_id,)
+    ).fetchone()
+    if fiche_row:
+        import json as _json
+        for s in conn.execute(
+            "SELECT section_emoji, section_title, content_json FROM dim_city_fiche_section WHERE fiche_id = ? ORDER BY section_order",
+            (fiche_row["fiche_id"],),
+        ):
+            existing_fiche_sections.append({
+                "emoji": s["section_emoji"],
+                "title": s["section_title"],
+                "blocks": _json.loads(s["content_json"]) if s["content_json"] else [],
+            })
+
+    # --- New data (parsed) ---
+    new_pop = dict(zip(stats["years"], stats["population"]))
+    new_annotations = []
+    for ann in stats["annotations"]:
+        if len(ann) >= 4:
+            new_annotations.append({
+                "year": ann[0],
+                "label": ann[2],
+                "color": ann[3],
+            })
+
+    new_periods = []
+    if periods_text:
+        new_periods = parse_period_details_text(periods_text)
+
+    new_fiche_sections = []
+    if fiche_text:
+        try:
+            _header, parsed = parse_fiche_text(fiche_text)
+            new_fiche_sections = [{"emoji": s.get("emoji", ""), "title": s["title"], "blocks": s.get("blocks", [])} for s in parsed]
+        except Exception:
+            pass
+
+    # --- Build comparison data ---
+    # Population diff
+    all_years = sorted(set(existing_pop.keys()) | set(new_pop.keys()))
+    pop_diff = []
+    for y in all_years:
+        ex = existing_pop.get(y)
+        nw = new_pop.get(y)
+        status = "same"
+        if ex is None:
+            status = "new"
+        elif nw is None:
+            status = "only_existing"
+        elif ex != nw:
+            status = "changed"
+        pop_diff.append({"year": y, "existing": ex, "new": nw, "status": status})
+
+    # Annotation diff (by year)
+    existing_ann_by_year = {a["year"]: a for a in existing_annotations}
+    new_ann_by_year = {a["year"]: a for a in new_annotations}
+    all_ann_years = sorted(set(existing_ann_by_year.keys()) | set(new_ann_by_year.keys()))
+    ann_diff = []
+    for y in all_ann_years:
+        ex = existing_ann_by_year.get(y)
+        nw = new_ann_by_year.get(y)
+        status = "same"
+        if ex is None:
+            status = "new"
+        elif nw is None:
+            status = "only_existing"
+        elif ex["label"] != nw["label"]:
+            status = "changed"
+        ann_diff.append({"year": y, "existing": ex, "new": nw, "status": status})
+
+    # Period diff (by range)
+    existing_period_by_range = {p["period_range_label"]: p for p in existing_periods}
+    new_period_by_range = {p["period_range_label"]: p for p in new_periods}
+    all_ranges = list(dict.fromkeys(
+        [p["period_range_label"] for p in existing_periods]
+        + [p["period_range_label"] for p in new_periods]
+    ))
+    period_diff = []
+    for rng in all_ranges:
+        ex = existing_period_by_range.get(rng)
+        nw = new_period_by_range.get(rng)
+        status = "same"
+        if ex is None:
+            status = "new"
+        elif nw is None:
+            status = "only_existing"
+        elif ex.get("summary_text", "") != nw.get("summary_text", ""):
+            status = "changed"
+        period_diff.append({"range": rng, "existing": ex, "new": nw, "status": status})
+
+    return render_template(
+        "web/merge_city.html",
+        page_title=f"Fusionner — {stats['city_name']}",
+        city_name=stats["city_name"],
+        city_slug=stats["city_slug"],
+        stats_text=stats_text,
+        periods_text=periods_text,
+        fiche_text=fiche_text,
+        pop_diff=pop_diff,
+        ann_diff=ann_diff,
+        period_diff=period_diff,
+        existing_fiche_sections=existing_fiche_sections,
+        new_fiche_sections=new_fiche_sections,
+        existing_pop_count=len(existing_pop),
+        new_pop_count=len(new_pop),
+        existing_ann_count=len(existing_annotations),
+        new_ann_count=len(new_annotations),
+        existing_period_count=len(existing_periods),
+        new_period_count=len(new_periods),
+    )
+
+
+@web.route("/add-city/merge-import", methods=["POST"])
+def add_city_merge_import() -> Response:
+    """Process the merge form decisions and apply selective import."""
+    stats_text = request.form.get("stats_text", "").strip()
+    periods_text = request.form.get("periods_text", "").strip()
+    fiche_text = request.form.get("fiche_text", "").strip()
+
+    pop_action = request.form.get("pop_action", "keep")      # keep | replace | merge
+    ann_action = request.form.get("ann_action", "keep")       # keep | replace | merge
+    period_action = request.form.get("period_action", "keep") # keep | replace
+    fiche_action = request.form.get("fiche_action", "keep")   # keep | replace
+
+    if not stats_text:
+        flash("Le champ population est vide.", "error")
+        return redirect(url_for("web.add_city"))
+
+    try:
+        stats = parse_stats_text(stats_text)
+    except ValueError as exc:
+        flash(f"Erreur de parsing population: {exc}", "error")
+        return redirect(url_for("web.add_city"))
+
+    from .db import get_db
+    conn = get_db()
+    messages: list[str] = []
+
+    # --- Upsert dim_city to get city_id ---
+    cursor = conn.execute(
+        """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON CONFLICT(city_slug) DO UPDATE SET
+               city_name = excluded.city_name, region = excluded.region,
+               country = excluded.country, city_color = excluded.city_color,
+               source_file = excluded.source_file
+           RETURNING city_id""",
+        (stats["city_name"], stats["city_slug"], stats["region"],
+         stats["country"], stats["city_color"], "web-import"),
+    )
+    city_id = cursor.fetchone()[0]
+    conn.commit()
+
+    # --- Population ---
+    if pop_action == "replace":
+        try:
+            import_city_stats(conn, stats)
+            conn.commit()
+            messages.append(f"Population remplacée — {len(stats['years'])} années.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"Erreur population: {exc}")
+    elif pop_action == "merge":
+        # Add only new years, keep existing
+        try:
+            time_cache: dict[int, int] = {
+                year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
+            }
+            existing_years = {
+                r["year"]
+                for r in conn.execute(
+                    "SELECT year FROM fact_city_population WHERE city_id = ?", (city_id,)
+                )
+            }
+            new_count = 0
+            for yr, pop in zip(stats["years"], stats["population"]):
+                if yr not in existing_years:
+                    time_id = upsert_time_dimension(conn, time_cache, yr)
+                    conn.execute(
+                        """INSERT INTO fact_city_population (city_id, time_id, year, population, is_key_year, source_file)
+                           VALUES (?, ?, ?, ?, 0, 'web-import')""",
+                        (city_id, time_id, yr, pop),
+                    )
+                    new_count += 1
+            conn.commit()
+            messages.append(f"Population fusionnée — {new_count} nouvelles années ajoutées.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"Erreur fusion population: {exc}")
+    else:
+        messages.append("Population conservée.")
+
+    # --- Annotations ---
+    if ann_action == "replace":
+        # Delete existing annotations links, import new
+        try:
+            conn.execute(
+                "UPDATE fact_city_population SET annotation_id = NULL WHERE city_id = ?",
+                (city_id,),
+            )
+            for ann in stats["annotations"]:
+                if len(ann) >= 4:
+                    year, _, label, color = ann[0], ann[1], ann[2], ann[3]
+                    # Upsert annotation
+                    row = conn.execute(
+                        "SELECT annotation_id FROM dim_annotation WHERE annotation_label = ?",
+                        (label,),
+                    ).fetchone()
+                    if row:
+                        ann_id = row["annotation_id"]
+                    else:
+                        cur = conn.execute(
+                            "INSERT INTO dim_annotation (annotation_label, annotation_color) VALUES (?, ?)",
+                            (label, color),
+                        )
+                        ann_id = cur.lastrowid
+                    conn.execute(
+                        "UPDATE fact_city_population SET annotation_id = ? WHERE city_id = ? AND year = ?",
+                        (ann_id, city_id, year),
+                    )
+            conn.commit()
+            messages.append(f"Annotations remplacées — {len(stats['annotations'])}.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"Erreur annotations: {exc}")
+    elif ann_action == "merge":
+        # Add only missing annotations (years that don't already have one)
+        try:
+            existing_ann_years = {
+                r["year"]
+                for r in conn.execute(
+                    "SELECT year FROM fact_city_population WHERE city_id = ? AND annotation_id IS NOT NULL",
+                    (city_id,),
+                )
+            }
+            new_count = 0
+            for ann in stats["annotations"]:
+                if len(ann) >= 4:
+                    year, _, label, color = ann[0], ann[1], ann[2], ann[3]
+                    if year not in existing_ann_years:
+                        row = conn.execute(
+                            "SELECT annotation_id FROM dim_annotation WHERE annotation_label = ?",
+                            (label,),
+                        ).fetchone()
+                        if row:
+                            ann_id = row["annotation_id"]
+                        else:
+                            cur = conn.execute(
+                                "INSERT INTO dim_annotation (annotation_label, annotation_color) VALUES (?, ?)",
+                                (label, color),
+                            )
+                            ann_id = cur.lastrowid
+                        conn.execute(
+                            "UPDATE fact_city_population SET annotation_id = ? WHERE city_id = ? AND year = ?",
+                            (ann_id, city_id, year),
+                        )
+                        new_count += 1
+            conn.commit()
+            messages.append(f"Annotations fusionnées — {new_count} nouvelles ajoutées.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"Erreur fusion annotations: {exc}")
+    else:
+        messages.append("Annotations conservées.")
+
+    # --- Periods ---
+    if period_action == "replace" and periods_text:
+        sections = parse_period_details_text(periods_text)
+        if sections:
+            try:
+                count = import_city_periods(conn, city_id, stats["city_slug"], sections)
+                save_period_details_file(stats["city_slug"], periods_text)
+                conn.commit()
+                messages.append(f"Périodes remplacées — {count}.")
+            except Exception as exc:
+                conn.rollback()
+                messages.append(f"Erreur périodes: {exc}")
+    elif period_action == "merge" and periods_text:
+        sections = parse_period_details_text(periods_text)
+        if sections:
+            try:
+                time_cache_p: dict[int, int] = {
+                    yr: tid for tid, yr in conn.execute("SELECT time_id, year FROM dim_time")
+                }
+                existing_ranges = {
+                    r["period_range_label"]
+                    for r in conn.execute(
+                        "SELECT period_range_label FROM dim_city_period_detail WHERE city_id = ?",
+                        (city_id,),
+                    )
+                }
+                max_order = conn.execute(
+                    "SELECT COALESCE(MAX(period_order), 0) FROM dim_city_period_detail WHERE city_id = ?",
+                    (city_id,),
+                ).fetchone()[0]
+                new_count = 0
+                for section in sections:
+                    if section["period_range_label"] not in existing_ranges:
+                        max_order += 1
+                        start_time_id = upsert_time_dimension(conn, time_cache_p, section["start_year"])
+                        end_time_id = upsert_time_dimension(conn, time_cache_p, section["end_year"])
+                        cursor = conn.execute(
+                            """INSERT INTO dim_city_period_detail
+                                (city_id, period_order, period_range_label, period_title,
+                                 start_year, end_year, start_time_id, end_time_id, summary_text, source_file)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            RETURNING period_detail_id""",
+                            (city_id, max_order, section["period_range_label"], section["period_title"],
+                             section["start_year"], section["end_year"], start_time_id, end_time_id,
+                             section["summary_text"], f"{stats['city_slug']}.txt"),
+                        )
+                        period_detail_id = cursor.fetchone()[0]
+                        for item_order, item_text in enumerate(section["items"], start=1):
+                            conn.execute(
+                                "INSERT INTO dim_city_period_detail_item (period_detail_id, item_order, item_text) VALUES (?, ?, ?)",
+                                (period_detail_id, item_order, item_text),
+                            )
+                        new_count += 1
+                conn.commit()
+                messages.append(f"Périodes fusionnées — {new_count} nouvelles ajoutées.")
+            except Exception as exc:
+                conn.rollback()
+                messages.append(f"Erreur fusion périodes: {exc}")
+    else:
+        messages.append("Périodes conservées.")
+
+    # --- Fiche ---
+    if fiche_action == "replace" and fiche_text:
+        try:
+            _header, fiche_sections = parse_fiche_text(fiche_text)
+            if fiche_sections:
+                import_city_fiche(conn, city_id, stats["city_slug"], fiche_text, fiche_sections)
+                conn.commit()
+                messages.append(f"Fiche remplacée — {len(fiche_sections)} sections.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"Erreur fiche: {exc}")
+    else:
+        messages.append("Fiche conservée.")
+
+    # --- Regenerate villestats_RAW.py ---
+    try:
+        from scripts.export_villestats_raw import export_all
+        from pathlib import Path
+        raw_path = Path(__file__).resolve().parent.parent / "villestats_RAW.py"
+        raw_path.write_text(export_all(), encoding="utf-8")
+        messages.append("villestats_RAW.py synchronisé.")
+    except Exception as exc:
+        messages.append(f"⚠️ villestats_RAW.py: {exc}")
+
+    flash(f"🔀 {stats['city_name']} — Fusion appliquée. " + " | ".join(messages), "success")
+    return redirect(url_for("web.city_detail", city_slug=stats["city_slug"]))
+
+
 @web.route("/add-city/import", methods=["POST"])
 def add_city_import() -> Response:
     """Single button: import stats + periods + auto-fetch photo."""
@@ -296,6 +737,7 @@ def add_city_import() -> Response:
     skip_periods = request.form.get("skip_periods") == "on"
     skip_fiche = request.form.get("skip_fiche") == "on"
     skip_photo = request.form.get("skip_photo") == "on"
+    force_import = request.form.get("force_import") == "on"
 
     if not stats_text:
         flash("Le champ population est vide.", "error")
@@ -307,6 +749,21 @@ def add_city_import() -> Response:
     except ValueError as exc:
         flash(f"Erreur de parsing population: {exc}", "error")
         return redirect(url_for("web.add_city"))
+
+    # --- 0. Garde-fou : valider le nom de la ville via géocodage ---
+    if not force_import:
+        from .services.city_coordinates import geocode_city, CITY_COORDINATES
+        slug = stats["city_slug"]
+        if slug not in CITY_COORDINATES:
+            coords = geocode_city(stats["city_name"], stats["region"], stats["country"])
+            if coords is None:
+                flash(
+                    f"⚠️ Impossible de géocoder « {stats['city_name']}, {stats['region'] or ''} » "
+                    f"— le nom est peut-être mal orthographié. "
+                    f"Vérifiez le nom et réessayez, ou cochez « Forcer l'import » pour passer outre.",
+                    "error",
+                )
+                return redirect(url_for("web.add_city"))
 
     from .db import get_db
     conn = get_db()

@@ -1,5 +1,9 @@
 {% extends 'web/base.html' %}
 
+{% block hero_title %}
+<img src="{{ url_for('static', filename='images/ccs-logo_text.png') }}" alt="Central City Scrutinizer" class="hero-logo">
+{% endblock %}
+
 {% block content %}
 <section class="metrics-grid metrics-grid-dash">
     <article class="metric-card">

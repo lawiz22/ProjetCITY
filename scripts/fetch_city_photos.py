@@ -19,7 +19,7 @@ from app.services.analytics import AnalyticsService
 from app.services.city_photos import CITY_PHOTO_DIR, CITY_PHOTO_MANIFEST, clear_city_photo_manifest_cache
 
 
-USER_AGENT = "ProjetCITY/1.0 (city photo cache)"
+USER_AGENT = "CentralCityScrutinizer/1.0 (city photo cache)"
 SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
 SEARCH_URL = "https://en.wikipedia.org/w/api.php?action=query&list=search&utf8=1&format=json&srlimit=5&srsearch={query}"
 
