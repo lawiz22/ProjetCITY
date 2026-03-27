@@ -1,0 +1,208 @@
+```markdown
+# Little Rock, Arkansas — Fiche Complète
+
+---
+
+## 📍 Informations Générales
+
+| Catégorie          | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| Ville              | Little Rock                                                            |
+| État/Province      | Arkansas (États-Unis)                                                   |
+| Surnom             | "The Rock" 🪨 / "City of Roses" 🌹                                      |
+| Statut             | Capitale de l'Arkansas et siège du comté de Pulaski                   |
+| Comté/Région       | Comté de Pulaski (principal) + partie du comté de Lonoke              |
+| Maire              | Frank Scott Jr. (depuis 2019, premier maire afro-américain élu)       |
+| Fondation          | 1821 (officielle) / Peuplement européen dès 1722 (poste de traite)   |
+| Université         | University of Arkansas at Little Rock (UA Little Rock)                |
+
+---
+
+## 👥 Population
+
+| Année       | Population (Ville) | Population (Aire Métro) |
+|-------------|-------------------|-------------------------|
+| 2000        | 183,133           | 610,518                 |
+| 2010        | 193,524           | 729,135                 |
+| 2020        | 202,591           | 748,031                 |
+| 2023 (est.) | ~204,500          | ~765,000                |
+
+📈 **Croissance modérée** : +10% entre 2000-2020 (vs +22% pour l'aire métropolitaine).
+🥇 **Capitale la moins peuplée** des États-Unis parmi les 10 États les plus densément peuplés.
+🌍 **Diversité ethnique** : 42% de la population est afro-américaine (l'une des plus fortes proportions pour une capitale d'État).
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée          | Valeur                                                                 |
+|-----------------|------------------------------------------------------------------------|
+| Superficie      | 302.5 km² (dont 3.2 km² d'eau)                                         |
+| Densité         | ~670 hab./km²                                                          |
+| Plan d'eau      | Rivière Arkansas (affluent du Mississippi)                            |
+| Relief          | Plaines alluviales et collines (Ouachita Mountains à 1h au nord-ouest)|
+| Altitude        | 102 m (centre-ville)                                                   |
+
+**Localisation clé** :
+- À 350 km de Memphis (TN) 🚗
+- À 430 km de Dallas (TX) ✈️
+- À 580 km de La Nouvelle-Orléans (LA) 🌊
+
+---
+
+## 🏛️ Économie
+
+**Secteurs Principaux** :
+🏛️ **Administration publique** — Siège du gouvernement de l'Arkansas (25,000 emplois publics).
+🏥 **Santé** — UAMS (University of Arkansas for Medical Sciences) employeur #1 (10,000+ employés).
+💻 **Technologie** — Croissance des startups (ex: **Apptegy**, **RevUnit**).
+🏭 **Industrie** — Usines **Dassault Falcon Jet** (avions privés) et **LM Wind Power** (éoliennes).
+🛒 **Logistique** — Hub pour **Walmart** (siège à Bentonville, 3h au nord).
+
+**Synthèse** : Économie diversifiée avec un PIB métropolitain de **$42 milliards** (2023), dominé par les services et la santé.
+
+---
+
+## 🎓 Éducation
+
+| Institution                     | Type               | Étudiants (2023) |
+|---------------------------------|--------------------|------------------|
+| UA Little Rock                  | Université publique | ~10,500          |
+| University of Arkansas at Pine Bluff (satellite) | Historique (HBCU) | ~2,500           |
+| Philander Smith College          | Collège privé (HBCU)| ~800             |
+| Arkansas Baptist College         | Collège privé      | ~600             |
+
+**Faits notables** :
+- UA Little Rock abrite le **William H. Bowen School of Law**, seule faculté de droit publique de l'État.
+- **eStem Public Charter Schools** : Réseau primé en STEM (Sciences, Technologie, Ingénierie, Maths).
+
+---
+
+## 🏥 Santé
+
+- **UAMS Medical Center** :
+  - **Plus grand hôpital** de l'État (500+ lits).
+  - **Seul centre de traumatologie de Niveau 1** en Arkansas.
+  - **Institut Winthrop P. Rockefeller** (recherche sur le cancer).
+- **Arkansas Children's Hospital** :
+  - Classé parmi les **50 meilleurs hôpitaux pédiatriques** des États-Unis (U.S. News).
+  - 300+ médecins, 5,000+ employés.
+
+---
+
+## 🎵 Culture & Musique
+
+| Artiste / Groupe / Personnalité       | Lien avec la ville                                  |
+|---------------------------------------|----------------------------------------------------|
+| **Johnny Cash**                       | A vécu à Dyess (1h30 à l'est) et enregistré à Little Rock. |
+| **Al Green**                          | Né à Forrest City (1h à l'est), influences gospel/soul. |
+| **Levon Helm** (The Band)            | A joué dans des clubs locaux dans les années 1960. |
+| **Arkansas Symphony Orchestra**       | Fondée en 1966, 50+ concerts/an.                   |
+
+**Événements culturels** :
+- **Riverfest** (mai) : Festival de musique avec 250,000 visiteurs (annulé en 2020-2021).
+- **Arkansas Literary Festival** (avril) : Avec des auteurs comme **John Grisham** (né à Jonesboro, AR).
+- **Museum of Discovery** : Musée scientifique interactif (50,000 visiteurs/an).
+
+---
+
+## 🌿 Environnement & Énergie
+
+- **Parc national proche** : **Hot Springs National Park** (1h au sud-ouest), plus ancien parc fédéral (1832).
+- **Énergie renouvelable** :
+  - **Central solaire de 100 MW** à Stuttgart (1h à l'est).
+  - **Éoliennes** : Projet **Scatter Creek** (200 MW) en développement.
+- **Défi écologique** :
+  - **Qualité de l'air** : Classée **43ème sur 226** villes US pour la pollution aux particules (American Lung Association, 2023).
+  - **Inondations** : Risque élevé le long de la rivière Arkansas (ex: crue record en 2019).
+
+---
+
+## 🏈 Sports & Loisirs
+
+| Équipe               | Sport          | Ligue               |
+|----------------------|----------------|---------------------|
+| **Arkansas Travelers** | Baseball       | Double-A (Affilié aux Mariners de Seattle) |
+| **Little Rock Trojans** | Basketball (NCAA) | Sun Belt Conference |
+
+**Activités** :
+- **Pinnacle Mountain State Park** : Randonnée avec vue à 360° sur la ville.
+- **Arkansas River Trail** : 17 miles de pistes cyclables le long de la rivière.
+- **War Memorial Stadium** : Stade de football américain (capacité : 54,000).
+
+---
+
+## 🚗 Transport
+
+| Mode               | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| **Autoroutes**     | I-30 (est-ouest), I-40 (nord-sud), I-430 (rocade).                     |
+| **Aéroport**       | **Bill and Hillary Clinton National Airport (LIT)** — 2.5M passagers/an (2023). |
+| **Transport en commun** | **Rock Region METRO** — 25 lignes de bus, 3M passagers/an.            |
+| **Train**          | **Amtrak Texas Eagle** (3x/semaine : Chicago-San Antonio).            |
+
+**Projets** :
+- **Extension de l'I-30** : $630M pour élargir l'autoroute (2023-2026).
+- **Vélos en libre-service** : **Little Rock Bike Share** (50 stations).
+
+---
+
+## 🌡️ Climat
+
+| Saison       | Temp. Moyenne | Précipitations |
+|--------------|---------------|----------------|
+| **Hiver (Jan)** | 4°C (min: -2°C) | 100 mm (neige rare) |
+| **Printemps (Avr)** | 18°C          | 130 mm         |
+| **Été (Juil)**   | 32°C (max: 38°C) | 80 mm          |
+| **Automne (Oct)** | 20°C          | 110 mm         |
+
+**Particularités** :
+- **Humidité élevée** en été (taux moyen : 70%).
+- **Tornades** : Zone à risque (saison : mars-mai). La tornade de **1997** (F4) a détruit 1,000 bâtiments.
+- **Jours de soleil** : 217/an (moyenne US : 205).
+
+---
+
+## 🏙️ Quartiers Notables
+
+| Quartier               | Caractéristique                                                                 |
+|------------------------|-------------------------------------------------------------------------------|
+| **Downtown**           | Cœur historique avec le **Old State House Museum** (1833) et des gratte-ciels. |
+| **The Heights**        | Quartier branché avec cafés, galeries d'art et maisons victoriens.           |
+| **Hillcrest**          | Premier "streetcar suburb" (1910), ambiance bohème et LGBTQ+ friendly.       |
+| **River Market District** | Marché fermier, restaurants et **Clinton Presidential Library**.          |
+| **West Little Rock**   | Zone commerciale (Pleasant Ridge Town Center) et résidences aisées.         |
+| **South Main (SoMa)**  | Renaissance urbaine avec lofts et **Bernice Garden** (jardin communautaire).  |
+| **East Little Rock**   | Quartier ouvrier, diversité ethnique et **McArthur Park**.                  |
+
+---
+
+## 📊 Comparaison — Grandes Villes de l'Arkansas
+
+| Ville               | Population (2023) | Caractéristique principale                          |
+|---------------------|-------------------|----------------------------------------------------|
+| **Little Rock**     | **204,500**       | **Capitale** + centre économique/santé.            |
+| Fayetteville        | 93,000            | **Université de l'Arkansas** (27,000 étudiants).  |
+| Fort Smith          | 89,000            | **Histoire militaire** (frontière avec l'Oklahoma).|
+| Springdale          | 84,000            | **Siège de Tyson Foods** (volaille).               |
+| Jonesboro           | 78,000            | **Agriculture** (riz, soja) + **Arkansas State Univ.** |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- 🎭 **Little Rock Central High School** — **Site du conflit des Neuf de Little Rock (1957)** : 9 élèves noirs ont brisé la ségrégation scolaire sous escorte militaire (ordonnée par Eisenhower). Le lycée est aujourd'hui un **National Historic Site**.
+- 🚀 **Premier McDonald's de l'Arkansas** — Ouvert en **1963** sur University Avenue (fermé en 2020).
+- 🏛️ **La seule capitale US avec une mine de diamants** — **Crater of Diamonds State Park** (2h au sud) : Visiteurs gardent les diamants trouvés (400+ par an) !
+- 🎻 **Violoniste Sarah Chang** — A donné son premier concert à 8 ans avec l'**Arkansas Symphony Orchestra**.
+- 🚂 **Chemin de fer underground** — Un tunnel ferroviaire secret sous **Downtown** (construit en 1899, utilisé jusqu'aux années 1980).
+- 🍗 **Invention du "Cheese Dip"** — Créé à **Mexico Chiquito** (Little Rock) dans les années 1930, maintenant un plat emblématique de l'Arkansas.
+- 🌉 **Pont le plus large des États-Unis** — Le **Big Dam Bridge** (pour piétons/vélos) : 4,226 pieds de long, relie Little Rock à North Little Rock.
+- 🎬 **Tourné à Little Rock** :
+  - **Sling Blade** (1996, Billy Bob Thornton).
+  - **The Simple Life** (2003, Paris Hilton et Nicole Richie y ont vécu 1 mois).
+- 🏆 **Record Guinness** — **Plus grande leçon de yoga** (1,221 participants, 2016) au **Riverfront Park**.
+- 🦖 **Trace de dinosaure** — Une empreinte de **Acrocanthosaurus** (110M d'années) découverte près de la rivière en 2011.
+- 🎤 **Elvis Presley** — A enregistré **3 chansons** à Little Rock en 1955 (studio **KARK Radio**).
+- 🚲 **Ville la plus "bike-friendly" du Sud** — Classée **#1** par *Bicycling Magazine* en 2014 pour ses pistes cyclables.
+```

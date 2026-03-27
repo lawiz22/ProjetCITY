@@ -45,9 +45,12 @@
                     {% endif %}
                 </select>
             </div>
-            <div class="ai-lab-field" style="flex:1.5;">
+            <div class="ai-lab-field" style="flex:2;">
                 <label class="opt-label" for="ai-city-input">Ville à générer</label>
-                <input type="text" id="ai-city-input" class="opt-input" placeholder="ex: Burlington, Vermont" spellcheck="false">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="text" id="ai-city-input" class="opt-input" placeholder="ex: Burlington, Vermont" spellcheck="false" style="flex:1;min-width:220px;">
+                    <button type="button" id="ai-suggest-btn" class="suggest-city-btn" title="Suggérer une ville manquante">🎲 Suggérer</button>
+                </div>
             </div>
         </div>
     </div>
@@ -178,6 +181,31 @@
     var tokenEl     = document.getElementById('token-mammouth');
     var resetBtn    = document.getElementById('token-reset-mammouth');
     var generateUrl = '{{ url_for("web.options_generate") }}';
+    var suggestUrl  = '{{ url_for("web.ai_lab_suggest_city") }}';
+
+    /* ---- Suggest city button ---- */
+    var suggestBtn = document.getElementById('ai-suggest-btn');
+    suggestBtn.addEventListener('click', function () {
+        suggestBtn.disabled = true;
+        suggestBtn.textContent = '⏳ …';
+        var fd = new FormData();
+        fd.append('model', modelSelect.value);
+        fetch(suggestUrl, { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.success && d.reply) {
+                    cityInput.value = d.reply.trim().replace(/^[\s"']+|[\s"']+$/g, '');
+                    if (d.tokens_total != null) tokenEl.textContent = d.tokens_total;
+                } else {
+                    alert(d.error || 'Erreur lors de la suggestion.');
+                }
+            })
+            .catch(function (err) { alert('Erreur réseau: ' + err); })
+            .finally(function () {
+                suggestBtn.disabled = false;
+                suggestBtn.textContent = '🎲 Suggérer';
+            });
+    });
 
     /* Step completion state */
     var stepDone = { 1: false, 2: false, 3: false };

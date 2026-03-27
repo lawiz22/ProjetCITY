@@ -1554,6 +1554,68 @@ def options_generate() -> Response:
     return jsonify(result)
 
 
+@web.route("/ai-lab/suggest-city", methods=["POST"])
+def ai_lab_suggest_city() -> Response:
+    """Ask Mammouth to suggest a city not yet in the DB, prioritizing missing regions."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+
+    conn = get_db()
+
+    # Get all existing cities
+    existing_rows = conn.execute(
+        "SELECT city_name, region, country FROM dim_city ORDER BY country, region, city_name"
+    ).fetchall()
+    existing_cities = [f"{r['city_name']}, {r['region']}" for r in existing_rows]
+    existing_list = "\n".join(existing_cities)
+
+    # Get regions with city counts
+    region_counts = conn.execute(
+        """SELECT country, region, COUNT(*) as cnt
+           FROM dim_city GROUP BY country, region
+           ORDER BY country, cnt ASC"""
+    ).fetchall()
+    region_summary = "\n".join(
+        f"- {r['country']} / {r['region']}: {r['cnt']} ville(s)"
+        for r in region_counts
+    )
+
+    # All Canadian provinces and US states for reference
+    prompt = f"""Tu es un expert en géographie urbaine nord-américaine.
+
+Voici les villes DÉJÀ dans ma base de données:
+{existing_list}
+
+Voici le nombre de villes par région:
+{region_summary}
+
+OBJECTIF: Suggère-moi UNE SEULE ville à ajouter. Critères de priorité:
+1. PRIORITÉ ABSOLUE: Choisir une ville dans une province canadienne ou un état américain qui n'a AUCUNE ville dans la liste ci-dessus
+2. Si toutes les provinces/états ont au moins une ville, choisir une ville dans la région la moins représentée
+3. Choisir des villes populaires, connues et peuplées (pas de petits villages)
+4. Les 10 provinces canadiennes, les 3 territoires canadiens, et les 50 états américains doivent éventuellement être couverts
+
+IMPORTANT: Réponds UNIQUEMENT avec le nom de la ville et sa région, dans ce format exact:
+NomVille, Région
+
+Par exemple: Austin, Texas
+ou: Fredericton, New Brunswick
+
+Ne mets AUCUN autre texte, aucune explication, juste la ville et la région sur une seule ligne."""
+
+    result = generate_city(api_key, model, "", prompt, max_tokens=50)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
 @web.route("/ai-lab/import", methods=["POST"])
 def ai_lab_import() -> Response:
     """AJAX import from AI Lab — returns JSON instead of redirect."""

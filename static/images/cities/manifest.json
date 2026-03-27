@@ -1090,5 +1090,17 @@
     "source_page": "https://en.wikipedia.org/wiki/Memphis%2C_Tennessee",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Skyline_of_Memphis%2C_TN.jpg/330px-Skyline_of_Memphis%2C_TN.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "little-rock-arkansas": {
+    "filename": "little-rock-arkansas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Little_Rock%2C_Arkansas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/William_J._Clinton_Presidential_Library%2C_Little_Rock%2C_Arkansas_LCCN2011633870.tif/lossy-page1-330px-William_J._Clinton_Presidential_Library%2C_Little_Rock%2C_Arkansas_LCCN2011633870.tif.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "jackson-mississippi": {
+    "filename": "jackson-mississippi.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Jackson%2C_Mississippi",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Mississippi_State_Capitol_Building_%2826815684617%29.jpg/1280px-Mississippi_State_Capitol_Building_%2826815684617%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

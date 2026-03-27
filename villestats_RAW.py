@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 179
+# Nombre de villes : 181
 #
 
 # ============================================================
@@ -1693,6 +1693,30 @@ annotations = [
 ]
 
 # ============================================================
+# Jackson (United States)
+# ============================================================
+CITY_NAME = "Jackson, Mississippi"
+CITY_COLOR = '#0047AB'
+
+years = [1822, 1850, 1860, 1870, 1900, 1920, 1940, 1960, 1980, 2000, 2010, 2020]
+population = [400, 4000, 8000, 10000, 17000, 29000, 52000, 88000, 160000, 184256, 173514, 160628]
+
+annotations = [
+    (1822, 400, "🏛️ Fondation de Jackson — capitale du Mississippi (1822)", 'brown'),
+    (1850, 4000, "🚂 Développement ferroviaire — croissance économique (1850)", 'orange'),
+    (1860, 8000, "⚔️ Guerre de Sécession — siège stratégique (1860)", 'red'),
+    (1870, 10000, "🏗️ Reconstruction après la guerre — début de la modernisation (1870)", 'green'),
+    (1900, 17000, "🏭 Industrialisation — expansion urbaine (1900)", 'blue'),
+    (1920, 29000, "🚗 Amélioration des infrastructures — boom démographique (1920)", 'purple'),
+    (1940, 52000, "🎖️ Seconde Guerre mondiale — croissance économique (1940)", 'navy'),
+    (1960, 88000, "✊ Mouvement des droits civiques — tensions sociales (1960)", 'darkred'),
+    (1980, 160000, "🏙️ Urbanisation accrue — diversification économique (1980)", 'teal'),
+    (2000, 184256, "📉 Déclin démographique — exode urbain (2000)", 'gray'),
+    (2010, 173514, "🏚️ Défis économiques — pauvreté urbaine (2010)", 'black'),
+    (2020, 160628, "🌆 Revitalisation urbaine — projets de rénovation (2020)", 'gold'),
+]
+
+# ============================================================
 # Johnstown (United States)
 # ============================================================
 CITY_NAME = "Johnstown, Pennsylvania"
@@ -1951,6 +1975,29 @@ annotations = [
     (1981, 14800, "🍷 Inniskillin — révolution viticole (1974)", 'darkred'),
     (1991, 17200, "🥇 Icewine — Grand Prix Bordeaux (1991)", 'gold'),
     (2021, 25300, "🍇 30+ domaines — capitale viticole Ontario (2020)", 'green'),
+]
+
+# ============================================================
+# Little Rock (United States)
+# ============================================================
+CITY_NAME = "Little Rock, Arkansas"
+CITY_COLOR = '#8B0000'
+
+years = [
+    1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 
+    1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    150, 1200, 2000, 3500, 3727, 12771, 20914, 33057, 38307, 45951, 58155, 81290, 87593, 
+    102415, 107301, 132483, 159151, 175795, 183133, 193524, 202591
+]
+
+annotations = [
+    (1820, 150, "🏡 Fondation officielle — Little Rock devient la capitale de l'Arkansas Territory (1821)", 'brown'),
+    (1940, 87593, "🏭 Boom industriel — Installation d'usines liées à l'effort de guerre (1941)", 'gray'),
+    (1960, 107301, "🏢 Modernisation — Construction du Capitol Statehouse (1915) et expansion urbaine", 'navy'),
+    (2010, 193524, "🏙️ Croissance économique — Siège de grandes entreprises comme Dillard's et Windstream", 'green'),
+    (2020, 202591, "📈 Métropole régionale — Little Rock dépasse les 200 000 habitants (2020)", 'orange'),
 ]
 
 # ============================================================
