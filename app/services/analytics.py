@@ -43,6 +43,18 @@ class SqlExecutionError(RuntimeError):
 
 
 def _get_city_origin_metadata(city_slug: str) -> dict[str, int | None]:
+    # 0) Check dim_city.foundation_year first (AI-validated overrides)
+    try:
+        connection = get_db()
+        db_row = connection.execute(
+            "SELECT foundation_year FROM dim_city WHERE city_slug = ?",
+            (city_slug,),
+        ).fetchone()
+        if db_row and db_row["foundation_year"]:
+            return {"foundation_year": db_row["foundation_year"]}
+    except Exception:
+        pass
+
     # 1) Try period details text file
     details_path = Path(current_app.root_path).parent / "data" / "city_details" / f"{city_slug}.txt"
     if details_path.exists():
@@ -1456,20 +1468,22 @@ class AnalyticsService:
         return results
 
     def get_missing_decades(self) -> list[dict[str, object]]:
-        """Return one row per city with the list of missing decade-years."""
+        """Return one row per city with the list of missing decade-years (1800–2020).
+
+        Uses the city's foundation year (from fiche/details) to skip decades
+        before the city existed.
+        """
         conn = get_db()
-        # Build the decade grid: 1800, 1810, ... up to current decade
-        from datetime import date
-        current_year = date.today().year
-        max_decade = (current_year // 10) * 10
+        # Fixed decade grid: 1800, 1810, ... 2020
+        all_decades = list(range(1800, 2030, 10))
 
         cities = conn.execute(
-            "SELECT city_id, city_name, city_slug, country FROM dim_city ORDER BY city_name"
+            "SELECT city_id, city_name, city_slug, region, country FROM dim_city ORDER BY city_name"
         ).fetchall()
 
         existing = {}
         for row in conn.execute(
-            "SELECT city_id, year FROM fact_city_population"
+            "SELECT city_id, year FROM fact_city_population WHERE year >= 1800"
         ).fetchall():
             existing.setdefault(row["city_id"], set()).add(row["year"])
 
@@ -1478,20 +1492,28 @@ class AnalyticsService:
             city_years = existing.get(city["city_id"], set())
             if not city_years:
                 continue
-            min_year = min(city_years)
-            # Align to nearest decade (±1 tolerance means 1851→1850 is covered)
-            start_decade = (min_year // 10) * 10
-            # If the min_year is within ±1 of start_decade, keep it;
-            # otherwise start at the next decade
-            if min_year - start_decade > 1:
-                start_decade += 10
-            # Include current year as the last expected checkpoint
-            # but exclude the current decade if census data isn't out yet
-            effective_max = max_decade - 10 if max_decade >= current_year else max_decade
-            expected = list(range(start_decade, effective_max + 1, 10))
+
+            # Get founding year from fiche/details
+            origin = _get_city_origin_metadata(city["city_slug"])
+            foundation_year = origin.get("foundation_year")
+
+            # Determine start decade: use foundation year if available,
+            # otherwise fall back to first data point
+            if foundation_year:
+                # Round foundation year up to next decade if not on a decade boundary
+                start_decade = (foundation_year // 10) * 10
+                if foundation_year - start_decade > 1:
+                    start_decade += 10
+            else:
+                min_year = min(city_years)
+                start_decade = (min_year // 10) * 10
+                if min_year - start_decade > 1:
+                    start_decade += 10
+
+            expected = [d for d in all_decades if d >= start_decade]
 
             # Check coverage with ±1 year tolerance (Canadian census years
-            # are offset by 1: 1851, 1871, 1901, 1921, 1941, … vs decades)
+            # are offset: 1851, 1871, 1901, 1921, 1941, … vs decades)
             def _covered(exp_year: int) -> bool:
                 return any(y in city_years for y in (exp_year, exp_year - 1, exp_year + 1))
 
@@ -1501,10 +1523,10 @@ class AnalyticsService:
                     "city_id": city["city_id"],
                     "city_name": city["city_name"],
                     "city_slug": city["city_slug"],
+                    "region": city["region"],
                     "country": city["country"],
+                    "foundation_year": foundation_year,
                     "start_decade": start_decade,
-                    "max_decade": max_decade,
-                    "current_year": current_year,
                     "missing_years": missing,
                     "missing_count": len(missing),
                     "expected_count": len(expected),

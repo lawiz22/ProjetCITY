@@ -1949,6 +1949,8 @@ def geo_coverage_expand_ref():
 
 @web.route("/coverage")
 def city_coverage() -> str:
+    from .services.mammouth_ai import load_settings, fetch_models
+
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
     coverage = service.get_city_coverage(filters)
@@ -1959,6 +1961,9 @@ def city_coverage() -> str:
     without_photo = sum(1 for c in coverage if not c["has_photo"])
     without_periods = sum(1 for c in coverage if not c["has_periods"])
     without_data = sum(1 for c in coverage if c["data_points"] == 0)
+
+    settings = load_settings()
+    models = fetch_models()
 
     return render_template(
         "web/coverage.html",
@@ -1971,7 +1976,80 @@ def city_coverage() -> str:
         without_photo=without_photo,
         without_periods=without_periods,
         without_data=without_data,
+        settings=settings,
+        models=models,
     )
+
+
+@web.route("/coverage/save-missing-years", methods=["POST"])
+def coverage_save_missing_years() -> Response:
+    """Save AI-found missing-year populations for an existing city."""
+    from .db import get_db
+    from .services.city_import import upsert_time_dimension
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "error": "Données JSON manquantes."})
+
+    city_slug = data.get("city_slug", "").strip()
+    year_pops = data.get("year_pops", [])
+    foundation_year = data.get("foundation_year")
+
+    if not city_slug:
+        return jsonify({"success": False, "error": "city_slug manquant."})
+    if not year_pops and not foundation_year:
+        return jsonify({"success": False, "error": "Aucune donnée à sauvegarder."})
+
+    conn = get_db()
+    city_row = conn.execute(
+        "SELECT city_id FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if not city_row:
+        return jsonify({"success": False, "error": f"Ville '{city_slug}' introuvable."})
+    city_id = city_row["city_id"]
+
+    # Save foundation year if provided
+    foundation_saved = None
+    if foundation_year is not None:
+        try:
+            fy = int(foundation_year)
+            if 1500 <= fy <= 2030:
+                conn.execute(
+                    "UPDATE dim_city SET foundation_year = ? WHERE city_id = ?",
+                    (fy, city_id),
+                )
+                foundation_saved = fy
+        except (ValueError, TypeError):
+            pass
+
+    time_cache: dict[int, int] = {
+        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
+    }
+
+    inserted = 0
+    for entry in year_pops:
+        year = int(entry["year"])
+        population = int(entry["population"])
+        if population <= 0:
+            continue
+        # Skip if this year already exists
+        exists = conn.execute(
+            "SELECT 1 FROM fact_city_population WHERE city_id = ? AND year = ?",
+            (city_id, year),
+        ).fetchone()
+        if exists:
+            continue
+        time_id = upsert_time_dimension(conn, time_cache, year)
+        conn.execute(
+            """INSERT INTO fact_city_population
+               (city_id, time_id, year, population, is_key_year, annotation_id, source_file)
+               VALUES (?, ?, ?, ?, 0, NULL, 'coverage-fill')""",
+            (city_id, time_id, year, population),
+        )
+        inserted += 1
+
+    conn.commit()
+    return jsonify({"success": True, "inserted": inserted, "foundation_saved": foundation_saved})
 
 
 @web.route("/coverage/export/coverage.csv")

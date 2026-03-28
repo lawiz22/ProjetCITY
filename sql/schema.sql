@@ -55,6 +55,7 @@ CREATE TABLE dim_city (
     longitude REAL,
     area_km2 REAL,
     density REAL,
+    foundation_year INTEGER,
     source_file TEXT NOT NULL
 );
 

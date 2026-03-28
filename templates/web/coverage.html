@@ -1,5 +1,43 @@
 {% extends 'web/base.html' %}
 
+{% block head_extra %}
+<style>
+    .fill-btn { background: #3b82f6; color: #fff; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: .85rem; white-space: nowrap; }
+    .fill-btn:hover { background: #2563eb; }
+
+    /* Modal overlay */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 9000; align-items: center; justify-content: center; }
+    .modal-overlay.visible { display: flex; }
+    .modal-box { background: var(--bg-card,#fff); border-radius: 12px; width: 90vw; max-width: 820px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,.3); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border,#e5e7eb); }
+    .modal-head h3 { margin: 0; font-size: 1.15rem; }
+    .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted,#6b7280); }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+    .modal-foot { padding: 14px 20px; border-top: 1px solid var(--border,#e5e7eb); display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-foot .btn-primary { background: #3b82f6; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; cursor: pointer; font-weight: 600; }
+    .modal-foot .btn-primary:hover { background: #2563eb; }
+    .modal-foot .btn-primary:disabled { opacity: .5; cursor: default; }
+    .modal-foot .btn-success { background: #16a34a; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; cursor: pointer; font-weight: 600; display: none; }
+    .modal-foot .btn-success:hover { background: #15803d; }
+    .modal-foot .btn-cancel { background: var(--bg-hover,#f3f4f6); border: 1px solid var(--border,#e5e7eb); border-radius: 6px; padding: 8px 18px; cursor: pointer; }
+
+    .modal-prompt { width: 100%; min-height: 140px; font-family: 'Fira Code', monospace; font-size: .82rem; border: 1px solid var(--border,#e5e7eb); border-radius: 8px; padding: 10px; resize: vertical; }
+    .modal-result { width: 100%; min-height: 120px; font-family: 'Fira Code', monospace; font-size: .82rem; border: 1px solid var(--border,#e5e7eb); border-radius: 8px; padding: 10px; resize: vertical; background: var(--bg-hover,#f9fafb); }
+    .modal-model-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .modal-model-row select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border,#e5e7eb); }
+    .modal-status { font-size: .9rem; padding: 8px 12px; border-radius: 6px; }
+    .modal-status.pending { background: #fef3c7; color: #92400e; }
+    .modal-status.success { background: #d1fae5; color: #065f46; }
+    .modal-status.error { background: #fee2e2; color: #991b1b; }
+
+    .parsed-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .parsed-table th, .parsed-table td { padding: 6px 10px; border: 1px solid var(--border,#e5e7eb); text-align: right; }
+    .parsed-table th { background: var(--bg-hover,#f3f4f6); text-align: center; }
+    .parsed-table .found { background: #d1fae5; }
+    .parsed-table .not-found { background: #fee2e2; }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <!-- Metrics row -->
@@ -33,7 +71,8 @@
         <a href="{{ url_for('web.coverage_export_missing_csv') }}" class="secondary-button">Exporter CSV</a>
     </div>
     <p class="helper-text">
-        Intervalles de 10 ans, de la première donnée jusqu'à 2020.
+        Intervalles de 10 ans, de la fondation de la ville jusqu'à 2020.
+        Les décennies avant la fondation sont exclues automatiquement.
         Les cellules rouges indiquent les décennies sans point de données.
     </p>
     <div class="table-wrapper coverage-table">
@@ -42,9 +81,11 @@
                 <tr>
                     <th>Ville</th>
                     <th>Pays</th>
+                    <th>Fondation</th>
                     <th>Complétude</th>
                     <th>Manquantes</th>
                     <th>Années manquantes</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,6 +93,7 @@
                 <tr>
                     <td><a href="{{ url_for('web.city_detail', city_slug=city.city_slug) }}">{{ city.city_name }}</a></td>
                     <td>{{ city.country }}</td>
+                    <td>{{ city.foundation_year or '—' }}</td>
                     <td>
                         <div class="completeness-bar">
                             <div class="completeness-fill" style="width: {{ city.completeness_pct }}%"></div>
@@ -64,53 +106,16 @@
                         <span class="tag tag-miss-year">{{ year }}</span>
                         {% endfor %}
                     </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</section>
-
-<!-- Table 2: City completeness overview -->
-<section class="panel">
-    <div class="panel-head">
-        <h2>Couverture par ville</h2>
-        <a href="{{ url_for('web.coverage_export_csv') }}" class="secondary-button">Exporter CSV</a>
-    </div>
-    <div class="table-wrapper coverage-table coverage-table-narrow">
-        <table data-sortable-table>
-            <thead>
-                <tr>
-                    <th>Ville</th>
-                    <th>Pays</th>
-                    <th>Données</th>
-                    <th>Période</th>
-                    <th>Annotations</th>
-                    <th>Fiche</th>
-                    <th>Sections</th>
-                    <th>Périodes hist.</th>
-                    <th>Photo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for city in coverage %}
-                <tr>
-                    <td><a href="{{ url_for('web.city_detail', city_slug=city.city_slug) }}">{{ city.city_name }}</a></td>
-                    <td>{{ city.country }}</td>
-                    <td>{{ city.data_points }}</td>
                     <td>
-                        {% if city.min_year %}{{ city.min_year }}–{{ city.max_year }}{% else %}<span class="tag tag-miss">—</span>{% endif %}
-                    </td>
-                    <td>{{ city.annotation_count }}</td>
-                    <td>
-                        {% if city.has_fiche %}<span class="tag tag-ok">✓</span>{% else %}<span class="tag tag-miss">✗</span>{% endif %}
-                    </td>
-                    <td>{{ city.fiche_sections }}</td>
-                    <td>
-                        {% if city.has_periods %}<span class="tag tag-ok">✓</span>{% else %}<span class="tag tag-miss">✗</span>{% endif %}
-                    </td>
-                    <td>
-                        {% if city.has_photo %}<span class="tag tag-ok">✓</span>{% else %}<span class="tag tag-miss">✗</span>{% endif %}
+                        <button type="button" class="fill-btn"
+                                data-city-name="{{ city.city_name }}"
+                                data-city-slug="{{ city.city_slug }}"
+                                data-region="{{ city.region }}"
+                                data-country="{{ city.country }}"
+                                data-foundation="{{ city.foundation_year or '' }}"
+                                data-missing="{{ city.missing_years | tojson }}">
+                            🦣 Compléter
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -119,4 +124,284 @@
     </div>
 </section>
 
+<!-- Modal: AI Fill Missing Years -->
+<div class="modal-overlay" id="fill-modal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h3 id="fill-modal-title">Compléter les années manquantes</h3>
+            <button class="modal-close" id="fill-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-model-row">
+                <label><strong>Modèle :</strong></label>
+                <select id="fill-model-select">
+                    {% if models %}
+                        {% for m in models %}
+                        <option value="{{ m.id if m.id is defined else m }}" {% if (m.id if m.id is defined else m) == settings.model %}selected{% endif %}>{{ m.id if m.id is defined else m }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                    {% endif %}
+                </select>
+            </div>
+            <label><strong>Prompt :</strong></label>
+            <textarea class="modal-prompt" id="fill-prompt"></textarea>
+            <label><strong>Résultat IA :</strong></label>
+            <textarea class="modal-result" id="fill-result" placeholder="Le résultat apparaîtra ici…"></textarea>
+            <div id="fill-status" class="modal-status" style="display:none;"></div>
+            <div id="fill-parsed" style="display:none;"></div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn-cancel" id="fill-cancel">Fermer</button>
+            <button class="btn-primary" id="fill-generate">🦣 Générer</button>
+            <button class="btn-success" id="fill-save">💾 Sauvegarder</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+(function() {
+    var modal = document.getElementById('fill-modal');
+    var modalTitle = document.getElementById('fill-modal-title');
+    var promptEl = document.getElementById('fill-prompt');
+    var resultEl = document.getElementById('fill-result');
+    var statusEl = document.getElementById('fill-status');
+    var parsedEl = document.getElementById('fill-parsed');
+    var modelSelect = document.getElementById('fill-model-select');
+    var generateBtn = document.getElementById('fill-generate');
+    var saveBtn = document.getElementById('fill-save');
+    var closeBtn = document.getElementById('fill-modal-close');
+    var cancelBtn = document.getElementById('fill-cancel');
+    var generateUrl = '{{ url_for("web.options_generate") }}';
+    var saveUrl = '{{ url_for("web.coverage_save_missing_years") }}';
+
+    var currentSlug = '';
+    var currentMissing = [];
+    var currentFoundation = '';
+    var parsedYearPops = [];
+    var parsedFoundation = null;
+
+    function buildPrompt(cityName, region, country, missingYears, foundationYear) {
+        var foundationLine = '';
+        if (foundationYear) {
+            foundationLine = '\nIMPORTANT — Notre base de données indique que la fondation de ' + cityName + ' est ' + foundationYear + '.\n' +
+                'Valide cette date. Si elle est incorrecte, corrige-la avec la vraie année de fondation/incorporation/création de la ville.\n\n';
+        } else {
+            foundationLine = '\nIMPORTANT — Nous n\'avons pas de date de fondation pour ' + cityName + '.\n' +
+                'Indique l\'année de fondation/incorporation/création de la ville.\n\n';
+        }
+        return 'Tu es un expert en d\u00e9mographie et en histoire urbaine.\n' +
+            'Donne-moi la population de la ville de ' + cityName + ', ' + region + ' (' + country + ') ' +
+            'pour chacune des années suivantes : ' + missingYears.join(', ') + '.\n' +
+            foundationLine +
+            'Réponds UNIQUEMENT avec un bloc de données dans ce format exact, sans explication :\n\n' +
+            'fondation = YYYY\n\n' +
+            'years = [' + missingYears.join(', ') + ']\n' +
+            'population = [\n' +
+            missingYears.map(function(y) { return '    0'; }).join(',\n') + '\n' +
+            ']\n\n' +
+            'Remplace YYYY par la vraie année de fondation de la ville.\n' +
+            'Remplace les 0 par les vraies populations (nombres entiers, pas de virgules ni espaces dans les chiffres).\n' +
+            'Si une année exacte n\'est pas disponible, utilise l\'estimation la plus proche.\n' +
+            'AUCUN commentaire Python, AUCUNE explication, UNIQUEMENT le code.';
+    }
+
+    function parseResult(text) {
+        var clean = text.replace(/^```python\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+        // Extract foundation year (case-insensitive, handles quotes)
+        var foundMatch = clean.match(/fondation\s*=\s*['"]?(\d{4})['"]?/i);
+        parsedFoundation = foundMatch ? parseInt(foundMatch[1], 10) : null;
+        var yearsMatch = clean.match(/years\s*=\s*\[([^\]]+)\]/);
+        var popMatch = clean.match(/population\s*=\s*\[([^\]]+)\]/s);
+        if (!yearsMatch || !popMatch) return null;
+        var years = yearsMatch[1].split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+        var pops = popMatch[1].split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+        if (years.length !== pops.length) return null;
+        var result = [];
+        for (var i = 0; i < years.length; i++) {
+            result.push({ year: years[i], population: pops[i] });
+        }
+        return result;
+    }
+
+    function showParsedTable(data) {
+        if (!data || !data.length) {
+            parsedEl.style.display = 'none';
+            return;
+        }
+        var allFound = true;
+        var html = '';
+        // Foundation year validation row
+        if (parsedFoundation) {
+            var oldF = currentFoundation ? parseInt(currentFoundation, 10) : null;
+            var changed = oldF && oldF !== parsedFoundation;
+            html += '<div style="margin-bottom:10px;padding:8px 12px;border-radius:6px;font-size:.9rem;' +
+                (changed ? 'background:#fef3c7;color:#92400e;' : 'background:#d1fae5;color:#065f46;') + '">';
+            if (changed) {
+                html += '🔄 <strong>Fondation corrigée :</strong> ' + oldF + ' → <strong>' + parsedFoundation + '</strong>';
+            } else if (!oldF) {
+                html += '🆕 <strong>Fondation trouvée :</strong> <strong>' + parsedFoundation + '</strong>';
+            } else {
+                html += '✅ <strong>Fondation confirmée :</strong> ' + parsedFoundation;
+            }
+            html += '</div>';
+        }
+        html += '<table class="parsed-table"><thead><tr><th>Année</th><th>Population</th><th>Statut</th></tr></thead><tbody>';
+        data.forEach(function(row) {
+            var isMissing = currentMissing.indexOf(row.year) !== -1;
+            var valid = row.population > 0;
+            if (!valid) allFound = false;
+            html += '<tr class="' + (valid ? 'found' : 'not-found') + '">' +
+                '<td style="text-align:center;">' + row.year + '</td>' +
+                '<td>' + (row.population > 0 ? row.population.toLocaleString('fr-CA') : '—') + '</td>' +
+                '<td style="text-align:center;">' + (valid ? '✅' : '❌') + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        parsedEl.innerHTML = html;
+        parsedEl.style.display = '';
+
+        // Show save button if at least one valid population found
+        var validEntries = data.filter(function(d) { return d.population > 0; });
+        var foundCount = validEntries.length;
+        var totalMissing = currentMissing.length;
+        if (foundCount > 0 || parsedFoundation) {
+            saveBtn.style.display = 'inline-block';
+            var label = '💾 Sauvegarder';
+            if (foundCount > 0) label += ' ' + foundCount + '/' + totalMissing;
+            if (parsedFoundation) label += ' + fondation';
+            saveBtn.textContent = label;
+            parsedYearPops = validEntries;
+        } else {
+            saveBtn.style.display = 'none';
+            parsedYearPops = [];
+        }
+    }
+
+    function showStatus(msg, type) {
+        statusEl.textContent = msg;
+        statusEl.className = 'modal-status ' + type;
+        statusEl.style.display = '';
+    }
+
+    // Open modal
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.fill-btn');
+        if (!btn) return;
+        currentSlug = btn.getAttribute('data-city-slug');
+        var cityName = btn.getAttribute('data-city-name');
+        var region = btn.getAttribute('data-region');
+        var country = btn.getAttribute('data-country');
+        currentFoundation = btn.getAttribute('data-foundation') || '';
+        currentMissing = JSON.parse(btn.getAttribute('data-missing'));
+
+        modalTitle.textContent = '\ud83e\udda3 Compl\u00e9ter \u2014 ' + cityName + ', ' + region;
+        promptEl.value = buildPrompt(cityName, region, country, currentMissing, currentFoundation);
+        resultEl.value = '';
+        parsedEl.style.display = 'none';
+        parsedEl.innerHTML = '';
+        statusEl.style.display = 'none';
+        saveBtn.style.display = 'none';
+        generateBtn.disabled = false;
+        generateBtn.textContent = '🦣 Générer';
+        parsedYearPops = [];
+        parsedFoundation = null;
+        modal.classList.add('visible');
+    });
+
+    // Close modal
+    function closeModal() { modal.classList.remove('visible'); }
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+
+    // Generate
+    generateBtn.addEventListener('click', function() {
+        generateBtn.disabled = true;
+        generateBtn.textContent = '⏳ Génération…';
+        saveBtn.style.display = 'none';
+        parsedEl.style.display = 'none';
+        showStatus('Interrogation de ' + modelSelect.value + '…', 'pending');
+
+        var fd = new FormData();
+        fd.append('city_input', currentSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', promptEl.value);
+        fd.append('max_tokens', '1000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🦣 Générer';
+                if (data.success) {
+                    var text = data.reply;
+                    text = text.replace(/^```python\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+                    resultEl.value = text;
+                    var parsed = parseResult(text);
+                    if (parsed) {
+                        showParsedTable(parsed);
+                        showStatus('Résultat parsé avec succès.', 'success');
+                    } else {
+                        showStatus('⚠️ Impossible de parser le résultat. Modifiez et réessayez.', 'error');
+                    }
+                } else {
+                    showStatus('❌ ' + data.error, 'error');
+                }
+            })
+            .catch(function(err) {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🦣 Générer';
+                showStatus('❌ Erreur réseau: ' + err.message, 'error');
+            });
+    });
+
+    // After editing result manually, re-parse
+    resultEl.addEventListener('input', function() {
+        var parsed = parseResult(resultEl.value);
+        if (parsed) {
+            showParsedTable(parsed);
+            showStatus('Résultat parsé avec succès.', 'success');
+        } else {
+            parsedEl.style.display = 'none';
+            saveBtn.style.display = 'none';
+        }
+    });
+
+    // Save
+    saveBtn.addEventListener('click', function() {
+        if (!parsedYearPops.length && !parsedFoundation) return;
+        saveBtn.disabled = true;
+        saveBtn.textContent = '⏳ Sauvegarde…';
+        showStatus('Sauvegarde en cours…', 'pending');
+
+        fetch(saveUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ city_slug: currentSlug, year_pops: parsedYearPops, foundation_year: parsedFoundation })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                var msg = '✅ ' + data.inserted + ' année(s) sauvegardée(s).';
+                if (data.foundation_saved) msg += ' Fondation ' + data.foundation_saved + ' enregistrée.';
+                msg += ' Rechargement…';
+                showStatus(msg, 'success');
+                setTimeout(function() { window.location.reload(); }, 1200);
+            } else {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Sauvegarder';
+                showStatus('❌ ' + data.error, 'error');
+            }
+        })
+        .catch(function(err) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Sauvegarder';
+            showStatus('❌ Erreur réseau: ' + err.message, 'error');
+        });
+    });
+})();
+</script>
 {% endblock %}
