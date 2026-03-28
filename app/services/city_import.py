@@ -162,6 +162,10 @@ def parse_stats_text(text: str) -> dict[str, Any]:
     color_match = re.search(r"CITY_COLOR\s*=\s*['\"](.+?)['\"]", text)
     result["city_color"] = color_match.group(1) if color_match else "#333333"
 
+    # Foundation year
+    fondation_match = re.search(r"fondation\s*=\s*['\"]?(\d{4})['\"]?", text, re.IGNORECASE)
+    result["foundation_year"] = int(fondation_match.group(1)) if fondation_match else None
+
     years_match = re.search(r"years\s*=\s*\[([^\]]+)\]", text, re.DOTALL)
     if not years_match:
         raise ValueError("Liste 'years' introuvable.")
@@ -321,18 +325,19 @@ def import_city_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
     # Upsert dim_city
     cursor = conn.execute(
         """
-        INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO dim_city (city_name, city_slug, region, country, city_color, foundation_year, source_file)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(city_slug) DO UPDATE SET
             city_name = excluded.city_name,
             region = excluded.region,
             country = excluded.country,
             city_color = excluded.city_color,
+            foundation_year = COALESCE(excluded.foundation_year, dim_city.foundation_year),
             source_file = excluded.source_file
         RETURNING city_id
         """,
         (stats["city_name"], stats["city_slug"], stats["region"],
-         stats["country"], stats["city_color"], "web-import"),
+         stats["country"], stats["city_color"], stats.get("foundation_year"), "web-import"),
     )
     city_id = cursor.fetchone()[0]
 

@@ -2049,6 +2049,15 @@ def coverage_save_missing_years() -> Response:
         inserted += 1
 
     conn.commit()
+
+    # Regenerate villestats_RAW.py to stay in sync
+    try:
+        from scripts.export_villestats_raw import export_all, OUTPUT_PATH
+        content = export_all()
+        OUTPUT_PATH.write_text(content, encoding="utf-8")
+    except Exception:
+        pass  # non-blocking — file can be regenerated manually
+
     return jsonify({"success": True, "inserted": inserted, "foundation_saved": foundation_saved})
 
 
@@ -2357,15 +2366,16 @@ def ai_lab_import() -> Response:
 
     if skip_pop:
         cursor = conn.execute(
-            """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
-               VALUES (?, ?, ?, ?, ?, ?)
+            """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, foundation_year, source_file)
+               VALUES (?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT(city_slug) DO UPDATE SET
                    city_name = excluded.city_name, region = excluded.region,
                    country = excluded.country, city_color = excluded.city_color,
+                   foundation_year = COALESCE(excluded.foundation_year, dim_city.foundation_year),
                    source_file = excluded.source_file
                RETURNING city_id""",
             (stats["city_name"], stats["city_slug"], stats["region"],
-             stats["country"], stats["city_color"], "ai-lab-import"),
+             stats["country"], stats["city_color"], stats.get("foundation_year"), "ai-lab-import"),
         )
         city_id = cursor.fetchone()[0]
         conn.commit()
