@@ -16,6 +16,7 @@
                 <button type="button" class="map-layer-pill" data-theme="annotations">Annotations</button>
                 <button type="button" class="map-layer-pill" data-theme="climate">Climat</button>
                 <button type="button" class="map-layer-pill" data-theme="density">Densité</button>
+                <button type="button" class="map-layer-pill map-layer-pill--time" data-theme="timetravel">⏳ Voyage dans le temps</button>
             </div>
         </div>
         <div class="map-toolbar-right">
@@ -99,11 +100,34 @@
             <span class="density-label">&gt; 6 000</span>
         </div>
     </div>
+
+    <!-- Time-travel slider panel (hidden by default) -->
+    <div class="map-timetravel-panel" id="timetravel-panel" style="display:none">
+        <div class="map-tt-header">
+            <span class="map-tt-icon">⏳</span>
+            <span class="map-tt-title">Voyage dans le temps</span>
+            <span class="map-tt-year-display" id="tt-year-display">—</span>
+            <span class="map-tt-city-count" id="tt-city-count"></span>
+        </div>
+        <div class="map-tt-slider-wrap">
+            <span class="map-tt-bound" id="tt-min-year">—</span>
+            <input type="range" id="tt-slider" class="map-tt-slider" min="0" max="100" value="50" step="1">
+            <span class="map-tt-bound" id="tt-max-year">—</span>
+        </div>
+        <div class="map-tt-controls">
+            <button type="button" id="tt-play-btn" class="map-tt-play" title="Lecture automatique">▶️ Lecture</button>
+            <select id="tt-speed" class="map-tt-speed" title="Vitesse">
+                <option value="1500">Lent</option>
+                <option value="800" selected>Normal</option>
+                <option value="350">Rapide</option>
+            </select>
+        </div>
+    </div>
 </section>
 {% endblock %}
 
 {% block scripts_extra %}
 <script>window.__mapPoints = {{ map_payload.points | tojson }};</script>
 <script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}?v=9"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=10"></script>
 {% endblock %}

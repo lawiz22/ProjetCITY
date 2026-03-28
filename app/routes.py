@@ -163,6 +163,58 @@ def city_map_data():
     return jsonify(payload["points"])
 
 
+@web.route("/map/time-travel")
+def map_time_travel_data():
+    """Return all population data by year for time-travel slider.
+
+    Response: {years: [...], cities: {slug: {name, country, region, color, lat, lng, data: {year: pop, ...}}}}
+    """
+    from .db import get_db
+
+    connection = get_db()
+    rows = connection.execute(
+        """
+        SELECT
+            f.year,
+            f.population,
+            c.city_name,
+            c.city_slug,
+            c.country,
+            c.region,
+            c.city_color,
+            c.latitude,
+            c.longitude
+        FROM fact_city_population f
+        JOIN dim_city c ON c.city_id = f.city_id
+        WHERE c.latitude IS NOT NULL
+          AND c.longitude IS NOT NULL
+          AND f.population IS NOT NULL
+        ORDER BY c.city_slug, f.year
+        """
+    ).fetchall()
+
+    cities: dict[str, dict] = {}
+    year_set: set[int] = set()
+
+    for r in rows:
+        slug = r["city_slug"]
+        yr = int(r["year"])
+        year_set.add(yr)
+        if slug not in cities:
+            cities[slug] = {
+                "name": r["city_name"],
+                "country": r["country"],
+                "region": r["region"],
+                "color": r["city_color"] or "#2f6fed",
+                "lat": r["latitude"],
+                "lng": r["longitude"],
+                "data": {},
+            }
+        cities[slug]["data"][str(yr)] = r["population"]
+
+    return jsonify({"years": sorted(year_set), "cities": cities})
+
+
 @web.route("/sql-lab", methods=["GET", "POST"])
 def sql_lab() -> str:
     service = AnalyticsService()

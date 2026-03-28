@@ -2849,6 +2849,168 @@ dt {
     margin-right: 8px;
 }
 
+/* ── Time-travel pill ─────────────────────────────────────── */
+.map-layer-pill--time {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.12));
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #7c3aed;
+}
+.map-layer-pill--time:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(236, 72, 153, 0.20));
+    color: #6d28d9;
+}
+.map-layer-pill--time.is-active {
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    color: white;
+    border-color: #7c3aed;
+}
+
+/* ── Time-travel panel ────────────────────────────────────── */
+.map-timetravel-panel {
+    margin-top: 12px;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(236, 72, 153, 0.04));
+    border: 1px solid rgba(139, 92, 246, 0.18);
+    border-radius: 16px;
+}
+
+.map-tt-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.map-tt-icon {
+    font-size: 1.4rem;
+}
+
+.map-tt-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.map-tt-year-display {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #7c3aed;
+    margin-left: auto;
+    min-width: 80px;
+    text-align: center;
+    letter-spacing: -0.5px;
+}
+
+.map-tt-city-count {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* ── Time-travel slider ──────────────────────────────────── */
+.map-tt-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.map-tt-bound {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 40px;
+    text-align: center;
+}
+
+.map-tt-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #c4b5fd, #7c3aed, #db2777);
+    outline: none;
+    cursor: pointer;
+}
+
+.map-tt-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #7c3aed;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+    cursor: grab;
+    transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.map-tt-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 3px 12px rgba(124, 58, 237, 0.5);
+}
+
+.map-tt-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+}
+
+.map-tt-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #7c3aed;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+    cursor: grab;
+}
+
+.map-tt-slider::-moz-range-track {
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #c4b5fd, #7c3aed, #db2777);
+}
+
+/* ── Time-travel controls ─────────────────────────────────── */
+.map-tt-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.map-tt-play {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: rgba(139, 92, 246, 0.1);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #7c3aed;
+    transition: all 0.18s;
+    width: auto;
+}
+
+.map-tt-play:hover {
+    background: rgba(139, 92, 246, 0.2);
+}
+
+.map-tt-speed {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    background: rgba(255, 255, 255, 0.7);
+    font-size: 0.78rem;
+    cursor: pointer;
+    color: var(--ink);
+}
+
 .timeline-header,
 .checkbox-row {
     display: flex;

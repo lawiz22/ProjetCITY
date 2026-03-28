@@ -1432,5 +1432,299 @@
     "source_page": "https://en.wikipedia.org/wiki/Savanna",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Tarangire-Natpark800600.jpg/1280px-Tarangire-Natpark800600.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "casper-wyoming": {
+    "filename": "casper-wyoming.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Casper%2C_Wyoming",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Casperskyline1to1.jpg/1280px-Casperskyline1to1.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "madison-wisconsin": {
+    "filename": "madison-wisconsin.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Madison%2C_Wisconsin",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Aerial_View_of_Campus%2C_with_Helen_C._White_Hall_in_foreground_%2814070186173%29.jpg/1280px-Aerial_View_of_Campus%2C_with_Helen_C._White_Hall_in_foreground_%2814070186173%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "atlantic-city-new-jersey": {
+    "filename": "atlantic-city-new-jersey.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Atlantic_City%2C_New_Jersey",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/A_sunset_view_of_the_beach_in_Atlantic_City%2C_NJ.jpg/1280px-A_sunset_view_of_the_beach_in_Atlantic_City%2C_NJ.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "aurora-illinois": {
+    "filename": "aurora-illinois.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Aurora",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Aurora_borealis_over_Eielson_Air_Force_Base%2C_Alaska.jpg/1280px-Aurora_borealis_over_Eielson_Air_Force_Base%2C_Alaska.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "indianapolis-indiana": {
+    "filename": "indianapolis-indiana.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Indianapolis",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Indianapolis-1872528.jpg/1280px-Indianapolis-1872528.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "cedar-rapids-iowa": {
+    "filename": "cedar-rapids-iowa.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Cedar_Rapids%2C_Iowa",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/National-Czech-and-Slovak-Museum-Library_%28cropped%29.jpg/1280px-National-Czech-and-Slovak-Museum-Library_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "lexington-kentucky": {
+    "filename": "lexington-kentucky.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Lexington%2C_Kentucky",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/LexingtonDowntown.JPG/1280px-LexingtonDowntown.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "baton-rouge-louisiana": {
+    "filename": "baton-rouge-louisiana.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Baton_Rouge%2C_Louisiana",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Louisiana_Old_State_Capitol_recolorized.jpg/1280px-Louisiana_Old_State_Capitol_recolorized.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "columbia-maryland": {
+    "filename": "columbia-maryland.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Columbia%2C_Maryland",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Aerial_View_of_Columbia%2C_MD.jpg/1280px-Aerial_View_of_Columbia%2C_MD.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-paul-minnesota": {
+    "filename": "saint-paul-minnesota.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Paul_the_Apostle",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Fresco_of_Saint_Paul_at_Ephesus.jpg/1280px-Fresco_of_Saint_Paul_at_Ephesus.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "gulfport-mississippi": {
+    "filename": "gulfport-mississippi.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Gulfport%2C_Mississippi",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/FightingSeabee_NavalConstructionBattalionCenter_Gulfport%2CMS.jpg/1280px-FightingSeabee_NavalConstructionBattalionCenter_Gulfport%2CMS.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "kansas-city-missouri": {
+    "filename": "kansas-city-missouri.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Kansas_City_metropolitan_area",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Kansas_city_%2816778782291%29.jpg/1280px-Kansas_city_%2816778782291%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "omaha-nebraska": {
+    "filename": "omaha-nebraska.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Omaha%2C_Nebraska",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/City_of_Omaha%2C_Nebraska_Skyline_on_the_Missouri_River_%2830899969517%29.jpg/1280px-City_of_Omaha%2C_Nebraska_Skyline_on_the_Missouri_River_%2830899969517%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "henderson-nevada": {
+    "filename": "henderson-nevada.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Henderson%2C_Nevada",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Lake_Las_Vegas_aerial_view.jpg/1280px-Lake_Las_Vegas_aerial_view.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "nashua-new-hampshire": {
+    "filename": "nashua-new-hampshire.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Nashua%2C_New_Hampshire",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Nashua_NH_Main_Street_50.JPG/1280px-Nashua_NH_Main_Street_50.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "tulsa-oklahoma": {
+    "filename": "tulsa-oklahoma.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Tulsa%2C_Oklahoma",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Tulsa_skyline_aerial%2C_April_2023.jpg/1280px-Tulsa_skyline_aerial%2C_April_2023.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "cranston-rhode-island": {
+    "filename": "cranston-rhode-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Cranston%2C_Rhode_Island",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/William_H_Hall_Free_Library%2C_Cranston_RI.jpg/1280px-William_H_Hall_Free_Library%2C_Cranston_RI.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "salem-oregon": {
+    "filename": "salem-oregon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Salem%2C_Oregon",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Salem_Oregon_downtown.JPG/1280px-Salem_Oregon_downtown.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "huntington-west-virginia": {
+    "filename": "huntington-west-virginia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Huntington%2C_West_Virginia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Huntington%2C_West_Virginia_%282023%29.jpg/1280px-Huntington%2C_West_Virginia_%282023%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "norfolk-virginia": {
+    "filename": "norfolk-virginia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Norfolk",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Kings_Lynn_Guild_Hall_%28geograph_4626827%29.jpg/1280px-Kings_Lynn_Guild_Hall_%28geograph_4626827%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "west-valley-city-utah": {
+    "filename": "west-valley-city-utah.png",
+    "source_page": "https://en.wikipedia.org/wiki/West_Valley_City%2C_Utah",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Flag_of_West_Valley_City%2C_Utah.svg/1280px-Flag_of_West_Valley_City%2C_Utah.svg.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "mesa-arizona": {
+    "filename": "mesa-arizona.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Mesa",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Over_Monument_Valley%2C_Navajo_Nation.jpg/1280px-Over_Monument_Valley%2C_Navajo_Nation.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "boulder-colorado": {
+    "filename": "boulder-colorado.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Boulder",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Balanced_Rock.jpg/1280px-Balanced_Rock.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "newark-delaware": {
+    "filename": "newark-delaware.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Newark%2C_Delaware",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Newark_DE_Main_Street.jpg/1280px-Newark_DE_Main_Street.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "tampa-florida": {
+    "filename": "tampa-florida.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Tampa%2C_Florida",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Downtown_Tampa%2C_Florida.jpg/1280px-Downtown_Tampa%2C_Florida.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "juneau-alaska": {
+    "filename": "juneau-alaska.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Juneau%2C_Alaska",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Queen_Elizabeth_%28ship%2C_2010%29_in_Juneau%2C_Alaska_2024-08-15.jpg/1280px-Queen_Elizabeth_%28ship%2C_2010%29_in_Juneau%2C_Alaska_2024-08-15.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "fort-smith-arkansas": {
+    "filename": "fort-smith-arkansas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Fort_Smith%2C_Arkansas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Fort_Smith%2C_AR_002.jpg/1280px-Fort_Smith%2C_AR_002.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "idaho-falls-idaho": {
+    "filename": "idaho-falls-idaho.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Idaho_Falls%2C_Idaho",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Downtown_Idaho_Falls.jpg/1280px-Downtown_Idaho_Falls.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "new-haven-connecticut": {
+    "filename": "new-haven-connecticut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/New_Haven%2C_Connecticut",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/New_Haven%2C_Connecticut_skyline_%28cropped%29.jpg/1280px-New_Haven%2C_Connecticut_skyline_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "augusta-georgia": {
+    "filename": "augusta-georgia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Augusta%2C_Georgia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Augusta%2C_GA_Downtown_Skyline_2017.jpg/1280px-Augusta%2C_GA_Downtown_Skyline_2017.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "arviat-nunavut": {
+    "filename": "arviat-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Arviat",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Arviat_Church_Centers_1995-06-30.jpg/1280px-Arviat_Church_Centers_1995-06-30.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "davenport-iowa": {
+    "filename": "davenport-iowa.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Davenport%2C_Iowa",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Village_of_East_Davenport_2.jpg/1280px-Village_of_East_Davenport_2.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "moose-jaw-saskatchewan": {
+    "filename": "moose-jaw-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Moose_Jaw",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/City_Hall_Moose_Jaw.jpg/1280px-City_Hall_Moose_Jaw.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "watson-lake-yukon": {
+    "filename": "watson-lake-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Watson_Lake%2C_Yukon",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Watson_Lake_4.jpg/1280px-Watson_Lake_4.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "yorkton-saskatchewan": {
+    "filename": "yorkton-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Yorkton",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/YorktonDownTownStreet.JPG/1280px-YorktonDownTownStreet.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "mobile-alabama": {
+    "filename": "mobile-alabama.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Mobile%2C_Alabama",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Mobile%2C_Alabama_skyline.jpg/1280px-Mobile%2C_Alabama_skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "aurora-colorado": {
+    "filename": "aurora-colorado.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Aurora",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Aurora_borealis_over_Eielson_Air_Force_Base%2C_Alaska.jpg/1280px-Aurora_borealis_over_Eielson_Air_Force_Base%2C_Alaska.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "truro-nova-scotia": {
+    "filename": "truro-nova-scotia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Truro",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Hall_for_Cornwall_on_Back_Quay%2C_Truro_-_geograph.org.uk_-_4429068.jpg/1280px-Hall_for_Cornwall_on_Back_Quay%2C_Truro_-_geograph.org.uk_-_4429068.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "worcester-massachusetts": {
+    "filename": "worcester-massachusetts.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Worcester%2C_Massachusetts",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Downtown_Worcester%2C_Massachusetts.jpg/1280px-Downtown_Worcester%2C_Massachusetts.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "steinbach-manitoba": {
+    "filename": "steinbach-manitoba.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Steinbach%2C_Manitoba",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Steinbach_montage_2.jpg/1280px-Steinbach_montage_2.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "lewiston-maine": {
+    "filename": "lewiston-maine.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Lewiston%2C_Maine",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Lewiston%2C_Maine.jpg/1280px-Lewiston%2C_Maine.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "ajax-ontario": {
+    "filename": "ajax-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Ajax%2C_Ontario",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Aerial_Photograph_of_Ajax%2C_Ontario_-_Discover_The_Town_Of_Ajax_%2801m08s%29_%28edited%29.jpg/1280px-Aerial_Photograph_of_Ajax%2C_Ontario_-_Discover_The_Town_Of_Ajax_%2801m08s%29_%28edited%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "jersey-city-new-jersey": {
+    "filename": "jersey-city-new-jersey.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Jersey_City%2C_New_Jersey",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Journal_Square_Jersey_City_November_2021_003.jpg/1280px-Journal_Square_Jersey_City_November_2021_003.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "delta-british-columbia": {
+    "filename": "delta-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Delta%2C_British_Columbia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Bridge_Street_%26_Delta_Street_-_37542593804.jpg/1280px-Bridge_Street_%26_Delta_Street_-_37542593804.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "san-diego-california": {
+    "filename": "san-diego-california.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/San_Diego",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/La_Jolla_Shores_view_%28cropped%29.jpg/1280px-La_Jolla_Shores_view_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "cambridge-ontario": {
+    "filename": "cambridge-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Cambridge",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Cambridge_-_Kings_College_vue_des_backs.jpg/1280px-Cambridge_-_Kings_College_vue_des_backs.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "jacksonville-florida": {
+    "filename": "jacksonville-florida.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Jacksonville%2C_Florida",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Jacksonville_skyline.jpg/1280px-Jacksonville_skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "north-vancouver-british-columbia": {
+    "filename": "north-vancouver-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/North_Vancouver_(city)",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/North_Vancouver_201807.jpg/1280px-North_Vancouver_201807.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "tacoma-washington": {
+    "filename": "tacoma-washington.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Tacoma%2C_Washington",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Tacoma_Washington_Aerial%2C_June_2025.jpg/1280px-Tacoma_Washington_Aerial%2C_June_2025.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

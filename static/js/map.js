@@ -26,7 +26,8 @@
         peak: 'Pics',
         annotations: 'Annotations',
         climate: 'Climat',
-        density: 'Densit\u00e9'
+        density: 'Densit\u00e9',
+        timetravel: 'Voyage dans le temps'
     };
 
     /* ── marker style per theme ──────────────────────────────── */
@@ -385,25 +386,245 @@
 
         /* ── event wiring ────────────────────────────────────── */
 
+        /* ── Time-travel state ───────────────────────────────── */
+        var ttData = null;       // {years: [...], cities: {...}}
+        var ttLoading = false;
+        var ttActive = false;
+        var ttPlayInterval = null;
+        var ttMarkerLayer = L.layerGroup();   // separate layer for time-travel
+        var ttPanel = document.getElementById('timetravel-panel');
+        var ttSlider = document.getElementById('tt-slider');
+        var ttYearDisplay = document.getElementById('tt-year-display');
+        var ttCityCount = document.getElementById('tt-city-count');
+        var ttMinYear = document.getElementById('tt-min-year');
+        var ttMaxYear = document.getElementById('tt-max-year');
+        var ttPlayBtn = document.getElementById('tt-play-btn');
+        var ttSpeed = document.getElementById('tt-speed');
+
+        function fetchTimeTravelData(cb) {
+            if (ttData) return cb(ttData);
+            if (ttLoading) return;
+            ttLoading = true;
+            if (ttYearDisplay) ttYearDisplay.textContent = 'Chargement…';
+            fetch('/map/time-travel')
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    ttData = d;
+                    ttLoading = false;
+                    cb(d);
+                })
+                .catch(function () {
+                    ttLoading = false;
+                    if (ttYearDisplay) ttYearDisplay.textContent = 'Erreur';
+                });
+        }
+
+        function enterTimeTravel() {
+            ttActive = true;
+            markerLayer.clearLayers();
+            markerLayer.remove();
+            ttMarkerLayer.addTo(map);
+            if (ttPanel) ttPanel.style.display = '';
+
+            fetchTimeTravelData(function (d) {
+                if (!d.years.length) return;
+                ttSlider.min = 0;
+                ttSlider.max = d.years.length - 1;
+                ttSlider.value = d.years.length - 1;
+                ttMinYear.textContent = d.years[0];
+                ttMaxYear.textContent = d.years[d.years.length - 1];
+                renderTimeTravelYear(d.years[d.years.length - 1]);
+            });
+        }
+
+        function exitTimeTravel() {
+            ttActive = false;
+            stopTTPlay();
+            ttMarkerLayer.clearLayers();
+            ttMarkerLayer.remove();
+            markerLayer.addTo(map);
+            if (ttPanel) ttPanel.style.display = 'none';
+            render();
+        }
+
+        function getPopulationForYear(cityData, targetYear) {
+            // Find exact match or interpolate between nearest years
+            var data = cityData.data;
+            if (data[String(targetYear)] != null) return data[String(targetYear)];
+
+            var years = Object.keys(data).map(Number).sort(function (a, b) { return a - b; });
+            if (!years.length) return null;
+
+            // If target is before first data point, no data
+            if (targetYear < years[0]) return null;
+            // If target is after last data point, no data
+            if (targetYear > years[years.length - 1]) return null;
+
+            // Interpolate between the two nearest years
+            var lower = null, upper = null;
+            for (var i = 0; i < years.length; i++) {
+                if (years[i] <= targetYear) lower = years[i];
+                if (years[i] >= targetYear && upper === null) upper = years[i];
+            }
+            if (lower === null || upper === null) return null;
+            if (lower === upper) return data[String(lower)];
+
+            var ratio = (targetYear - lower) / (upper - lower);
+            var popLow = data[String(lower)];
+            var popHigh = data[String(upper)];
+            return Math.round(popLow + (popHigh - popLow) * ratio);
+        }
+
+        function renderTimeTravelYear(year) {
+            if (!ttData) return;
+            ttMarkerLayer.clearLayers();
+
+            var cities = ttData.cities;
+            var slugs = Object.keys(cities);
+            var maxPop = 0;
+            var pointsForYear = [];
+
+            // First pass: compute populations and find max
+            slugs.forEach(function (slug) {
+                var city = cities[slug];
+                var pop = getPopulationForYear(city, year);
+                if (pop != null && pop > 0) {
+                    pointsForYear.push({ slug: slug, city: city, pop: pop });
+                    if (pop > maxPop) maxPop = pop;
+                }
+            });
+
+            // Apply filters (country, region, search)
+            var country = ctrls.countrySelect ? ctrls.countrySelect.value : '';
+            var regions = ctrls.regionList ? getCheckedRegions(ctrls.regionList) : null;
+            var search = (ctrls.search.value || '').trim().toLowerCase();
+
+            pointsForYear = pointsForYear.filter(function (p) {
+                if (country && p.city.country !== country) return false;
+                if (regions && !regions.has(p.city.region)) return false;
+                if (search && p.city.name.toLowerCase().indexOf(search) === -1) return false;
+                return true;
+            });
+
+            // Second pass: draw markers
+            pointsForYear.forEach(function (p) {
+                var radius = maxPop > 0 ? Math.max(5, Math.min(32, 5 + (p.pop / maxPop) * 27)) : 8;
+                var m = L.circleMarker([p.city.lat, p.city.lng], {
+                    radius: radius,
+                    color: p.city.color,
+                    fillColor: p.city.color,
+                    fillOpacity: 0.55,
+                    weight: 2
+                });
+                m.bindPopup(
+                    '<div class="map-popup">' +
+                    '<h3>' + p.city.name + '</h3>' +
+                    '<p>' + p.city.country + ' · ' + p.city.region + '</p>' +
+                    '<p><strong>' + fmt(p.pop) + '</strong> habitants en <strong>' + year + '</strong></p>' +
+                    '<a href="/cities/' + p.slug + '">Ouvrir la fiche</a>' +
+                    '</div>'
+                );
+                m.addTo(ttMarkerLayer);
+            });
+
+            if (ttYearDisplay) ttYearDisplay.textContent = year;
+            if (ttCityCount) ttCityCount.textContent = pointsForYear.length + ' villes';
+            if (ctrls.summary) {
+                ctrls.summary.textContent = pointsForYear.length + ' villes en ' + year + '. Couche active\u00a0: Voyage dans le temps.';
+            }
+            if (ctrls.visibleCount) {
+                ctrls.visibleCount.textContent = pointsForYear.length + ' villes';
+            }
+        }
+
+        // Slider input handler
+        if (ttSlider) {
+            ttSlider.addEventListener('input', function () {
+                if (!ttData) return;
+                var idx = Number(ttSlider.value);
+                var year = ttData.years[idx];
+                renderTimeTravelYear(year);
+            });
+        }
+
+        // Play / Pause
+        function stopTTPlay() {
+            if (ttPlayInterval) {
+                clearInterval(ttPlayInterval);
+                ttPlayInterval = null;
+            }
+            if (ttPlayBtn) ttPlayBtn.textContent = '▶️ Lecture';
+        }
+
+        if (ttPlayBtn) {
+            ttPlayBtn.addEventListener('click', function () {
+                if (ttPlayInterval) {
+                    stopTTPlay();
+                    return;
+                }
+                if (!ttData || !ttData.years.length) return;
+                ttPlayBtn.textContent = '⏸️ Pause';
+                var speed = Number(ttSpeed.value) || 800;
+                ttPlayInterval = setInterval(function () {
+                    var idx = Number(ttSlider.value);
+                    if (idx >= ttData.years.length - 1) {
+                        ttSlider.value = 0;
+                        idx = 0;
+                    } else {
+                        idx++;
+                        ttSlider.value = idx;
+                    }
+                    renderTimeTravelYear(ttData.years[idx]);
+                }, speed);
+            });
+        }
+
+        if (ttSpeed) {
+            ttSpeed.addEventListener('change', function () {
+                if (ttPlayInterval) {
+                    stopTTPlay();
+                    ttPlayBtn.click();  // restart with new speed
+                }
+            });
+        }
+
         /* Layer pills */
         ctrls.themePills.forEach(function (pill) {
             pill.addEventListener('click', function () {
                 ctrls.themePills.forEach(function (p) { p.classList.remove('is-active'); });
                 pill.classList.add('is-active');
-                ctrls.activeTheme = pill.getAttribute('data-theme');
-                render();
+                var theme = pill.getAttribute('data-theme');
+                ctrls.activeTheme = theme;
+
+                if (theme === 'timetravel') {
+                    enterTimeTravel();
+                } else {
+                    if (ttActive) exitTimeTravel();
+                    else render();
+                }
             });
         });
 
         [ctrls.popRange, ctrls.search].forEach(function (el) {
             if (el) {
-                el.addEventListener('input', function () { render(); });
-                el.addEventListener('change', function () { render(); });
+                el.addEventListener('input', function () {
+                    if (ttActive && ttData) {
+                        var idx = Number(ttSlider.value);
+                        renderTimeTravelYear(ttData.years[idx]);
+                    } else { render(); }
+                });
+                el.addEventListener('change', function () {
+                    if (ttActive && ttData) {
+                        var idx = Number(ttSlider.value);
+                        renderTimeTravelYear(ttData.years[idx]);
+                    } else { render(); }
+                });
             }
         });
 
         if (ctrls.reset) {
             ctrls.reset.addEventListener('click', function () {
+                if (ttActive) exitTimeTravel();
                 ctrls.activeTheme = 'population';
                 ctrls.themePills.forEach(function (p) {
                     p.classList.toggle('is-active', p.getAttribute('data-theme') === 'population');
@@ -420,8 +641,14 @@
         }
 
         /* Country / Region filters */
+        function ttRerender() {
+            if (ttActive && ttData) {
+                var idx = Number(ttSlider.value);
+                renderTimeTravelYear(ttData.years[idx]);
+            } else { render(); }
+        }
         if (ctrls.countrySelect) {
-            ctrls.countrySelect.addEventListener('change', render);
+            ctrls.countrySelect.addEventListener('change', ttRerender);
         }
         if (ctrls.regionToggle && ctrls.regionDropdown) {
             ctrls.regionToggle.addEventListener('click', function (e) {
@@ -437,7 +664,7 @@
         if (ctrls.regionList) {
             ctrls.regionList.addEventListener('change', function () {
                 updateRegionLabel(ctrls.regionToggle, ctrls.regionList);
-                render();
+                ttRerender();
             });
         }
         ctrls.regionDropdown && ctrls.regionDropdown.querySelectorAll('[data-region-action]').forEach(function (btn) {
@@ -445,7 +672,7 @@
                 var check = btn.dataset.regionAction === 'all';
                 ctrls.regionList.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = check; });
                 updateRegionLabel(ctrls.regionToggle, ctrls.regionList);
-                render();
+                ttRerender();
             });
         });
 
