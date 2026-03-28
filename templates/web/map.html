@@ -31,6 +31,12 @@
                 <option value="opentopomap">⛰️ OpenTopoMap</option>
                 <option value="ohm-historical">🏛️ Historical Map (OHM)</option>
             </select>
+            <select id="ohm-style-select" class="map-tile-select" title="Style historique" style="display:none;">
+                <option value="ohm-main">🏛️ Historique</option>
+                <option value="ohm-woodblock">🪵 Bloc de bois</option>
+                <option value="ohm-japanese">🌸 Rouleau japonais</option>
+                <option value="ohm-railway">🚂 Voie ferrée</option>
+            </select>
             <input id="map-search-filter" type="text" placeholder="🔍 Rechercher une ville…" class="map-search-input">
             <button type="button" id="map-save-default" class="map-save-pill" title="Sauvegarder cette vue par défaut">💾</button>
             <button type="button" id="map-refresh-btn" class="map-refresh-pill" title="Rafraîchir les données">⟳</button>
@@ -203,5 +209,5 @@
 <script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}?v=29"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=31"></script>
 {% endblock %}

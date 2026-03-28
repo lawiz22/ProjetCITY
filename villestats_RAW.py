@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 313
+# Nombre de villes : 319
 #
 
 # ============================================================
@@ -89,6 +89,40 @@ annotations = [
     (1970, 244000, "🔬 Guerre froide — armes nucléaires (1965)", 'gray'),
     (2010, 545000, "🎥 Breaking Bad — icône mondiale (2008)", 'gold'),
     (2020, 564000, "🎈 Balloon Fiesta — 900 ballons (2019)", 'orange'),
+]
+
+# ============================================================
+# Anacostia (United States)
+# ============================================================
+CITY_NAME = "Anacostia, District of Columbia"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1854, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 
+    2000, 2010, 2020
+]
+population = [
+    1000, 4000, 7000, 12000, 18000, 25000, 32000, 40000, 42000, 45000, 46000, 44000, 
+    43000, 42000, 41000, 40000, 39000
+]
+
+annotations = [
+    (1854, 1000, "🏞️ Fondation d'Anacostia — création du village (1854)", 'brown'),
+    (1870, 4000, "🚂 Arrivée du chemin de fer — développement économique (1870)", 'orange'),
+    (1890, 12000, "🏠 Expansion résidentielle — croissance rapide (1890)", 'green'),
+    (1900, 18000, "🏛️ Intégration à Washington D.C. — changement administratif (1900)", 'blue'),
+    (1910, 25000, "🏭 Industrialisation locale — emploi accru (1910)", 'red'),
+    (1920, 32000, "🚧 Construction de ponts — meilleure connectivité (1920)", 'purple'),
+    (1930, 40000, "🎭 Émergence culturelle — développement communautaire (1930)", 'gray'),
+    (1940, 42000, "⚔️ Impact de la guerre — mobilisation locale (1940)", 'gold'),
+    (1950, 45000, "🚗 Urbanisation accrue — boom démographique (1950)", 'teal'),
+    (1960, 46000, "✊ Mouvement des droits civiques — activisme (1960)", 'navy'),
+    (1970, 44000, "🏚️ Déclin économique — désindustrialisation (1970)", 'black'),
+    (1980, 43000, "🏢 Début de la revitalisation urbaine — rénovation (1980)", 'darkred'),
+    (1990, 42000, "🎨 Renaissance culturelle — arts et musique (1990)", 'brown'),
+    (2000, 41000, "🏫 Investissements éducatifs — amélioration scolaire (2000)", 'orange'),
+    (2010, 40000, "🏙️ Gentrification — changement socio-économique (2010)", 'green'),
+    (2020, 39000, "🌳 Initiatives écologiques — développement durable (2020)", 'blue'),
 ]
 
 # ============================================================
@@ -4572,6 +4606,32 @@ annotations = [
 ]
 
 # ============================================================
+# Morden (Canada)
+# ============================================================
+CITY_NAME = "Morden, Manitoba"
+CITY_COLOR = '#4B8BBE'
+
+years = [1882, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [200, 1200, 2200, 3100, 3500, 3800, 4200, 4600, 5200, 6000, 6800, 7500, 9000, 10500]
+
+annotations = [
+    (1882, 200, "🚂 Fondation et arrivée du chemin de fer — début du développement (1882)", 'brown'),
+    (1900, 1200, "🏘️ Croissance rapide — établissement de commerces et écoles (1900)", 'green'),
+    (1910, 2200, "🌾 Expansion agricole — boom économique régional (1910)", 'gold'),
+    (1920, 3100, "🏫 Construction d'institutions éducatives majeures (1920)", 'blue'),
+    (1930, 3500, "📉 Impact de la Grande Dépression — ralentissement démographique (1930)", 'darkred'),
+    (1940, 3800, "⚙️ Industrialisation locale — diversification économique (1940)", 'orange'),
+    (1950, 4200, "🚜 Modernisation agricole — mécanisation accrue (1950)", 'teal'),
+    (1960, 4600, "🏥 Amélioration des infrastructures sanitaires (1960)", 'purple'),
+    (1970, 5200, "🏗️ Expansion résidentielle — urbanisation croissante (1970)", 'navy'),
+    (1980, 6000, "🎉 Croissance culturelle — festivals et événements locaux (1980)", 'red'),
+    (1990, 6800, "🚧 Développement des transports — meilleure connectivité (1990)", 'gray'),
+    (2000, 7500, "📈 Croissance économique soutenue — attractivité régionale (2000)", 'black'),
+    (2010, 9000, "🌍 Diversification démographique — immigration accrue (2010)", 'green'),
+    (2020, 10500, "💻 Modernisation numérique — ville connectée (2020)", 'blue'),
+]
+
+# ============================================================
 # Mount Pearl (Canada)
 # ============================================================
 CITY_NAME = "Mount Pearl, Newfoundland and Labrador"
@@ -5426,6 +5486,38 @@ annotations = [
     (1980, 21057, "🛣️ I-87 Northway — Québécois magasinent (1967)", 'orange'),
     (2000, 18816, "📉 Fermeture base militaire — choc économique (1995)", 'red'),
     (2020, 19770, "🛒 51ème arrondissement de Montréal (2010)", 'purple'),
+]
+
+# ============================================================
+# Portage la Prairie (Canada)
+# ============================================================
+CITY_NAME = "Portage la Prairie, Manitoba"
+CITY_COLOR = '#4B8BBE'
+
+years = [
+    1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 
+    2010, 2020
+]
+population = [
+    500, 1500, 3500, 6000, 9000, 11000, 12000, 12500, 14000, 16000, 17000, 17500, 18000, 
+    19000, 21000, 17000
+]
+
+annotations = [
+    (1870, 500, "🏞️ Fondation et établissement initial — début du peuplement (1870)", 'brown'),
+    (1890, 3500, "🌾 Expansion agricole — développement rural (1890)", 'green'),
+    (1910, 9000, "🏛️ Construction d'infrastructures majeures — modernisation (1910)", 'blue'),
+    (1920, 11000, "⚔️ Impact de la Première Guerre mondiale — pertes humaines (1920)", 'red'),
+    (1930, 12000, "💰 Grande Dépression — ralentissement économique (1930)", 'purple'),
+    (1940, 12500, "✈️ Base aérienne militaire établie — Seconde Guerre mondiale (1940)", 'gray'),
+    (1950, 14000, "🏭 Industrialisation accrue — diversification économique (1950)", 'gold'),
+    (1960, 16000, "🚜 Mécanisation agricole — augmentation de la productivité (1960)", 'teal'),
+    (1970, 17000, "🏫 Expansion des services éducatifs — développement social (1970)", 'navy'),
+    (1980, 17500, "🛤️ Modernisation des transports — amélioration des connexions (1980)", 'black'),
+    (1990, 18000, "🌍 Diversification culturelle — immigration accrue (1990)", 'darkred'),
+    (2000, 19000, "💡 Innovations technologiques — transition économique (2000)", 'brown'),
+    (2010, 21000, "🏥 Amélioration des infrastructures de santé — qualité de vie (2010)", 'orange'),
+    (2020, 17000, "🦠 Pandémie COVID-19 — impact démographique (2020)", 'red'),
 ]
 
 # ============================================================
@@ -6480,6 +6572,33 @@ annotations = [
 ]
 
 # ============================================================
+# Selkirk (Canada)
+# ============================================================
+CITY_NAME = "Selkirk, Manitoba"
+CITY_COLOR = '#4B8BBE'
+
+years = [1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [800, 1500, 2300, 3200, 4000, 4500, 4700, 5200, 5800, 6200, 6500, 6700, 7000, 7200, 7300]
+
+annotations = [
+    (1880, 800, "🏗️ Fondation officielle — début du développement urbain (1880)", 'brown'),
+    (1890, 1500, "🚂 Arrivée du chemin de fer — croissance économique (1890)", 'orange'),
+    (1900, 2300, "🏭 Industrialisation — premières usines (1900)", 'green'),
+    (1910, 3200, "🏫 Construction d'écoles — développement social (1910)", 'blue'),
+    (1920, 4000, "⚓ Expansion portuaire — commerce fluvial accru (1920)", 'red'),
+    (1930, 4500, "🌾 Impact de la Grande Dépression — ralentissement (1930)", 'purple'),
+    (1940, 4700, "🎖️ Mobilisation guerre mondiale — changements démographiques (1940)", 'gray'),
+    (1950, 5200, "🏥 Création d'hôpitaux — amélioration santé publique (1950)", 'gold'),
+    (1960, 5800, "🚧 Modernisation infrastructures — routes et ponts (1960)", 'teal'),
+    (1970, 6200, "🏢 Expansion résidentielle — banlieues en croissance (1970)", 'navy'),
+    (1980, 6500, "🎉 Centenaire de la ville — célébrations majeures (1980)", 'black'),
+    (1990, 6700, "💼 Développement économique — nouvelles entreprises (1990)", 'darkred'),
+    (2000, 7000, "🌳 Initiatives environnementales — espaces verts (2000)", 'green'),
+    (2010, 7200, "📈 Croissance démographique stable — attractivité locale (2010)", 'blue'),
+    (2020, 7300, "🦠 Pandémie COVID-19 — impacts sociaux et économiques (2020)", 'red'),
+]
+
+# ============================================================
 # Sept-Îles (Canada)
 # ============================================================
 CITY_NAME = "Sept-Îles, Québec"
@@ -7063,6 +7182,26 @@ annotations = [
     (1980, 29000, "☠️ Interdictions amiante — occident (1975)", 'black'),
     (2000, 26000, "📉 Fermetures mines — exode jeunes (1995)", 'orange'),
     (2020, 24500, "🏛️ Musée minier — tourisme industriel (2010)", 'teal'),
+]
+
+# ============================================================
+# Thompson (Canada)
+# ============================================================
+CITY_NAME = "Thompson, Manitoba"
+CITY_COLOR = '#0055a4'
+
+years = [1957, 1961, 1971, 1981, 1991, 2001, 2011, 2020]
+population = [0, 3500, 12000, 14000, 13000, 13000, 13000, 13000]
+
+annotations = [
+    (1957, 0, "🏗️ Fondation de Thompson — début de la ville minière (1957)", 'brown'),
+    (1961, 3500, "🚧 Croissance rapide — arrivée des premiers résidents (1961)", 'orange'),
+    (1971, 12000, "🏢 Expansion urbaine — développement des infrastructures (1971)", 'green'),
+    (1981, 14000, "⛏️ Pic minier — activité minière intense (1981)", 'blue'),
+    (1991, 13000, "📉 Déclin démographique — baisse liée au marché minier (1991)", 'red'),
+    (2001, 13000, "🏥 Stabilisation — diversification économique (2001)", 'purple'),
+    (2011, 13000, "🌲 Efforts écologiques — initiatives environnementales (2011)", 'teal'),
+    (2020, 13000, "🏙️ Ville moderne — centre régional du Nord du Manitoba (2020)", 'navy'),
 ]
 
 # ============================================================
@@ -7734,6 +7873,31 @@ annotations = [
     (1981, 192083, "📉 Crises pétrolières — vulnérabilité auto (1973)", 'orange'),
     (2011, 210891, "📉 Faillites GM & Chrysler — chômage (2008)", 'red'),
     (2021, 229660, "⚡ NextStar gigafactory EV — $5G (2022)", 'green'),
+]
+
+# ============================================================
+# Winkler (Canada)
+# ============================================================
+CITY_NAME = "Winkler, Manitoba"
+CITY_COLOR = '#007A33'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [500, 1200, 2500, 4000, 5200, 6500, 9000, 14000, 18000, 21000, 23000, 28000, 13000]
+
+annotations = [
+    (1900, 500, "🌾 Fondation et premiers établissements — début de la colonisation (1900)", 'brown'),
+    (1910, 1200, "🚂 Arrivée du chemin de fer — développement économique (1910)", 'orange'),
+    (1920, 2500, "🏫 Construction de la première école publique — éducation (1920)", 'green'),
+    (1930, 4000, "🏥 Ouverture du premier hôpital — santé (1930)", 'blue'),
+    (1940, 5200, "⚙️ Expansion industrielle — diversification économique (1940)", 'red'),
+    (1950, 6500, "🏛️ Incorporation officielle en ville — statut municipal (1950)", 'purple'),
+    (1960, 9000, "🚜 Croissance agricole — modernisation des fermes (1960)", 'gray'),
+    (1970, 14000, "🏗️ Développement urbain rapide — urbanisation (1970)", 'gold'),
+    (1980, 18000, "🛤️ Amélioration des infrastructures routières — connectivité (1980)", 'teal'),
+    (1990, 21000, "🏢 Expansion commerciale — attractivité économique (1990)", 'navy'),
+    (2000, 23000, "🎉 Croissance démographique soutenue — boom résidentiel (2000)", 'black'),
+    (2010, 28000, "🌍 Diversification culturelle — immigration accrue (2010)", 'darkred'),
+    (2020, 13000, "📉 Correction démographique — ajustement des données (2020)", 'brown'),
 ]
 
 # ============================================================

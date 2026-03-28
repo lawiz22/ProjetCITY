@@ -269,12 +269,21 @@
                 label: 'OpenTopoMap'
             },
             'ohm-historical': {
-                style: 'https://www.openhistoricalmap.org/map-styles/main/main.json',
                 options: { attribution: '&copy; <a href="https://www.openhistoricalmap.org/">OpenHistoricalMap</a> contributors' },
                 label: 'Historical Map (OHM)',
                 maplibre: true
             }
         };
+
+        /* OHM sub-styles */
+        var OHM_STYLES = {
+            'ohm-main':      { style: 'https://www.openhistoricalmap.org/map-styles/main/main.json',           label: 'Historique' },
+            'ohm-woodblock': { style: 'https://www.openhistoricalmap.org/map-styles/woodblock/woodblock.json', label: 'Bloc de bois' },
+            'ohm-japanese':  { style: 'https://www.openhistoricalmap.org/map-styles/japanese_scroll/japanese_scroll.json', label: 'Rouleau japonais' },
+            'ohm-railway':   { style: 'https://www.openhistoricalmap.org/map-styles/railway/railway.json',     label: 'Voie ferrée' }
+        };
+        var currentOhmStyleKey = localStorage.getItem('ccs-ohm-style') || 'ohm-main';
+        if (!OHM_STYLES[currentOhmStyleKey]) currentOhmStyleKey = 'ohm-main';
 
         var currentTileKey = (savedView && savedView.tile) || localStorage.getItem('ccs-map-tile') || 'carto-voyager';
         if (!TILE_PROVIDERS[currentTileKey]) currentTileKey = 'carto-voyager';
@@ -348,8 +357,9 @@
 
             if (provider.maplibre && typeof L.maplibreGL === 'function') {
                 /* Vector tile layer via MapLibre GL */
+                var ohmStyle = OHM_STYLES[currentOhmStyleKey] || OHM_STYLES['ohm-main'];
                 currentTileLayer = L.maplibreGL({
-                    style: provider.style,
+                    style: ohmStyle.style,
                     attribution: provider.options.attribution
                 }).addTo(map);
                 var glMap = currentTileLayer.getMaplibreMap();
@@ -387,13 +397,34 @@
 
         /* Set initial tile layer */
         var tileSelect = document.getElementById('map-tile-select');
+        var ohmStyleSelect = document.getElementById('ohm-style-select');
         if (tileSelect) tileSelect.value = currentTileKey;
+        if (ohmStyleSelect) ohmStyleSelect.value = currentOhmStyleKey;
+
+        function syncOhmStyleDropdown() {
+            if (ohmStyleSelect) {
+                ohmStyleSelect.style.display = (currentTileKey === 'ohm-historical') ? '' : 'none';
+            }
+        }
+        syncOhmStyleDropdown();
         setTileLayer(currentTileKey);
 
         /* Tile select change handler */
         if (tileSelect) {
             tileSelect.addEventListener('change', function () {
                 setTileLayer(this.value);
+                syncOhmStyleDropdown();
+            });
+        }
+
+        /* OHM sub-style change handler */
+        if (ohmStyleSelect) {
+            ohmStyleSelect.addEventListener('change', function () {
+                currentOhmStyleKey = this.value;
+                localStorage.setItem('ccs-ohm-style', currentOhmStyleKey);
+                if (currentTileKey === 'ohm-historical') {
+                    setTileLayer('ohm-historical');
+                }
             });
         }
 
@@ -529,6 +560,7 @@
                 setTileLayer('ohm-historical');
                 if (tileSelect) tileSelect.value = 'ohm-historical';
             }
+            syncOhmStyleDropdown();
 
             var mp = document.querySelector('.map-panel-full');
             if (mp) mp.classList.add('timetravel-active');
@@ -566,6 +598,7 @@
                 if (tileSelect) tileSelect.value = ttPreviousTileKey;
             }
             ttPreviousTileKey = null;
+            syncOhmStyleDropdown();
 
             var mp = document.querySelector('.map-panel-full');
             if (mp) mp.classList.remove('timetravel-active');

@@ -1888,5 +1888,41 @@
     "source_page": "https://en.wikipedia.org/wiki/Naperville%2C_Illinois",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Naperville_IL_Skyline_2022.jpg/1280px-Naperville_IL_Skyline_2022.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "anacostia-district-of-columbia": {
+    "filename": "anacostia-district-of-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Anacostia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Map_anacostia.jpg/1280px-Map_anacostia.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "thompson-manitoba": {
+    "filename": "thompson-manitoba.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Thompson%2C_Manitoba",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Spirit_Way_Wolf_Mural.jpg/1280px-Spirit_Way_Wolf_Mural.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "portage-la-prairie-manitoba": {
+    "filename": "portage-la-prairie-manitoba.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Portage_la_Prairie",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Portage_la_Prairie_-_City_Collage.jpg/1280px-Portage_la_Prairie_-_City_Collage.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "winkler-manitoba": {
+    "filename": "winkler-manitoba.png",
+    "source_page": "https://en.wikipedia.org/wiki/Winkler%2C_Manitoba",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/City_of_Winkler_Montage.png/1280px-City_of_Winkler_Montage.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "selkirk-manitoba": {
+    "filename": "selkirk-manitoba.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Selkirk%2C_Manitoba",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Selkirk_MB_watertower.jpg/1280px-Selkirk_MB_watertower.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "morden-manitoba": {
+    "filename": "morden-manitoba.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Morden",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Morden_Hall_Park_3.jpg/1280px-Morden_Hall_Park_3.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }
