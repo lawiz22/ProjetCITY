@@ -33,8 +33,8 @@ function getStaticMarkerStyle(link, theme) {
 
     if (theme === 'annotations') {
         return {
-            color: annotationCount > 0 ? '#ef6c3d' : '#b8c0cc',
-            radius: Math.max(9, Math.min(22, 9 + annotationCount * 2))
+            color: annotationCount > 0 ? '#2ecc71' : '#b8c0cc',
+            radius: Math.max(5, Math.min(14, 5 + annotationCount))
         };
     }
 

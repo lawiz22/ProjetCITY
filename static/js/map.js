@@ -49,8 +49,8 @@
         }
         if (theme === 'annotations') {
             var ac = pt.annotation_count || 0;
-            var ca = ac > 0 ? '#ef6c3d' : '#b8c0cc';
-            return { radius: Math.max(8, Math.min(24, 8 + ac * 2)), color: ca, fillColor: ca };
+            var ca = ac > 0 ? '#2ecc71' : '#b8c0cc';
+            return { radius: Math.max(5, Math.min(14, 5 + ac)), color: ca, fillColor: ca };
         }
         if (theme === 'density') {
             var geo = pt.geography;
@@ -267,21 +267,122 @@
                 url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
                 options: { maxZoom: 17, attribution: '&copy; <a href="https://opentopomap.org/">OpenTopoMap</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' },
                 label: 'OpenTopoMap'
+            },
+            'ohm-historical': {
+                style: 'https://www.openhistoricalmap.org/map-styles/main/main.json',
+                options: { attribution: '&copy; <a href="https://www.openhistoricalmap.org/">OpenHistoricalMap</a> contributors' },
+                label: 'Historical Map (OHM)',
+                maplibre: true
             }
         };
 
         var currentTileKey = (savedView && savedView.tile) || localStorage.getItem('ccs-map-tile') || 'carto-voyager';
         if (!TILE_PROVIDERS[currentTileKey]) currentTileKey = 'carto-voyager';
         var currentTileLayer = null;
+        var currentMaplibreMap = null;
+        var ohmMapReady = false;
 
-        function setTileLayer(key) {
+        /* Convert a YYYY-MM-DD string to a decimal year (e.g. 1914.0) */
+        function dateToDecimalYear(dateStr) {
+            var parts = dateStr.split('-');
+            var y = parseInt(parts[0], 10);
+            var m = parseInt(parts[1] || '1', 10) - 1;
+            var d = parseInt(parts[2] || '1', 10);
+            var dt = new Date(y, m, d);
+            var yearStart = new Date(y, 0, 1);
+            var yearEnd   = new Date(y + 1, 0, 1);
+            return y + (dt - yearStart) / (yearEnd - yearStart);
+        }
+
+        /* Store original (base) filters per layer id so they can be restored */
+        var _ohmBaseFilters = {};
+
+        /* Apply date filter to every layer of a MapLibre GL map
+         * Uses MapLibre expression syntax (not legacy filters). */
+        function applyOhmDateFilter(glMap, dateStr) {
+            if (!glMap || !glMap.getStyle) return;
+            var style;
+            try { style = glMap.getStyle(); } catch(e) { return; }
+            if (!style || !style.layers) return;
+            var decYear = dateToDecimalYear(dateStr);
+
+            style.layers.forEach(function(layer) {
+                if (layer.type === 'background' || !layer.source) return;
+
+                /* Capture original filter on first encounter */
+                if (!(layer.id in _ohmBaseFilters)) {
+                    _ohmBaseFilters[layer.id] = layer.filter ? JSON.parse(JSON.stringify(layer.filter)) : null;
+                }
+                var base = _ohmBaseFilters[layer.id];
+
+                /* Date constraint using expression syntax */
+                var startOk = ['any',
+                    ['!', ['has', 'start_decdate']],
+                    ['<=', ['get', 'start_decdate'], decYear]
+                ];
+                var endOk = ['any',
+                    ['!', ['has', 'end_decdate']],
+                    ['>=', ['get', 'end_decdate'], decYear]
+                ];
+
+                var combined;
+                if (base) {
+                    combined = ['all', base, startOk, endOk];
+                } else {
+                    combined = ['all', startOk, endOk];
+                }
+
+                try { glMap.setFilter(layer.id, combined); } catch(e) {
+                    // Some layers (raster, hillshade) don't support filters – ignore
+                }
+            });
+        }
+
+        function setTileLayer(key, ohmDate) {
             var provider = TILE_PROVIDERS[key];
             if (!provider) return;
             if (currentTileLayer) map.removeLayer(currentTileLayer);
-            currentTileLayer = L.tileLayer(provider.url, provider.options).addTo(map);
+            currentMaplibreMap = null;
+            ohmMapReady = false;
+            _ohmBaseFilters = {};   /* reset base filters for new style */
+
+            if (provider.maplibre && typeof L.maplibreGL === 'function') {
+                /* Vector tile layer via MapLibre GL */
+                currentTileLayer = L.maplibreGL({
+                    style: provider.style,
+                    attribution: provider.options.attribution
+                }).addTo(map);
+                var glMap = currentTileLayer.getMaplibreMap();
+                currentMaplibreMap = glMap;
+
+                function onOhmStyleReady() {
+                    if (ohmMapReady) return;  /* guard against double-fire */
+                    ohmMapReady = true;
+                    applyOhmDateFilter(glMap, currentOhmDate);
+                }
+
+                /* Handle both cases: style already loaded, or not yet */
+                if (glMap.isStyleLoaded && glMap.isStyleLoaded()) {
+                    onOhmStyleReady();
+                } else {
+                    glMap.once('styledata', onOhmStyleReady);
+                }
+            } else if (provider.url) {
+                currentTileLayer = L.tileLayer(provider.url, provider.options).addTo(map);
+            }
+
             currentTileKey = key;
             localStorage.setItem('ccs-map-tile', key);
             if (ctrls.status) ctrls.status.textContent = 'Fond de carte: ' + provider.label;
+        }
+
+        var currentOhmDate = '2020-01-01';
+
+        function updateOhmDate(year) {
+            currentOhmDate = year + '-01-01';
+            if (currentTileKey === 'ohm-historical' && currentMaplibreMap && ohmMapReady) {
+                applyOhmDateFilter(currentMaplibreMap, currentOhmDate);
+            }
         }
 
         /* Set initial tile layer */
@@ -413,12 +514,25 @@
                 });
         }
 
+        var ttPreviousTileKey = null;
+
         function enterTimeTravel() {
             ttActive = true;
             markerLayer.clearLayers();
             markerLayer.remove();
             ttMarkerLayer.addTo(map);
             if (ttPanel) ttPanel.style.display = '';
+
+            // Auto-switch to OHM historical basemap
+            ttPreviousTileKey = currentTileKey;
+            if (currentTileKey !== 'ohm-historical') {
+                setTileLayer('ohm-historical');
+                if (tileSelect) tileSelect.value = 'ohm-historical';
+            }
+
+            var mp = document.querySelector('.map-panel-full');
+            if (mp) mp.classList.add('timetravel-active');
+            setTimeout(function(){ map.invalidateSize(); }, 50);
 
             // Hide reading strip & density legend
             var readingStrip = document.querySelector('.map-reading-strip');
@@ -445,6 +559,17 @@
             markerLayer.addTo(map);
             if (ttPanel) ttPanel.style.display = 'none';
             if (ttDetailsRow) ttDetailsRow.style.display = 'none';
+
+            // Restore previous basemap
+            if (ttPreviousTileKey && ttPreviousTileKey !== 'ohm-historical') {
+                setTileLayer(ttPreviousTileKey);
+                if (tileSelect) tileSelect.value = ttPreviousTileKey;
+            }
+            ttPreviousTileKey = null;
+
+            var mp = document.querySelector('.map-panel-full');
+            if (mp) mp.classList.remove('timetravel-active');
+            setTimeout(function(){ map.invalidateSize(); }, 50);
 
             // Restore reading strip
             var readingStrip = document.querySelector('.map-reading-strip');
@@ -484,6 +609,7 @@
         function renderTimeTravelYear(year) {
             if (!ttData) return;
             ttMarkerLayer.clearLayers();
+            updateOhmDate(year);
 
             var cities = ttData.cities;
             var slugs = Object.keys(cities);

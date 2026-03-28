@@ -2,6 +2,7 @@
 
 {% block head_extra %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 {% endblock %}
 
 {% block content %}
@@ -28,6 +29,7 @@
                 <option value="esri-satellite">🛰️ Esri Satellite</option>
                 <option value="esri-topo">⛰️ Esri Topo</option>
                 <option value="opentopomap">⛰️ OpenTopoMap</option>
+                <option value="ohm-historical">🏛️ Historical Map (OHM)</option>
             </select>
             <input id="map-search-filter" type="text" placeholder="🔍 Rechercher une ville…" class="map-search-input">
             <button type="button" id="map-save-default" class="map-save-pill" title="Sauvegarder cette vue par défaut">💾</button>
@@ -199,5 +201,7 @@
 {% block scripts_extra %}
 <script>window.__mapPoints = {{ map_payload.points | tojson }};</script>
 <script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}?v=26"></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=29"></script>
 {% endblock %}

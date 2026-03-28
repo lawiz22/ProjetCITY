@@ -2858,16 +2858,18 @@ dt {
     height: 100vh;
     overflow: hidden;
 }
-.map-panel-full.spotlight-active .map-toolbar,
-.map-panel-full.spotlight-active .map-filter-row,
 .map-panel-full.spotlight-active .map-reading-strip,
 .map-panel-full.spotlight-active .map-density-legend,
 .map-panel-full.spotlight-active .map-timetravel-panel {
     display: none !important;
 }
+.map-panel-full.spotlight-active .map-toolbar,
+.map-panel-full.spotlight-active .map-filter-row {
+    flex-shrink: 0;
+}
 .map-panel-full.spotlight-active .map-canvas {
-    height: 40vh !important;
-    min-height: 220px !important;
+    height: 32vh !important;
+    min-height: 180px !important;
     flex-shrink: 0;
 }
 .map-panel-full.spotlight-active .spotlight-panel {
@@ -3217,6 +3219,26 @@ dt {
 }
 
 /* ── Time-travel panel ────────────────────────────────────── */
+
+/* When time-travel is active, fix the map and allow scrolling below */
+.map-panel-full.timetravel-active {
+    display: flex;
+    flex-direction: column;
+}
+.map-panel-full.timetravel-active .map-toolbar,
+.map-panel-full.timetravel-active .map-filter-row {
+    flex-shrink: 0;
+}
+.map-panel-full.timetravel-active .map-reading-strip,
+.map-panel-full.timetravel-active .map-density-legend {
+    display: none !important;
+}
+.map-panel-full.timetravel-active .map-canvas {
+    height: 32vh !important;
+    min-height: 180px !important;
+    flex-shrink: 0;
+}
+
 .map-timetravel-panel {
     margin-top: 12px;
     padding: 18px 24px;
