@@ -1,0 +1,200 @@
+```markdown
+# Banff, Alberta — Fiche Complète
+
+## 📍 Informations Générales
+
+| Catégorie          | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| Ville              | Banff 🏔️                                                               |
+| État/Province      | Alberta, Canada                                                         |
+| Surnom             | "La Perle des Rocheuses" 💎 / "Capitale des Parcs Nationaux" 🏞️        |
+| Statut             | Ville incorporée (depuis 1990)                                          |
+| Comté/Région       | Région de l'Alberta (dans le parc national Banff)                       |
+| Maire              | Corrie DiManno (depuis 2021)                                            |
+| Fondation          | 1885 (comme station thermale), 1990 (incorporation municipale)          |
+| Université         | Aucune université locale, mais partenariats avec l'Université de Calgary |
+
+---
+
+## 👥 Population
+
+| Année       | Population |
+|-------------|------------|
+| 2000        | ~6 700     |
+| 2010        | ~7 500     |
+| 2020        | ~8 300     |
+| 2024 (est.) | ~8 800     |
+| Aire métropolitaine (Banff-Canmore) | ~25 000 (incluant Canmore) |
+
+📈 **Croissance** : Population stable mais limitée par les restrictions de développement dans le parc national. La croissance est principalement due à l'afflux touristique saisonnier.
+🥇 **Particularité** : Banff est la seule ville entièrement située dans un parc national au Canada.
+🌍 **Contexte démographique** : Population jeune (moyenne d'âge ~35 ans), très internationale (30% de résidents temporaires ou travailleurs étrangers).
+
+---
+
+## 📐 Géographie & Densité
+
+| Donnée          | Valeur                     |
+|-----------------|----------------------------|
+| Superficie      | ~4,88 km² (limites urbaines) |
+| Densité         | ~1 700 hab./km²            |
+| Plan d'eau      | Rivière Bow 🌊              |
+| Relief          | Montagnes Rocheuses 🏔️     |
+| Altitude        | ~1 383 m (centre-ville)    |
+
+**Distances** :
+- Calgary : 128 km (~1h30 en voiture)
+- Lake Louise : 58 km (~45 min)
+- Jasper : 288 km (~3h30 via Icefields Parkway)
+- Vancouver : 850 km (~9h en voiture)
+
+---
+
+## 🏛️ Économie
+
+**Secteurs Principaux** :
+🏨 **Tourisme** — 4 millions de visiteurs annuels, hôtels de luxe (Fairmont Banff Springs), stations de ski (Sunshine Village, Lake Louise).
+🛍️ **Commerce & Services** — Boutiques haut de gamme (Banff Avenue), restaurants gastronomiques, spas.
+🎿 **Sports d'hiver** — Hébergement et activités liées au ski, randonnée, escalade.
+📸 **Événementiel** — Festivals (Banff Mountain Film Festival), conférences internationales.
+🏛️ **Administration** — Parcs Canada (siège régional), gestion du parc national.
+
+**Synthèse** : Économie 100% dépendante du tourisme, avec des revenus parmi les plus élevés par habitant en Alberta grâce aux dépenses des visiteurs internationaux.
+
+---
+
+## 🎓 Éducation
+
+| Institution               | Type               | Étudiants       |
+|---------------------------|--------------------|-----------------|
+| Banff Centre for Arts and Creativity | Centre de formation artistique | ~1 000 (annuels) |
+| École élémentaire Banff Community High School | École publique (K-12) | ~500            |
+
+**Faits notables** :
+- Le **Banff Centre** est un leader mondial en formation artistique et en résidences créatives, accueillant des artistes de plus de 50 pays.
+- Absence d'université locale, mais partenariats avec l'Université de Calgary pour des programmes en gestion du tourisme et environnement.
+
+---
+
+## 🏥 Santé
+
+- **Banff Mineral Springs Hospital** — Hôpital communautaire de 10 lits, géré par Alberta Health Services.
+  - **Spécialités** : Urgences, soins primaires, réadaptation.
+  - **Employés** : ~100 (dont médecins, infirmiers, personnel administratif).
+  - **Affiliations** : Liens avec l'hôpital de Canmore et les services médicaux d'urgence de Parcs Canada.
+
+---
+
+## 🎵 Culture & Musique
+
+| Artiste / Groupe / Personnalité | Lien avec la ville                          |
+|---------------------------------|---------------------------------------------|
+| **The Wardens**                 | Groupe folk-rock inspiré par les Rocheuses  |
+| **Jon Whyte**                   | Poète et historien local, figure culturelle |
+| **Zacharias Kunuk**             | Cinéaste inuit, résident artistique au Banff Centre |
+
+**Scène culturelle** :
+- **Banff Mountain Film and Book Festival** 🎥 — Festival international de films d'aventure et de montagne.
+- **Banff Centre** — Résidences artistiques, concerts, expositions.
+- **Whyte Museum of the Canadian Rockies** 🏛️ — Histoire locale, art autochtone et archives.
+- **Lieux emblématiques** : Fairmont Banff Springs (hôtel historique), Cave and Basin (site de fondation du parc national).
+
+---
+
+## 🌿 Environnement & Énergie
+
+- **Énergie** : Réseau électrique alimenté à 100% par des sources renouvelables (hydroélectricité via TransAlta).
+- **Gestion des déchets** : Programme de compostage obligatoire, interdiction des sacs plastiques depuis 2022.
+- **Enjeux écologiques** :
+  - **Surfréquentation touristique** : Menace pour les écosystèmes fragiles (ex. : grizzlis, caribous).
+  - **Changement climatique** : Réduction de 30% de la couverture neigeuse depuis 1980, impact sur les stations de ski.
+  - **Faune protégée** : Corridors écologiques pour les ours et wapitis, programmes de sensibilisation.
+
+---
+
+## 🏈 Sports & Loisirs
+
+| Équipe               | Sport          | Ligue                     |
+|----------------------|----------------|---------------------------|
+| **Banff Bears**      | Hockey sur glace | Ligue de hockey senior de l'Alberta |
+
+**Activités de plein air** :
+- **Ski** : Sunshine Village, Lake Louise, Mount Norquay.
+- **Randonnée** : Sentiers comme Plain of Six Glaciers, Tunnel Mountain.
+- **Escalade** : Big Wall sur le mont Rundle.
+- **VTT** : Réseau de pistes dans la vallée de la Bow.
+- **Golf** : Fairmont Banff Springs Golf Course (parcours historique).
+- **Thermes** : Banff Upper Hot Springs 🛁.
+
+---
+
+## 🚗 Transport
+
+| Mode               | Détails                                                                 |
+|--------------------|-------------------------------------------------------------------------|
+| Autoroute          | Trans-Canada Highway (Highway 1) 🛣️                                    |
+| Aéroport           | Aucun aéroport commercial. Aéroport le plus proche : Calgary (YYC) ✈️  |
+| Transport en commun | **Roam Transit** — Réseau de bus local (lignes vers Canmore, Lake Louise) 🚌 |
+| Train              | **VIA Rail** — Arrêt à Banff (service saisonnier, ligne *Canadian*) 🚂   |
+
+**Corridors importants** :
+- **Icefields Parkway** (Highway 93) — Route panoramique vers Jasper.
+- **Bow Valley Parkway** — Alternative scénique à la Trans-Canada.
+
+---
+
+## 🌡️ Climat
+
+| Saison         | Température moyenne |
+|----------------|---------------------|
+| Hiver (Jan)    | -10°C (extrêmes : -40°C) ❄️ |
+| Printemps (Avr)| 5°C                  |
+| Été (Juil)     | 22°C (extrêmes : 30°C) ☀️  |
+| Automne (Oct)  | 6°C                  |
+
+**Particularités** :
+- Climat subarctique (Köppen : *Dfc*), avec des hivers longs et froids, étés courts et doux.
+- **Précipitations** : ~470 mm/an, neige abondante (300 cm/an en moyenne).
+- **Ensoleillement** : 1 900 heures/an, ciel dégagé fréquent en hiver.
+
+---
+
+## 🏙️ Quartiers Notables
+
+| Quartier          | Caractéristique                                                                 |
+|-------------------|---------------------------------------------------------------------------------|
+| **Downtown Banff** | Cœur touristique, Banff Avenue, boutiques, restaurants, vie nocturne animée 🏙️ |
+| **Tunnel Mountain** | Quartier résidentiel, vue sur les montagnes, proche des sentiers de randonnée 🏔️ |
+| **Wolf Street**   | Zone commerciale et résidentielle, ambiance locale moins touristique 🐺         |
+| **Upper Hot Springs** | Zone thermale, hôtels haut de gamme, accès aux sources chaudes 🛁               |
+| **Cascade Gardens** | Quartier historique, maisons patrimoniales, proche du Banff Centre 🌸          |
+
+---
+
+## 📊 Comparaison — Grandes Villes de l'Alberta
+
+| Ville          | Population | Caractéristique                                  |
+|----------------|------------|--------------------------------------------------|
+| **Banff**      | ~8 800     | **Ville touristique dans un parc national** 🏞️  |
+| Calgary        | ~1 300 000 | Métropole économique, siège de nombreuses entreprises 🏙️ |
+| Edmonton       | ~1 000 000 | Capitale provinciale, hub culturel et gouvernemental 🏛️ |
+| Red Deer       | ~103 000   | Ville industrielle et agricole 🏭                |
+| Canmore        | ~17 000    | Ville voisine de Banff, croissance rapide 🏔️    |
+
+---
+
+## 💡 Le Saviez-Vous ?
+
+- 🐻 **Banff abrite l'un des plus anciens programmes de recherche sur les grizzlis au monde** — Le *Foothills Research Institute* étudie ces ours depuis 1971, avec des données sur plus de 100 individus.
+- 🏨 **Le Fairmont Banff Springs a été construit "à l'envers"** — Son architecte, Bruce Price, a conçu l'hôtel avec la façade principale tournée vers la montagne, mais les plans ont été inversés par erreur lors de la construction en 1888.
+- 🚂 **Le premier train à vapeur est arrivé à Banff en 1886** — La *Canadian Pacific Railway* a joué un rôle clé dans le développement touristique de la ville, en faisant une destination accessible.
+- 🎥 **Banff a inspiré des scènes de films célèbres** — Des parties de *The Revenant* (2015) et *Brokeback Mountain* (2005) ont été tournées dans les environs.
+- 🏔️ **Le parc national Banff est le plus ancien du Canada** — Créé en 1885, il est aussi le troisième plus ancien parc national au monde après Yellowstone (États-Unis) et Royal (Australie).
+- 🍺 **Banff a sa propre brasserie artisanale depuis 1888** — La *Banff Ave Brewing Co.* (anciennement *Banff Springs Brewery*) est l'une des plus anciennes microbrasseries du Canada.
+- 📸 **Plus de 4 millions de photos sont prises chaque année à Banff** — Le *Lake Louise* et le *Moraine Lake* sont parmi les lieux les plus photographiés au monde sur Instagram.
+- 🐺 **Les loups de Banff ont été réintroduits dans les années 1980** — Après leur disparition due à la chasse, un programme de réintroduction a permis de rétablir une meute viable, étudiée par les biologistes.
+- 🌌 **Banff est l'un des meilleurs endroits au Canada pour observer les aurores boréales** — Grâce à son altitude et son faible niveau de pollution lumineuse, les aurores sont visibles plusieurs nuits par an.
+- 🏔️ **Le mont Rundle est l'une des montagnes les plus photographiées au monde** — Sa forme distinctive en "dent de scie" en fait un symbole des Rocheuses canadiennes.
+- 🚗 **Il est interdit de nourrir les wapitis à Banff** — Une amende de 25 000$ peut être infligée pour avoir nourri ces animaux, qui deviennent agressifs envers les humains.
+- 🎭 **Le Banff Centre a accueilli des lauréats du prix Nobel** — Des personnalités comme le Dalaï-Lama, Margaret Atwood et des scientifiques primés y ont séjourné pour des résidences ou conférences.
+```

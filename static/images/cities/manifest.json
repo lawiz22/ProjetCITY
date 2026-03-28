@@ -1312,5 +1312,125 @@
     "source_page": "https://en.wikipedia.org/wiki/Coquitlam",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Coquitlam_Town_Centre_2025.png/1280px-Coquitlam_Town_Centre_2025.png",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "langley-british-columbia": {
+    "filename": "langley-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Langley%2C_British_Columbia_(city)",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Langley_City_Hall.jpg/1280px-Langley_City_Hall.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saanich-british-columbia": {
+    "filename": "saanich-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saanich%2C_British_Columbia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/View_of_Mount_Douglas_from_the_south.jpg/1280px-View_of_Mount_Douglas_from_the_south.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "toronto-ontario": {
+    "filename": "toronto-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Toronto",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Toronto_Skyline_from_Snake_Island%2C_February_28_2026_%2808%29.jpg/1280px-Toronto_Skyline_from_Snake_Island%2C_February_28_2026_%2808%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "st-catharines-ontario": {
+    "filename": "st-catharines-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/St._Catharines",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/St._Catharines_Downtown_Centre-ville_de_St._Catharines_%2823904737637%29.jpg/1280px-St._Catharines_Downtown_Centre-ville_de_St._Catharines_%2823904737637%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "brandon-manitoba": {
+    "filename": "brandon-manitoba.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Brandon%2C_Manitoba",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Dominion_Exhibition_Display_Building_II_flags.jpg/1280px-Dominion_Exhibition_Display_Building_II_flags.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "fayetteville-arkansas": {
+    "filename": "fayetteville-arkansas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Fayetteville%2C_Arkansas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Downtown_Fayetteville_from_Old_Main_001.jpg/1280px-Downtown_Fayetteville_from_Old_Main_001.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "dover-delaware": {
+    "filename": "dover-delaware.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Dover",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Dover_from_the_top_of_Dover_Castle_-_geograph.org.uk_-_4061940.jpg/1280px-Dover_from_the_top_of_Dover_Castle_-_geograph.org.uk_-_4061940.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "montgomery-alabama": {
+    "filename": "montgomery-alabama.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Montgomery%2C_Alabama",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Aerial_view_of_Montgomery%2C_Alabama_LCCN2011646683.jpg/1280px-Aerial_view_of_Montgomery%2C_Alabama_LCCN2011646683.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "hilo-hawaii": {
+    "filename": "hilo-hawaii.png",
+    "source_page": "https://en.wikipedia.org/wiki/Hilo%2C_Hawaii",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Hawaii_County_Hawaii_Incorporated_and_Unincorporated_areas_Hilo_Highlighted.svg/1280px-Hawaii_County_Hawaii_Incorporated_and_Unincorporated_areas_Hilo_Highlighted.svg.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sioux-falls-south-dakota": {
+    "filename": "sioux-falls-south-dakota.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Sioux_Falls%2C_South_Dakota",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Downtown_and_Falls_Park_03-16-24.jpg/1280px-Downtown_and_Falls_Park_03-16-24.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "fargo-north-dakota": {
+    "filename": "fargo-north-dakota.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Fargo%2C_North_Dakota",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Downtown_Fargo_Aerial_-_Facing_Southeast_%2851009704407%29.jpg/1280px-Downtown_Fargo_Aerial_-_Facing_Southeast_%2851009704407%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "raleigh-north-carolina": {
+    "filename": "raleigh-north-carolina.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Raleigh%2C_North_Carolina",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Raleigh_Skyline.jpg/1280px-Raleigh_Skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "columbia-south-carolina": {
+    "filename": "columbia-south-carolina.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Columbia%2C_South_Carolina",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Fall_skyline_of_Columbia_SC_from_Arsenal_Hill.jpg/1280px-Fall_skyline_of_Columbia_SC_from_Arsenal_Hill.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "hartford-connecticut": {
+    "filename": "hartford-connecticut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Hartford%2C_Connecticut",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Hartford%2C_CT_skyline_%28cropped%29.jpg/1280px-Hartford%2C_CT_skyline_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "colorado-springs-colorado": {
+    "filename": "colorado-springs-colorado.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Colorado_Springs%2C_Colorado",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Colorado-springs-450_%287296313624%29.jpg/1280px-Colorado-springs-450_%287296313624%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "banff-alberta": {
+    "filename": "banff-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Banff%2C_Alberta",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Town_of_Banff_viewed_from_Sulphur_Mountain.jpg/1280px-Town_of_Banff_viewed_from_Sulphur_Mountain.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "georgetown-district-of-columbia": {
+    "filename": "georgetown-district-of-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Georgetown_(Washington%2C_D.C.)",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Riggs_Bank%2C_Georgetown.jpg/1280px-Riggs_Bank%2C_Georgetown.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "coeur-d-alene-idaho": {
+    "filename": "coeur-d-alene-idaho.png",
+    "source_page": "https://en.wikipedia.org/wiki/Coeur_d'Alene%2C_Idaho",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Coeur_d%27Alene_aerial%2C_May_2023_%28cropped%29.png/1280px-Coeur_d%27Alene_aerial%2C_May_2023_%28cropped%29.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "huntsville-alabama": {
+    "filename": "huntsville-alabama.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Huntsville%2C_Alabama",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Huntsville_Art_Museum_-_front_fa%C3%A7ade_and_stairs_2023.jpg/1280px-Huntsville_Art_Museum_-_front_fa%C3%A7ade_and_stairs_2023.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "savannah-georgia": {
+    "filename": "savannah-georgia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Savanna",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Tarangire-Natpark800600.jpg/1280px-Tarangire-Natpark800600.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }
