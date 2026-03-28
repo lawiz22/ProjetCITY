@@ -91,23 +91,8 @@
             ? 'n/a'
             : pt.latest_growth_pct + '% (' + pt.latest_growth_decade + ')';
 
-        var annotations = pt.annotations || [];
         var annotBlock = '';
-        if (theme === 'annotations') {
-            if (annotations.length) {
-                annotBlock = '<div class="map-popup-annotations">' +
-                    annotations.map(function (a) {
-                        return '<button type="button" class="map-popup-annotation" data-slug="' +
-                            pt.city_slug + '" data-year="' + a.year + '">' +
-                            '<span style="background:' + a.color + '"></span>' +
-                            a.year + ' &middot; ' + a.label + '</button>';
-                    }).join('') +
-                    '</div>';
-            } else {
-                annotBlock = '<p>Aucune annotation.</p>';
-            }
-            annotBlock = '<div class="map-popup-layer"><strong>Annotations</strong>' + annotBlock + '</div>';
-        }
+        /* Annotations mode uses spotlight panel below — no popup */
 
         /* Geography block */
         var geoBlock = '';
@@ -358,7 +343,16 @@
                     fillOpacity: 0.42,
                     weight: 2
                 });
-                m.bindPopup(function () { return popupHtml(pt, theme); });
+                /* In annotations mode: no popup, just spotlight + store coords */
+                if (theme === 'annotations') {
+                    (function (slug, lat, lng) {
+                        m.on('click', function () {
+                            if (typeof loadSpotlight === 'function') loadSpotlight(slug, lat, lng);
+                        });
+                    })(pt.city_slug, pt.lat, pt.lng);
+                } else {
+                    m.bindPopup(function () { return popupHtml(pt, theme); });
+                }
                 m.addTo(markerLayer);
                 coords.push([pt.lat, pt.lng]);
             });
@@ -426,6 +420,12 @@
             ttMarkerLayer.addTo(map);
             if (ttPanel) ttPanel.style.display = '';
 
+            // Hide reading strip & density legend
+            var readingStrip = document.querySelector('.map-reading-strip');
+            if (readingStrip) readingStrip.style.display = 'none';
+            var densityLeg = document.getElementById('density-legend');
+            if (densityLeg) densityLeg.style.display = 'none';
+
             fetchTimeTravelData(function (d) {
                 if (!d.years.length) return;
                 ttSlider.min = 0;
@@ -445,6 +445,11 @@
             markerLayer.addTo(map);
             if (ttPanel) ttPanel.style.display = 'none';
             if (ttDetailsRow) ttDetailsRow.style.display = 'none';
+
+            // Restore reading strip
+            var readingStrip = document.querySelector('.map-reading-strip');
+            if (readingStrip) readingStrip.style.display = '';
+
             render();
         }
 
@@ -535,6 +540,11 @@
             }
             if (ctrls.visibleCount) {
                 ctrls.visibleCount.textContent = pointsForYear.length + ' villes';
+            }
+            // Update block 1 count
+            var ttBlock1Count = document.getElementById('tt-block1-count');
+            if (ttBlock1Count) {
+                ttBlock1Count.textContent = '\u2014 ' + pointsForYear.length + ' villes en ' + year;
             }
 
             updateTTDetails(pointsForYear, year);
@@ -819,6 +829,9 @@
                 var theme = pill.getAttribute('data-theme');
                 ctrls.activeTheme = theme;
 
+                /* Hide spotlight when leaving annotations */
+                if (typeof hideSpotlight === 'function') hideSpotlight();
+
                 if (theme === 'timetravel') {
                     enterTimeTravel();
                 } else {
@@ -909,7 +922,184 @@
                     if (slug && year) window.location.href = cityUrl(slug, year);
                 });
             });
+            /* Spotlight button in annotations mode */
+            el.querySelectorAll('.map-popup-spotlight-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var slug = btn.getAttribute('data-spotlight-slug');
+                    if (slug) loadSpotlight(slug);
+                });
+            });
         });
+
+        /* ── Annotation Spotlight ────────────────────────────── */
+        var spotlightPanel = document.getElementById('spotlight-panel');
+        var spotlightCache = {};
+        var spotlightLat = null;
+        var spotlightLng = null;
+
+        function loadSpotlight(slug, lat, lng) {
+            if (!spotlightPanel) return;
+            spotlightLat = lat || null;
+            spotlightLng = lng || null;
+            spotlightPanel.style.display = '';
+            var mp = document.querySelector('.map-panel-full');
+            if (mp) mp.classList.add('spotlight-active');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            setTimeout(function(){ map.invalidateSize(); }, 50);
+            var cityHeader = document.getElementById('spotlight-city-header');
+            if (cityHeader) cityHeader.innerHTML = '<p class="spotlight-loading">Chargement…</p>';
+            document.getElementById('spotlight-photos').innerHTML = '';
+            document.getElementById('spotlight-fiche').innerHTML = '';
+            document.getElementById('spotlight-annotations').innerHTML = '';
+            document.getElementById('spotlight-periods').innerHTML = '';
+
+            if (spotlightCache[slug]) {
+                renderSpotlight(spotlightCache[slug]);
+                return;
+            }
+            fetch('/map/city-spotlight/' + encodeURIComponent(slug))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.error) {
+                        if (cityHeader) cityHeader.innerHTML = '<p>' + data.error + '</p>';
+                        return;
+                    }
+                    spotlightCache[slug] = data;
+                    renderSpotlight(data);
+                })
+                .catch(function () {
+                    if (cityHeader) cityHeader.innerHTML = '<p>Erreur de chargement.</p>';
+                });
+        }
+
+        function renderSpotlight(d) {
+            /* ── City header ── */
+            var heroImg = '';
+            if (d.has_photo && d.photo_path) {
+                heroImg = '<img class="spotlight-hero" src="/static/' + d.photo_path + '" alt="' + d.city_name + '">';
+            }
+            var trendClass = d.trend_label === 'En croissance' ? 'up' : (d.trend_label === 'En décroissance' ? 'down' : 'stable');
+            var headerHtml = heroImg +
+                '<div class="spotlight-city-info">' +
+                '<h2>' + d.city_name + '</h2>' +
+                '<p class="spotlight-sub">' + d.country + ' · ' + d.region + '</p>' +
+                '<div class="spotlight-stats">' +
+                '<div class="spotlight-stat"><span class="spotlight-stat-value">' + fmt(d.population) + '</span><span class="spotlight-stat-label">Population (' + d.year + ')</span></div>' +
+                (d.peak_population ? '<div class="spotlight-stat"><span class="spotlight-stat-value">' + fmt(d.peak_population) + '</span><span class="spotlight-stat-label">Pic (' + d.peak_year + ')</span></div>' : '') +
+                (d.first_population ? '<div class="spotlight-stat"><span class="spotlight-stat-value">' + fmt(d.first_population) + '</span><span class="spotlight-stat-label">Première donnée (' + d.first_population_year + ')</span></div>' : '') +
+                '<div class="spotlight-stat"><span class="spotlight-stat-value spotlight-trend-' + trendClass + '">' + d.trend_symbol + ' ' + d.trend_label + '</span><span class="spotlight-stat-label">Tendance</span></div>' +
+                '</div>' +
+                '<div class="spotlight-actions">' +
+                '<a href="' + d.detail_url + '" target="_blank" class="spotlight-action-btn spotlight-btn-fiche">📄 Ouvrir la fiche</a>' +
+                '<button type="button" class="spotlight-action-btn spotlight-btn-zoom" id="spotlight-zoom-btn">🔍 Zoom rue</button>' +
+                '</div>' +
+                '</div>';
+            document.getElementById('spotlight-city-header').innerHTML = headerHtml;
+
+            /* Update topbar label */
+            var topbarLabel = document.getElementById('spotlight-topbar-label');
+            if (topbarLabel) topbarLabel.textContent = '📌 ' + d.city_name;
+
+            /* Wire zoom button */
+            var zoomBtn = document.getElementById('spotlight-zoom-btn');
+            if (zoomBtn && spotlightLat != null && spotlightLng != null) {
+                zoomBtn.addEventListener('click', function () {
+                    map.setView([spotlightLat, spotlightLng], 16, { animate: true });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            /* ── Photos ── */
+            var photosEl = document.getElementById('spotlight-photos');
+            if (d.photos && d.photos.length) {
+                var photosHtml = '<h3>📷 Photos (' + d.photos.length + ')</h3><div class="spotlight-photo-grid">';
+                d.photos.forEach(function (ph) {
+                    photosHtml += '<div class="spotlight-photo-card"><img src="' + ph.url + '" alt="" loading="lazy"></div>';
+                });
+                photosHtml += '</div>';
+                photosEl.innerHTML = photosHtml;
+            }
+
+            /* ── Fiche sections ── */
+            var ficheEl = document.getElementById('spotlight-fiche');
+            if (d.fiche_sections && d.fiche_sections.length) {
+                var ficheHtml = '<h3>📋 Résumé de la fiche</h3><div class="spotlight-fiche-sections">';
+                d.fiche_sections.forEach(function (s) {
+                    ficheHtml += '<details class="spotlight-fiche-section"><summary>' + s.emoji + ' ' + s.title + '</summary>' +
+                        '<div class="spotlight-fiche-content">' + s.html + '</div></details>';
+                });
+                ficheHtml += '</div>';
+                ficheEl.innerHTML = ficheHtml;
+            }
+
+            /* ── Annotations ── */
+            var annotEl = document.getElementById('spotlight-annotations');
+            if (d.annotations && d.annotations.length) {
+                var annotHtml = '<h3>📌 Annotations (' + d.annotations.length + ')</h3><div class="spotlight-annot-list">';
+                d.annotations.forEach(function (a) {
+                    annotHtml += '<div class="spotlight-annot-item">';
+                    annotHtml += '<span class="spotlight-annot-dot" style="background:' + a.color + '"></span>';
+                    annotHtml += '<span class="spotlight-annot-year">' + a.year + '</span>';
+                    annotHtml += '<span class="spotlight-annot-label">' + a.label + '</span>';
+                    if (a.photoUrl) {
+                        annotHtml += '<img class="spotlight-annot-photo" src="' + a.photoUrl + '" alt="" loading="lazy">';
+                    }
+                    annotHtml += '</div>';
+                });
+                annotHtml += '</div>';
+                annotEl.innerHTML = annotHtml;
+            }
+
+            /* ── Periods ── */
+            var periodsEl = document.getElementById('spotlight-periods');
+            if (d.periods && d.periods.length) {
+                var periodsHtml = '<h3>📜 Périodes (' + d.periods.length + ')</h3><div class="spotlight-period-list">';
+                d.periods.forEach(function (p) {
+                    periodsHtml += '<div class="spotlight-period-card">';
+                    periodsHtml += '<div class="spotlight-period-header"><strong>' + p.range + '</strong> — ' + p.title + '</div>';
+                    if (p.start_pop || p.end_pop) {
+                        periodsHtml += '<div class="spotlight-period-kpis">';
+                        periodsHtml += '<span>Pop. ' + (p.start_pop ? fmt(p.start_pop) : '?') + ' → ' + (p.end_pop ? fmt(p.end_pop) : '?') + '</span>';
+                        if (p.change_pct != null) periodsHtml += '<span> (' + p.change_pct + '%)</span>';
+                        periodsHtml += '</div>';
+                    }
+                    if (p.summary) {
+                        periodsHtml += '<p class="spotlight-period-summary">' + p.summary + '</p>';
+                    }
+                    if (p.annotations && p.annotations.length) {
+                        periodsHtml += '<div class="spotlight-period-annotations">';
+                        p.annotations.forEach(function (a) {
+                            periodsHtml += '<span class="spotlight-period-ann-chip" style="border-left: 3px solid ' + a.color + '">';
+                            if (a.photoUrl) periodsHtml += '<img src="' + a.photoUrl + '" alt="" loading="lazy">';
+                            periodsHtml += a.year + ' · ' + a.label + '</span>';
+                        });
+                        periodsHtml += '</div>';
+                    }
+                    periodsHtml += '</div>';
+                });
+                periodsHtml += '</div>';
+                periodsEl.innerHTML = periodsHtml;
+            }
+        }
+
+        /* Also trigger spotlight when clicking a marker in annotations mode */
+        map.on('click', function () {
+            /* Close spotlight if clicking empty map area */
+        });
+
+        /* Hide spotlight when switching away from annotations pill */
+        var mapPanel = document.querySelector('.map-panel-full');
+        function hideSpotlight() {
+            if (spotlightPanel) spotlightPanel.style.display = 'none';
+            if (mapPanel) mapPanel.classList.remove('spotlight-active');
+            setTimeout(function(){ map.invalidateSize(); }, 50);
+        }
+
+        /* Close button */
+        var spotlightCloseBtn = document.getElementById('spotlight-close-btn');
+        if (spotlightCloseBtn) {
+            spotlightCloseBtn.addEventListener('click', hideSpotlight);
+        }
 
         /* ── refresh button (AJAX reload) ────────────────────── */
 

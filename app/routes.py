@@ -251,6 +251,115 @@ def map_time_travel_data():
     return jsonify({"years": sorted(year_set), "cities": cities})
 
 
+@web.route("/map/city-spotlight/<city_slug>")
+def map_city_spotlight(city_slug: str):
+    """Return rich city data for the annotation spotlight panel."""
+    from .db import get_db
+    from .services.city_photos import get_city_photos
+
+    service = AnalyticsService()
+    filters = service.normalize_filters(request.args)
+    city = service.get_city_detail(city_slug, filters)
+    if city is None:
+        return jsonify({"error": "Ville introuvable."}), 404
+
+    conn = get_db()
+    annotations = service.get_city_annotations(city_slug, filters)
+    periods = service.get_city_periods(city_slug, filters)
+    photos = get_city_photos(conn, city_slug)
+    fiche = get_city_fiche(conn, city["city_id"])
+
+    # Build simplified fiche sections
+    fiche_sections = []
+    if fiche:
+        for s in fiche.get("sections", []):
+            blocks_html = []
+            for b in s.get("blocks", []):
+                if b["type"] == "paragraph":
+                    blocks_html.append(b["text"])
+                elif b["type"] == "list":
+                    blocks_html.append("<ul>" + "".join("<li>" + li + "</li>" for li in b["items"]) + "</ul>")
+                elif b["type"] == "table":
+                    rows_html = "".join(
+                        "<tr>" + "".join("<td>" + cell + "</td>" for cell in row) + "</tr>"
+                        for row in b.get("rows", [])
+                    )
+                    blocks_html.append("<table class='spotlight-table'>" + rows_html + "</table>")
+            fiche_sections.append({
+                "emoji": s["emoji"],
+                "title": s["title"],
+                "html": "".join(blocks_html),
+            })
+
+    # Build annotation list with photo URLs
+    ann_list = []
+    for a in annotations:
+        photo_url = ""
+        if a.get("annotation_photo_filename"):
+            photo_url = f"/static/images/annotations/{a['annotation_photo_filename']}"
+        ann_list.append({
+            "year": a["year"],
+            "label": a["annotation_label"],
+            "color": a["annotation_color"] or "#ef6c3d",
+            "type": a["annotation_type"],
+            "photoUrl": photo_url,
+        })
+
+    # Build period summaries
+    period_list = []
+    for p in periods:
+        linked = []
+        for la in p.get("linked_annotations", []):
+            linked.append({
+                "year": la["year"],
+                "label": la["label"],
+                "color": la["color"],
+                "photoUrl": la.get("photoUrl", ""),
+            })
+        period_list.append({
+            "range": p["period_range_label"],
+            "title": p["period_title"],
+            "summary": p.get("summary_text", ""),
+            "start_pop": p.get("start_population"),
+            "end_pop": p.get("end_population"),
+            "change_pct": p.get("population_change_pct"),
+            "annotations": linked,
+            "bullets": [b["text"] if isinstance(b, dict) else b for b in p.get("display_bullets", [])],
+        })
+
+    # Photo list
+    photo_list = []
+    for ph in photos[:8]:
+        photo_list.append({
+            "url": "/static/" + ph["photo_path"],
+            "caption": ph.get("caption", ""),
+            "isPrimary": bool(ph.get("is_primary")),
+        })
+
+    return jsonify({
+        "city_name": city["city_name"],
+        "city_slug": city["city_slug"],
+        "country": city["country"],
+        "region": city["region"],
+        "city_color": city.get("city_color", "#2f6fed"),
+        "population": city["latest_population"],
+        "year": city["latest_year"],
+        "peak_population": city.get("peak_population"),
+        "peak_year": city.get("peak_year"),
+        "first_population": city.get("first_population"),
+        "first_population_year": city.get("first_population_year"),
+        "trend_label": city.get("trend_label", ""),
+        "trend_symbol": city.get("trend_symbol", ""),
+        "photo_path": city.get("photo_path", ""),
+        "has_photo": city.get("has_photo", False),
+        "annotations": ann_list,
+        "periods": period_list,
+        "photos": photo_list,
+        "fiche_sections": fiche_sections,
+        "detail_url": f"/cities/{city_slug}",
+    })
+
+
 @web.route("/map/geocode-missing", methods=["POST"])
 def map_geocode_missing():
     """Geocode all cities that have no latitude/longitude."""

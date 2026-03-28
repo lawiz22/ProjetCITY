@@ -72,7 +72,7 @@
         </div>
     </div>
 
-    <div id="city-map" class="map-canvas" style="width:100%;height:600px;min-height:480px;"></div>
+    <div id="city-map" class="map-canvas"></div>
 
     <div class="map-reading-strip">
         <div class="map-reading-text">
@@ -101,6 +101,27 @@
             <span class="density-label">3 000 – 6 000</span>
             <span class="density-swatch" style="background:#dc2626"></span>
             <span class="density-label">&gt; 6 000</span>
+        </div>
+    </div>
+
+    <!-- Annotation spotlight panel (hidden by default) -->
+    <div class="spotlight-panel" id="spotlight-panel" style="display:none">
+        <div class="spotlight-topbar">
+            <span class="spotlight-topbar-label" id="spotlight-topbar-label">📌 Détail de la ville</span>
+            <button type="button" class="spotlight-close-btn" id="spotlight-close-btn" title="Fermer le panneau">✕</button>
+        </div>
+        <div class="spotlight-row">
+            <!-- Left: city overview + photos -->
+            <div class="spotlight-block spotlight-city-block">
+                <div class="spotlight-city-header" id="spotlight-city-header"></div>
+                <div class="spotlight-photos" id="spotlight-photos"></div>
+                <div class="spotlight-fiche" id="spotlight-fiche"></div>
+            </div>
+            <!-- Right: annotations + periods -->
+            <div class="spotlight-block spotlight-annot-block">
+                <div class="spotlight-annotations" id="spotlight-annotations"></div>
+                <div class="spotlight-periods" id="spotlight-periods"></div>
+            </div>
         </div>
     </div>
 
@@ -138,7 +159,7 @@
     <div class="tt-details-row" id="tt-details-row" style="display:none">
         <!-- Block 1: City table -->
         <div class="tt-detail-block tt-cities-block">
-            <h3 class="tt-detail-title">🏙️ Villes affichées</h3>
+            <h3 class="tt-detail-title">🏙️ Villes affichées <span id="tt-block1-count" class="tt-block1-count"></span></h3>
             <div class="tt-table-scroll">
                 <table class="data-table tt-city-table" id="tt-city-table">
                     <thead>
@@ -178,5 +199,5 @@
 {% block scripts_extra %}
 <script>window.__mapPoints = {{ map_payload.points | tojson }};</script>
 <script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}?v=17"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=26"></script>
 {% endblock %}

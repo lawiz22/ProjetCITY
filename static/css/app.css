@@ -2849,6 +2849,357 @@ dt {
     margin-right: 8px;
 }
 
+/* ── Annotation Spotlight Panel ────────────────────────────── */
+
+/* When spotlight is active, lock the panel to viewport height */
+.map-panel-full.spotlight-active {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+.map-panel-full.spotlight-active .map-toolbar,
+.map-panel-full.spotlight-active .map-filter-row,
+.map-panel-full.spotlight-active .map-reading-strip,
+.map-panel-full.spotlight-active .map-density-legend,
+.map-panel-full.spotlight-active .map-timetravel-panel {
+    display: none !important;
+}
+.map-panel-full.spotlight-active .map-canvas {
+    height: 40vh !important;
+    min-height: 220px !important;
+    flex-shrink: 0;
+}
+.map-panel-full.spotlight-active .spotlight-panel {
+    flex: 1;
+    display: flex !important;
+    flex-direction: column;
+    margin-top: 0;
+    border-radius: 0;
+    overflow: hidden;
+    min-height: 0;
+}
+.map-panel-full.spotlight-active .spotlight-row {
+    flex: 1;
+    min-height: 0;
+}
+.map-panel-full.spotlight-active .spotlight-block {
+    max-height: none;
+}
+
+.spotlight-panel {
+    margin-top: 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    overflow: hidden;
+}
+.spotlight-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--line);
+}
+.spotlight-topbar-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+.spotlight-close-btn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+.spotlight-close-btn:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+    border-color: #dc2626;
+}
+.spotlight-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+@media (max-width: 900px) {
+    .spotlight-row { grid-template-columns: 1fr; }
+}
+.spotlight-block {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 700px;
+}
+.spotlight-city-block {
+    border-right: 1px solid var(--line);
+}
+@media (max-width: 900px) {
+    .spotlight-city-block { border-right: none; border-bottom: 1px solid var(--line); }
+}
+.spotlight-loading { color: var(--muted); font-style: italic; padding: 1rem 0; }
+
+/* City header */
+.spotlight-city-header { display: flex; flex-direction: column; gap: 0; }
+.spotlight-hero {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+.spotlight-city-info h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.3rem;
+    margin: 0 0 2px;
+    color: var(--ink);
+}
+.spotlight-sub { color: var(--muted); font-size: 0.85rem; margin: 0 0 10px; }
+.spotlight-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+.spotlight-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.spotlight-stat-value {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+.spotlight-stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.spotlight-trend-up { color: #22c55e; }
+.spotlight-trend-down { color: #dc2626; }
+.spotlight-trend-stable { color: var(--muted); }
+.spotlight-link {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+}
+.spotlight-link:hover { text-decoration: underline; }
+
+/* Spotlight action buttons */
+.spotlight-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+.spotlight-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid var(--line);
+    transition: background 0.15s, color 0.15s;
+}
+.spotlight-btn-fiche {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+.spotlight-btn-fiche:hover {
+    background: #d45a2e;
+    color: white;
+}
+.spotlight-btn-zoom {
+    background: var(--surface-alt);
+    color: var(--accent-2);
+    border-color: var(--accent-2);
+}
+.spotlight-btn-zoom:hover {
+    background: rgba(15, 139, 141, 0.12);
+    color: var(--accent-3);
+}
+
+/* Photos */
+.spotlight-photos h3,
+.spotlight-fiche h3,
+.spotlight-annotations h3,
+.spotlight-periods h3 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 18px 0 10px;
+    color: var(--ink);
+}
+.spotlight-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 6px;
+}
+.spotlight-photo-card img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+.spotlight-photo-card img:hover { transform: scale(1.04); }
+
+/* Fiche sections */
+.spotlight-fiche-sections { display: flex; flex-direction: column; gap: 4px; }
+.spotlight-fiche-section {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.spotlight-fiche-section summary {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.84rem;
+    font-weight: 600;
+    background: var(--surface-alt);
+    color: var(--ink);
+}
+.spotlight-fiche-section summary:hover { background: rgba(15, 139, 141, 0.06); }
+.spotlight-fiche-content {
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--muted);
+}
+.spotlight-fiche-content table.spotlight-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0;
+    font-size: 0.8rem;
+}
+.spotlight-fiche-content table.spotlight-table td {
+    padding: 3px 8px;
+    border-bottom: 1px solid var(--line);
+}
+.spotlight-fiche-content ul {
+    margin: 6px 0;
+    padding-left: 18px;
+}
+.spotlight-fiche-content ul li {
+    margin-bottom: 3px;
+}
+
+/* Annotations list */
+.spotlight-annot-list { display: flex; flex-direction: column; gap: 6px; }
+.spotlight-annot-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.82rem;
+}
+.spotlight-annot-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+.spotlight-annot-year {
+    font-weight: 700;
+    font-family: "Space Grotesk", sans-serif;
+    white-space: nowrap;
+    min-width: 36px;
+}
+.spotlight-annot-label { flex: 1; color: var(--ink); }
+.spotlight-annot-photo {
+    width: 48px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+/* Periods */
+.spotlight-period-list { display: flex; flex-direction: column; gap: 10px; }
+.spotlight-period-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--surface-alt);
+}
+.spotlight-period-header {
+    font-size: 0.88rem;
+    color: var(--ink);
+    margin-bottom: 4px;
+}
+.spotlight-period-kpis {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+.spotlight-period-summary {
+    font-size: 0.82rem;
+    color: var(--ink);
+    line-height: 1.5;
+    margin: 4px 0;
+}
+.spotlight-period-annotations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+.spotlight-period-ann-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--surface);
+    border-radius: 4px;
+    font-size: 0.76rem;
+}
+.spotlight-period-ann-chip img {
+    width: 28px;
+    height: 22px;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+/* Popup compact annotation */
+.map-popup-annot-summary {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-right: 8px;
+}
+.map-popup-spotlight-btn {
+    background: var(--accent-2);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.map-popup-spotlight-btn:hover { background: var(--accent-3); }
+
 /* ── Time-travel pill ─────────────────────────────────────── */
 .map-layer-pill--time {
     background: linear-gradient(135deg, rgba(15, 139, 141, 0.12), rgba(38, 70, 83, 0.10));
@@ -3072,6 +3423,12 @@ dt {
     font-weight: 700;
     margin: 0 0 10px;
     color: var(--ink);
+}
+.tt-block1-count {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 4px;
 }
 .tt-table-scroll {
     overflow-y: auto;
@@ -3598,6 +3955,7 @@ dt {
     font-size: 0.78rem;
     cursor: pointer;
     color: var(--ink);
+    min-width: 200px;
 }
 
 .map-filter-row {
