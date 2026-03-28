@@ -76,10 +76,13 @@
 
     <div class="map-reading-strip">
         <div class="map-reading-text">
-            <p id="map-visible-summary" class="helper-text">{{ map_payload.mapped_count }} villes visibles.</p>
+            <p id="map-visible-summary" class="helper-text">{{ map_payload.mapped_count }} villes visibles.{% if map_payload.missing_count %} <span class="map-missing-warn">{{ map_payload.missing_count }} ville{{ 's' if map_payload.missing_count > 1 else '' }} sans coordonnées.</span>{% endif %}</p>
             <p id="map-provider-status" class="helper-text"></p>
         </div>
         <div class="map-legend">
+            {% if map_payload.missing_count %}
+            <button type="button" id="map-geocode-btn" class="map-geocode-btn" title="Géocoder les villes sans coordonnées">📍 Géocoder ({{ map_payload.missing_count }})</button>
+            {% endif %}
             <span><i class="legend-dot legend-dot-small"></i>ville moyenne</span>
             <span><i class="legend-dot legend-dot-large"></i>grande métropole</span>
         </div>
@@ -115,12 +118,58 @@
             <span class="map-tt-bound" id="tt-max-year">—</span>
         </div>
         <div class="map-tt-controls">
+            <button type="button" class="tt-nav-btn" id="tt-back10" title="−10 ans">⏪</button>
+            <button type="button" class="tt-nav-btn" id="tt-back1" title="−1 an">◀</button>
             <button type="button" id="tt-play-btn" class="map-tt-play" title="Lecture automatique">▶️ Lecture</button>
+            <button type="button" class="tt-nav-btn" id="tt-fwd1" title="+1 an">▶</button>
+            <button type="button" class="tt-nav-btn" id="tt-fwd10" title="+10 ans">⏩</button>
             <select id="tt-speed" class="map-tt-speed" title="Vitesse">
                 <option value="1500">Lent</option>
                 <option value="800" selected>Normal</option>
                 <option value="350">Rapide</option>
             </select>
+            <label class="tt-autozoom-label" title="Recentrer automatiquement la carte sur les villes affichées">
+                <input type="checkbox" id="tt-autozoom"> Auto-zoom
+            </label>
+        </div>
+    </div>
+
+    <!-- Time-travel detail panels (hidden by default) -->
+    <div class="tt-details-row" id="tt-details-row" style="display:none">
+        <!-- Block 1: City table -->
+        <div class="tt-detail-block tt-cities-block">
+            <h3 class="tt-detail-title">🏙️ Villes affichées</h3>
+            <div class="tt-table-scroll">
+                <table class="data-table tt-city-table" id="tt-city-table">
+                    <thead>
+                        <tr>
+                            <th>Ville</th>
+                            <th>Région</th>
+                            <th class="num">Population</th>
+                            <th class="num">Densité</th>
+                            <th class="num">Année</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tt-city-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Block 2: Period annotations -->
+        <div class="tt-detail-block tt-annotations-block">
+            <div class="tt-chroniques-header">
+                <h3 class="tt-detail-title">📜 Chroniques des villes</h3>
+                <div class="tt-chrono-filter" id="tt-chrono-filter">
+                    <button type="button" class="tt-chrono-filter-btn" id="tt-chrono-filter-btn" title="Filtrer les villes">🔍 Filtrer</button>
+                    <div class="tt-chrono-dropdown" id="tt-chrono-dropdown" style="display:none">
+                        <div class="tt-chrono-dropdown-actions">
+                            <button type="button" id="tt-chrono-all">Tout</button>
+                            <button type="button" id="tt-chrono-none">Aucun</button>
+                        </div>
+                        <div class="tt-chrono-dropdown-list" id="tt-chrono-dropdown-list"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tt-annotations-scroll" id="tt-annotations-list"></div>
         </div>
     </div>
 </section>
@@ -129,5 +178,5 @@
 {% block scripts_extra %}
 <script>window.__mapPoints = {{ map_payload.points | tojson }};</script>
 <script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}?v=10"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=17"></script>
 {% endblock %}

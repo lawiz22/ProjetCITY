@@ -1,5 +1,12 @@
 [
   {
+    "timestamp": "2026-03-28T12:18:54.862670+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, peak_year, peak_population\r\nFROM vw_city_peak_population\r\nORDER BY peak_population DESC;",
+    "preview": "SELECT city_name, peak_year, peak_population"
+  },
+  {
     "timestamp": "2026-03-26T21:06:42.682318+00:00",
     "action": "execute",
     "status": "read",

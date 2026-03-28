@@ -50,9 +50,9 @@
             <thead>
                 <tr>
                     <th class="col-year">Année</th>
+                    <th class="col-cities">Villes</th>
                     <th class="col-pop">Pop. référence</th>
                     <th class="col-pop">Pop. dans notre BD</th>
-                    <th class="col-cities">Villes</th>
                     <th class="col-pct">Couverture</th>
                     <th class="col-bar"></th>
                 </tr>
@@ -61,9 +61,9 @@
                 {% for r in country_rows %}
                 <tr data-country="{{ r.country }}" data-year="{{ r.year }}">
                     <td class="cell-year">{{ r.year_label }}</td>
+                    <td class="cell-cities" title="{{ r.cities|join(', ') }}">{{ r.cities|length }}</td>
                     <td class="num cell-pop">{{ "{:,}".format(r.ref_population)|replace(",", " ") }}</td>
                     <td class="num cell-pop cell-pop-db">{{ "{:,}".format(r.db_population)|replace(",", " ") }}</td>
-                    <td class="cell-cities" title="{{ r.cities|join(', ') }}">{{ r.cities|join(', ') }}</td>
                     <td class="num cell-pct {% if r.coverage_pct >= 30 %}pct-good{% elif r.coverage_pct >= 10 %}pct-ok{% else %}pct-low{% endif %}">{{ r.coverage_pct }}%</td>
                     <td class="cell-bar">
                         <div class="completeness-bar">
@@ -110,12 +110,13 @@
         <table class="data-table ref-table" id="region-table">
             <thead>
                 <tr>
-                    <th class="col-region">Pays</th>
+                    <th class="col-country">Pays</th>
                     <th class="col-region">Région / État</th>
                     <th class="col-year">Année</th>
+                    <th class="col-cities">Villes</th>
+                    <th class="col-map">Carte</th>
                     <th class="col-pop">Pop. référence</th>
                     <th class="col-pop">Pop. dans notre BD</th>
-                    <th class="col-cities">Villes</th>
                     <th class="col-pct">Couverture</th>
                     <th class="col-bar"></th>
                 </tr>
@@ -124,12 +125,13 @@
                 {% for r in region_rows %}
                 {% if (r.country, r.region) in active_regions %}
                 <tr data-region="{{ r.region }}" data-country-r="{{ r.country }}" data-year="{{ r.year }}">
-                    <td>{{ r.country }}</td>
-                    <td>{{ r.region }}</td>
+                    <td><img class="flag-icon" src="{{ flag_url(r.country) }}" alt=""> {{ r.country }}</td>
+                    <td><img class="flag-icon" src="{{ flag_url(r.country, r.region) }}" alt=""> {{ r.region }}</td>
                     <td class="cell-year">{{ r.year_label }}</td>
+                    <td class="cell-cities" title="{{ r.cities|join(', ') }}">{{ r.cities|length }}</td>
+                    <td><a class="ref-map-btn" href="/map?tt=1&year={{ r.year }}&country={{ r.country|urlencode }}&region={{ r.region|urlencode }}" title="Voir sur la carte en {{ r.year_label }}">🗺️</a></td>
                     <td class="num cell-pop">{{ "{:,}".format(r.ref_population)|replace(",", " ") }}</td>
                     <td class="num cell-pop cell-pop-db">{{ "{:,}".format(r.db_population)|replace(",", " ") }}</td>
-                    <td class="cell-cities" title="{{ r.cities|join(', ') }}">{{ r.cities|join(', ') }}</td>
                     <td class="num cell-pct {% if r.coverage_pct >= 30 %}pct-good{% elif r.coverage_pct >= 10 %}pct-ok{% else %}pct-low{% endif %}">{{ r.coverage_pct }}%</td>
                     <td class="cell-bar">
                         <div class="completeness-bar">

@@ -1699,10 +1699,19 @@ class AnalyticsService:
             "WHERE region IS NULL ORDER BY country, year"
         ).fetchall()
 
+        def _is_canada_decade(yr: int) -> bool:
+            """Keep only decade-aligned census years for Canada."""
+            return yr == 1800 or yr % 10 == 1
+
         country_rows: list[dict[str, Any]] = []
         for r in country_ref:
             yr = r["year"]
             cty = r["country"]
+            if yr > 2021:
+                continue
+            # Canada: keep only decade census years (1800, 1811, 1821 … 2021)
+            if cty == "Canada" and not _is_canada_decade(yr):
+                continue
             ref_pop = r["population"]
             info = _best_pop_for_year(
                 country_idx, lambda y: (cty, y), yr
@@ -1729,6 +1738,11 @@ class AnalyticsService:
         for r in region_ref:
             yr = r["year"]
             cty = r["country"]
+            if yr > 2021:
+                continue
+            # Canada: keep only decade census years
+            if cty == "Canada" and not _is_canada_decade(yr):
+                continue
             reg = r["region"]
             ref_pop = r["population"]
             info = _best_pop_for_year(

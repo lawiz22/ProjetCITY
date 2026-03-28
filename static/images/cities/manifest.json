@@ -1726,5 +1726,167 @@
     "source_page": "https://en.wikipedia.org/wiki/Tacoma%2C_Washington",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Tacoma_Washington_Aerial%2C_June_2025.jpg/1280px-Tacoma_Washington_Aerial%2C_June_2025.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "wichita-kansas": {
+    "filename": "wichita-kansas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Wichita%2C_Kansas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wichita%2C_Kansas_skyline.jpg/1280px-Wichita%2C_Kansas_skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "kamloops-british-columbia": {
+    "filename": "kamloops-british-columbia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Kamloops",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Old_Kamloops_Courthouse.jpg/1280px-Old_Kamloops_Courthouse.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "carmacks-yukon": {
+    "filename": "carmacks-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Carmacks%2C_Yukon",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Carmacks_Yukon.jpg/1280px-Carmacks_Yukon.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "sanikiluaq-nunavut": {
+    "filename": "sanikiluaq-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Sanikiluaq",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Sanikiluaq.jpg/1280px-Sanikiluaq.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "burwash-landing-yukon": {
+    "filename": "burwash-landing-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Burwash_Landing",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Burwash_Landing.jpg/1280px-Burwash_Landing.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "teslin-yukon": {
+    "filename": "teslin-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Teslin%2C_Yukon",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Teslin%2C_Yukon_in_2005.jpg/1280px-Teslin%2C_Yukon_in_2005.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "mayo-yukon": {
+    "filename": "mayo-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Mayo%2C_Yukon",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Mayo_mit_Stewart_River.jpg/1280px-Mayo_mit_Stewart_River.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "carcross-yukon": {
+    "filename": "carcross-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Carcross",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Carcross%2C_Yukon_%2814109531945%29.jpg/1280px-Carcross%2C_Yukon_%2814109531945%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "faro-yukon": {
+    "filename": "faro-yukon.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Faro%2C_Yukon",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Town_of_Faro.jpg/1280px-Town_of_Faro.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "st-albert-alberta": {
+    "filename": "st-albert-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/St._Albert%2C_Alberta",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Downtown_clocktower_St._Albert_Alberta.jpg/1280px-Downtown_clocktower_St._Albert_Alberta.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "medicine-hat-alberta": {
+    "filename": "medicine-hat-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Medicine_Hat",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Medicine_Hat_College_View.jpg/1280px-Medicine_Hat_College_View.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "grande-prairie-alberta": {
+    "filename": "grande-prairie-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Grande_Prairie",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/GPSkyline.jpg/1280px-GPSkyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "airdrie-alberta": {
+    "filename": "airdrie-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Airdrie%2C_Alberta",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Airdrie-aerial.JPG/1280px-Airdrie-aerial.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "spruce-grove-alberta": {
+    "filename": "spruce-grove-alberta.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Spruce_Grove",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Spruce_Grove_City_Hall.jpg/1280px-Spruce_Grove_City_Hall.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "lloydminster-alberta-saskatchewan": {
+    "filename": "lloydminster-alberta-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Lloydminster",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Lloydminster_City_Hall.jpg/1280px-Lloydminster_City_Hall.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "mount-pearl-newfoundland-and-labrador": {
+    "filename": "mount-pearl-newfoundland-and-labrador.png",
+    "source_page": "https://en.wikipedia.org/wiki/Mount_Pearl",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Mount_Pearl.png/1280px-Mount_Pearl.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "tuscaloosa-alabama": {
+    "filename": "tuscaloosa-alabama.png",
+    "source_page": "https://en.wikipedia.org/wiki/Tuscaloosa%2C_Alabama",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Downtown_Tuscaloosa_Alabama.png/1280px-Downtown_Tuscaloosa_Alabama.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "hoover-alabama": {
+    "filename": "hoover-alabama.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Hoover%2C_Alabama",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/RiverchaseGalleria2026.jpg/1280px-RiverchaseGalleria2026.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "wasilla-alaska": {
+    "filename": "wasilla-alaska.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Wasilla%2C_Alaska",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Wasilla%2C_looking_southeast_at_Main_Street_from_Parks_Highway_%28cropped%29.jpg/1280px-Wasilla%2C_looking_southeast_at_Main_Street_from_Parks_Highway_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "chandler-arizona": {
+    "filename": "chandler-arizona.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Chandler%2C_Arizona",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Neighborhoods_in_the_City_of_Chandler.jpg/1280px-Neighborhoods_in_the_City_of_Chandler.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "fresno-california": {
+    "filename": "fresno-california.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Fresno%2C_California",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Fresno_Bee_Building_Dec_2012_%28cropped%29.jpg/1280px-Fresno_Bee_Building_Dec_2012_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "bakersfield-california": {
+    "filename": "bakersfield-california.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Bakersfield%2C_California",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/2009-0726-CA-Bakersfield-FoxTheater_%28cropped%29.jpg/1280px-2009-0726-CA-Bakersfield-FoxTheater_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "anaheim-california": {
+    "filename": "anaheim-california.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Anaheim%2C_California",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Sleeping_beauty_castle_dlr_2019.jpg/1280px-Sleeping_beauty_castle_dlr_2019.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "rapid-city-south-dakota": {
+    "filename": "rapid-city-south-dakota.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Rapid_City%2C_South_Dakota",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Rapid_City_Skyline_%282022%29.jpg/1280px-Rapid_City_Skyline_%282022%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "springdale-arkansas": {
+    "filename": "springdale-arkansas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Springdale%2C_Arkansas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Turnbow_Park.jpg/1280px-Turnbow_Park.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "east-honolulu-hawaii": {
+    "filename": "east-honolulu-hawaii.png",
+    "source_page": "https://en.wikipedia.org/wiki/East_Honolulu%2C_Hawaii",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/East_honolulu.png/1280px-East_honolulu.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "naperville-illinois": {
+    "filename": "naperville-illinois.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Naperville%2C_Illinois",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Naperville_IL_Skyline_2022.jpg/1280px-Naperville_IL_Skyline_2022.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

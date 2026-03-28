@@ -106,6 +106,13 @@ def split_location(raw_city_name: str) -> tuple[str | None, str]:
             return region, "Canada"
         if region in US_STATES:
             return region, "United States"
+        # Handle composite regions like "Alberta/Saskatchewan"
+        if "/" in region:
+            sub = [s.strip() for s in region.split("/")]
+            if any(s in CANADIAN_PROVINCES for s in sub):
+                return sub[0], "Canada"
+            if any(s in US_STATES for s in sub):
+                return sub[0], "United States"
         return region, "Unknown"
     return None, "Unknown"
 

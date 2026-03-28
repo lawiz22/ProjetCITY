@@ -167,7 +167,7 @@ def city_map_data():
 def map_time_travel_data():
     """Return all population data by year for time-travel slider.
 
-    Response: {years: [...], cities: {slug: {name, country, region, color, lat, lng, data: {year: pop, ...}}}}
+    Response: {years: [...], cities: {slug: {name, country, region, color, lat, lng, area, density, data: {year: pop, ...}, periods: [...]}}}
     """
     from .db import get_db
 
@@ -183,7 +183,9 @@ def map_time_travel_data():
             c.region,
             c.city_color,
             c.latitude,
-            c.longitude
+            c.longitude,
+            c.area_km2,
+            c.density
         FROM fact_city_population f
         JOIN dim_city c ON c.city_id = f.city_id
         WHERE c.latitude IS NOT NULL
@@ -208,11 +210,75 @@ def map_time_travel_data():
                 "color": r["city_color"] or "#2f6fed",
                 "lat": r["latitude"],
                 "lng": r["longitude"],
+                "area": r["area_km2"],
+                "density": r["density"],
                 "data": {},
+                "periods": [],
             }
         cities[slug]["data"][str(yr)] = r["population"]
 
+    # Fetch period details for all cities that have them
+    period_rows = connection.execute(
+        """
+        SELECT
+            c.city_slug,
+            cpd.period_order,
+            cpd.period_range_label,
+            cpd.period_title,
+            cpd.start_year,
+            cpd.end_year,
+            cpd.summary_text
+        FROM dim_city_period_detail cpd
+        JOIN dim_city c ON c.city_id = cpd.city_id
+        WHERE c.city_slug IN ({})
+        ORDER BY c.city_slug, cpd.period_order
+        """.format(",".join("?" for _ in cities)),
+        list(cities.keys()),
+    ).fetchall()
+
+    for pr in period_rows:
+        slug = pr["city_slug"]
+        if slug in cities:
+            cities[slug]["periods"].append({
+                "order": pr["period_order"],
+                "range": pr["period_range_label"],
+                "title": pr["period_title"],
+                "start": pr["start_year"],
+                "end": pr["end_year"],
+                "summary": pr["summary_text"],
+            })
+
     return jsonify({"years": sorted(year_set), "cities": cities})
+
+
+@web.route("/map/geocode-missing", methods=["POST"])
+def map_geocode_missing():
+    """Geocode all cities that have no latitude/longitude."""
+    import time
+    from .db import get_db
+    from .services.city_coordinates import geocode_city
+
+    connection = get_db()
+    rows = connection.execute(
+        "SELECT city_id, city_name, region, country FROM dim_city "
+        "WHERE latitude IS NULL OR longitude IS NULL"
+    ).fetchall()
+
+    results = []
+    for row in rows:
+        coords = geocode_city(row["city_name"], row["region"], row["country"])
+        if coords:
+            connection.execute(
+                "UPDATE dim_city SET latitude = ?, longitude = ? WHERE city_id = ?",
+                (coords["lat"], coords["lng"], row["city_id"]),
+            )
+            connection.commit()
+            results.append({"city": row["city_name"], "lat": coords["lat"], "lng": coords["lng"], "ok": True})
+        else:
+            results.append({"city": row["city_name"], "ok": False})
+        time.sleep(1)  # respect Nominatim rate limit
+
+    return jsonify({"total": len(rows), "geocoded": sum(1 for r in results if r["ok"]), "results": results})
 
 
 @web.route("/sql-lab", methods=["GET", "POST"])

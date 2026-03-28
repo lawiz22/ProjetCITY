@@ -5,8 +5,28 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 286
+# Nombre de villes : 313
 #
+
+# ============================================================
+# Airdrie (Canada)
+# ============================================================
+CITY_NAME = "Airdrie, Alberta"
+CITY_COLOR = '#0073e6'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [300, 500, 600, 700, 800, 1200, 1800, 3500, 8000, 12000, 18000, 42000, 70000]
+
+annotations = [
+    (1930, 700, "🌾 Agriculture — développement rural important (1930)", 'orange'),
+    (1950, 1200, "🏘️ Expansion résidentielle — croissance après-guerre (1950)", 'blue'),
+    (1970, 3500, "🚜 Modernisation — mécanisation agricole accrue (1970)", 'purple'),
+    (1980, 8000, "🏙️ Urbanisation — début de la transformation en ville-dortoir (1980)", 'red'),
+    (1990, 12000, "🚧 Infrastructures — amélioration des routes et services (1990)", 'teal'),
+    (2000, 18000, "🏢 Développement commercial — ouverture de centres commerciaux (2000)", 'navy'),
+    (2010, 42000, "🚀 Croissance rapide — explosion démographique liée à Calgary (2010)", 'gold'),
+    (2020, 70000, "🌆 Métropolisation — intégration dans l'aire urbaine de Calgary (2020)", 'black'),
+]
 
 # ============================================================
 # Ajax (Canada)
@@ -69,6 +89,37 @@ annotations = [
     (1970, 244000, "🔬 Guerre froide — armes nucléaires (1965)", 'gray'),
     (2010, 545000, "🎥 Breaking Bad — icône mondiale (2008)", 'gold'),
     (2020, 564000, "🎈 Balloon Fiesta — 900 ballons (2019)", 'orange'),
+]
+
+# ============================================================
+# Anaheim (United States)
+# ============================================================
+CITY_NAME = "Anaheim, California"
+CITY_COLOR = '#FF6F00'
+
+years = [
+    1857, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 
+    2000, 2010, 2020
+]
+population = [
+    200, 500, 1200, 2500, 4000, 6000, 10000, 15000, 25000, 82000, 140000, 210000, 260000, 
+    300000, 328014, 336265, 350365
+]
+
+annotations = [
+    (1857, 200, "🌱 Fondation d'Anaheim — colonie agricole allemande (1857)", 'green'),
+    (1870, 500, "🏘️ Développement initial — agriculture et vignobles (1870)", 'brown'),
+    (1890, 2500, "🚂 Arrivée du chemin de fer — croissance économique (1890)", 'blue'),
+    (1900, 4000, "🏭 Industrialisation légère — diversification économique (1900)", 'orange'),
+    (1920, 10000, "🏙️ Urbanisation accrue — début de la ville moderne (1920)", 'purple'),
+    (1950, 82000, "🎢 Ouverture de Disneyland — essor touristique (1955)", 'gold'),
+    (1960, 140000, "🏗️ Expansion résidentielle rapide — boom démographique (1960)", 'red'),
+    (1970, 210000, "🚗 Croissance des infrastructures — banlieue automobile (1970)", 'teal'),
+    (1980, 260000, "🌆 Diversification économique — services et commerce (1980)", 'navy'),
+    (1990, 300000, "🌎 Croissance multiculturelle — immigration importante (1990)", 'darkred'),
+    (2000, 328014, "📈 Stabilisation démographique — ville mature (2000)", 'gray'),
+    (2010, 336265, "🏙️ Développement urbain durable — modernisation (2010)", 'black'),
+    (2020, 350365, "💉 Pandémie COVID-19 — impact sanitaire et social (2020)", 'red'),
 ]
 
 # ============================================================
@@ -314,6 +365,33 @@ annotations = [
     (2000, 2500, "🌲 Protection environnementale renforcée — conservation (2000)", 'navy'),
     (2010, 2700, "🏡 Expansion résidentielle — augmentation démographique (2010)", 'black'),
     (2020, 3000, "📈 Croissance soutenue — dynamisme actuel (2020)", 'darkred'),
+]
+
+# ============================================================
+# Bakersfield (United States)
+# ============================================================
+CITY_NAME = "Bakersfield, California"
+CITY_COLOR = '#FF8C00'
+
+years = [
+    1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 
+    2000, 2010, 2020
+]
+population = [
+    500, 1500, 3000, 5000, 8000, 12000, 20000, 35000, 45000, 70000, 100000, 150000, 
+    180000, 180000, 247000, 347000, 380000
+]
+
+annotations = [
+    (1860, 500, "🏞️ Fondation de Bakersfield — établissement initial (1860)", 'brown'),
+    (1910, 12000, "🛢️ Découverte de pétrole — essor industriel (1910)", 'blue'),
+    (1920, 20000, "🏙️ Incorporation officielle — statut de ville (1920)", 'red'),
+    (1940, 45000, "✈️ Expansion militaire — base aérienne proche (1940)", 'gray'),
+    (1950, 70000, "🏭 Industrialisation accrue — diversification économique (1950)", 'gold'),
+    (1960, 100000, "🏢 Urbanisation rapide — croissance démographique (1960)", 'teal'),
+    (1980, 180000, "🚧 Développement suburbain — extension urbaine (1980)", 'navy'),
+    (1990, 180000, "🌍 Diversification culturelle — immigration accrue (1990)", 'black'),
+    (2010, 347000, "📈 Croissance moderne — 3e plus grande ville de Californie centrale (2010)", 'darkred'),
 ]
 
 # ============================================================
@@ -901,6 +979,29 @@ annotations = [
 ]
 
 # ============================================================
+# Burwash Landing (Canada)
+# ============================================================
+CITY_NAME = "Burwash Landing, Yukon"
+CITY_COLOR = '#6B8E23'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 75, 80, 85]
+
+annotations = [
+    (1900, 10, "🏞️ Fondation du village — établissement initial (1900)", 'brown'),
+    (1920, 20, "🚂 Arrivée du chemin de fer — développement du transport (1920)", 'orange'),
+    (1940, 30, "🌲 Expansion forestière — exploitation accrue des ressources (1940)", 'green'),
+    (1950, 35, "🏫 Construction de l'école locale — amélioration des infrastructures (1950)", 'blue'),
+    (1960, 40, "🛤️ Modernisation des routes — meilleure connectivité (1960)", 'red'),
+    (1970, 50, "🏥 Ouverture du centre de santé — services médicaux locaux (1970)", 'purple'),
+    (1980, 60, "🎣 Développement touristique — attraction des visiteurs (1980)", 'gray'),
+    (1990, 70, "🌐 Introduction des communications modernes — téléphonie et internet (1990)", 'gold'),
+    (2000, 75, "🏠 Croissance résidentielle — augmentation de la population locale (2000)", 'teal'),
+    (2010, 80, "♻️ Initiatives écologiques — protection de l'environnement (2010)", 'navy'),
+    (2020, 85, "📈 Stabilisation démographique — population stable (2020)", 'black'),
+]
+
+# ============================================================
 # Cadillac (United States)
 # ============================================================
 CITY_NAME = "Cadillac, Michigan"
@@ -976,6 +1077,31 @@ annotations = [
 ]
 
 # ============================================================
+# Carcross (Canada)
+# ============================================================
+CITY_NAME = "Carcross, Yukon"
+CITY_COLOR = '#8B4513'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [300, 450, 400, 350, 300, 250, 200, 180, 160, 140, 130, 120, 115]
+
+annotations = [
+    (1900, 300, "🚂 Fondation et boom minier — arrivée du chemin de fer (1900)", 'brown'),
+    (1910, 450, "⛏️ Pic de la ruée vers l'or — population maximale (1910)", 'orange'),
+    (1920, 400, "🏞️ Déclin minier — début de la baisse démographique (1920)", 'red'),
+    (1930, 350, "❄️ Hiver rigoureux — impact sur la communauté (1930)", 'blue'),
+    (1940, 300, "🛤️ Fermeture partielle du chemin de fer — isolement accru (1940)", 'gray'),
+    (1950, 250, "🚜 Transition vers l'agriculture locale — diversification économique (1950)", 'green'),
+    (1960, 200, "🏕️ Début du tourisme — premiers visiteurs attirés par la nature (1960)", 'teal'),
+    (1970, 180, "📉 Déclin continu — exode rural (1970)", 'darkred'),
+    (1980, 160, "🎣 Développement de la pêche sportive — nouvelle source de revenus (1980)", 'navy'),
+    (1990, 140, "🏞️ Reconnaissance comme site historique — valorisation culturelle (1990)", 'purple'),
+    (2000, 130, "🌲 Croissance modérée du tourisme durable — renouveau économique (2000)", 'gold'),
+    (2010, 120, "🛶 Expansion des activités de plein air — attractivité renforcée (2010)", 'green'),
+    (2020, 115, "🏡 Communauté stable mais petite — préservation du patrimoine (2020)", 'black'),
+]
+
+# ============================================================
 # Carleton-sur-Mer (Canada)
 # ============================================================
 CITY_NAME = "Carleton-sur-Mer, Québec"
@@ -993,6 +1119,31 @@ annotations = [
     (1981, 3100, "📚 Cégep de Carleton — centre régional (1975)", 'orange'),
     (2001, 7800, "🏙️ Fusion — Carleton-sur-Mer créée (2000)", 'red'),
     (2021, 8400, "💻 Télétravail — nouveaux arrivants (2020)", 'navy'),
+]
+
+# ============================================================
+# Carmacks (Canada)
+# ============================================================
+CITY_NAME = "Carmacks, Yukon"
+CITY_COLOR = '#8B4513'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [50, 120, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700]
+
+annotations = [
+    (1900, 50, "🛤️ Fondation liée au chemin de fer — début du développement (1900)", 'brown'),
+    (1910, 120, "⛏️ Développement minier — afflux de travailleurs (1910)", 'orange'),
+    (1920, 200, "🏠 Croissance résidentielle — expansion du village (1920)", 'green'),
+    (1930, 250, "🚜 Agriculture locale en essor — diversification économique (1930)", 'blue'),
+    (1940, 300, "⚓ Amélioration des infrastructures — ponts et routes (1940)", 'red'),
+    (1950, 350, "📞 Introduction des communications modernes — téléphonie (1950)", 'purple'),
+    (1960, 400, "🏫 Construction d'écoles — développement social (1960)", 'gray'),
+    (1970, 450, "🚗 Amélioration des transports routiers — accès facilité (1970)", 'gold'),
+    (1980, 500, "🎣 Développement du tourisme — pêche et nature (1980)", 'teal'),
+    (1990, 550, "🌲 Protection environnementale accrue — zones protégées (1990)", 'navy'),
+    (2000, 600, "💡 Modernisation énergétique — électricité améliorée (2000)", 'black'),
+    (2010, 650, "📈 Croissance démographique stable — attractivité locale (2010)", 'darkred'),
+    (2020, 700, "🌐 Connectivité numérique — internet haut débit (2020)", 'brown'),
 ]
 
 # ============================================================
@@ -1083,6 +1234,29 @@ annotations = [
     (1981, 16000, "🏡 Développement résidentiel — Nouveaux quartiers (1980)", 'navy'),
     (2001, 21700, "🌍 Expansion urbaine — Proximité autoroute 10 (1990)", 'darkred'),
     (2011, 29120, "🎉 Population record — Croissance continue (2011)", 'black'),
+]
+
+# ============================================================
+# Chandler (United States)
+# ============================================================
+CITY_NAME = "Chandler, Arizona"
+CITY_COLOR = '#FF6F00'
+
+years = [1912, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [1500, 2500, 3500, 4500, 7000, 12000, 35000, 65000, 90000, 176000, 236000, 261000]
+
+annotations = [
+    (1912, 1500, "🌵 Fondation — création officielle de Chandler (1912)", 'brown'),
+    (1920, 2500, "🚜 Agriculture — développement des cultures d'agrumes (1920)", 'green'),
+    (1940, 4500, "🏭 Industrie — début de l'industrialisation locale (1940)", 'blue'),
+    (1950, 7000, "🏠 Expansion résidentielle — croissance après la Seconde Guerre mondiale (1950)", 'orange'),
+    (1960, 12000, "🚗 Infrastructure — amélioration des routes et accès (1960)", 'gray'),
+    (1970, 35000, "🏢 Développement urbain — arrivée des premières entreprises technologiques (1970)", 'purple'),
+    (1980, 65000, "📈 Boom démographique — forte croissance de la population (1980)", 'red'),
+    (1990, 90000, "🏫 Éducation — ouverture de nouvelles écoles et universités (1990)", 'navy'),
+    (2000, 176000, "💻 Technologie — émergence de Chandler comme hub technologique (2000)", 'teal'),
+    (2010, 236000, "🌇 Urbanisation — densification et développement urbain (2010)", 'darkred'),
+    (2020, 261000, "🌟 Modernisation — ville moderne et diversifiée (2020)", 'gold'),
 ]
 
 # ============================================================
@@ -1889,6 +2063,29 @@ annotations = [
 ]
 
 # ============================================================
+# East Honolulu (United States)
+# ============================================================
+CITY_NAME = "East Honolulu, Hawaii"
+CITY_COLOR = '#1E90FF'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [1200, 1500, 1800, 2200, 3000, 4500, 8000, 15000, 25000, 35000, 45000, 52000, 58000]
+
+annotations = [
+    (1900, 1200, "🌺 Fondation et premières habitations — début du peuplement moderne (1900)", 'brown'),
+    (1920, 1800, "🚜 Développement agricole — plantation de canne à sucre (1920)", 'green'),
+    (1940, 3000, "✈️ Expansion militaire — base aérienne proche durant la guerre (1940)", 'navy'),
+    (1950, 4500, "🏠 Urbanisation croissante — début des lotissements résidentiels (1950)", 'orange'),
+    (1960, 8000, "🌴 Tourisme en essor — développement des infrastructures touristiques (1960)", 'gold'),
+    (1970, 15000, "🚧 Construction d'autoroutes — amélioration des accès (1970)", 'gray'),
+    (1980, 25000, "🏢 Croissance démographique rapide — boom immobilier (1980)", 'red'),
+    (1990, 35000, "🎓 Expansion éducative — ouverture d'écoles et universités (1990)", 'purple'),
+    (2000, 45000, "🌊 Sensibilisation environnementale — protection des plages (2000)", 'teal'),
+    (2010, 52000, "🚶‍♂️ Développement durable — promotion des transports alternatifs (2010)", 'blue'),
+    (2020, 58000, "🏙️ Maturation urbaine — densification et modernisation (2020)", 'black'),
+]
+
+# ============================================================
 # Edmonton (Canada)
 # ============================================================
 CITY_NAME = "Edmonton, Alberta"
@@ -2080,6 +2277,26 @@ annotations = [
     (2000, 90000, "🌐 Expansion technologique et universitaire (2000)", 'orange'),
     (2010, 105000, "🏙️ Modernisation du centre-ville (2010)", 'green'),
     (2020, 125000, "🌿 Initiatives écologiques urbaines (2020)", 'blue'),
+]
+
+# ============================================================
+# Faro (Canada)
+# ============================================================
+CITY_NAME = "Faro, Yukon"
+CITY_COLOR = '#8B4513'
+
+years = [1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [100, 500, 2500, 3500, 3000, 800, 400, 350]
+
+annotations = [
+    (1950, 100, "🏞️ Fondation du camp minier — début de l'exploitation (1950)", 'brown'),
+    (1960, 500, "⛏️ Découverte majeure de minerai — boom minier (1960)", 'orange'),
+    (1970, 2500, "🏗️ Expansion rapide — construction de logements (1970)", 'green'),
+    (1980, 3500, "🏭 Pic de la production minière — apogée économique (1980)", 'blue'),
+    (1990, 3000, "⚠️ Déclin minier — fermeture partielle des mines (1990)", 'red'),
+    (2000, 800, "🏚️ Dépopulation importante — fermeture des infrastructures (2000)", 'purple'),
+    (2010, 400, "🌲 Transition vers tourisme et conservation — diversification (2010)", 'teal'),
+    (2020, 350, "📉 Population stable mais faible — défis démographiques (2020)", 'gray'),
 ]
 
 # ============================================================
@@ -2328,6 +2545,34 @@ annotations = [
 ]
 
 # ============================================================
+# Fresno (United States)
+# ============================================================
+CITY_NAME = "Fresno, California"
+CITY_COLOR = '#FF6F61'
+
+years = [
+    1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 
+    2010, 2020
+]
+population = [
+    1234, 2855, 5940, 11116, 17036, 23900, 40840, 62000, 83400, 121000, 134000, 174000, 
+    295000, 427652, 494665, 531576
+]
+
+annotations = [
+    (1900, 11116, "🏛️ Incorporation en ville — Fresno devient une ville officielle (1900)", 'green'),
+    (1910, 17036, "🌽 Expansion agricole — Fresno devient centre agricole majeur (1910)", 'blue'),
+    (1920, 23900, "🏭 Industrialisation — croissance industrielle locale (1920)", 'red'),
+    (1930, 40840, "🏠 Boom résidentiel — croissance démographique importante (1930)", 'purple'),
+    (1940, 62000, "✈️ Proximité militaire — base aérienne proche influence (1940)", 'gray'),
+    (1950, 83400, "🚜 Modernisation agricole — mécanisation accrue (1950)", 'gold'),
+    (1960, 121000, "🏙️ Urbanisation rapide — Fresno devient grande ville (1960)", 'teal'),
+    (1980, 174000, "🏫 Expansion éducative — universités et écoles (1980)", 'navy'),
+    (2000, 427652, "🌆 Diversification économique — services et industrie (2000)", 'black'),
+    (2010, 494665, "🌎 Croissance multiculturelle — diversité accrue (2010)", 'darkred'),
+]
+
+# ============================================================
 # Gander (Canada)
 # ============================================================
 CITY_NAME = "Gander, Newfoundland and Labrador"
@@ -2466,6 +2711,30 @@ annotations = [
     (1981, 37000, "📉 Déclin manufactures — reconversion (1975)", 'red'),
     (2006, 55000, "🔀 Fusions municipales — expansion (2002)", 'teal'),
     (2021, 70000, "🏙️ Tourisme + qualité de vie — renaissance (2010)", 'blue'),
+]
+
+# ============================================================
+# Grande Prairie (Canada)
+# ============================================================
+CITY_NAME = "Grande Prairie, Alberta"
+CITY_COLOR = '#2E8B57'
+
+years = [1914, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [300, 1200, 2500, 4000, 7000, 12000, 18000, 25000, 35000, 45000, 60000, 69000]
+
+annotations = [
+    (1914, 300, "🏞️ Fondation du village — arrivée du chemin de fer (1914)", 'brown'),
+    (1920, 1200, "🌾 Développement agricole — expansion rurale (1920)", 'green'),
+    (1930, 2500, "🏘️ Incorporation en village — croissance locale (1930)", 'blue'),
+    (1940, 4000, "⚒️ Début de l'exploitation pétrolière — diversification économique (1940)", 'orange'),
+    (1950, 7000, "🏫 Construction d'infrastructures scolaires — développement social (1950)", 'purple'),
+    (1960, 12000, "🚜 Modernisation agricole — mécanisation accrue (1960)", 'teal'),
+    (1970, 18000, "🏢 Incorporation en ville — urbanisation accélérée (1970)", 'red'),
+    (1980, 25000, "🛣️ Amélioration des transports — autoroutes et routes (1980)", 'navy'),
+    (1990, 35000, "🏥 Expansion des services de santé — hôpital régional (1990)", 'gold'),
+    (2000, 45000, "🏭 Croissance industrielle — développement énergétique (2000)", 'darkred'),
+    (2010, 60000, "🎓 Ouverture de l'université — éducation supérieure (2010)", 'black'),
+    (2020, 69000, "🌆 Métropole régionale — centre économique du nord-ouest (2020)", 'gray'),
 ]
 
 # ============================================================
@@ -2846,6 +3115,25 @@ annotations = [
 ]
 
 # ============================================================
+# Hoover (United States)
+# ============================================================
+CITY_NAME = "Hoover, Alabama"
+CITY_COLOR = '#005f73'
+
+years = [1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [0, 0, 0, 0, 134, 13100, 59200, 84300, 85200]
+
+annotations = [
+    (1940, 0, "🏞️ Zone rurale — avant urbanisation majeure (1940)", 'brown'),
+    (1970, 0, "🚧 Début du développement résidentiel — premières maisons construites (1970)", 'orange'),
+    (1980, 134, "🏘️ Croissance initiale — population atteint 134 (1980)", 'blue'),
+    (1990, 13100, "🚀 Boom démographique — population dépasse 13 000 (1990)", 'red'),
+    (2000, 59200, "🏢 Expansion urbaine — développement commercial et résidentiel (2000)", 'purple'),
+    (2010, 84300, "🚗 Ville-dortoir majeure — croissance liée à Birmingham (2010)", 'teal'),
+    (2020, 85200, "🌳 Maintien de la qualité de vie — ville résidentielle prospère (2020)", 'navy'),
+]
+
+# ============================================================
 # Houston (United States)
 # ============================================================
 CITY_NAME = "Houston, Texas"
@@ -3176,6 +3464,29 @@ annotations = [
     (2000, 30000, "🎣 Tourisme en hausse — attraction majeure (2000)", 'brown'),
     (2010, 31000, "🌐 Modernisation technologique — ville connectée (2010)", 'blue'),
     (2020, 32000, "🛡️ Résilience urbaine — adaptation au changement climatique (2020)", 'green'),
+]
+
+# ============================================================
+# Kamloops (Canada)
+# ============================================================
+CITY_NAME = "Kamloops, British Columbia"
+CITY_COLOR = '#4B8BBE'
+
+years = [1811, 1850, 1880, 1900, 1910, 1920, 1950, 1980, 2000, 2010, 2020]
+population = [100, 500, 1500, 3000, 4500, 6000, 15000, 35000, 80000, 90000, 100000]
+
+annotations = [
+    (1811, 100, "🛶 Première présence autochtone documentée — Secwepemc dans la région (1811)", 'brown'),
+    (1850, 500, "⛏️ Début de la ruée vers l'or — afflux de colons (1850)", 'orange'),
+    (1880, 1500, "🚂 Arrivée du chemin de fer Canadian Pacific — développement urbain (1880)", 'green'),
+    (1900, 3000, "🏫 Fondation de la première école publique — éducation locale (1900)", 'blue'),
+    (1910, 4500, "🏥 Construction de l'hôpital Royal Inland — soins de santé (1910)", 'red'),
+    (1920, 6000, "🏛️ Incorporation officielle de la ville — statut municipal (1920)", 'purple'),
+    (1950, 15000, "🏭 Expansion industrielle majeure — croissance économique (1950)", 'gray'),
+    (1980, 35000, "🎓 Ouverture de l'Université Thompson Rivers — éducation supérieure (1980)", 'gold'),
+    (2000, 80000, "🏙️ Urbanisation rapide — développement résidentiel (2000)", 'teal'),
+    (2010, 90000, "🌲 Initiatives environnementales majeures — durabilité (2010)", 'navy'),
+    (2020, 100000, "💉 Gestion de la pandémie COVID-19 — santé publique (2020)", 'black'),
 ]
 
 # ============================================================
@@ -3538,6 +3849,32 @@ annotations = [
 ]
 
 # ============================================================
+# Lloydminster (Canada)
+# ============================================================
+CITY_NAME = "Lloydminster, Alberta"
+CITY_COLOR = '#6495ED'
+
+years = [1900, 1903, 1911, 1921, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 2001, 2011, 2020]
+population = [645, 500, 1500, 2500, 3500, 4200, 5500, 7200, 9000, 12000, 14000, 18000, 31000, 32000]
+
+annotations = [
+    (1900, 645, "🏔️ Fondation de Lloydminster (1900)", 'green'),
+    (1903, 500, "🏗️ Fondation — établissement initial (1903)", 'brown'),
+    (1911, 1500, "🚂 Arrivée du chemin de fer — développement économique (1911)", 'orange'),
+    (1921, 2500, "🏘️ Expansion résidentielle — croissance démographique (1921)", 'green'),
+    (1931, 3500, "🌾 Agriculture dominante — base économique (1931)", 'blue'),
+    (1941, 4200, "⚔️ Impact de la Seconde Guerre mondiale — mobilisation locale (1941)", 'red'),
+    (1951, 5500, "🏭 Industrialisation — diversification économique (1951)", 'purple'),
+    (1961, 7200, "🚧 Urbanisation accrue — infrastructures modernes (1961)", 'gray'),
+    (1971, 9000, "🛣️ Amélioration des transports — meilleure connectivité (1971)", 'gold'),
+    (1981, 12000, "🏢 Croissance commerciale — développement urbain (1981)", 'teal'),
+    (1991, 14000, "🎓 Éducation renforcée — établissement d'institutions (1991)", 'navy'),
+    (2001, 18000, "🛢️ Boom pétrolier — essor économique (2001)", 'black'),
+    (2011, 31000, "🌆 Fusion interprovinciale — statut unique (2011)", 'darkred'),
+    (2020, 32000, "📈 Stabilisation démographique — ville moderne (2020)", 'green'),
+]
+
+# ============================================================
 # London (Canada)
 # ============================================================
 CITY_NAME = "London, Ontario"
@@ -3812,6 +4149,61 @@ annotations = [
     (1970, 13500, "🎓 CÉGEP de Matane fondé — centre régional (1968)", 'purple'),
     (1990, 13000, "📉 Exode rural — déclin démographique amorcé (1985)", 'red'),
     (2020, 9500, "💨 Éolien — reconversion énergétique du golfe (2000)", 'teal'),
+]
+
+# ============================================================
+# Mayo (Canada)
+# ============================================================
+CITY_NAME = "Mayo, Yukon"
+CITY_COLOR = '#8B4513'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [0, 500, 1200, 1500, 1300, 900, 600, 400, 300, 250, 200, 150, 100]
+
+annotations = [
+    (1900, 0, "🛤️ Fondation liée à la ruée vers l'or — début du développement (1900)", 'brown'),
+    (1910, 500, "⛏️ Boom minier — population en forte croissance (1910)", 'orange'),
+    (1920, 1200, "🏭 Développement des infrastructures minières — pic démographique (1920)", 'green'),
+    (1930, 1500, "💰 Apogée économique — Mayo prospère grâce à l'or (1930)", 'blue'),
+    (1940, 1300, "⚒️ Déclin minier — début de la baisse de population (1940)", 'red'),
+    (1950, 900, "🚪 Fermeture de mines majeures — exode rural (1950)", 'purple'),
+    (1960, 600, "🌲 Transition vers l'économie forestière — adaptation locale (1960)", 'gray'),
+    (1970, 400, "🛑 Réduction des services — baisse continue (1970)", 'darkred'),
+    (1980, 300, "🏞️ Début du tourisme — diversification économique (1980)", 'gold'),
+    (1990, 250, "📉 Population stable mais faible — défis démographiques (1990)", 'teal'),
+    (2000, 200, "🏘️ Efforts de revitalisation — maintien de la communauté (2000)", 'navy'),
+    (2010, 150, "🌄 Tourisme croissant — nouvelle source de revenus (2010)", 'black'),
+    (2020, 100, "📉 Déclin démographique persistant — population réduite (2020)", 'brown'),
+]
+
+# ============================================================
+# Medicine Hat (Canada)
+# ============================================================
+CITY_NAME = "Medicine Hat, Alberta"
+CITY_COLOR = '#d2691e'
+
+years = [1883, 1891, 1901, 1911, 1921, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 2001, 2011, 2020]
+population = [
+    500, 1500, 3500, 7000, 9000, 12000, 14000, 16000, 22000, 30000, 35000, 37000, 54000, 
+    61000, 63000
+]
+
+annotations = [
+    (1883, 500, "🏞️ Fondation de Medicine Hat — établissement initial (1883)", 'brown'),
+    (1891, 1500, "🚂 Arrivée du chemin de fer — développement économique (1891)", 'orange'),
+    (1901, 3500, "🏭 Début de l'industrie du gaz naturel — croissance industrielle (1901)", 'green'),
+    (1911, 7000, "🏙️ Incorporation en ville — statut municipal (1911)", 'blue'),
+    (1921, 9000, "🌾 Expansion agricole — développement rural (1921)", 'red'),
+    (1931, 12000, "🏥 Construction de l'hôpital général — amélioration des services (1931)", 'purple'),
+    (1941, 14000, "⚙️ Efforts de guerre et industrialisation — période WWII (1941)", 'gray'),
+    (1951, 16000, "🏫 Ouverture d'écoles secondaires — éducation renforcée (1951)", 'gold'),
+    (1961, 22000, "🏢 Croissance urbaine post-guerre — boom démographique (1961)", 'teal'),
+    (1971, 30000, "🚧 Développement des infrastructures — modernisation (1971)", 'navy'),
+    (1981, 35000, "🏞️ Création de parcs et espaces verts — qualité de vie (1981)", 'black'),
+    (1991, 37000, "🏥 Expansion des services de santé — hôpital agrandi (1991)", 'darkred'),
+    (2001, 54000, "🏙️ Croissance économique majeure — diversification (2001)", 'brown'),
+    (2011, 61000, "🌐 Amélioration des technologies — ville connectée (2011)", 'orange'),
+    (2020, 63000, "🌿 Initiatives écologiques — développement durable (2020)", 'green'),
 ]
 
 # ============================================================
@@ -4180,6 +4572,25 @@ annotations = [
 ]
 
 # ============================================================
+# Mount Pearl (Canada)
+# ============================================================
+CITY_NAME = "Mount Pearl, Newfoundland and Labrador"
+CITY_COLOR = '#0077be'
+
+years = [1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [1000, 1500, 2500, 6000, 12000, 18000, 22000, 25000, 26000, 26000, 23000]
+
+annotations = [
+    (1920, 1000, "🏠 Fondation du village — début de Mount Pearl (1920)", 'brown'),
+    (1970, 18000, "🚧 Expansion urbaine — développement résidentiel (1970)", 'blue'),
+    (1980, 22000, "🏫 Amélioration des infrastructures — écoles et services (1980)", 'red'),
+    (1990, 25000, "🚗 Amélioration des transports — accès routier accru (1990)", 'purple'),
+    (2000, 26000, "🌳 Développement durable — espaces verts protégés (2000)", 'gray'),
+    (2010, 26000, "🏆 Reconnaissance locale — ville dynamique (2010)", 'gold'),
+    (2020, 23000, "⚠️ Légère baisse démographique — défis économiques (2020)", 'darkred'),
+]
+
+# ============================================================
 # Murdochville (Canada)
 # ============================================================
 CITY_NAME = "Murdochville, Québec"
@@ -4251,6 +4662,29 @@ annotations = [
     (1990, 48024, "⛳ Golf boom — 100+ terrains sur Grand Strand (1980s)", 'green'),
     (2000, 58780, "🏗️ Fermeture base USAF — reconversion Market Common (1993)", 'red'),
     (2020, 35682, "📉 Pop. résidente vs 479K agglomération (2024)", 'purple'),
+]
+
+# ============================================================
+# Naperville (United States)
+# ============================================================
+CITY_NAME = "Naperville, Illinois"
+CITY_COLOR = '#0072CE'
+
+years = [1831, 1850, 1900, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [6, 500, 2500, 12000, 17000, 43000, 72000, 97000, 128358, 141853, 148449]
+
+annotations = [
+    (1831, 6, "🌾 Fondation — premiers colons s'installent (1831)", 'brown'),
+    (1850, 500, "🏘️ Croissance initiale — développement agricole (1850)", 'green'),
+    (1900, 2500, "🚂 Arrivée du chemin de fer — début industrialisation (1900)", 'orange'),
+    (1950, 12000, "🏙️ Expansion urbaine post-Seconde Guerre mondiale (1950)", 'blue'),
+    (1960, 17000, "🏫 Création d'infrastructures éducatives majeures (1960)", 'purple'),
+    (1970, 43000, "🏢 Développement des banlieues — boom démographique (1970)", 'red'),
+    (1980, 72000, "🚗 Amélioration des transports — croissance économique (1980)", 'teal'),
+    (1990, 97000, "💼 Essor du secteur technologique local (1990)", 'navy'),
+    (2000, 128358, "🌆 Naperville devient la plus grande ville de la banlieue de Chicago (2000)", 'gold'),
+    (2010, 141853, "📈 Croissance continue malgré la crise économique (2010)", 'darkred'),
+    (2020, 148449, "🏡 Ville résidentielle majeure avec qualité de vie élevée (2020)", 'black'),
 ]
 
 # ============================================================
@@ -5163,6 +5597,31 @@ annotations = [
 ]
 
 # ============================================================
+# Rapid City (United States)
+# ============================================================
+CITY_NAME = "Rapid City, South Dakota"
+CITY_COLOR = '#4a90e2'
+
+years = [1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [
+    1000, 3500, 7000, 12000, 16000, 21000, 27000, 35000, 43000, 52000, 60000, 65000, 
+    67000, 70000, 75000
+]
+
+annotations = [
+    (1880, 1000, "🏞️ Fondation — établissement initial près des Black Hills (1880)", 'brown'),
+    (1900, 7000, "🏙️ Croissance urbaine — population dépasse 7000 (1900)", 'green'),
+    (1930, 21000, "🏭 Développement industriel — diversification économique (1930)", 'red'),
+    (1950, 35000, "🚗 Expansion urbaine — essor des banlieues (1950)", 'gray'),
+    (1970, 52000, "🏢 Modernisation — construction de bâtiments publics (1970)", 'gold'),
+    (1980, 60000, "🎡 Tourisme en hausse — proximité du Mont Rushmore (1980)", 'teal'),
+    (1990, 65000, "🏥 Développement des infrastructures — hôpitaux et écoles (1990)", 'navy'),
+    (2000, 67000, "🌲 Protection environnementale — initiatives locales (2000)", 'black'),
+    (2010, 70000, "📈 Croissance démographique stable — attractivité régionale (2010)", 'darkred'),
+    (2020, 75000, "💻 Économie numérique — diversification économique (2020)", 'brown'),
+]
+
+# ============================================================
 # Red Deer (Canada)
 # ============================================================
 CITY_NAME = "Red Deer, Alberta"
@@ -5875,6 +6334,28 @@ annotations = [
 ]
 
 # ============================================================
+# Sanikiluaq (Canada)
+# ============================================================
+CITY_NAME = "Sanikiluaq, Nunavut"
+CITY_COLOR = '#006994'
+
+years = [1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [50, 80, 120, 180, 250, 320, 400, 550, 700, 900, 1100, 1200]
+
+annotations = [
+    (1910, 50, "🛶 Fondation du village — premiers établissements inuit (1910)", 'brown'),
+    (1930, 120, "🎣 Développement de la pêche — activité économique clé (1930)", 'blue'),
+    (1950, 250, "🏫 Construction de la première école — éducation locale (1950)", 'green'),
+    (1960, 320, "🚢 Arrivée des premiers bateaux modernes — ouverture commerciale (1960)", 'orange'),
+    (1970, 400, "🏥 Ouverture du centre de santé — amélioration des soins (1970)", 'red'),
+    (1980, 550, "📡 Installation des communications satellitaires — connectivité accrue (1980)", 'purple'),
+    (1990, 700, "🏠 Expansion des logements — croissance démographique (1990)", 'teal'),
+    (2000, 900, "🌐 Accès à Internet — modernisation numérique (2000)", 'navy'),
+    (2010, 1100, "🛍️ Développement du commerce local — diversification économique (2010)", 'gold'),
+    (2020, 1200, "🌿 Initiatives environnementales — protection du territoire (2020)", 'darkred'),
+]
+
+# ============================================================
 # Saratoga Springs (United States)
 # ============================================================
 CITY_NAME = "Saratoga Springs, New York"
@@ -6167,6 +6648,95 @@ annotations = [
 ]
 
 # ============================================================
+# Springdale (United States)
+# ============================================================
+CITY_NAME = "Springdale, Arkansas"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 
+    2010, 2020
+]
+population = [
+    500, 1200, 1800, 2500, 3200, 4000, 4800, 6000, 8500, 12000, 18000, 25000, 35000, 
+    48000, 70000, 83000
+]
+
+annotations = [
+    (1870, 500, "🏞️ Fondation de Springdale — établissement initial (1870)", 'brown'),
+    (1880, 1200, "🚂 Arrivée du chemin de fer — développement économique (1880)", 'orange'),
+    (1900, 2500, "🏭 Début de l'industrialisation locale — croissance urbaine (1900)", 'green'),
+    (1920, 4000, "🍗 Expansion de l'industrie agroalimentaire — Tyson Foods (1920)", 'blue'),
+    (1940, 6000, "🏘️ Croissance résidentielle — urbanisation accrue (1940)", 'red'),
+    (1950, 8500, "🛣️ Construction d'infrastructures routières — accès amélioré (1950)", 'purple'),
+    (1960, 12000, "🏢 Développement commercial — diversification économique (1960)", 'gray'),
+    (1970, 18000, "📈 Boom démographique — migration et emploi (1970)", 'gold'),
+    (1980, 25000, "🌆 Expansion urbaine — intégration régionale (1980)", 'teal'),
+    (1990, 35000, "🏫 Investissements éducatifs — amélioration des services (1990)", 'navy'),
+    (2000, 48000, "🌍 Croissance multiculturelle — diversification démographique (2000)", 'black'),
+    (2010, 70000, "🚀 Modernisation urbaine — développement durable (2010)", 'darkred'),
+    (2020, 83000, "📊 Population record — plus grande ville du comté (2020)", 'green'),
+]
+
+# ============================================================
+# Spruce Grove (Canada)
+# ============================================================
+CITY_NAME = "Spruce Grove, Alberta"
+CITY_COLOR = '#2E8B57'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [50, 200, 500, 1200, 2000, 3500, 6000, 12000, 18000, 22000, 25000, 30000, 35000]
+
+annotations = [
+    (1900, 50, "🌲 Fondation du village — premiers colons s'installent (1900)", 'brown'),
+    (1910, 200, "🚂 Arrivée du chemin de fer — développement économique (1910)", 'orange'),
+    (1930, 1200, "🏫 Construction de la première école publique (1930)", 'green'),
+    (1950, 3500, "🏘️ Expansion résidentielle après la Seconde Guerre mondiale (1950)", 'blue'),
+    (1960, 6000, "🏢 Incorporation en ville — autonomie municipale (1960)", 'red'),
+    (1970, 12000, "🛣️ Amélioration des infrastructures routières (1970)", 'purple'),
+    (1980, 18000, "🏥 Ouverture du centre hospitalier régional (1980)", 'gray'),
+    (1990, 22000, "🏢 Développement commercial majeur — centre-ville (1990)", 'gold'),
+    (2000, 25000, "🎓 Expansion des services éducatifs — collège local (2000)", 'teal'),
+    (2010, 30000, "🌳 Initiatives écologiques et parcs urbains (2010)", 'navy'),
+    (2020, 35000, "🏙️ Croissance continue — ville dynamique de banlieue (2020)", 'black'),
+]
+
+# ============================================================
+# St. Albert (Canada)
+# ============================================================
+CITY_NAME = "St. Albert, Alberta"
+CITY_COLOR = '#007A33'
+
+years = [
+    1861, 1871, 1881, 1891, 1901, 1911, 1921, 1931, 1941, 1951, 1961, 1971, 1981, 1991, 
+    2001, 2011, 2020
+]
+population = [
+    20, 100, 300, 500, 700, 1200, 1500, 2000, 2500, 4000, 7000, 12000, 19000, 30000, 
+    43000, 61000, 66000
+]
+
+annotations = [
+    (1861, 20, "⛪ Fondation missionnaire — établissement de la mission catholique (1861)", 'brown'),
+    (1871, 100, "🌾 Début de l'agriculture — premières fermes établies (1871)", 'green'),
+    (1881, 300, "🚂 Arrivée du chemin de fer — amélioration des transports (1881)", 'blue'),
+    (1891, 500, "🏫 Construction de la première école — éducation locale (1891)", 'orange'),
+    (1901, 700, "📈 Croissance démographique — début de l'urbanisation (1901)", 'purple'),
+    (1911, 1200, "🏥 Ouverture du premier hôpital — services de santé (1911)", 'red'),
+    (1921, 1500, "🛤️ Extension des infrastructures — développement économique (1921)", 'teal'),
+    (1931, 2000, "💡 Introduction de l'électricité — modernisation (1931)", 'gold'),
+    (1941, 2500, "🚜 Mécanisation agricole — augmentation de la productivité (1941)", 'navy'),
+    (1951, 4000, "🏙️ Statut de ville — reconnaissance officielle (1951)", 'black'),
+    (1961, 7000, "🏢 Développement résidentiel — expansion urbaine (1961)", 'darkred'),
+    (1971, 12000, "🛒 Ouverture de centres commerciaux — croissance économique (1971)", 'brown'),
+    (1981, 19000, "🚗 Amélioration des routes — meilleure connectivité (1981)", 'green'),
+    (1991, 30000, "🏫 Expansion scolaire — nouveaux établissements (1991)", 'blue'),
+    (2001, 43000, "🌳 Développement durable — initiatives environnementales (2001)", 'orange'),
+    (2011, 61000, "🏥 Nouveau centre médical — amélioration des soins (2011)", 'purple'),
+    (2020, 66000, "📊 Croissance continue — population stable (2020)", 'gray'),
+]
+
+# ============================================================
 # St. Catharines (Canada)
 # ============================================================
 CITY_NAME = "St. Catharines, Ontario"
@@ -6445,6 +7015,31 @@ annotations = [
 ]
 
 # ============================================================
+# Teslin (Canada)
+# ============================================================
+CITY_NAME = "Teslin, Yukon"
+CITY_COLOR = '#4B8BBE'
+
+years = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [50, 120, 200, 350, 400, 450, 500, 520, 480, 460, 430, 410, 390]
+
+annotations = [
+    (1900, 50, "🛶 Fondation du village — établissement des Premières Nations (1900)", 'brown'),
+    (1910, 120, "🚂 Arrivée du chemin de fer — développement économique (1910)", 'orange'),
+    (1920, 200, "🏫 Construction de la première école — éducation locale (1920)", 'green'),
+    (1930, 350, "🏥 Ouverture du premier centre de santé — amélioration des soins (1930)", 'blue'),
+    (1940, 400, "⚓ Expansion du commerce — croissance pendant la guerre (1940)", 'red'),
+    (1950, 450, "🚗 Amélioration des routes — meilleure accessibilité (1950)", 'purple'),
+    (1960, 500, "🏠 Croissance résidentielle — augmentation de la population (1960)", 'gray'),
+    (1970, 520, "🎣 Développement du tourisme — valorisation culturelle (1970)", 'gold'),
+    (1980, 480, "🌲 Protection environnementale — début des efforts écologiques (1980)", 'teal'),
+    (1990, 460, "📡 Introduction des télécommunications — modernisation (1990)", 'navy'),
+    (2000, 430, "🎭 Promotion culturelle — renforcement de l'identité locale (2000)", 'black'),
+    (2010, 410, "🌐 Accès internet amélioré — connectivité accrue (2010)", 'darkred'),
+    (2020, 390, "🧑‍🤝‍🧑 Stabilisation démographique — défis contemporains (2020)", 'brown'),
+]
+
+# ============================================================
 # Thetford Mines (Canada)
 # ============================================================
 CITY_NAME = "Thetford Mines, Québec"
@@ -6684,6 +7279,26 @@ annotations = [
     (2011, 2710, "⛏️ Nouveau boom minier — charbon à coke (2008)", 'brown'),
     (2016, 2034, "🌍 UNESCO Géoparc mondial — tourisme (2014)", 'teal'),
     (2021, 2627, "🦖 Paléontologie + gaz naturel — renaissance (2020)", 'green'),
+]
+
+# ============================================================
+# Tuscaloosa (United States)
+# ============================================================
+CITY_NAME = "Tuscaloosa, Alabama"
+CITY_COLOR = '#004080'
+
+years = [1819, 1830, 1850, 1870, 1900, 1920, 1950, 1980, 2000, 2010, 2020]
+population = [1000, 3000, 7000, 9000, 12000, 18000, 45000, 70000, 85000, 90000, 101000]
+
+annotations = [
+    (1819, 1000, "🏛️ Fondation officielle — Tuscaloosa devient capitale de l'Alabama (1819)", 'brown'),
+    (1900, 12000, "🚂 Expansion ferroviaire — développement industriel (1900)", 'orange'),
+    (1920, 18000, "🏭 Croissance industrielle — textile et acier (1920)", 'blue'),
+    (1950, 45000, "🏙️ Urbanisation rapide — boom démographique (1950)", 'purple'),
+    (1980, 70000, "🎉 Développement culturel et sportif — renouveau urbain (1980)", 'teal'),
+    (2000, 85000, "🏥 Expansion universitaire et médicale — croissance économique (2000)", 'navy'),
+    (2010, 90000, "📈 Modernisation urbaine — augmentation démographique (2010)", 'gold'),
+    (2020, 101000, "🌆 Ville contemporaine — diversification économique (2020)", 'black'),
 ]
 
 # ============================================================
@@ -6935,6 +7550,30 @@ annotations = [
 ]
 
 # ============================================================
+# Wasilla (United States)
+# ============================================================
+CITY_NAME = "Wasilla, Alaska"
+CITY_COLOR = '#2E86AB'
+
+years = [1917, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [0, 200, 500, 800, 1200, 1800, 2500, 4500, 7000, 7100, 8500, 10000]
+
+annotations = [
+    (1917, 0, "🚂 Fondation — arrivée du chemin de fer Alaska Railroad (1917)", 'brown'),
+    (1920, 200, "🏠 Première communauté permanente — début du peuplement (1920)", 'orange'),
+    (1930, 500, "🌲 Exploitation forestière — développement économique (1930)", 'green'),
+    (1940, 800, "🛤️ Expansion ferroviaire — croissance liée au transport (1940)", 'blue'),
+    (1950, 1200, "🚜 Agriculture locale — diversification économique (1950)", 'red'),
+    (1960, 1800, "🏫 Établissement d'écoles — développement social (1960)", 'purple'),
+    (1970, 2500, "🏙️ Incorporation officielle — statut de ville (1970)", 'gray'),
+    (1980, 4500, "🛣️ Construction de la route Parks Highway — meilleure accessibilité (1980)", 'gold'),
+    (1990, 7000, "🏢 Croissance résidentielle — banlieue d'Anchorage (1990)", 'teal'),
+    (2000, 7100, "🎿 Tourisme hivernal — développement économique (2000)", 'navy'),
+    (2010, 8500, "👩‍💼 Expansion démographique — croissance continue (2010)", 'black'),
+    (2020, 10000, "🌆 Ville moderne — population stable et croissante (2020)", 'darkred'),
+]
+
+# ============================================================
 # Watson Lake (Canada)
 # ============================================================
 CITY_NAME = "Watson Lake, Yukon"
@@ -6996,6 +7635,40 @@ annotations = [
     (1971, 11084, "⛏️ Mine de Faro — plomb-zinc — boom (1969)", 'orange'),
     (2001, 19058, "📜 Accords Premières Nations — autonomie (1995)", 'purple'),
     (2021, 28201, "🎓 Université du Yukon fondée (2020)", 'teal'),
+]
+
+# ============================================================
+# Wichita (United States)
+# ============================================================
+CITY_NAME = "Wichita, Kansas"
+CITY_COLOR = '#005a9c'
+
+years = [
+    1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 
+    2010, 2020
+]
+population = [
+    1200, 4000, 24000, 50000, 72000, 104000, 150000, 165000, 200000, 250000, 280000, 
+    300000, 320000, 344000, 382000, 389000
+]
+
+annotations = [
+    (1870, 1200, "🏜️ Fondation de Wichita — établissement initial (1870)", 'brown'),
+    (1880, 4000, "🚂 Arrivée du chemin de fer — croissance rapide (1880)", 'orange'),
+    (1890, 24000, "🏭 Développement industriel — boom économique (1890)", 'green'),
+    (1900, 50000, "🏙️ Incorporation officielle — ville établie (1900)", 'blue'),
+    (1910, 72000, "✈️ Début de l'industrie aéronautique — innovation (1910)", 'red'),
+    (1920, 104000, "💼 Expansion économique — diversification (1920)", 'purple'),
+    (1930, 150000, "📉 Grande Dépression — ralentissement (1930)", 'gray'),
+    (1940, 165000, "⚙️ Industrie de guerre — relance économique (1940)", 'gold'),
+    (1950, 200000, "🏢 Urbanisation accrue — croissance urbaine (1950)", 'teal'),
+    (1960, 250000, "🚀 Industrie aérospatiale — innovation continue (1960)", 'navy'),
+    (1970, 280000, "🏥 Développement des infrastructures — modernisation (1970)", 'black'),
+    (1980, 300000, "📈 Croissance démographique stable — expansion (1980)", 'darkred'),
+    (1990, 320000, "🏫 Expansion éducative — universités et recherche (1990)", 'brown'),
+    (2000, 344000, "🌆 Revitalisation urbaine — projets culturels (2000)", 'orange'),
+    (2010, 382000, "🚗 Croissance des transports — amélioration (2010)", 'green'),
+    (2020, 389000, "🦠 Pandémie COVID-19 — impact sanitaire (2020)", 'red'),
 ]
 
 # ============================================================

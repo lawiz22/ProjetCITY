@@ -444,6 +444,7 @@
             ttMarkerLayer.remove();
             markerLayer.addTo(map);
             if (ttPanel) ttPanel.style.display = 'none';
+            if (ttDetailsRow) ttDetailsRow.style.display = 'none';
             render();
         }
 
@@ -535,6 +536,200 @@
             if (ctrls.visibleCount) {
                 ctrls.visibleCount.textContent = pointsForYear.length + ' villes';
             }
+
+            updateTTDetails(pointsForYear, year);
+
+            // Auto-zoom: fit map to visible cities
+            var ttAutoZoom = document.getElementById('tt-autozoom');
+            if (ttAutoZoom && ttAutoZoom.checked && pointsForYear.length) {
+                var bounds = L.latLngBounds(pointsForYear.map(function (p) {
+                    return [p.city.lat, p.city.lng];
+                }));
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+            }
+        }
+
+        /* ── Time-travel detail panels ──────────────────────── */
+        var ttDetailsRow = document.getElementById('tt-details-row');
+        var ttCityTbody = document.getElementById('tt-city-tbody');
+        var ttAnnotationsList = document.getElementById('tt-annotations-list');
+
+        // Chroniques city filter
+        var ttChronoFilterBtn = document.getElementById('tt-chrono-filter-btn');
+        var ttChronoDropdown = document.getElementById('tt-chrono-dropdown');
+        var ttChronoDropdownList = document.getElementById('tt-chrono-dropdown-list');
+        var ttChronoAll = document.getElementById('tt-chrono-all');
+        var ttChronoNone = document.getElementById('tt-chrono-none');
+        var ttChronoChecked = null; // null = all checked (no filter active)
+        var ttLastAnnotations = [];
+
+        // Toggle dropdown
+        if (ttChronoFilterBtn) {
+            ttChronoFilterBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var vis = ttChronoDropdown.style.display === 'none';
+                ttChronoDropdown.style.display = vis ? '' : 'none';
+            });
+        }
+        // Close dropdown on click outside
+        document.addEventListener('click', function (e) {
+            if (ttChronoDropdown && ttChronoDropdown.style.display !== 'none') {
+                if (!ttChronoDropdown.contains(e.target) && e.target !== ttChronoFilterBtn) {
+                    ttChronoDropdown.style.display = 'none';
+                }
+            }
+        });
+        // Tout / Aucun
+        if (ttChronoAll) {
+            ttChronoAll.addEventListener('click', function () {
+                ttChronoChecked = null;
+                var cbs = ttChronoDropdownList.querySelectorAll('input[type="checkbox"]');
+                cbs.forEach(function (cb) { cb.checked = true; });
+                ttChronoFilterBtn.classList.remove('is-filtered');
+                renderChronoFiltered();
+            });
+        }
+        if (ttChronoNone) {
+            ttChronoNone.addEventListener('click', function () {
+                ttChronoChecked = new Set();
+                var cbs = ttChronoDropdownList.querySelectorAll('input[type="checkbox"]');
+                cbs.forEach(function (cb) { cb.checked = false; });
+                ttChronoFilterBtn.classList.add('is-filtered');
+                renderChronoFiltered();
+            });
+        }
+
+        function buildChronoChecklist(annotations) {
+            if (!ttChronoDropdownList) return;
+            var cities = [];
+            annotations.forEach(function (a) {
+                if (cities.indexOf(a.city) === -1) cities.push(a.city);
+            });
+            cities.sort(function (a, b) { return a.localeCompare(b); });
+
+            var html = '';
+            cities.forEach(function (city) {
+                var checked = !ttChronoChecked || ttChronoChecked.has(city);
+                html += '<label><input type="checkbox" value="' + city.replace(/"/g, '&quot;') + '"' +
+                    (checked ? ' checked' : '') + '> ' + city + '</label>';
+            });
+            ttChronoDropdownList.innerHTML = html;
+
+            // Listen for changes
+            ttChronoDropdownList.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+                cb.addEventListener('change', function () {
+                    // Build set from current checkboxes
+                    var allCbs = ttChronoDropdownList.querySelectorAll('input[type="checkbox"]');
+                    var allChecked = true;
+                    var checked = new Set();
+                    allCbs.forEach(function (c) {
+                        if (c.checked) checked.add(c.value);
+                        else allChecked = false;
+                    });
+                    ttChronoChecked = allChecked ? null : checked;
+                    ttChronoFilterBtn.classList.toggle('is-filtered', !allChecked);
+                    renderChronoFiltered();
+                });
+            });
+        }
+
+        function renderChronoFiltered() {
+            if (!ttAnnotationsList) return;
+            var filtered = ttLastAnnotations;
+            if (ttChronoChecked) {
+                filtered = ttLastAnnotations.filter(function (a) {
+                    return ttChronoChecked.has(a.city);
+                });
+            }
+            var aHtml = '';
+            filtered.forEach(function (a) {
+                aHtml += '<div class="tt-annotation-card">' +
+                    '<div class="tt-annotation-header">' +
+                    '<span class="tt-annotation-dot" style="background:' + a.color + '"></span>' +
+                    '<strong><a href="/cities/' + a.slug + '">' + a.city + '</a></strong>' +
+                    '<span class="tt-annotation-range">' + a.period.range + '</span>' +
+                    '</div>' +
+                    '<div class="tt-annotation-title">' + a.period.title + '</div>' +
+                    '<div class="tt-annotation-summary">' + a.period.summary + '</div>' +
+                    '</div>';
+            });
+            if (!filtered.length) {
+                aHtml = '<p class="tt-no-data">Aucune chronique disponible pour cette sélection.</p>';
+            }
+            ttAnnotationsList.innerHTML = aHtml;
+        }
+
+        function updateTTDetails(pointsForYear, year) {
+            if (!ttDetailsRow) return;
+            ttDetailsRow.style.display = pointsForYear.length ? '' : 'none';
+
+            // ── Block 1: City table ──
+            if (ttCityTbody) {
+                // Sort by population descending
+                var sorted = pointsForYear.slice().sort(function (a, b) { return b.pop - a.pop; });
+                var html = '';
+                sorted.forEach(function (p) {
+                    var density = '';
+                    if (p.city.area && p.city.area > 0) {
+                        density = Math.round(p.pop / p.city.area);
+                        density = fmt(density) + '/km²';
+                    } else if (p.city.density) {
+                        density = fmt(Math.round(p.city.density)) + '/km²';
+                    }
+                    html += '<tr>' +
+                        '<td><a href="/cities/' + p.slug + '">' + p.city.name + '</a></td>' +
+                        '<td>' + p.city.region + '</td>' +
+                        '<td class="num">' + fmt(p.pop) + '</td>' +
+                        '<td class="num">' + density + '</td>' +
+                        '<td class="num">' + year + '</td>' +
+                        '</tr>';
+                });
+                ttCityTbody.innerHTML = html;
+            }
+
+            // ── Block 2: Period annotations ──
+            if (ttAnnotationsList) {
+                // Collect the active period for each visible city at this year
+                var annotations = [];
+                pointsForYear.forEach(function (p) {
+                    if (!p.city.periods || !p.city.periods.length) return;
+                    // Find the period that covers the current year
+                    var activePeriod = null;
+                    for (var i = 0; i < p.city.periods.length; i++) {
+                        var pd = p.city.periods[i];
+                        var start = pd.start || 0;
+                        var end = pd.end || 9999;
+                        if (year >= start && year <= end) {
+                            activePeriod = pd;
+                            break;
+                        }
+                    }
+                    // Fallback: if year is after all periods, use the last one
+                    if (!activePeriod) {
+                        for (var j = p.city.periods.length - 1; j >= 0; j--) {
+                            if (p.city.periods[j].start && year >= p.city.periods[j].start) {
+                                activePeriod = p.city.periods[j];
+                                break;
+                            }
+                        }
+                    }
+                    if (activePeriod) {
+                        annotations.push({
+                            city: p.city.name,
+                            slug: p.slug,
+                            color: p.city.color,
+                            period: activePeriod
+                        });
+                    }
+                });
+
+                // Sort by city name
+                annotations.sort(function (a, b) { return a.city.localeCompare(b.city); });
+
+                ttLastAnnotations = annotations;
+                buildChronoChecklist(annotations);
+                renderChronoFiltered();
+            }
         }
 
         // Slider input handler
@@ -587,6 +782,34 @@
                 }
             });
         }
+
+        // Navigation arrows: step by N years
+        function ttStepYears(delta) {
+            if (!ttData || !ttData.years.length) return;
+            var curIdx = Number(ttSlider.value);
+            var curYear = ttData.years[curIdx];
+            var targetYear = curYear + delta;
+            // Find the nearest index for targetYear
+            var bestIdx = curIdx;
+            var bestDist = Infinity;
+            for (var i = 0; i < ttData.years.length; i++) {
+                var d = Math.abs(ttData.years[i] - targetYear);
+                if (d < bestDist) { bestDist = d; bestIdx = i; }
+            }
+            // Ensure we actually move at least 1 index in the right direction
+            if (bestIdx === curIdx && delta > 0 && curIdx < ttData.years.length - 1) bestIdx = curIdx + 1;
+            if (bestIdx === curIdx && delta < 0 && curIdx > 0) bestIdx = curIdx - 1;
+            ttSlider.value = bestIdx;
+            renderTimeTravelYear(ttData.years[bestIdx]);
+        }
+
+        ['tt-back10','tt-back1','tt-fwd1','tt-fwd10'].forEach(function (id) {
+            var btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', function () {
+                var deltas = {'tt-back10': -10, 'tt-back1': -1, 'tt-fwd1': 1, 'tt-fwd10': 10};
+                ttStepYears(deltas[id]);
+            });
+        });
 
         /* Layer pills */
         ctrls.themePills.forEach(function (pill) {
@@ -716,8 +939,32 @@
             });
         }
 
+        /* ── Geocode missing cities button ───────────────── */
+        var geocodeBtn = document.getElementById('map-geocode-btn');
+        if (geocodeBtn) {
+            geocodeBtn.addEventListener('click', function () {
+                geocodeBtn.disabled = true;
+                geocodeBtn.textContent = '⏳ Géocodage…';
+                fetch('/map/geocode-missing', { method: 'POST' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        var msg = data.geocoded + '/' + data.total + ' ville(s) géocodée(s).';
+                        if (data.geocoded > 0) {
+                            geocodeBtn.textContent = '✅ ' + msg;
+                            setTimeout(function () { window.location.reload(); }, 1500);
+                        } else {
+                            geocodeBtn.textContent = '⚠️ ' + msg;
+                        }
+                    })
+                    .catch(function () {
+                        geocodeBtn.textContent = '❌ Erreur';
+                    });
+            });
+        }
+
         /* ── focus on city from URL param (?focus=slug) ──── */
-        var focusSlug = new URLSearchParams(window.location.search).get('focus');
+        var urlParams = new URLSearchParams(window.location.search);
+        var focusSlug = urlParams.get('focus');
         if (focusSlug) {
             var focusPt = null;
             for (var i = 0; i < points.length; i++) {
@@ -729,6 +976,66 @@
                 map.setView([focusPt.lat, focusPt.lng], 12);
                 renderCalled = true;        // prevent render() from resetting
             }
+        }
+
+        /* ── auto-enter time-travel from URL (?tt=1&year=1900&country=Canada&region=Alberta) ── */
+        if (urlParams.get('tt') === '1') {
+            var ttUrlYear = Number(urlParams.get('year')) || null;
+            var ttUrlCountry = urlParams.get('country') || '';
+            var ttUrlRegion = urlParams.get('region') || '';
+
+            // Pre-set country filter
+            if (ttUrlCountry && ctrls.countrySelect) {
+                ctrls.countrySelect.value = ttUrlCountry;
+            }
+            // Pre-set region filter: uncheck all, check only the target
+            if (ttUrlRegion && ctrls.regionList) {
+                ctrls.regionList.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+                    cb.checked = (cb.value === ttUrlRegion);
+                });
+                updateRegionLabel(ctrls.regionToggle, ctrls.regionList);
+            }
+
+            // Activate time-travel pill
+            ctrls.themePills.forEach(function (p) { p.classList.remove('is-active'); });
+            var ttPill = document.querySelector('[data-theme="timetravel"]');
+            if (ttPill) ttPill.classList.add('is-active');
+
+            // Enter time-travel and jump to requested year
+            ttActive = true;
+            markerLayer.clearLayers();
+            markerLayer.remove();
+            ttMarkerLayer.addTo(map);
+            if (ttPanel) ttPanel.style.display = '';
+
+            fetchTimeTravelData(function (d) {
+                if (!d.years.length) return;
+                ttSlider.min = 0;
+                ttSlider.max = d.years.length - 1;
+                ttMinYear.textContent = d.years[0];
+                ttMaxYear.textContent = d.years[d.years.length - 1];
+
+                // Find closest year index
+                var targetIdx = d.years.length - 1;
+                if (ttUrlYear) {
+                    var bestDist = Infinity;
+                    for (var i = 0; i < d.years.length; i++) {
+                        var dist = Math.abs(d.years[i] - ttUrlYear);
+                        if (dist < bestDist) { bestDist = dist; targetIdx = i; }
+                    }
+                }
+                ttSlider.value = targetIdx;
+                renderTimeTravelYear(d.years[targetIdx]);
+
+                // Zoom to fit visible markers
+                var bounds = [];
+                ttMarkerLayer.eachLayer(function (layer) {
+                    if (layer.getLatLng) bounds.push(layer.getLatLng());
+                });
+                if (bounds.length) {
+                    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 8 });
+                }
+            });
         }
 
         /* ── zoom on search match ───────────────────────────── */

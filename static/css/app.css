@@ -2851,26 +2851,26 @@ dt {
 
 /* ── Time-travel pill ─────────────────────────────────────── */
 .map-layer-pill--time {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.12));
-    border-color: rgba(139, 92, 246, 0.3);
-    color: #7c3aed;
+    background: linear-gradient(135deg, rgba(15, 139, 141, 0.12), rgba(38, 70, 83, 0.10));
+    border-color: rgba(15, 139, 141, 0.3);
+    color: var(--accent-2);
 }
 .map-layer-pill--time:hover {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(236, 72, 153, 0.20));
-    color: #6d28d9;
+    background: linear-gradient(135deg, rgba(15, 139, 141, 0.22), rgba(38, 70, 83, 0.16));
+    color: #0a6e70;
 }
 .map-layer-pill--time.is-active {
-    background: linear-gradient(135deg, #7c3aed, #db2777);
+    background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
     color: white;
-    border-color: #7c3aed;
+    border-color: var(--accent-2);
 }
 
 /* ── Time-travel panel ────────────────────────────────────── */
 .map-timetravel-panel {
     margin-top: 12px;
     padding: 18px 24px;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(236, 72, 153, 0.04));
-    border: 1px solid rgba(139, 92, 246, 0.18);
+    background: linear-gradient(135deg, rgba(15, 139, 141, 0.06), rgba(38, 70, 83, 0.04));
+    border: 1px solid rgba(15, 139, 141, 0.18);
     border-radius: 16px;
 }
 
@@ -2896,7 +2896,7 @@ dt {
     font-family: "Space Grotesk", sans-serif;
     font-size: 1.8rem;
     font-weight: 800;
-    color: #7c3aed;
+    color: var(--accent-2);
     margin-left: auto;
     min-width: 80px;
     text-align: center;
@@ -2933,7 +2933,7 @@ dt {
     appearance: none;
     height: 10px;
     border-radius: 5px;
-    background: linear-gradient(90deg, #c4b5fd, #7c3aed, #db2777);
+    background: linear-gradient(90deg, #a7d8d9, #0f8b8d, #264653);
     outline: none;
     cursor: pointer;
 }
@@ -2945,15 +2945,15 @@ dt {
     height: 28px;
     border-radius: 50%;
     background: white;
-    border: 3px solid #7c3aed;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+    border: 3px solid var(--accent-2);
+    box-shadow: 0 2px 8px rgba(15, 139, 141, 0.35);
     cursor: grab;
     transition: transform 0.12s, box-shadow 0.12s;
 }
 
 .map-tt-slider::-webkit-slider-thumb:hover {
     transform: scale(1.15);
-    box-shadow: 0 3px 12px rgba(124, 58, 237, 0.5);
+    box-shadow: 0 3px 12px rgba(15, 139, 141, 0.5);
 }
 
 .map-tt-slider::-webkit-slider-thumb:active {
@@ -2966,49 +2966,358 @@ dt {
     height: 28px;
     border-radius: 50%;
     background: white;
-    border: 3px solid #7c3aed;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+    border: 3px solid var(--accent-2);
+    box-shadow: 0 2px 8px rgba(15, 139, 141, 0.35);
     cursor: grab;
 }
 
 .map-tt-slider::-moz-range-track {
     height: 10px;
     border-radius: 5px;
-    background: linear-gradient(90deg, #c4b5fd, #7c3aed, #db2777);
+    background: linear-gradient(90deg, #a7d8d9, #0f8b8d, #264653);
 }
 
 /* ── Time-travel controls ─────────────────────────────────── */
 .map-tt-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
 }
 
 .map-tt-play {
-    padding: 6px 16px;
-    border-radius: 999px;
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    background: rgba(139, 92, 246, 0.1);
-    font-size: 0.82rem;
+    padding: 5px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(15, 139, 141, 0.35);
+    background: var(--accent-2);
+    font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
-    color: #7c3aed;
-    transition: all 0.18s;
+    color: #fff;
+    transition: all 0.15s;
     width: auto;
 }
 
 .map-tt-play:hover {
-    background: rgba(139, 92, 246, 0.2);
+    background: #0a6e70;
 }
 
 .map-tt-speed {
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--panel-strong);
+    font-size: 0.72rem;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.tt-nav-btn {
     padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--panel-strong);
+    font-size: 0.82rem;
+    cursor: pointer;
+    color: var(--accent-2);
+    transition: all 0.15s;
+    line-height: 1;
+}
+.tt-nav-btn:hover {
+    background: rgba(15, 139, 141, 0.1);
+    border-color: rgba(15, 139, 141, 0.3);
+}
+
+.tt-autozoom-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+}
+.tt-autozoom-label input[type="checkbox"] {
+    accent-color: var(--accent-2);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
+/* ── Time-travel detail panels ──────────────────────────── */
+.tt-details-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+}
+.tt-detail-block {
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 12px;
+    padding: 14px;
+    min-height: 200px;
+    max-height: 420px;
+    display: flex;
+    flex-direction: column;
+}
+.tt-cities-block {
+    flex: 0 0 35%;
+    max-width: 35%;
+}
+.tt-annotations-block {
+    flex: 1;
+}
+.tt-detail-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: var(--ink);
+}
+.tt-table-scroll {
+    overflow-y: auto;
+    flex: 1;
+}
+.tt-city-table {
+    font-size: 0.82rem;
+    width: 100%;
+}
+.tt-city-table th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-card, #fff);
+    z-index: 1;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-secondary, #888);
+    padding: 4px 8px;
+    border-bottom: 2px solid var(--border, #e5e5e5);
+}
+.tt-city-table td {
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border-light, #f0f0f0);
+    white-space: nowrap;
+}
+.tt-city-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.tt-city-table a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+.tt-city-table a:hover {
+    text-decoration: underline;
+}
+
+/* Annotations block */
+.tt-chroniques-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.tt-chroniques-header .tt-detail-title {
+    margin: 0;
+}
+.tt-chrono-filter {
+    position: relative;
+}
+.tt-chrono-filter-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--panel-strong);
+    font-size: 0.74rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+}
+.tt-chrono-filter-btn:hover {
+    border-color: rgba(15, 139, 141, 0.3);
+    color: var(--accent-2);
+}
+.tt-chrono-filter-btn.is-filtered {
+    border-color: var(--accent-2);
+    color: var(--accent-2);
+    background: rgba(15, 139, 141, 0.08);
+}
+.tt-chrono-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    min-width: 220px;
+    max-height: 320px;
+    background: var(--panel-strong, #fff);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 100;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.tt-chrono-dropdown-actions {
+    display: flex;
+    gap: 6px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+}
+.tt-chrono-dropdown-actions button {
+    flex: 1;
+    padding: 3px 0;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.12s;
+}
+.tt-chrono-dropdown-actions button:hover {
+    color: var(--accent-2);
+    border-color: rgba(15, 139, 141, 0.3);
+}
+.tt-chrono-dropdown-list {
+    overflow-y: auto;
+    flex: 1;
+    max-height: 260px;
+}
+.tt-chrono-dropdown-list label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
     font-size: 0.78rem;
     cursor: pointer;
     color: var(--ink);
+    transition: background 0.1s;
+}
+.tt-chrono-dropdown-list label:hover {
+    background: rgba(15, 139, 141, 0.06);
+}
+.tt-chrono-dropdown-list input[type="checkbox"] {
+    accent-color: var(--accent-2);
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+.tt-annotations-scroll {
+    overflow-y: auto;
+    flex: 1;
+}
+.tt-annotation-card {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-light, #f0f0f0);
+}
+.tt-annotation-card:last-child {
+    border-bottom: none;
+}
+.tt-annotation-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.tt-annotation-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.tt-annotation-header a {
+    color: var(--ink);
+    text-decoration: none;
+}
+.tt-annotation-header a:hover {
+    text-decoration: underline;
+}
+.tt-annotation-range {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #888);
+    margin-left: auto;
+    white-space: nowrap;
+}
+.tt-annotation-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+}
+.tt-annotation-summary {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-secondary, #666);
+}
+.tt-no-data {
+    color: var(--text-secondary, #888);
+    font-size: 0.85rem;
+    font-style: italic;
+    text-align: center;
+    padding: 30px 10px;
+}
+
+@media (max-width: 900px) {
+    .tt-details-row {
+        flex-direction: column;
+    }
+}
+
+/* ── Geocode button ───────────────────────────────────────── */
+.map-geocode-btn {
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.08);
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #dc2626;
+    transition: all 0.18s;
+    white-space: nowrap;
+    width: auto;
+}
+.map-geocode-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+.map-geocode-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+.map-missing-warn {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* ── Flag icons ── */
+.flag-icon {
+    width: 32px;
+    height: auto;
+    vertical-align: middle;
+    margin-right: 5px;
+    border-radius: 2px;
+    box-shadow: 0 0 1px rgba(0,0,0,.25);
+}
+
+/* ── Ref-pop map button ── */
+.ref-map-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--bg-card, #f8f8f8);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background 0.15s;
+}
+.ref-map-btn:hover {
+    background: var(--border, #e0e0e0);
 }
 
 .timeline-header,
@@ -4257,24 +4566,27 @@ td {
 }
 
 /* ── Table column sizing & readability ── */
+.ref-table {
+    table-layout: fixed;
+    width: 100%;
+}
 .ref-table .num {
     text-align: right;
     font-variant-numeric: tabular-nums;
 }
 .ref-table .col-year { width: 70px; }
-.ref-table .col-pop  { width: 180px; }
-.ref-table .col-pct  { width: 100px; }
-.ref-table .col-bar  { width: 140px; }
-.ref-table .col-region { width: auto; }
-.ref-table .col-cities { width: auto; }
+.ref-table .col-pop  { width: 110px; }
+.ref-table .col-pct  { width: 90px; }
+.ref-table .col-bar  { width: 110px; }
+.ref-table .col-region { white-space: nowrap; width: 160px; }
+.ref-table .col-country { white-space: nowrap; width: 110px; }
+.ref-table .col-cities { width: 50px; text-align: center; }
+.ref-table .col-map { width: 45px; text-align: center; }
 
 .ref-table .cell-cities {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-secondary, #666);
-    max-width: 320px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-align: center;
 }
 
 .ref-table .cell-year {
@@ -4282,9 +4594,9 @@ td {
     color: var(--accent);
 }
 .ref-table .cell-pop {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     letter-spacing: 0.3px;
-    padding-right: 14px;
+    padding-right: 8px;
 }
 .ref-table .cell-pop-db {
     font-weight: 700;

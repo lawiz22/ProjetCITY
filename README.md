@@ -2,7 +2,7 @@
 
 Urban Intelligence Analytic Platform — plateforme locale d'analyse urbaine pour villes canadiennes et américaines.
 
-210+ villes | 13 provinces/territoires | 50 états | Base SQLite en étoile | Flask + Chart.js + Leaflet | IA générative Mammouth
+310+ villes | 13 provinces/territoires | 51 états | Base SQLite en étoile | Flask + Chart.js + Leaflet | IA générative Mammouth | 66 drapeaux
 
 ---
 
@@ -22,7 +22,7 @@ python run_web.py
 ## Pages principales
 
 ### Dashboard (`/`)
-- Indicateurs clés : nombre de villes, couverture temporelle, croissance moyenne
+- Indicateurs clés : nombre de villes (avec drapeaux 🇨🇦🇺🇸), couverture temporelle, croissance moyenne
 - Palmarès croissance / déclin, pics historiques
 - Export PDF du dashboard complet
 
@@ -54,6 +54,10 @@ python run_web.py
 - Filtres dynamiques (pays, région, population, recherche texte)
 - Sauvegarde de la vue par défaut (zoom, position, fond de carte, couche) via localStorage
 - Focus automatique sur une ville via paramètre URL `?focus=<slug>`
+- **Voyage dans le temps** : slider temporel avec lecture automatique (lent/normal/rapide)
+  - Bloc « Villes affichées » : tableau trié par population avec densité calculée dynamiquement
+  - Bloc « Chroniques des villes » : périodes historiques actives par ville, mises à jour en temps réel
+  - Entrée directe via URL `?tt=1&year=YEAR&country=COUNTRY&region=REGION` avec zoom automatique
 
 ### SQL Lab (`/sql-lab`)
 - Requêtes SQL directes sur la base SQLite (lecture par défaut)
@@ -74,6 +78,13 @@ python run_web.py
 - Tableau des villes de référence manquantes avec bouton « Générer » vers l'AI Lab
 - Bouton « Ajouter 20 villes » par région pour enrichir la base de référence via IA (prompts progressifs)
 - Onglets Canada / États-Unis avec recherche par région
+
+### Population de référence (`/reference-population`)
+- Couverture nationale et régionale (pop. de référence vs pop. dans la BD)
+- Filtres par pays, région/état, années (multi-select)
+- Drapeaux pour chaque pays et région/état (66 drapeaux : 2 pays + 13 provinces CA + 51 états US)
+- Bouton 🗺️ lien direct vers la carte en mode voyage dans le temps
+- Barres de progression colorées (vert/orange/rouge)
 
 ### Couverture des données (`/coverage`)
 - Villes sans fiche complète, sans photos, sans périodes détaillées
@@ -143,6 +154,7 @@ static/
      map.js, map_static.js,            SQL Lab, tables, thème)
      sql_lab.js, tables.js, ui.js
   images/cities/                    → photos HD par ville
+  images/flags/                     → drapeaux (66 : pays + provinces/états)
 villestats.py                       → données source (séries historiques)
 villestats_v2.py                    → données source (format simplifié)
 ```
@@ -218,6 +230,9 @@ python scripts\repair_city_dimension.py
 
 # Télécharger les photos Wikipedia
 python scripts\fetch_city_photos.py
+
+# Télécharger les drapeaux (flagcdn.com + Wikimedia)
+python scripts\download_flags.py
 ```
 
 ---
