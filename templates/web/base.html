@@ -6,12 +6,13 @@
     <title>{{ page_title }} | Central City Scrutinizer</title>
     <script>
         document.documentElement.dataset.theme = localStorage.getItem('projetcity-theme') || 'light';
+        if (localStorage.getItem('projetcity-sidebar') === 'collapsed') document.documentElement.classList.add('sidebar-pre-collapsed');
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
     {% block head_extra %}{% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=25">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=34">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0"></script>
@@ -21,7 +22,8 @@
 </head>
 <body>
     <div class="site-shell">
-        <aside class="sidebar sidebar-nav">
+        <button type="button" class="sidebar-toggle" id="sidebar-toggle" title="Réduire/Agrandir le menu">◀</button>
+        <aside class="sidebar sidebar-nav" id="sidebar">
             <div class="sidebar-nav-top">
                 <a class="brand" href="{{ url_for('web.dashboard') }}">
                     <img src="{{ url_for('static', filename='images/ccs-logo.png') }}" alt="Central City Scrutinizer" class="brand-logo">

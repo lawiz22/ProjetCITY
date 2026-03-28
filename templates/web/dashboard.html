@@ -5,6 +5,36 @@
 {% endblock %}
 
 {% block content %}
+<section class="dash-filters">
+    <form method="get" action="{{ url_for('web.dashboard') }}" class="dash-filter-form" id="dash-filter-form">
+        <select name="country" onchange="this.form.submit()">
+            <option value="">Tous les pays</option>
+            {% for c in filter_options.countries %}
+            <option value="{{ c }}" {% if filters.country == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+        <div class="dir-filter-region-wrap">
+            <button type="button" class="dir-region-toggle" id="dash-region-toggle">
+                {% if filters.region|length == 0 %}Toutes les régions{% elif filters.region|length == 1 %}{{ filters.region[0] }}{% else %}{{ filters.region|length }} régions{% endif %} <span class="dir-region-arrow">▾</span>
+            </button>
+            <div class="dir-region-dropdown" id="dash-region-dropdown">
+                <div class="dir-region-actions">
+                    <button type="button" data-dash-region-action="all">Tout cocher</button>
+                    <button type="button" data-dash-region-action="none">Tout décocher</button>
+                </div>
+                <div class="dir-region-list" id="dash-region-list">
+                    {% for r in filter_options.regions %}
+                    <label><input type="checkbox" name="region" value="{{ r }}" {% if not filters.region or r in filters.region %}checked{% endif %}> {{ r }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% if filters.country or filters.region %}
+        <a href="{{ url_for('web.dashboard') }}" class="dash-reset" title="Réinitialiser">✕</a>
+        {% endif %}
+    </form>
+</section>
+
 <section class="metrics-grid metrics-grid-dash">
     <article class="metric-card">
         <span>Villes</span>
@@ -32,38 +62,59 @@
 </section>
 
 <section class="panel-grid panel-grid-2">
-    <article class="panel tall-panel">
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Évolution de la population agrégée</h2>
+            <div class="chart-view-tabs">
+                <button class="chart-view-tab active" data-swap-target="pop-country">Par pays</button>
+                <button class="chart-view-tab" data-swap-target="pop-region">Par région</button>
+            </div>
+        </div>
+        <div class="chart-block chart-swap-block" id="pop-country">
+            <div class="chart-frame">
+                <canvas class="chart-canvas" data-chart='{{ chart_payload.popEvolution | tojson }}' data-chart-type="line" data-chart-filename="dashboard-pop-evolution"></canvas>
+            </div>
+        </div>
+        <div class="chart-block chart-swap-block" id="pop-region" style="display:none">
+            <div class="chart-frame">
+                <canvas class="chart-canvas" data-chart-lazy='{{ chart_payload.popEvolutionRegion | tojson }}' data-chart-type="line" data-chart-filename="dashboard-pop-evolution-region"></canvas>
+            </div>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Nombre de villes par décennie</h2>
+            <div class="chart-view-tabs">
+                <button class="chart-view-tab active" data-swap-target="cnt-country">Par pays</button>
+                <button class="chart-view-tab" data-swap-target="cnt-region">Par région</button>
+            </div>
+        </div>
+        <div class="chart-block chart-swap-block" id="cnt-country">
+            <div class="chart-frame">
+                <canvas class="chart-canvas" data-chart='{{ chart_payload.cityCount | tojson }}' data-chart-type="line" data-chart-filename="dashboard-city-count"></canvas>
+            </div>
+        </div>
+        <div class="chart-block chart-swap-block" id="cnt-region" style="display:none">
+            <div class="chart-frame">
+                <canvas class="chart-canvas" data-chart-lazy='{{ chart_payload.cityCountRegion | tojson }}' data-chart-type="line" data-chart-filename="dashboard-city-count-region"></canvas>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="panel-grid panel-grid-1">
+    <article class="panel">
         <div class="panel-head">
             <h2>Top populations récentes</h2>
             <a href="{{ url_for('web.city_directory', country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">Voir les villes</a>
         </div>
         <div class="chart-block">
             <div class="chart-toolbar">
-                <span class="helper-text">Export PNG disponible pour les graphiques principaux.</span>
                 <button type="button" class="secondary-button chart-export" data-chart-export>Exporter PNG</button>
             </div>
             <div class="chart-frame">
                 <canvas class="chart-canvas" data-chart='{{ chart_payload.topPopulations | tojson }}' data-chart-type="bar" data-chart-filename="dashboard-top-populations"></canvas>
-            </div>
-        </div>
-    </article>
-
-    <article class="panel insight-panel">
-        <div class="panel-head">
-            <h2>Répartition de la population</h2>
-        </div>
-        <div class="pie-tabs">
-            <button class="pie-tab active" data-pie-target="pie-country">Par pays</button>
-            <button class="pie-tab" data-pie-target="pie-region">Par région</button>
-        </div>
-        <div class="chart-block" id="pie-country">
-            <div class="chart-frame chart-frame-pie">
-                <canvas class="chart-canvas" data-chart='{{ chart_payload.popByCountry | tojson }}' data-chart-type="doughnut" data-chart-filename="dashboard-pop-par-pays"></canvas>
-            </div>
-        </div>
-        <div class="chart-block" id="pie-region" style="display:none">
-            <div class="chart-frame chart-frame-pie">
-                <canvas class="chart-canvas" data-chart='{{ chart_payload.popByRegion | tojson }}' data-chart-type="doughnut" data-chart-filename="dashboard-pop-par-region"></canvas>
             </div>
         </div>
     </article>
@@ -79,9 +130,9 @@
             <div class="data-row">
                 <div>
                     <strong><span style="color:#22c55e;">▲</span> {{ row.city_name }}</strong>
-                    <span>{{ row.country }} · {{ row.region }} · {{ row.decade }}</span>
+                    <span>{{ row.country }} · {{ row.region }} · En croissance depuis {{ row.growth_since }}</span>
                 </div>
-                <strong style="color:#22c55e;">{{ row.growth_pct }}%</strong>
+                <strong style="color:#22c55e;">×{{ row.growth_factor }}</strong>
             </div>
             {% endfor %}
         </div>
@@ -140,15 +191,60 @@
 </section>
 
 <script>
-document.querySelectorAll('.pie-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.pie-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const target = btn.dataset.pieTarget;
-        document.querySelectorAll('.insight-panel .chart-block').forEach(b => {
-            b.style.display = b.id === target ? '' : 'none';
+// Region dropdown multi-select
+(function(){
+    const btn = document.getElementById('dash-region-toggle');
+    const dd  = document.getElementById('dash-region-dropdown');
+    const list = document.getElementById('dash-region-list');
+    const form = document.getElementById('dash-filter-form');
+    if(!btn||!dd||!list||!form) return;
+
+    btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.toggle('is-open'); });
+    document.addEventListener('click', e => {
+        if(!dd.contains(e.target) && e.target !== btn) dd.classList.remove('is-open');
+    });
+
+    function updateLabel(){
+        const total = list.querySelectorAll('input[type="checkbox"]').length;
+        const checked = list.querySelectorAll('input[type="checkbox"]:checked').length;
+        btn.firstChild.textContent = (checked === total || checked === 0) ? 'Toutes les régions ' : checked + ' région' + (checked > 1 ? 's' : '') + ' ';
+    }
+
+    list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => { updateLabel(); form.submit(); });
+    });
+
+    document.querySelectorAll('[data-dash-region-action]').forEach(ab => {
+        ab.addEventListener('click', () => {
+            const check = ab.dataset.dashRegionAction === 'all';
+            list.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = check; });
+            updateLabel();
+            form.submit();
         });
+    });
+})();
+// Chart view tabs (par pays / par région)
+document.querySelectorAll('.chart-view-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const panel = btn.closest('.panel');
+        panel.querySelectorAll('.chart-view-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.swapTarget;
+        panel.querySelectorAll('.chart-swap-block').forEach(block => {
+            block.style.display = block.id === target ? '' : 'none';
+        });
+        const shown = panel.querySelector('#' + target);
+        if (shown) {
+            const lazy = shown.querySelector('[data-chart-lazy]');
+            if (lazy) {
+                lazy.dataset.chart = lazy.dataset.chartLazy;
+                delete lazy.dataset.chartLazy;
+                lazy.removeAttribute('data-chart-lazy');
+                if (typeof mountChart === 'function') mountChart(lazy);
+            }
+        }
     });
 });
 </script>
+
 {% endblock %}

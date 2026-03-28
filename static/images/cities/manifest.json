@@ -1930,5 +1930,179 @@
     "source_page": "https://en.wikipedia.org/wiki/Rochester%2C_Minnesota",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Downtown_Rochester%2C_MN-Peace_Plaza.jpg/1280px-Downtown_Rochester%2C_MN-Peace_Plaza.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "dauphin-manitoba": {
+    "filename": "dauphin-manitoba.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Dauphin%2C_Manitoba",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Ukrainian_Catholic_Church_of_the_Resurrection%2C_Dauphin.P5290096.jpg/1280px-Ukrainian_Catholic_Church_of_the_Resurrection%2C_Dauphin.P5290096.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "swift-current-saskatchewan": {
+    "filename": "swift-current-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Swift_Current",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Citysign1.jpg/1280px-Citysign1.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "north-battleford-saskatchewan": {
+    "filename": "north-battleford-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/North_Battleford",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Downtown_North_Battleford%2C_SK.jpg/1280px-Downtown_North_Battleford%2C_SK.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "warman-saskatchewan": {
+    "filename": "warman-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Warman%2C_Saskatchewan",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Municipal_Office_Warman_Saskatchewan.jpg/1280px-Municipal_Office_Warman_Saskatchewan.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "martensville-saskatchewan": {
+    "filename": "martensville-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Martensville",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Centennial_Drive_Martensville_Saskatchewan.jpg/1280px-Centennial_Drive_Martensville_Saskatchewan.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "estevan-saskatchewan": {
+    "filename": "estevan-saskatchewan.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Estevan",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/War_of_the_worlds_%284956917528%29.jpg/1280px-War_of_the_worlds_%284956917528%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "riverview-new-brunswick": {
+    "filename": "riverview-new-brunswick.png",
+    "source_page": "https://en.wikipedia.org/wiki/Riverview%2C_New_Brunswick",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Riverview%2C_New_Brunswick_Location.png/1280px-Riverview%2C_New_Brunswick_Location.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "quispamsis-new-brunswick": {
+    "filename": "quispamsis-new-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Quispamsis",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Quispamsis_NB.JPG/1280px-Quispamsis_NB.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "miramichi-new-brunswick": {
+    "filename": "miramichi-new-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Miramichi%2C_New_Brunswick",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Miramichi%2C_New_Brunswick%2C_Canada.jpg/1280px-Miramichi%2C_New_Brunswick%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "edmundston-new-brunswick": {
+    "filename": "edmundston-new-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Edmundston",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Edmundston_NB_skyline.JPG/1280px-Edmundston_NB_skyline.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "bathurst-new-brunswick": {
+    "filename": "bathurst-new-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Bathurst%2C_New_Brunswick",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bathurst%2C_New_Brunswick%2C_Canada_skyline.jpg/1280px-Bathurst%2C_New_Brunswick%2C_Canada_skyline.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "oromocto-new-brunswick": {
+    "filename": "oromocto-new-brunswick.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Oromocto",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Still_Waters_Run_Deep._%288103767811%29.jpg/1280px-Still_Waters_Run_Deep._%288103767811%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "stratford-prince-edward-island": {
+    "filename": "stratford-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Stratford%2C_Prince_Edward_Island",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Stratford%2C_Prince_Edward_Island%2C_Canada.jpg/1280px-Stratford%2C_Prince_Edward_Island%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "souris-prince-edward-island": {
+    "filename": "souris-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Souris%2C_Prince_Edward_Island",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Souris%2C_Prince_Edward_Island%2C_Canada.jpg/1280px-Souris%2C_Prince_Edward_Island%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "kensington-prince-edward-island": {
+    "filename": "kensington-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Kensington",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Kensington_High_Street_2_Londres.jpg/1280px-Kensington_High_Street_2_Londres.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "borden-carleton-prince-edward-island": {
+    "filename": "borden-carleton-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Borden-Carleton",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Confederation_Bridge_-_panoramio_%281%29.jpg/1280px-Confederation_Bridge_-_panoramio_%281%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "georgetown-prince-edward-island": {
+    "filename": "georgetown-prince-edward-island.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Georgetown%2C_Prince_Edward_Island",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Georgetown%2C_Prince_Edward_Island%2C_Canada.jpg/1280px-Georgetown%2C_Prince_Edward_Island%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "o-leary-prince-edward-island": {
+    "filename": "o-leary-prince-edward-island.png",
+    "source_page": "https://en.wikipedia.org/wiki/O'Leary",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/O%27Leary_CoA.png/1280px-O%27Leary_CoA.png",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "cambridge-bay-nunavut": {
+    "filename": "cambridge-bay-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Cambridge_Bay",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Cambridge_Bay%2C_Nunavut_aerial_view.jpg/1280px-Cambridge_Bay%2C_Nunavut_aerial_view.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "pangnirtung-nunavut": {
+    "filename": "pangnirtung-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Pangnirtung",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Pangnirtung-uptown.jpg/1280px-Pangnirtung-uptown.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "igloolik-nunavut": {
+    "filename": "igloolik-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Igloolik",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Igloolik_Town.jpg/1280px-Igloolik_Town.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "kugluktuk-nunavut": {
+    "filename": "kugluktuk-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Kugluktuk",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Kugluktuk.jpg/1280px-Kugluktuk.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "gjoa-haven-nunavut": {
+    "filename": "gjoa-haven-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Gjoa_Haven",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Gjoa.JPG/1280px-Gjoa.JPG",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "taloyoak-nunavut": {
+    "filename": "taloyoak-nunavut.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Taloyoak",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Taloyoak_01.jpg/1280px-Taloyoak_01.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "dartmouth-nova-scotia": {
+    "filename": "dartmouth-nova-scotia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Dartmouth%2C_Nova_Scotia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Dartmouth%2C_Nova_Scotia%2C_Canada.jpg/1280px-Dartmouth%2C_Nova_Scotia%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "conception-bay-south-newfoundland-and-labrador": {
+    "filename": "conception-bay-south-newfoundland-and-labrador.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Conception_Bay_South",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/NLA_Topsail_tango7174.jpg/1280px-NLA_Topsail_tango7174.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "new-glasgow-nova-scotia": {
+    "filename": "new-glasgow-nova-scotia.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/New_Glasgow%2C_Nova_Scotia",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/New_Glasgow%2C_Nova_Scotia%2C_Canada.jpg/1280px-New_Glasgow%2C_Nova_Scotia%2C_Canada.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "behchoko-northwest-territories": {
+    "filename": "behchoko-northwest-territories.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Behchok%C7%AB%CC%80",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Raeedzo_greatslavelake.jpg/1280px-Raeedzo_greatslavelake.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "paradise-newfoundland-and-labrador": {
+    "filename": "paradise-newfoundland-and-labrador.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Paradise",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Angelico%2C_giudizio_universale_01.jpg/1280px-Angelico%2C_giudizio_universale_01.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

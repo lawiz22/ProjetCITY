@@ -289,7 +289,7 @@ def build_dashboard_pdf(filters: dict[str, Any], metrics: dict[str, Any], growth
     story.append(Spacer(1, 12))
 
     story.append(Paragraph("Top croissances", styles["SectionHeading"]))
-    story.append(_metric_table([["Ville", "Décennie / croissance"]] + [[row["city_name"], f"{row['decade']} - {row['growth_pct']}%"] for row in growth_leaders[:10]]))
+    story.append(_metric_table([["Ville", "Croissance"]] + [[row["city_name"], f"En croissance depuis {row['growth_since']} — \u00d7{row['growth_factor']}"] for row in growth_leaders[:10]]))
     story.append(Spacer(1, 12))
 
     story.append(Paragraph("Villes au pic", styles["SectionHeading"]))

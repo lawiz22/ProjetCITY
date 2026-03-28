@@ -28,10 +28,12 @@ web = Blueprint("web", __name__)
 def dashboard() -> str:
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
+    filter_options = service.get_filter_options()
     return render_template(
         "web/dashboard.html",
         page_title="Dashboard",
         filters=filters,
+        filter_options=filter_options,
         metrics=service.get_dashboard_metrics(filters),
         growth_leaders=service.get_growth_leaders(filters),
         decline_leaders=service.get_decline_leader_cities(filters),

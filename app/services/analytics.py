@@ -157,12 +157,13 @@ class AnalyticsService:
             return []
         return unique_items
 
-    def normalize_filters(self, args: Any) -> dict[str, str | None]:
+    def normalize_filters(self, args: Any) -> dict[str, Any]:
         country = self._clean_value(args.get("country"))
-        region = self._clean_value(args.get("region"))
+        raw_regions = args.getlist("region") if hasattr(args, "getlist") else []
+        regions = [r for r in (self._clean_value(v) for v in raw_regions) if r]
         search = self._clean_value(args.get("search"))
         period = self._clean_value(args.get("period"))
-        return {"country": country, "region": region, "search": search, "period": period}
+        return {"country": country, "region": regions, "search": search, "period": period}
 
     def normalize_slug_list(self, values: Iterable[str]) -> list[str]:
         cleaned: list[str] = []
@@ -239,18 +240,63 @@ class AnalyticsService:
         }
 
     def get_growth_leaders(self, filters: dict[str, str | None]) -> list[dict[str, Any]]:
+        """Cities with the longest current consecutive growth streaks."""
         connection = get_db()
+        filtered_analysis_sql = self._filtered_analysis_cte(filters)
         rows = connection.execute(
             f"""
-            SELECT growth.city_name, growth.decade, growth.absolute_growth, growth.growth_pct, growth.country, city.region
-            FROM vw_city_growth_by_decade growth
-            INNER JOIN dim_city city
-                ON city.city_id = growth.city_id
-            WHERE growth_pct IS NOT NULL {self._growth_filter_sql(filters)}
-            ORDER BY growth_pct DESC, absolute_growth DESC
+            WITH {filtered_analysis_sql},
+            pop_data AS (
+                SELECT city_id, city_name, city_slug, country, year, population
+                FROM filtered_analysis
+            ),
+            with_prev AS (
+                SELECT *,
+                    LAG(population) OVER (PARTITION BY city_id ORDER BY year) AS prev_pop
+                FROM pop_data
+            ),
+            non_growth AS (
+                SELECT city_id, year
+                FROM with_prev
+                WHERE prev_pop IS NOT NULL AND population <= prev_pop
+            ),
+            latest AS (
+                SELECT city_id, MAX(year) AS latest_year
+                FROM pop_data GROUP BY city_id
+            ),
+            last_stop AS (
+                SELECT city_id, MAX(year) AS stop_year
+                FROM non_growth GROUP BY city_id
+            ),
+            streaks AS (
+                SELECT l.city_id, l.latest_year,
+                    COALESCE(ls.stop_year,
+                        (SELECT MIN(year) FROM pop_data pd WHERE pd.city_id = l.city_id)
+                    ) AS growth_since
+                FROM latest l
+                LEFT JOIN last_stop ls ON ls.city_id = l.city_id
+                WHERE l.latest_year > COALESCE(ls.stop_year, 0)
+            )
+            SELECT
+                pd_start.city_name,
+                pd_start.country,
+                city.region,
+                s.growth_since,
+                pd_start.population AS start_population,
+                pd_end.population AS current_population,
+                ROUND(CAST(pd_end.population AS REAL) / pd_start.population, 1) AS growth_factor,
+                ROUND(((pd_end.population - pd_start.population) * 100.0) / pd_start.population, 1) AS growth_pct
+            FROM streaks s
+            JOIN pop_data pd_start ON pd_start.city_id = s.city_id AND pd_start.year = s.growth_since
+            JOIN pop_data pd_end ON pd_end.city_id = s.city_id AND pd_end.year = s.latest_year
+            JOIN dim_city city ON city.city_id = s.city_id
+            WHERE pd_start.population >= 1000
+              AND pd_end.population > pd_start.population
+              AND s.latest_year - s.growth_since >= 20
+            ORDER BY growth_pct DESC
             LIMIT 8
             """,
-            self._growth_filter_params(filters),
+            self._analysis_filter_params(filters),
         ).fetchall()
         return [dict(row) for row in rows]
 
@@ -335,7 +381,7 @@ class AnalyticsService:
                 FROM filtered_analysis
                 GROUP BY city_slug
             )
-            SELECT v.city_name, v.city_slug, v.city_color, v.population
+            SELECT v.city_name, v.city_slug, v.city_color, v.population, v.country, v.region
             FROM filtered_analysis v
             INNER JOIN latest_year ly
                 ON ly.city_slug = v.city_slug
@@ -346,6 +392,18 @@ class AnalyticsService:
             self._analysis_filter_params(filters),
         ).fetchall()
 
+        # Color by country, or by region if filtered to a single country
+        if filters.get("country"):
+            regions_seen: list[str] = []
+            for row in rows:
+                r = row["region"] or "Autre"
+                if r not in regions_seen:
+                    regions_seen.append(r)
+            region_colors = {r: self._REGION_PALETTE[i % len(self._REGION_PALETTE)] for i, r in enumerate(regions_seen)}
+            bar_colors = [region_colors.get(row["region"] or "Autre", "#999") for row in rows]
+        else:
+            bar_colors = [self._COUNTRY_COLORS.get(row["country"], "#999") for row in rows]
+
         return {
             "topPopulations": {
                 "labels": [row["city_name"] for row in rows],
@@ -353,15 +411,17 @@ class AnalyticsService:
                     {
                         "label": "Population la plus récente",
                         "data": [row["population"] for row in rows],
-                        "backgroundColor": [row["city_color"] or "#2f6fed" for row in rows],
+                        "backgroundColor": bar_colors,
                     }
                 ],
             },
-            "popByCountry": self._pop_pie_by_country(filters),
-            "popByRegion": self._pop_pie_by_region(filters),
+            "popEvolution": self._pop_evolution(filters),
+            "popEvolutionRegion": self._pop_evolution_by_region(filters),
+            "cityCount": self._city_count_evolution(filters),
+            "cityCountRegion": self._city_count_by_region(filters),
         }
 
-    # ── Pie-chart helpers (dashboard) ──────────────────────────────
+    # ── Dashboard chart helpers ──────────────────────────────────
 
     _COUNTRY_COLORS = {"Canada": "#d62728", "United States": "#1f77b4"}
     _REGION_PALETTE = [
@@ -427,6 +487,138 @@ class AnalyticsService:
             "labels": labels,
             "datasets": [{"data": data, "backgroundColor": colors}],
         }
+
+    def _pop_evolution(self, filters: dict[str, str | None]) -> dict[str, Any]:
+        """Total aggregated population per decade, split by country."""
+        conn = get_db()
+        rows = conn.execute(
+            f"""
+            WITH {self._filtered_analysis_cte(filters)}
+            SELECT v.country, dt.decade, SUM(v.population) AS total
+            FROM filtered_analysis v
+            INNER JOIN dim_time dt ON dt.year = v.year
+            GROUP BY v.country, dt.decade
+            ORDER BY dt.decade
+            """,
+            self._analysis_filter_params(filters),
+        ).fetchall()
+        decades = sorted({r["decade"] for r in rows})
+        countries = sorted({r["country"] for r in rows})
+        by_country: dict[str, dict[int, int]] = {c: {} for c in countries}
+        for r in rows:
+            by_country[r["country"]][r["decade"]] = r["total"]
+        datasets = []
+        for c in countries:
+            datasets.append({
+                "label": c,
+                "data": [by_country[c].get(d, 0) for d in decades],
+                "borderColor": self._COUNTRY_COLORS.get(c, "#999"),
+                "backgroundColor": self._COUNTRY_COLORS.get(c, "#999") + "33",
+                "fill": True,
+                "tension": 0.3,
+            })
+        return {"labels": [str(d) for d in decades], "datasets": datasets}
+
+    def _pop_evolution_by_region(self, filters: dict[str, str | None]) -> dict[str, Any]:
+        """Total aggregated population per decade, split by region (top 10)."""
+        conn = get_db()
+        rows = conn.execute(
+            f"""
+            WITH {self._filtered_analysis_cte(filters)}
+            SELECT v.region, dt.decade, SUM(v.population) AS total
+            FROM filtered_analysis v
+            INNER JOIN dim_time dt ON dt.year = v.year
+            WHERE v.region IS NOT NULL
+            GROUP BY v.region, dt.decade
+            ORDER BY dt.decade
+            """,
+            self._analysis_filter_params(filters),
+        ).fetchall()
+        decades = sorted({r["decade"] for r in rows})
+        totals_by_region: dict[str, int] = {}
+        by_region: dict[str, dict[int, int]] = {}
+        for r in rows:
+            by_region.setdefault(r["region"], {})[r["decade"]] = r["total"]
+            totals_by_region[r["region"]] = totals_by_region.get(r["region"], 0) + r["total"]
+        top_regions = sorted(totals_by_region, key=totals_by_region.get, reverse=True)[:10]
+        datasets = []
+        for i, region in enumerate(top_regions):
+            color = self._REGION_PALETTE[i % len(self._REGION_PALETTE)]
+            datasets.append({
+                "label": region,
+                "data": [by_region[region].get(d, 0) for d in decades],
+                "borderColor": color,
+                "backgroundColor": color + "33",
+                "fill": True,
+                "tension": 0.3,
+            })
+        return {"labels": [str(d) for d in decades], "datasets": datasets}
+
+    def _city_count_evolution(self, filters: dict[str, str | None]) -> dict[str, Any]:
+        """Number of cities with data per decade, split by country."""
+        conn = get_db()
+        rows = conn.execute(
+            f"""
+            WITH {self._filtered_analysis_cte(filters)}
+            SELECT v.country, dt.decade, COUNT(DISTINCT v.city_id) AS cnt
+            FROM filtered_analysis v
+            INNER JOIN dim_time dt ON dt.year = v.year
+            GROUP BY v.country, dt.decade
+            ORDER BY dt.decade
+            """,
+            self._analysis_filter_params(filters),
+        ).fetchall()
+        decades = sorted({r["decade"] for r in rows})
+        countries = sorted({r["country"] for r in rows})
+        by_country: dict[str, dict[int, int]] = {c: {} for c in countries}
+        for r in rows:
+            by_country[r["country"]][r["decade"]] = r["cnt"]
+        datasets = []
+        for c in countries:
+            datasets.append({
+                "label": c,
+                "data": [by_country[c].get(d, 0) for d in decades],
+                "borderColor": self._COUNTRY_COLORS.get(c, "#999"),
+                "backgroundColor": self._COUNTRY_COLORS.get(c, "#999") + "33",
+                "fill": True,
+                "tension": 0.3,
+            })
+        return {"labels": [str(d) for d in decades], "datasets": datasets}
+
+    def _city_count_by_region(self, filters: dict[str, str | None]) -> dict[str, Any]:
+        """Number of cities with data per decade, split by region (top 10)."""
+        conn = get_db()
+        rows = conn.execute(
+            f"""
+            WITH {self._filtered_analysis_cte(filters)}
+            SELECT v.region, dt.decade, COUNT(DISTINCT v.city_id) AS cnt
+            FROM filtered_analysis v
+            INNER JOIN dim_time dt ON dt.year = v.year
+            WHERE v.region IS NOT NULL
+            GROUP BY v.region, dt.decade
+            ORDER BY dt.decade
+            """,
+            self._analysis_filter_params(filters),
+        ).fetchall()
+        decades = sorted({r["decade"] for r in rows})
+        totals_by_region: dict[str, int] = {}
+        by_region: dict[str, dict[int, int]] = {}
+        for r in rows:
+            by_region.setdefault(r["region"], {})[r["decade"]] = r["cnt"]
+            totals_by_region[r["region"]] = totals_by_region.get(r["region"], 0) + r["cnt"]
+        top_regions = sorted(totals_by_region, key=totals_by_region.get, reverse=True)[:10]
+        datasets = []
+        for i, region in enumerate(top_regions):
+            color = self._REGION_PALETTE[i % len(self._REGION_PALETTE)]
+            datasets.append({
+                "label": region,
+                "data": [by_region[region].get(d, 0) for d in decades],
+                "borderColor": color,
+                "backgroundColor": color + "33",
+                "fill": True,
+                "tension": 0.3,
+            })
+        return {"labels": [str(d) for d in decades], "datasets": datasets}
 
     def get_map_payload(self, filters: dict[str, str | None]) -> dict[str, Any]:
         connection = get_db()
@@ -1271,15 +1463,19 @@ class AnalyticsService:
             },
         ]
 
-    def _build_city_filter_clause(self, filters: dict[str, str | None]) -> tuple[str, list[Any]]:
+    @staticmethod
+    def _region_in_clause(regions: list[str], col: str = "region") -> str:
+        return f"AND {col} IN ({','.join('?' for _ in regions)})"
+
+    def _build_city_filter_clause(self, filters: dict) -> tuple[str, list[Any]]:
         clause_parts: list[str] = []
         params: list[Any] = []
         if filters.get("country"):
             clause_parts.append("AND country = ?")
             params.append(filters["country"])
         if filters.get("region"):
-            clause_parts.append("AND region = ?")
-            params.append(filters["region"])
+            clause_parts.append(self._region_in_clause(filters["region"]))
+            params.extend(filters["region"])
         if filters.get("search"):
             clause_parts.append("AND city_name LIKE ?")
             params.append(f"%{filters['search']}%")
@@ -1287,7 +1483,7 @@ class AnalyticsService:
 
     def _analysis_filter_sql(
         self,
-        filters: dict[str, str | None],
+        filters: dict,
         *,
         alias: str | None = None,
         include_city: bool = True,
@@ -1297,19 +1493,19 @@ class AnalyticsService:
         if filters.get("country"):
             parts.append(f"AND {prefix}country = ?")
         if filters.get("region"):
-            parts.append(f"AND {prefix}region = ?")
+            parts.append(self._region_in_clause(filters["region"], f"{prefix}region"))
         if include_city and filters.get("search"):
             parts.append(f"AND {prefix}city_name LIKE ?")
         if filters.get("period"):
             parts.append(f"AND {prefix}period_label = ?")
         return " ".join(parts)
 
-    def _analysis_filter_params(self, filters: dict[str, str | None], *, include_city: bool = True) -> list[Any]:
+    def _analysis_filter_params(self, filters: dict, *, include_city: bool = True) -> list[Any]:
         params: list[Any] = []
         if filters.get("country"):
             params.append(filters["country"])
         if filters.get("region"):
-            params.append(filters["region"])
+            params.extend(filters["region"])
         if include_city and filters.get("search"):
             params.append(f"%{filters['search']}%")
         if filters.get("period"):
@@ -1322,48 +1518,48 @@ class AnalyticsService:
     def _peak_filter_params(self, filters: dict[str, str | None]) -> list[Any]:
         return self._analysis_filter_params(filters)
 
-    def _growth_filter_sql(self, filters: dict[str, str | None]) -> str:
+    def _growth_filter_sql(self, filters: dict) -> str:
         parts: list[str] = []
         if filters.get("country"):
             parts.append("AND growth.country = ?")
         if filters.get("region"):
-            parts.append("AND city.region = ?")
+            parts.append(self._region_in_clause(filters["region"], "city.region"))
         if filters.get("search"):
             parts.append("AND growth.city_name LIKE ?")
         if filters.get("period"):
             parts.append("AND " + self._period_year_condition("growth.end_year"))
         return " ".join(parts)
 
-    def _growth_filter_params(self, filters: dict[str, str | None]) -> list[Any]:
+    def _growth_filter_params(self, filters: dict) -> list[Any]:
         params: list[Any] = []
         if filters.get("country"):
             params.append(filters["country"])
         if filters.get("region"):
-            params.append(filters["region"])
+            params.extend(filters["region"])
         if filters.get("search"):
             params.append(f"%{filters['search']}%")
         if filters.get("period"):
             params.extend(self._period_year_params(filters["period"]))
         return params
 
-    def _decline_filter_sql(self, filters: dict[str, str | None]) -> str:
+    def _decline_filter_sql(self, filters: dict) -> str:
         parts: list[str] = []
         if filters.get("country"):
             parts.append("AND decline.country = ?")
         if filters.get("region"):
-            parts.append("AND city.region = ?")
+            parts.append(self._region_in_clause(filters["region"], "city.region"))
         if filters.get("search"):
             parts.append("AND decline.city_name LIKE ?")
         if filters.get("period"):
             parts.append("AND " + self._period_year_condition("decline.current_year"))
         return " ".join(parts)
 
-    def _decline_filter_params(self, filters: dict[str, str | None]) -> list[Any]:
+    def _decline_filter_params(self, filters: dict) -> list[Any]:
         params: list[Any] = []
         if filters.get("country"):
             params.append(filters["country"])
         if filters.get("region"):
-            params.append(filters["region"])
+            params.extend(filters["region"])
         if filters.get("search"):
             params.append(f"%{filters['search']}%")
         if filters.get("period"):

@@ -65,6 +65,11 @@ a {
     align-items: start;
     gap: 18px;
     padding: 24px;
+    transition: grid-template-columns .3s ease;
+}
+
+.site-shell.sidebar-collapsed {
+    grid-template-columns: 52px minmax(0, 1fr);
 }
 
 .sidebar,
@@ -88,6 +93,63 @@ a {
     display: grid;
     gap: 16px;
     align-content: start;
+    overflow: hidden;
+    transition: padding .3s ease;
+}
+
+.site-shell {
+    position: relative;
+}
+
+/* Sidebar toggle button — lives outside sidebar to stay visible */
+.sidebar-toggle {
+    position: fixed;
+    top: 40px;
+    left: 306px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink-2);
+    font-size: .75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    transition: left .3s ease, transform .3s ease;
+    padding: 0;
+    line-height: 1;
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+.sidebar-toggle:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* Early collapse (before JS) to prevent flash */
+html.sidebar-pre-collapsed .site-shell {
+    grid-template-columns: 52px minmax(0, 1fr);
+}
+
+/* Collapsed sidebar */
+.site-shell.sidebar-collapsed .sidebar {
+    padding: 12px 6px;
+    border-radius: 16px;
+}
+.site-shell.sidebar-collapsed .sidebar-nav-top,
+.site-shell.sidebar-collapsed .theme-toggle-button {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+.site-shell.sidebar-collapsed .sidebar-toggle {
+    left: 38px;
+    transform: rotate(180deg);
 }
 
 .sidebar-nav {
@@ -729,6 +791,70 @@ button {
 .accent-card span,
 .accent-card small {
     color: rgba(255, 255, 255, 0.85);
+}
+
+/* Dashboard filters */
+.dash-filters {
+    margin-bottom: 8px;
+}
+.dash-filter-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.dash-filter-form select {
+    padding: .3rem .5rem;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel-strong);
+    color: var(--ink);
+    font-size: .82rem;
+    font-family: inherit;
+    cursor: pointer;
+    width: auto;
+}
+.dash-filter-form select:hover,
+.dash-filter-form select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.dash-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--line);
+    color: var(--ink);
+    font-size: .75rem;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+.dash-reset:hover { background: var(--accent); color: #fff; }
+
+/* Chart view toggle tabs */
+.chart-view-tabs {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+.chart-view-tab {
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink-2);
+    font-size: .75rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+}
+.chart-view-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
 }
 
 .metrics-grid-dash {
