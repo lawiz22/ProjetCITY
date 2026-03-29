@@ -104,16 +104,23 @@ def parse_event_text(text: str) -> dict[str, Any]:
     # Extract key=value fields
     for line in text.splitlines():
         line = line.strip()
-        m = re.match(r'^EVENT_NAME\s*=\s*["\'](.+?)["\']', line)
+        # Match EVENT_NAME – use opening quote to determine closing quote
+        # (avoid apostrophes in French names like "Assassinat d'Abraham Lincoln")
+        m = re.match(r'^EVENT_NAME\s*=\s*"(.+)"\s*$', line) or \
+            re.match(r"^EVENT_NAME\s*=\s*'(.+)'\s*$", line)
         if m:
             result["event_name"] = m.group(1).strip()
             result["event_slug"] = slugify(result["event_name"])
             continue
-        m = re.match(r'^EVENT_DATE_START\s*=\s*["\'](.+?)["\']', line)
+        # Match EVENT_DATE_START
+        m = re.match(r'^EVENT_DATE_START\s*=\s*"(.+?)"\s*$', line) or \
+            re.match(r"^EVENT_DATE_START\s*=\s*'(.+?)'\s*$", line)
         if m:
             result["event_date_start"] = m.group(1).strip()
             continue
-        m = re.match(r'^EVENT_DATE_END\s*=\s*["\'](.+?)["\']', line)
+        # Match EVENT_DATE_END
+        m = re.match(r'^EVENT_DATE_END\s*=\s*"(.+?)"\s*$', line) or \
+            re.match(r"^EVENT_DATE_END\s*=\s*'(.+?)'\s*$", line)
         if m:
             result["event_date_end"] = m.group(1).strip()
             continue
@@ -125,7 +132,9 @@ def parse_event_text(text: str) -> dict[str, Any]:
         if m:
             result["event_level"] = int(m.group(1))
             continue
-        m = re.match(r'^EVENT_CATEGORY\s*=\s*["\'](.+?)["\']', line)
+        # Match EVENT_CATEGORY
+        m = re.match(r'^EVENT_CATEGORY\s*=\s*"(.+?)"\s*$', line) or \
+            re.match(r"^EVENT_CATEGORY\s*=\s*'(.+?)'\s*$", line)
         if m:
             cat = m.group(1).strip().lower()
             if cat in EVENT_CATEGORIES:
@@ -167,6 +176,13 @@ def parse_event_text(text: str) -> dict[str, Any]:
 
     if not result["event_name"]:
         raise ValueError("EVENT_NAME introuvable dans le texte généré.")
+
+    if len(result["event_name"]) < 10:
+        raise ValueError(
+            f"EVENT_NAME trop court ({result['event_name']!r}). "
+            "Le nom a probablement été tronqué par une apostrophe. "
+            "Vérifiez les guillemets dans le texte source."
+        )
 
     return result
 

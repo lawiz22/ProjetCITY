@@ -207,13 +207,13 @@
             </div>
             <!-- Manual search panel -->
             <div id="evt-manual-panel" style="display:none;">
-                <p class="helper-text" style="margin:0 0 .5rem;">Cliquez les mots-clés suggérés ou tapez vos propres termes :</p>
-                <div class="evt-pill-tray" id="evt-pill-tray"></div>
-                <div class="evt-search-bar">
-                    <div class="evt-search-input-wrap" id="evt-search-input-wrap">
-                        <input type="text" id="evt-manual-input" class="opt-input" placeholder="Tapez ou cliquez les mots-clés…" autocomplete="off" style="flex:1;">
+                <p class="helper-text" style="margin:0 0 .5rem;">Cliquez ou glissez les mots-clés dans la barre de recherche :</p>
+                <div class="ann-pill-tray" id="evt-pill-tray"></div>
+                <div class="ann-search-bar">
+                    <div class="ann-search-input-wrap" id="evt-search-input-wrap">
+                        <input type="text" id="evt-manual-input" placeholder="Glissez des mots-clés ici ou tapez…" autocomplete="off">
                     </div>
-                    <button type="button" class="opt-btn opt-btn-save" id="evt-manual-search-btn">🔍 Chercher</button>
+                    <button type="button" class="ann-manual-search-btn opt-btn opt-btn-save" id="evt-manual-search-btn">🔍 Chercher</button>
                 </div>
                 <p class="helper-text" id="evt-manual-status"></p>
                 <div class="photo-search-grid" id="evt-manual-grid"></div>
@@ -371,50 +371,129 @@
         return d.innerHTML;
     }
 
+    /* ---- French stop words ---- */
+    var FR_STOP_EVT = new Set(['les','des','une','par','pour','dans','avec','sur','aux','son','ses','est','sont','qui','que','pas','tout','mais','ces','cette','entre','sans','leur','leurs','plus','fait','ils','elle','ont','été','aussi','même','être','nous','vous','comme','après','quand','chez','très','peu','sous','vers']);
+    var FR_EN_EVT = {ville:'city',pont:'bridge',église:'church',château:'castle',bataille:'battle',guerre:'war',incendie:'fire',fondation:'foundation',construction:'construction',assassinat:'assassination',tremblement:'earthquake',inondation:'flood',explosion:'explosion',massacre:'massacre',mort:'death',roi:'king',reine:'queen',empereur:'emperor',président:'president',général:'general',traité:'treaty',siège:'siege',découverte:'discovery',invasion:'invasion',révolution:'revolution',indépendance:'independence',catastrophe:'catastrophe',épidémie:'epidemic',ouverture:'opening',fermeture:'closure',inauguration:'inauguration',naufrage:'shipwreck',émeute:'riot',attentat:'attack',bombardement:'bombing'};
+
+    var searchWrap = document.getElementById('evt-search-input-wrap');
+
     /* ---- Keyword pills ---- */
     function buildPills() {
         pillTray.innerHTML = '';
-        var keywords = [];
-        // Event name words
-        eventName.split(/[\s,\-–—:;()]+/).forEach(function(w) {
-            w = w.trim();
-            if (w.length > 2) keywords.push(w);
+        var cleaned = eventName.replace(/[\u{10000}-\u{10FFFF}]/gu, '').trim();
+        var year = '';
+        var ym = cleaned.match(/(\d{4})/);
+        if (ym) year = ym[1];
+        cleaned = cleaned.replace(/\(\d{4}\)/g, '').replace(/[=+—]/g, ' ').replace(/\s+/g, ' ').trim();
+
+        var words = cleaned.split(/\s+/).filter(function(w) {
+            return w.length >= 3 && !FR_STOP_EVT.has(w.toLowerCase());
         });
-        // Year
-        if (eventYear) keywords.push(String(eventYear));
-        // Category
-        if (eventCategory) keywords.push(eventCategory.replace('_', ' '));
-        // Common search helpers  
-        var helpers = ['historical', 'archive', 'photograph', 'illustration', 'map', 'document'];
-        keywords = keywords.concat(helpers);
-        // Deduplicate
-        var seen = {};
-        keywords.forEach(function(kw) {
-            var lower = kw.toLowerCase();
-            if (seen[lower]) return;
-            seen[lower] = true;
-            var pill = document.createElement('button');
-            pill.type = 'button';
-            pill.className = 'evt-keyword-pill';
-            pill.textContent = kw;
-            pill.addEventListener('click', function() {
-                var val = manualInput.value.trim();
-                manualInput.value = val ? val + ' ' + kw : kw;
-                pill.classList.toggle('pill-active');
+        var seen = new Set();
+        var frPills = [];
+        var enPills = [];
+        words.forEach(function(w) {
+            var lw = w.toLowerCase();
+            if (!seen.has(lw)) {
+                seen.add(lw);
+                frPills.push(w);
+                var en = FR_EN_EVT[lw];
+                if (en && en.toLowerCase() !== lw) enPills.push(en);
+            }
+        });
+        if (eventYear && !seen.has(String(eventYear))) frPills.push(String(eventYear));
+        if (eventCategory) {
+            var cat = eventCategory.replace('_', ' ');
+            if (!seen.has(cat.toLowerCase())) frPills.push(cat);
+        }
+        var helpers = ['historical', 'archive', 'photograph'];
+        helpers.forEach(function(h) { if (!seen.has(h)) frPills.push(h); });
+
+        function makePill(text, isEn) {
+            var pill = document.createElement('span');
+            pill.className = 'ann-keyword-pill' + (isEn ? ' ann-keyword-pill-en' : '');
+            pill.textContent = text;
+            pill.draggable = true;
+            pill.dataset.keyword = text;
+            pill.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', text);
+                pill.classList.add('dragging');
             });
-            pillTray.appendChild(pill);
-        });
+            pill.addEventListener('dragend', function() {
+                pill.classList.remove('dragging');
+            });
+            pill.addEventListener('click', function() {
+                addPillToSearch(text);
+            });
+            return pill;
+        }
+        frPills.forEach(function(t) { pillTray.appendChild(makePill(t, false)); });
+        enPills.forEach(function(t) { pillTray.appendChild(makePill(t, true)); });
     }
+
+    function addPillToSearch(text) {
+        var existing = searchWrap.querySelectorAll('.ann-search-pill');
+        for (var i = 0; i < existing.length; i++) {
+            if (existing[i].dataset.keyword.toLowerCase() === text.toLowerCase()) return;
+        }
+        var pill = document.createElement('span');
+        pill.className = 'ann-search-pill';
+        pill.dataset.keyword = text;
+        pill.innerHTML = text + '<button type="button">&times;</button>';
+        pill.querySelector('button').addEventListener('click', function(e) {
+            e.stopPropagation();
+            pill.remove();
+        });
+        searchWrap.insertBefore(pill, manualInput);
+        manualInput.value = '';
+        manualInput.focus();
+    }
+
+    function getManualQuery() {
+        var parts = [];
+        searchWrap.querySelectorAll('.ann-search-pill').forEach(function(p) {
+            parts.push(p.dataset.keyword);
+        });
+        var typed = manualInput.value.trim();
+        if (typed) parts.push(typed);
+        return parts.join(' ');
+    }
+
+    /* Drag-and-drop on search bar */
+    searchWrap.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        searchWrap.classList.add('drag-over');
+    });
+    searchWrap.addEventListener('dragleave', function() {
+        searchWrap.classList.remove('drag-over');
+    });
+    searchWrap.addEventListener('drop', function(e) {
+        e.preventDefault();
+        searchWrap.classList.remove('drag-over');
+        var text = e.dataTransfer.getData('text/plain');
+        if (text) addPillToSearch(text);
+    });
+
+    /* Keyboard support */
+    manualInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var typed = manualInput.value.trim();
+            if (typed) addPillToSearch(typed);
+            else doManualSearch();
+        }
+        if (e.key === 'Backspace' && !manualInput.value) {
+            var pills = searchWrap.querySelectorAll('.ann-search-pill');
+            if (pills.length) pills[pills.length - 1].remove();
+        }
+    });
 
     /* ---- Manual search ---- */
     document.getElementById('evt-manual-search-btn').addEventListener('click', doManualSearch);
-    manualInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); doManualSearch(); }
-    });
 
     function doManualSearch() {
-        var q = manualInput.value.trim();
-        if (!q) return;
+        var q = getManualQuery();
+        if (!q.trim()) return;
         manualStatus.textContent = '⏳ Recherche « ' + q + ' »…';
         manualGrid.innerHTML = '';
         fetch('/events/' + encodeURIComponent(slug) + '/photos/manual-search?q=' + encodeURIComponent(q))
