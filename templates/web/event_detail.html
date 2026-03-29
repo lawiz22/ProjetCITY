@@ -1,0 +1,200 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<!-- Event header -->
+<section class="panel event-detail-header">
+    <div class="panel-head">
+        <div>
+            <h2>
+                {{ category_emojis.get(event.event_category, '📌') }}
+                {{ event.event_name }}
+                {% if event.event_level == 1 %}<span class="event-level-major" title="Impact majeur">⭐</span>{% endif %}
+            </h2>
+            <span>
+                <span class="badge badge-{{ event.event_category }}">{{ category_labels.get(event.event_category, event.event_category) }}</span>
+                {% if event.event_date_start %}
+                · {{ event.event_date_start }}{% if event.event_date_end and event.event_date_end != event.event_date_start %} → {{ event.event_date_end }}{% endif %}
+                {% endif %}
+                {% if event.event_year %} · {{ event.event_year }}{% endif %}
+            </span>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+            <a href="{{ url_for('web.events_list') }}" class="opt-btn opt-btn-test" style="text-decoration:none;">← Retour</a>
+            <form method="post" action="{{ url_for('web.event_delete', event_slug=event.event_slug) }}" onsubmit="return confirm('Supprimer cet événement ?');" style="margin:0;">
+                <button type="submit" class="opt-btn" style="background:#c0392b;color:#fff;">🗑️ Supprimer</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Description -->
+{% if event.description %}
+<section class="panel">
+    <div class="panel-head">
+        <h2>📖 Description</h2>
+    </div>
+    <div class="options-body event-text-body">
+        {% for para in event.description.split('\n\n') %}
+        <p>{{ para }}</p>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Impacts -->
+<div class="event-impacts-grid">
+    {% if event.impact_population %}
+    <section class="panel">
+        <div class="panel-head">
+            <h2>👥 Impact sur la population</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in event.impact_population.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if event.impact_migration %}
+    <section class="panel">
+        <div class="panel-head">
+            <h2>🚢 Impact migratoire</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in event.impact_migration.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Locations -->
+{% if event.locations %}
+<section class="panel">
+    <div class="panel-head">
+        <h2>📍 Lieux liés</h2>
+        <span>{{ event.locations|length }} lieu{% if event.locations|length != 1 %}x{% endif %}</span>
+    </div>
+    <div class="options-body">
+        <div class="event-locations-list">
+            {% for loc in event.locations %}
+            <div class="event-location-item">
+                <span class="event-location-role role-{{ loc.role }}">
+                    {% if loc.role == 'primary' %}🔴{% elif loc.role == 'secondary' %}🟠{% else %}🟡{% endif %}
+                    {{ loc.role }}
+                </span>
+                {% if loc.matched_city_slug %}
+                <a href="{{ url_for('web.city_detail', city_slug=loc.matched_city_slug) }}">
+                    {{ loc.matched_city_name }}
+                </a>
+                {% elif loc.city_id %}
+                <span>{{ loc.region }}, {{ loc.country }}</span>
+                {% else %}
+                <span>{{ loc.region }}, {{ loc.country }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Photos -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>📷 Photos</h2>
+        <span>{{ event.photos|length }} photo{% if event.photos|length != 1 %}s{% endif %}</span>
+    </div>
+    <div class="options-body">
+        {% if event.photos %}
+        <div class="event-photos-grid">
+            {% for photo in event.photos %}
+            <div class="event-photo-card{% if photo.is_primary %} event-photo-primary{% endif %}">
+                <img src="{{ url_for('static', filename=photo.photo_path) }}" alt="{{ photo.caption or event.event_name }}">
+                {% if photo.caption %}
+                <div class="event-photo-caption">{{ photo.caption }}</div>
+                {% endif %}
+                <div class="event-photo-actions">
+                    {% if not photo.is_primary %}
+                    <button type="button" class="opt-btn opt-btn-save event-photo-btn" onclick="setPhotoPrimary({{ photo.event_photo_id }})" title="Définir comme principale">⭐</button>
+                    {% endif %}
+                    <button type="button" class="opt-btn event-photo-btn" onclick="deletePhoto({{ photo.event_photo_id }})" title="Supprimer" style="background:#c0392b;color:#fff;">🗑️</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="opacity:.6;padding:1rem;">Aucune photo.</p>
+        {% endif %}
+
+        <!-- Upload form -->
+        <div class="event-photo-upload" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--panel-border,#333);">
+            <h4>Ajouter une photo</h4>
+            <form id="event-photo-form" enctype="multipart/form-data">
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0;">
+                    <input type="file" name="photo" accept="image/*" required style="flex:1;min-width:200px;">
+                    <input type="text" name="caption" class="opt-input" placeholder="Légende" style="flex:1;min-width:150px;">
+                </div>
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0;">
+                    <input type="text" name="source_url" class="opt-input" placeholder="URL source" style="flex:1;">
+                    <input type="text" name="attribution" class="opt-input" placeholder="Attribution" style="flex:1;">
+                    <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;"><input type="checkbox" name="set_primary"> Principale</label>
+                </div>
+                <button type="submit" class="opt-btn opt-btn-save">📤 Uploader</button>
+                <span id="upload-status" style="margin-left:.5rem;"></span>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Source text -->
+{% if event.source_text %}
+<section class="panel">
+    <div class="panel-head" style="cursor:pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? '' : 'none';">
+        <h2>📝 Texte source (AI)</h2>
+        <span>Cliquer pour afficher/masquer</span>
+    </div>
+    <div class="options-body" style="display:none;">
+        <pre style="white-space:pre-wrap;font-size:.85rem;opacity:.8;max-height:400px;overflow:auto;">{{ event.source_text }}</pre>
+    </div>
+</section>
+{% endif %}
+
+<script>
+(function() {
+    var slug = '{{ event.event_slug }}';
+
+    document.getElementById('event-photo-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        var status = document.getElementById('upload-status');
+        status.textContent = '⏳ Upload…';
+        var fd = new FormData(form);
+        fetch('/events/' + encodeURIComponent(slug) + '/photos/upload', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) { location.reload(); }
+                else { status.textContent = '❌ ' + d.error; }
+            })
+            .catch(function(err) { status.textContent = '❌ ' + err.message; });
+    });
+
+    window.deletePhoto = function(photoId) {
+        if (!confirm('Supprimer cette photo ?')) return;
+        fetch('/events/' + encodeURIComponent(slug) + '/photos/' + photoId + '/delete', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { if (d.success) location.reload(); });
+    };
+
+    window.setPhotoPrimary = function(photoId) {
+        fetch('/events/' + encodeURIComponent(slug) + '/photos/' + photoId + '/primary', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { if (d.success) location.reload(); });
+    };
+})();
+</script>
+
+{% endblock %}

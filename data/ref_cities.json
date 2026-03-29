@@ -3176,7 +3176,7 @@
   ],
   "United States|New York": [
     {
-      "city_name": "New York",
+      "city_name": "New York City",
       "region": "New York",
       "country": "United States",
       "population": 8419600,
@@ -3608,7 +3608,7 @@
   ],
   "United States|Pennsylvania": [
     {
-      "city_name": "Philadelphie",
+      "city_name": "Philadelphia",
       "region": "Pennsylvania",
       "country": "United States",
       "population": 1584064,

@@ -568,6 +568,16 @@ function mountChart(canvas) {
             if (chartType === 'line') {
                 options.plugins.cityAnnotationBands.annotations = annotations;
             }
+            if (chartType === 'bar' && payload.datasets && payload.datasets[0] && payload.datasets[0].cityNames) {
+                const cityNames = payload.datasets[0].cityNames;
+                options.plugins.tooltip = {
+                    callbacks: {
+                        afterLabel: function(ctx) {
+                            return cityNames[ctx.dataIndex] || '';
+                        }
+                    }
+                };
+            }
             return options;
         })()
     });

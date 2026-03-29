@@ -6272,7 +6272,36 @@ td {
     background: var(--hover-bg, #f3f4f6);
 }
 
-.geo-search-bar { margin-bottom: 14px; }
+.geo-search-bar {
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.geo-sort-buttons {
+    display: flex;
+    gap: 4px;
+}
+.geo-sort-btn {
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink-2);
+    font-size: .75rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.geo-sort-btn.is-active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+.geo-sort-btn:hover:not(.is-active) {
+    background: var(--line);
+}
 
 /* Region cards */
 .geo-region-grid {
@@ -6472,3 +6501,200 @@ td {
     font-size: .85rem;
     cursor: pointer;
 }
+
+/* ===================== EVENTS ===================== */
+
+/* -- Filters -- */
+.event-filters-form { width: 100%; }
+.event-filters-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+.event-filter-field { flex: 1; min-width: 160px; }
+
+/* -- Event grid (list page) -- */
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1rem;
+    padding: 1.2rem;
+}
+.event-card {
+    display: block;
+    background: var(--panel-strong, #1a1a2e);
+    border: 1px solid var(--panel-border, #333);
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s, transform .1s;
+}
+.event-card:hover {
+    border-color: var(--accent, #4f46e5);
+    transform: translateY(-2px);
+}
+.event-card-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+}
+.event-card-year {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent, #4f46e5);
+}
+.event-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: .3rem 0;
+    line-height: 1.3;
+}
+.event-card-dates {
+    font-size: .8rem;
+    opacity: .6;
+    margin-bottom: .4rem;
+}
+.event-card-meta {
+    display: flex;
+    gap: .8rem;
+    font-size: .8rem;
+    opacity: .7;
+    margin-top: .4rem;
+}
+.event-card-locations {
+    font-size: .78rem;
+    opacity: .5;
+    margin-top: .4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* -- Badges for categories -- */
+.badge {
+    display: inline-block;
+    font-size: .75rem;
+    font-weight: 600;
+    padding: .15rem .55rem;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+.badge-guerre            { background: #7f1d1d; color: #fca5a5; }
+.badge-catastrophe_naturelle { background: #78350f; color: #fcd34d; }
+.badge-economie          { background: #1e3a5f; color: #93c5fd; }
+.badge-politique         { background: #312e81; color: #c4b5fd; }
+.badge-culture           { background: #5b21b6; color: #d8b4fe; }
+.badge-environnement     { background: #064e3b; color: #6ee7b7; }
+.badge-technologie       { background: #1e293b; color: #94a3b8; }
+.badge-sante             { background: #701a75; color: #f0abfc; }
+.badge-migration         { background: #0c4a6e; color: #7dd3fc; }
+.badge-autre             { background: #374151; color: #d1d5db; }
+
+.event-level-major { font-size: .85rem; }
+
+/* -- Event detail -- */
+.event-detail-header .panel-head { flex-wrap: wrap; }
+.event-text-body { padding: 1.2rem 1.5rem; line-height: 1.7; }
+.event-text-body p { margin-bottom: 1rem; }
+.event-text-body p:last-child { margin-bottom: 0; }
+
+.event-impacts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1rem;
+}
+
+/* Locations list */
+.event-locations-list { padding: .5rem 1rem; }
+.event-location-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .4rem 0;
+    border-bottom: 1px solid var(--panel-border, #222);
+}
+.event-location-item:last-child { border-bottom: none; }
+.event-location-item a { color: var(--accent, #4f46e5); text-decoration: none; font-weight: 600; }
+.event-location-item a:hover { text-decoration: underline; }
+.event-location-role {
+    font-size: .7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    min-width: 80px;
+}
+
+/* Photos grid */
+.event-photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+.event-photo-card {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    background: var(--panel-strong, #1a1a2e);
+}
+.event-photo-card.event-photo-primary { border-color: var(--accent, #4f46e5); }
+.event-photo-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+.event-photo-caption {
+    padding: .4rem .6rem;
+    font-size: .78rem;
+    opacity: .7;
+}
+.event-photo-actions {
+    display: flex;
+    gap: .3rem;
+    padding: .3rem .5rem .5rem;
+}
+.event-photo-btn {
+    font-size: .7rem !important;
+    padding: .2rem .5rem !important;
+}
+
+/* -- City detail events section -- */
+.city-events-list { padding: .5rem 1rem; }
+.city-event-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .5rem 0;
+    border-bottom: 1px solid var(--panel-border, #222);
+    text-decoration: none;
+    color: inherit;
+    transition: background .1s;
+}
+.city-event-item:last-child { border-bottom: none; }
+.city-event-item:hover { background: var(--panel-strong, #1a1a2e); }
+.city-event-year {
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--accent, #4f46e5);
+    min-width: 40px;
+}
+.city-event-name { flex: 1; font-weight: 600; }
+.city-event-role {
+    font-size: .65rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: .1rem .4rem;
+    border-radius: 4px;
+    background: var(--panel-border, #333);
+}
+
+/* -- Empty state -- */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    opacity: .6;
+}
+.empty-state a { color: var(--accent, #4f46e5); }

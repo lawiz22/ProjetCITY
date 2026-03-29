@@ -316,8 +316,32 @@ def upsert_time_dimension(conn: sqlite3.Connection, time_cache: dict[int, int], 
     return time_id
 
 
+def _ascii_name(name: str) -> str:
+    """Strip accents and lowercase for fuzzy name comparison."""
+    return unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii").lower()
+
+
+def _resolve_duplicate_slug(conn: sqlite3.Connection, stats: dict[str, Any]) -> None:
+    """If a city with the same accent-stripped name already exists in the same
+    region, reuse its slug and name so the UPSERT merges instead of creating a
+    duplicate (e.g. Philadelphie vs Philadelphia)."""
+    if not stats.get("region"):
+        return
+    ascii_new = _ascii_name(stats["city_name"])
+    rows = conn.execute(
+        "SELECT city_name, city_slug FROM dim_city WHERE region = ? AND country = ?",
+        (stats["region"], stats["country"]),
+    ).fetchall()
+    for row in rows:
+        if _ascii_name(row[0]) == ascii_new and row[1] != stats["city_slug"]:
+            stats["city_slug"] = row[1]
+            stats["city_name"] = row[0]
+            return
+
+
 def import_city_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
     """Insert/update dim_city + fact_city_population rows. Returns city_id."""
+    _resolve_duplicate_slug(conn, stats)
     time_cache: dict[int, int] = {
         year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
     }

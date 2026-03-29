@@ -419,6 +419,7 @@ class AnalyticsService:
             "popEvolutionRegion": self._pop_evolution_by_region(filters),
             "cityCount": self._city_count_evolution(filters),
             "cityCountRegion": self._city_count_by_region(filters),
+            "topPopByDecade": self._top_pop_by_decade(filters),
         }
 
     # ── Dashboard chart helpers ──────────────────────────────────
@@ -429,6 +430,54 @@ class AnalyticsService:
         "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
         "#14b8a6", "#ef4444",
     ]
+
+    def _top_pop_by_decade(self, filters: dict) -> dict[str, Any]:
+        conn = get_db()
+        params = self._analysis_filter_params(filters)
+        rows = conn.execute(
+            f"""
+            WITH {self._filtered_analysis_cte(filters)},
+            decade_data AS (
+                SELECT city_name, country, region,
+                       (year / 10) * 10 AS decade,
+                       MAX(population) AS max_pop
+                FROM filtered_analysis
+                GROUP BY city_name, country, region, (year / 10) * 10
+            ),
+            ranked AS (
+                SELECT *, ROW_NUMBER() OVER (PARTITION BY decade ORDER BY max_pop DESC) AS rn
+                FROM decade_data
+            )
+            SELECT decade, city_name, country, region, max_pop
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY decade
+            """,
+            params,
+        ).fetchall()
+
+        if filters.get("country"):
+            regions_seen: list[str] = []
+            for r in rows:
+                rg = r["region"] or "Autre"
+                if rg not in regions_seen:
+                    regions_seen.append(rg)
+            region_colors = {rg: self._REGION_PALETTE[i % len(self._REGION_PALETTE)] for i, rg in enumerate(regions_seen)}
+            bar_colors = [region_colors.get(r["region"] or "Autre", "#999") for r in rows]
+        else:
+            bar_colors = [self._COUNTRY_COLORS.get(r["country"], "#999") for r in rows]
+
+        return {
+            "labels": [f"{r['decade']}s" for r in rows],
+            "datasets": [
+                {
+                    "label": "Ville la plus peuplée par décennie",
+                    "data": [r["max_pop"] for r in rows],
+                    "backgroundColor": bar_colors,
+                    "cityNames": [r["city_name"] for r in rows],
+                }
+            ],
+        }
 
     def _pop_pie_by_country(self, filters: dict[str, str | None]) -> dict[str, Any]:
         conn = get_db()

@@ -72,10 +72,16 @@
 <section class="geo-tab-content" id="geo-tab-ca">
     <div class="geo-search-bar">
         <input type="text" id="geo-search-ca" class="opt-input" placeholder="Rechercher une province ou une ville…" style="max-width:400px;">
+        <div class="geo-sort-buttons">
+            <button class="geo-sort-btn is-active" data-geo-sort="alpha" data-geo-grid="geo-regions-ca">A→Z</button>
+            <button class="geo-sort-btn" data-geo-sort="missing" data-geo-grid="geo-regions-ca">Manquantes ↓</button>
+            <button class="geo-sort-btn" data-geo-sort="pop" data-geo-grid="geo-regions-ca">Population ↓</button>
+            <button class="geo-sort-btn" data-geo-sort="top-missing-pop" data-geo-grid="geo-regions-ca">Top manquante ↓</button>
+        </div>
     </div>
     <div class="geo-region-grid" id="geo-regions-ca">
         {% for reg in ca_regions %}
-        <div class="geo-region-card {{ 'geo-missing' if not reg.covered }}" data-region-name="{{ reg.name|lower }}">
+        <div class="geo-region-card {{ 'geo-missing' if not reg.covered }}" data-region-name="{{ reg.name|lower }}" data-ref-missing="{{ reg.ref_total - reg.ref_covered }}" data-total-pop="{{ reg.cities|sum(attribute='peak_pop') }}">
             <div class="geo-region-header" data-toggle-region>
                 <span class="geo-region-status {{ 'geo-ok' if reg.covered else 'geo-nok' }}">{{ '✅' if reg.covered else '❌' }}</span>
                 <h4>{{ reg.name }}</h4>
@@ -136,10 +142,17 @@
 <section class="geo-tab-content" id="geo-tab-us" style="display:none;">
     <div class="geo-search-bar">
         <input type="text" id="geo-search-us" class="opt-input" placeholder="Rechercher un état ou une ville…" style="max-width:400px;">
+        <div class="geo-sort-buttons">
+            <button class="geo-sort-btn is-active" data-geo-sort="alpha" data-geo-grid="geo-regions-us">A→Z</button>
+            <button class="geo-sort-btn" data-geo-sort="missing" data-geo-grid="geo-regions-us">Manquantes ↓</button>
+            <button class="geo-sort-btn" data-geo-sort="pop" data-geo-grid="geo-regions-us">Population ↓</button>
+            <button class="geo-sort-btn" data-geo-sort="top-missing-pop" data-geo-grid="geo-regions-us">Top manquante ↓</button>
+        </div>
     </div>
     <div class="geo-region-grid" id="geo-regions-us">
         {% for reg in us_regions %}
-        <div class="geo-region-card {{ 'geo-missing' if not reg.covered }}" data-region-name="{{ reg.name|lower }}">
+        {% set missing_refs_us = reg.ref_cities | selectattr('in_db', 'false') | list %}
+        <div class="geo-region-card {{ 'geo-missing' if not reg.covered }}" data-region-name="{{ reg.name|lower }}" data-ref-missing="{{ reg.ref_total - reg.ref_covered }}" data-total-pop="{{ reg.cities|sum(attribute='peak_pop') }}" data-top-missing-pop="{{ missing_refs_us|map(attribute='population')|max if missing_refs_us else 0 }}">
             <div class="geo-region-header" data-toggle-region>
                 <span class="geo-region-status {{ 'geo-ok' if reg.covered else 'geo-nok' }}">{{ '✅' if reg.covered else '❌' }}</span>
                 <h4>{{ reg.name }}</h4>
@@ -236,6 +249,36 @@
     }
     wireSearch('geo-search-ca', 'geo-regions-ca');
     wireSearch('geo-search-us', 'geo-regions-us');
+
+    /* Sort buttons */
+    function sortGrid(gridId, mode) {
+        var grid = document.getElementById(gridId);
+        if (!grid) return;
+        var cards = Array.from(grid.querySelectorAll('.geo-region-card'));
+        cards.sort(function (a, b) {
+            if (mode === 'alpha') {
+                return (a.dataset.regionName || '').localeCompare(b.dataset.regionName || '');
+            } else if (mode === 'missing') {
+                return (parseInt(b.dataset.refMissing) || 0) - (parseInt(a.dataset.refMissing) || 0);
+            } else if (mode === 'pop') {
+                return (parseInt(b.dataset.totalPop) || 0) - (parseInt(a.dataset.totalPop) || 0);
+            } else if (mode === 'top-missing-pop') {
+                return (parseInt(b.dataset.topMissingPop) || 0) - (parseInt(a.dataset.topMissingPop) || 0);
+            }
+            return 0;
+        });
+        cards.forEach(function (c) { grid.appendChild(c); });
+    }
+
+    document.querySelectorAll('.geo-sort-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var gridId = btn.dataset.geoGrid;
+            var bar = btn.closest('.geo-sort-buttons');
+            bar.querySelectorAll('.geo-sort-btn').forEach(function (b) { b.classList.remove('is-active'); });
+            btn.classList.add('is-active');
+            sortGrid(gridId, btn.dataset.geoSort);
+        });
+    });
 
     /* Expand ref: add 20 more reference cities */
     var expandUrl = '{{ url_for("web.geo_coverage_expand_ref") }}';

@@ -1,5 +1,6 @@
 PRAGMA foreign_keys = ON;
 
+DROP VIEW IF EXISTS vw_event_summary;
 DROP VIEW IF EXISTS vw_fiche_section_content_stats;
 DROP VIEW IF EXISTS vw_fiche_city_richness;
 DROP VIEW IF EXISTS vw_fiche_section_catalog;
@@ -14,6 +15,9 @@ DROP VIEW IF EXISTS vw_city_period_detail_with_population;
 DROP VIEW IF EXISTS vw_city_period_detail_analysis;
 DROP VIEW IF EXISTS vw_city_population_analysis;
 
+DROP TABLE IF EXISTS dim_event_photo;
+DROP TABLE IF EXISTS dim_event_location;
+DROP TABLE IF EXISTS dim_event;
 DROP TABLE IF EXISTS dim_city_photo;
 DROP TABLE IF EXISTS fact_city_population;
 DROP TABLE IF EXISTS ref_population;
@@ -146,6 +150,46 @@ CREATE TABLE dim_city_photo (
     FOREIGN KEY (city_id) REFERENCES dim_city(city_id)
 );
 
+CREATE TABLE dim_event (
+    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_name TEXT NOT NULL,
+    event_slug TEXT NOT NULL UNIQUE,
+    event_date_start TEXT,
+    event_date_end TEXT,
+    event_year INTEGER,
+    event_level INTEGER NOT NULL DEFAULT 1 CHECK (event_level IN (1, 2)),
+    event_category TEXT NOT NULL DEFAULT 'autre',
+    description TEXT,
+    impact_population TEXT,
+    impact_migration TEXT,
+    source_text TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE dim_event_location (
+    event_location_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    city_id INTEGER,
+    region TEXT,
+    country TEXT,
+    role TEXT NOT NULL DEFAULT 'primary',
+    FOREIGN KEY (event_id) REFERENCES dim_event(event_id),
+    FOREIGN KEY (city_id) REFERENCES dim_city(city_id)
+);
+
+CREATE TABLE dim_event_photo (
+    event_photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    filename TEXT NOT NULL,
+    caption TEXT,
+    source_url TEXT,
+    attribution TEXT,
+    is_primary INTEGER NOT NULL DEFAULT 0 CHECK (is_primary IN (0, 1)),
+    photo_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (event_id) REFERENCES dim_event(event_id)
+);
+
 CREATE INDEX idx_city_slug ON dim_city (city_slug);
 CREATE INDEX idx_city_country ON dim_city (country, region);
 CREATE INDEX idx_period_detail_city ON dim_city_period_detail (city_id, period_order);
@@ -157,6 +201,13 @@ CREATE INDEX idx_fact_annotation ON fact_city_population (annotation_id);
 CREATE INDEX idx_fiche_city ON dim_city_fiche (city_id);
 CREATE INDEX idx_fiche_section ON dim_city_fiche_section (fiche_id, section_order);
 CREATE INDEX idx_photo_city ON dim_city_photo (city_id);
+CREATE INDEX idx_event_slug ON dim_event (event_slug);
+CREATE INDEX idx_event_year ON dim_event (event_year);
+CREATE INDEX idx_event_category ON dim_event (event_category);
+CREATE INDEX idx_event_level ON dim_event (event_level);
+CREATE INDEX idx_event_location_event ON dim_event_location (event_id);
+CREATE INDEX idx_event_location_city ON dim_event_location (city_id);
+CREATE INDEX idx_event_photo_event ON dim_event_photo (event_id);
 
 CREATE VIEW vw_city_population_analysis AS
 SELECT
@@ -599,3 +650,26 @@ SELECT
 FROM dim_city_fiche_section s
 GROUP BY s.section_title
 ORDER BY total_sections DESC;
+
+CREATE VIEW vw_event_summary AS
+SELECT
+    e.event_id,
+    e.event_name,
+    e.event_slug,
+    e.event_date_start,
+    e.event_date_end,
+    e.event_year,
+    e.event_level,
+    e.event_category,
+    e.description,
+    e.impact_population,
+    e.impact_migration,
+    e.created_at,
+    COUNT(DISTINCT el.event_location_id) AS location_count,
+    COUNT(DISTINCT ep.event_photo_id) AS photo_count,
+    GROUP_CONCAT(DISTINCT COALESCE(dc.city_name, el.region)) AS location_names
+FROM dim_event e
+LEFT JOIN dim_event_location el ON el.event_id = e.event_id
+LEFT JOIN dim_city dc ON dc.city_id = el.city_id
+LEFT JOIN dim_event_photo ep ON ep.event_id = e.event_id
+GROUP BY e.event_id;

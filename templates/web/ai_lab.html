@@ -149,6 +149,39 @@
     </div>
 </section>
 
+<!-- ===================== STEP 4 — Événement historique ===================== -->
+<section class="panel ailab-step" id="step4-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">4</span>
+            Événement historique
+            <span class="ailab-check" id="step4-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai4-event-input">Nom de l'événement</label>
+            <input type="text" id="ai4-event-input" class="opt-input" placeholder="ex: Ouragan Katrina, Grande Dépression, Ruée vers l'or du Klondike" spellcheck="false">
+        </div>
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai4-prompt">Prompt (modifiable)</label>
+            <textarea id="ai4-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_event }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="ai4-generate">🚀 Générer Step 4</button>
+        </div>
+        <div class="ai-lab-field" id="ai4-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="ai4-result" class="opt-input ai-lab-result" rows="28" readonly></textarea>
+            <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="ai4-copy">📋 Copier</button>
+                <button type="button" class="opt-btn opt-btn-save" id="ai4-import">📥 Importer l'événement</button>
+            </div>
+            <div class="opt-test-result" id="ai4-import-result" style="display:none;"></div>
+        </div>
+    </div>
+</section>
+
 <!-- ===================== Ajouter la ville ===================== -->
 <section class="panel" id="add-city-panel" style="display:none;">
     <div class="panel-head">
@@ -424,6 +457,95 @@
                 genAllBtn.textContent = '🦣 Générer les 3 étapes';
                 genAllStatus.innerHTML = '❌ ' + err.message;
                 genAllStatus.className = 'generate-all-status generate-all-error';
+            });
+    });
+
+    /* ---- Step 4 — Event generation (standalone, not tied to city workflow) ---- */
+    var eventGenBtn = document.getElementById('ai4-generate');
+    var eventInput  = document.getElementById('ai4-event-input');
+    var eventPrompt = document.getElementById('ai4-prompt');
+    var eventResultWrap = document.getElementById('ai4-result-wrap');
+    var eventResult = document.getElementById('ai4-result');
+    var eventCheck  = document.getElementById('step4-check');
+
+    eventGenBtn.addEventListener('click', function() {
+        var eventName = eventInput.value.trim();
+        if (!eventName) { alert('Entrez un nom d\'événement.'); return; }
+        eventGenBtn.disabled = true;
+        eventGenBtn.textContent = '⏳ Génération en cours…';
+        eventResultWrap.style.display = '';
+        eventResult.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', eventName);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', eventPrompt.value);
+        fd.append('max_tokens', '4000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                eventGenBtn.disabled = false;
+                eventGenBtn.textContent = '🚀 Générer Step 4';
+                if (data.success) {
+                    eventResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    eventCheck.classList.add('visible');
+                } else {
+                    eventResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                eventGenBtn.disabled = false;
+                eventGenBtn.textContent = '🚀 Générer Step 4';
+                eventResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* Copy button for Step 4 */
+    document.getElementById('ai4-copy').addEventListener('click', function() {
+        eventResult.select();
+        navigator.clipboard.writeText(eventResult.value).then(function() {
+            var btn = document.getElementById('ai4-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* Import event button */
+    document.getElementById('ai4-import').addEventListener('click', function() {
+        var text = eventResult.value.trim();
+        if (!text) { alert('Aucun résultat à importer.'); return; }
+        var importBtn = document.getElementById('ai4-import');
+        var importResult = document.getElementById('ai4-import-result');
+        importBtn.disabled = true;
+        importBtn.textContent = '⏳ Import…';
+        importResult.style.display = '';
+        importResult.className = 'opt-test-result opt-test-pending';
+        importResult.textContent = 'Importation…';
+
+        var fd = new FormData();
+        fd.append('event_text', text);
+
+        fetch('{{ url_for("web.event_import") }}', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer l\'événement';
+                if (data.success) {
+                    importResult.className = 'opt-test-result opt-test-success';
+                    importResult.innerHTML = '✅ <strong>' + data.event_name + '</strong> importé!<br>' +
+                        '<a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir l\'événement</a>';
+                } else {
+                    importResult.className = 'opt-test-result opt-test-error';
+                    importResult.innerHTML = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer l\'événement';
+                importResult.className = 'opt-test-result opt-test-error';
+                importResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
     });
 

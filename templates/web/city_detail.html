@@ -16,6 +16,7 @@
             <a href="#city-photos">Photos</a>
             <a href="#city-annotations">Annotations</a>
             <a href="#city-timeline">Timeline</a>
+            {% if city_events %}<a href="#city-events">Événements</a>{% endif %}
             <a href="#city-fiche">Fiche</a>
         </nav>
         <div class="city-sticky-tools" data-guided-reader>
@@ -462,6 +463,29 @@
         {% endfor %}
     </div>
 </section>
+
+<!-- Events linked to this city -->
+{% if city_events %}
+<section class="panel" id="city-events">
+    <div class="panel-head">
+        <h2>📜 Événements historiques liés</h2>
+        <span>{{ city_events|length }} événement{% if city_events|length != 1 %}s{% endif %}</span>
+    </div>
+    <div class="options-body">
+        <div class="city-events-list">
+            {% for ev in city_events %}
+            <a href="{{ url_for('web.event_detail', event_slug=ev.event_slug) }}" class="city-event-item">
+                <span class="city-event-year">{{ ev.event_year or '?' }}</span>
+                <span class="city-event-cat">{{ event_category_emojis.get(ev.event_category, '📌') }}</span>
+                <span class="city-event-name">{{ ev.event_name }}</span>
+                <span class="city-event-role role-{{ ev.role }}">{{ ev.role }}</span>
+                {% if ev.event_level == 1 %}<span class="event-level-major">⭐</span>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
 
 {% if fiche %}
 <section class="panel fiche-panel" id="city-fiche">

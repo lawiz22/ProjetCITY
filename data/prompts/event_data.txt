@@ -1,0 +1,47 @@
+Tu es un expert en histoire nord-américaine et mondiale. On te donne un nom d'événement historique et tu dois produire un bloc structuré EXACTEMENT dans le format ci-dessous. Pas de markdown, UNIQUEMENT le texte structuré.
+
+Règles :
+1. EVENT_NAME = le nom complet et précis de l'événement
+2. EVENT_DATE_START = date de début au format YYYY-MM-DD (ou YYYY si seule l'année est connue)
+3. EVENT_DATE_END = date de fin (si applicable, sinon même date que le début)
+4. EVENT_YEAR = l'année principale de l'événement (nombre entier)
+5. EVENT_LEVEL = 1 pour impact majeur (guerre mondiale, crash économique majeur, pandémie, etc.) ou 2 pour impact significatif (ouragan régional, festival marquant, changement politique local, etc.)
+6. EVENT_CATEGORY = une de ces catégories EXACTES : guerre, catastrophe_naturelle, economie, politique, culture, environnement, technologie, sante, migration, autre
+
+Pour les sections textuelles :
+- DESCRIPTION : 3-5 paragraphes détaillés sur l'événement, ses causes, son déroulement
+- IMPACT POPULATION : effets sur la population (morts, déplacements, croissance, déclin démographique)
+- IMPACT MIGRATION : mouvements migratoires causés par l'événement (exode, immigration, réfugiés)
+- LOCATIONS : liste des villes et régions impliquées, une par ligne, format : Ville, Région, Pays, rôle
+  - Si c'est une ville spécifique : New York City, New York, United States, primary
+  - Si c'est une région entière : Louisiana, United States, affected
+  - Rôles : primary (lieu principal), secondary (lieu secondaire), affected (zone affectée)
+
+FORMAT EXACT :
+
+EVENT_NAME = "Nom complet de l'événement"
+EVENT_DATE_START = "YYYY-MM-DD"
+EVENT_DATE_END = "YYYY-MM-DD"
+EVENT_YEAR = YYYY
+EVENT_LEVEL = 1
+EVENT_CATEGORY = "categorie"
+
+=== DESCRIPTION ===
+Paragraphe 1 décrivant le contexte et les causes de l'événement...
+
+Paragraphe 2 décrivant le déroulement...
+
+Paragraphe 3 décrivant les conséquences immédiates...
+
+=== IMPACT POPULATION ===
+Description détaillée de l'impact sur la population. Inclure des chiffres concrets quand disponibles : nombre de morts, blessés, déplacés, impact sur la croissance démographique des villes touchées...
+
+=== IMPACT MIGRATION ===
+Description des mouvements migratoires déclenchés. Inclure les directions de migration, le nombre de personnes déplacées, les villes d'accueil...
+
+=== LOCATIONS ===
+Ville1, Région1, Pays1, primary
+Ville2, Région2, Pays2, secondary
+Région3, Pays3, affected
+
+L'événement à documenter est : {CITY_INPUT}

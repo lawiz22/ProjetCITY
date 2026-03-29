@@ -103,7 +103,7 @@
     </article>
 </section>
 
-<section class="panel-grid panel-grid-1">
+<section class="panel-grid panel-grid-2">
     <article class="panel">
         <div class="panel-head">
             <h2>Top populations récentes</h2>
@@ -115,6 +115,19 @@
             </div>
             <div class="chart-frame">
                 <canvas class="chart-canvas" data-chart='{{ chart_payload.topPopulations | tojson }}' data-chart-type="bar" data-chart-filename="dashboard-top-populations"></canvas>
+            </div>
+        </div>
+    </article>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Ville la plus peuplée par décennie</h2>
+        </div>
+        <div class="chart-block">
+            <div class="chart-toolbar">
+                <button type="button" class="secondary-button chart-export" data-chart-export>Exporter PNG</button>
+            </div>
+            <div class="chart-frame">
+                <canvas class="chart-canvas" data-chart='{{ chart_payload.topPopByDecade | tojson }}' data-chart-type="bar" data-chart-filename="dashboard-top-pop-decade"></canvas>
             </div>
         </div>
     </article>

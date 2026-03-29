@@ -6,6 +6,7 @@ from flask import Blueprint, Response, current_app, flash, jsonify, redirect, re
 
 from .services.analytics import AnalyticsService, SqlExecutionError
 from .services.city_import import (
+    _resolve_duplicate_slug,
     delete_city_fiche,
     fetch_and_save_city_photo,
     get_city_fiche,
@@ -94,6 +95,9 @@ def city_detail(city_slug: str) -> str:
     conn = get_db()
     city_photos = get_city_photos(conn, city_slug)
 
+    from .services.event_service import get_events_for_city, CATEGORY_LABELS, CATEGORY_EMOJIS
+    city_events = get_events_for_city(conn, city["city_id"])
+
     return render_template(
         "web/city_detail.html",
         page_title=city["city_name"],
@@ -101,6 +105,9 @@ def city_detail(city_slug: str) -> str:
         city=city,
         fiche=fiche,
         city_photos=city_photos,
+        city_events=city_events,
+        event_category_labels=CATEGORY_LABELS,
+        event_category_emojis=CATEGORY_EMOJIS,
         periods=service.get_city_periods(city_slug, filters),
         annotations=service.get_city_annotations(city_slug, filters),
         chart_payload=service.get_city_chart_payload(city_slug, filters),
@@ -741,6 +748,8 @@ def add_city_merge_import() -> Response:
     conn = get_db()
     messages: list[str] = []
 
+    _resolve_duplicate_slug(conn, stats)
+
     # --- Upsert dim_city to get city_id ---
     cursor = conn.execute(
         """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
@@ -1001,6 +1010,7 @@ def add_city_import() -> Response:
 
     if skip_pop:
         # Still need city_id — upsert dim_city only, skip population
+        _resolve_duplicate_slug(conn, stats)
         cursor = conn.execute(
             """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
                VALUES (?, ?, ?, ?, ?, ?)
@@ -1682,12 +1692,36 @@ def geo_coverage() -> str:
         })
 
     # Index existing city names by region for matching
+    import unicodedata as _ud
+
+    def _ascii(name: str) -> str:
+        return _ud.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii").lower().strip()
+
     existing_by_region: dict[str, set[str]] = {}
+    existing_ascii_by_region: dict[str, set[str]] = {}
     for r in rows:
         key = f"{r['country']}|{r['region']}"
         if key not in existing_by_region:
             existing_by_region[key] = set()
+            existing_ascii_by_region[key] = set()
         existing_by_region[key].add(r["city_name"].lower().strip())
+        existing_ascii_by_region[key].add(_ascii(r["city_name"]))
+
+    def _ref_in_db(ref_name: str, key: str) -> bool:
+        """Check if ref city matches a DB city (exact, accent-stripped, or substring)."""
+        names = existing_by_region.get(key, set())
+        ascii_names = existing_ascii_by_region.get(key, set())
+        rn = ref_name.lower().strip()
+        if rn in names:
+            return True
+        ra = _ascii(ref_name)
+        if ra in ascii_names:
+            return True
+        # Substring: "New York" matches "New York City"
+        for an in ascii_names:
+            if ra in an or an in ra:
+                return True
+        return False
 
     # Build per-region data
     region_data: dict[str, dict] = {}  # key = "country|region"
@@ -1726,12 +1760,11 @@ def geo_coverage() -> str:
         key = f"Canada|{reg}"
         cities = region_data.get(key, {}).get("cities", [])
         ref_cities = ref_by_region.get(key, [])
-        existing_names = existing_by_region.get(key, set())
         ref_with_status = []
         for rc in ref_cities:
             ref_with_status.append({
                 **rc,
-                "in_db": rc["city_name"].lower().strip() in existing_names,
+                "in_db": _ref_in_db(rc["city_name"], key),
             })
         ref_total = len(ref_with_status)
         ref_covered = sum(1 for r in ref_with_status if r["in_db"])
@@ -1750,12 +1783,11 @@ def geo_coverage() -> str:
         key = f"United States|{st}"
         cities = region_data.get(key, {}).get("cities", [])
         ref_cities = ref_by_region.get(key, [])
-        existing_names = existing_by_region.get(key, set())
         ref_with_status = []
         for rc in ref_cities:
             ref_with_status.append({
                 **rc,
-                "in_db": rc["city_name"].lower().strip() in existing_names,
+                "in_db": _ref_in_db(rc["city_name"], key),
             })
         ref_total = len(ref_with_status)
         ref_covered = sum(1 for r in ref_with_status if r["in_db"])
@@ -2125,6 +2157,7 @@ def ai_lab() -> str:
     prompt_city = load_prompt("city_data_step1.txt")
     prompt_details = load_prompt("city_data_step2.txt")
     prompt_fiche = load_prompt("city_data_step3.txt")
+    prompt_event = load_prompt("event_data.txt")
     return render_template(
         "web/ai_lab.html",
         page_title="AI Lab",
@@ -2133,6 +2166,7 @@ def ai_lab() -> str:
         prompt_city=prompt_city,
         prompt_details=prompt_details,
         prompt_fiche=prompt_fiche,
+        prompt_event=prompt_event,
     )
 
 
@@ -2481,3 +2515,140 @@ def ai_lab_import() -> Response:
         "messages": messages,
         "redirect": url_for("web.city_detail", city_slug=stats["city_slug"]),
     })
+
+
+# ---------------------------------------------------------------------------
+# Events
+# ---------------------------------------------------------------------------
+
+@web.route("/events")
+def events_list() -> str:
+    from .db import get_db
+    from .services.event_service import get_events_list, EVENT_CATEGORIES, CATEGORY_LABELS, CATEGORY_EMOJIS
+
+    conn = get_db()
+    filters = {
+        "category": request.args.get("category", ""),
+        "level": request.args.get("level", ""),
+        "search": request.args.get("search", ""),
+    }
+    events = get_events_list(conn, filters)
+    return render_template(
+        "web/events.html",
+        page_title="Événements historiques",
+        events=events,
+        filters=filters,
+        categories=EVENT_CATEGORIES,
+        category_labels=CATEGORY_LABELS,
+        category_emojis=CATEGORY_EMOJIS,
+    )
+
+
+@web.route("/events/<event_slug>")
+def event_detail(event_slug: str) -> str:
+    from .db import get_db
+    from .services.event_service import get_event, CATEGORY_LABELS, CATEGORY_EMOJIS
+
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        flash("Événement introuvable.", "error")
+        return redirect(url_for("web.events_list"))
+    return render_template(
+        "web/event_detail.html",
+        page_title=event["event_name"],
+        event=event,
+        category_labels=CATEGORY_LABELS,
+        category_emojis=CATEGORY_EMOJIS,
+    )
+
+
+@web.route("/events/import", methods=["POST"])
+def event_import() -> Response:
+    from .db import get_db
+    from .services.event_service import parse_event_text, import_event
+
+    text = request.form.get("event_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+    try:
+        data = parse_event_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    event_id = import_event(conn, data)
+    return jsonify({
+        "success": True,
+        "event_name": data["event_name"],
+        "event_slug": data["event_slug"],
+        "event_id": event_id,
+        "redirect": url_for("web.event_detail", event_slug=data["event_slug"]),
+    })
+
+
+@web.route("/events/<event_slug>/delete", methods=["POST"])
+def event_delete(event_slug: str) -> Response:
+    from .db import get_db
+    from .services.event_service import get_event, delete_event
+
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        flash("Événement introuvable.", "error")
+        return redirect(url_for("web.events_list"))
+    delete_event(conn, event["event_id"])
+    flash(f"Événement « {event['event_name']} » supprimé.", "success")
+    return redirect(url_for("web.events_list"))
+
+
+@web.route("/events/<event_slug>/photos/upload", methods=["POST"])
+def event_photo_upload(event_slug: str) -> Response:
+    from .db import get_db
+    from .services.event_service import get_event, save_event_photo
+
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"success": False, "error": "Événement introuvable."})
+
+    file = request.files.get("photo")
+    if not file or not file.filename:
+        return jsonify({"success": False, "error": "Aucun fichier sélectionné."})
+
+    result = save_event_photo(
+        conn,
+        event["event_id"],
+        event_slug,
+        file.read(),
+        file.filename,
+        source_url=request.form.get("source_url", ""),
+        attribution=request.form.get("attribution", ""),
+        caption=request.form.get("caption", ""),
+        set_primary=request.form.get("set_primary") == "on",
+    )
+    return jsonify(result)
+
+
+@web.route("/events/<event_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+def event_photo_delete(event_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.event_service import delete_event_photo
+
+    conn = get_db()
+    delete_event_photo(conn, photo_id, event_slug)
+    return jsonify({"success": True})
+
+
+@web.route("/events/<event_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+def event_photo_primary(event_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.event_service import get_event, set_event_photo_primary
+
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"success": False, "error": "Événement introuvable."})
+    set_event_photo_primary(conn, photo_id, event["event_id"])
+    return jsonify({"success": True})

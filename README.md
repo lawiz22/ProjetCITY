@@ -71,6 +71,7 @@ python run_web.py
 - Bouton « Suggérer une ville » intelligent avec filtres pays/région et priorité aux régions manquantes
 - Comparaison et fusion sélective avec les données existantes (population, annotations, périodes, fiche)
 - Import direct dans la base avec géocodage et photo automatiques
+- **Step 4 — Événements historiques** : génération et import d'événements avec description, impacts, lieux liés
 
 ### Géo-couverture (`/geo-coverage`)
 - Couverture géographique par province canadienne et état américain
@@ -85,6 +86,16 @@ python run_web.py
 - Drapeaux pour chaque pays et région/état (66 drapeaux : 2 pays + 13 provinces CA + 51 états US)
 - Bouton 🗺️ lien direct vers la carte en mode voyage dans le temps
 - Barres de progression colorées (vert/orange/rouge)
+
+### Événements historiques (`/events`)
+- Catalogue d'événements historiques majeurs liés aux villes (guerres, catastrophes, économie, politique, etc.)
+- 10 catégories avec badges colorés : guerre, catastrophe naturelle, économie, politique, culture, environnement, technologie, santé, migration, autre
+- 2 niveaux d'impact : ⭐ majeur (guerres mondiales, crashs) et 📌 significatif (ouragans régionaux, festivals)
+- Filtres par catégorie, niveau et recherche textuelle
+- Fiche détaillée par événement : description, impact sur la population, impact migratoire, lieux liés avec liens vers les fiches ville
+- Galerie photo par événement avec upload, suppression et photo principale
+- Texte source (AI) collapsible pour traçabilité
+- Intégration dans les fiches ville : section « Événements historiques liés » avec rôle (primary/secondary/affected)
 
 ### Couverture des données (`/coverage`)
 - Villes sans fiche complète, sans photos, sans périodes détaillées
@@ -127,6 +138,7 @@ app/
     city_coordinates.py             → géocodage (cache + fallback web)
     city_import.py                  → import population, périodes, fiches, photos
     city_photos.py                  → recherche Wikipedia/Commons, galerie, EXIF
+    event_service.py                → événements historiques : parse, import, CRUD, photos
     mammouth_ai.py                  → client API Mammouth AI, tokens
     pdf_reports.py                  → génération PDF (dashboard, fiche ville)
 sql/
@@ -145,15 +157,17 @@ data/
   city_analysis.db                  → base SQLite générée
   city_details/                     → 65+ fichiers .txt de périodes détaillées
   ref_cities.json                   → villes de référence (630 entrées)
+  prompts/                          → prompts IA (city_data_step1-3.txt, event_data.txt)
   saved_views.json                  → vues SQL sauvegardées
   sql_lab_history.json              → historique SQL Lab
-templates/web/                      → 14 templates Jinja2
+templates/web/                      → 16 templates Jinja2
 static/
   css/app.css, leaflet.css          → styles de la plateforme
   js/charts.js, leaflet.js,         → modules JS (graphiques, carte,
      map.js, map_static.js,            SQL Lab, tables, thème)
      sql_lab.js, tables.js, ui.js
   images/cities/                    → photos HD par ville
+  images/events/                    → photos par événement
   images/flags/                     → drapeaux (66 : pays + provinces/états)
 villestats.py                       → données source (séries historiques)
 villestats_v2.py                    → données source (format simplifié)
@@ -176,6 +190,9 @@ villestats_v2.py                    → données source (format simplifié)
 | `dim_city_fiche` | Fiche complète par ville (texte brut + sections parsées) |
 | `dim_city_fiche_section` | Sections de fiche (emoji, titre, contenu JSON) |
 | `dim_city_photo` | Bibliothèque photo (fichier, légende, EXIF, attribution) |
+| `dim_event` | Événement historique : nom, slug, dates, niveau, catégorie, description, impacts |
+| `dim_event_location` | Lieux liés à un événement (ville optionnelle, région, pays, rôle) |
+| `dim_event_photo` | Photos par événement (fichier, légende, attribution) |
 | `ref_city` | Villes de référence par région (630 villes, 63 régions) |
 | `ref_population` | Population de référence par région/année |
 
@@ -192,6 +209,7 @@ villestats_v2.py                    → données source (format simplifié)
 | `vw_city_period_detail_analysis` | Lecture analytique des périodes détaillées |
 | `vw_city_period_detail_with_population` | Périodes avec population début/fin et variation |
 | `vw_city_period_detail_with_annotations` | Périodes avec annotations couvertes |
+| `vw_event_summary` | Événements avec compteurs de lieux/photos et noms des lieux |
 
 ---
 
@@ -269,4 +287,3 @@ ORDER BY peak_population DESC;
 - emploi et revenus
 - transport collectif
 - émissions et usage du sol
-- événements historiques majeurs
