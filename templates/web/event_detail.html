@@ -1,45 +1,76 @@
 {% extends 'web/base.html' %}
 
+{% block hero_title %}{% endblock %}
+
 {% block content %}
 
-<!-- Event header -->
-<section class="panel event-detail-header">
-    <div class="panel-head">
-        <div>
-            <h2>
-                {{ category_emojis.get(event.event_category, '📌') }}
-                {{ event.event_name }}
-                {% if event.event_level == 1 %}<span class="event-level-major" title="Impact majeur">⭐</span>{% endif %}
-            </h2>
-            <span>
+{% set primary_photo = event.photos | selectattr('is_primary') | first %}
+
+<!-- ===== HERO HEADER ===== -->
+<section class="event-hero"{% if primary_photo %} style="--evt-hero-image: url('{{ url_for('static', filename=primary_photo.photo_path) }}')"{% endif %}>
+    <div class="event-hero-overlay"></div>
+    <article class="event-hero-content">
+        <div class="event-hero-top">
+            <p class="eyebrow">
                 <span class="badge badge-{{ event.event_category }}">{{ category_labels.get(event.event_category, event.event_category) }}</span>
-                {% if event.event_date_start %}
-                · {{ event.event_date_start }}{% if event.event_date_end and event.event_date_end != event.event_date_start %} → {{ event.event_date_end }}{% endif %}
-                {% endif %}
-                {% if event.event_year %} · {{ event.event_year }}{% endif %}
+                {% if event.event_level == 1 %}<span class="event-level-major" title="Impact majeur">⭐</span>{% endif %}
+            </p>
+            <div class="event-hero-actions">
+                <a href="{{ url_for('web.events_list') }}" class="event-hero-btn">← Retour</a>
+                <form method="post" action="{{ url_for('web.event_delete', event_slug=event.event_slug) }}" onsubmit="return confirm('Supprimer cet événement ?');" style="margin:0;">
+                    <button type="submit" class="event-hero-btn event-hero-btn-danger">🗑️ Supprimer</button>
+                </form>
+            </div>
+        </div>
+        <h2>{{ event.event_name }}</h2>
+        <div class="event-hero-badges">
+            {% if event.event_year %}
+            <span class="event-hero-badge">📅 {{ event.event_year }}</span>
+            {% endif %}
+            {% if event.event_date_start %}
+            <span class="event-hero-badge">
+                {{ event.event_date_start }}{% if event.event_date_end and event.event_date_end != event.event_date_start %} → {{ event.event_date_end }}{% endif %}
             </span>
+            {% endif %}
+            {% if event.locations %}
+            <span class="event-hero-badge">📍 {{ event.locations|length }} lieu{% if event.locations|length != 1 %}x{% endif %}</span>
+            {% endif %}
+            {% if event.photos %}
+            <span class="event-hero-badge">📷 {{ event.photos|length }} photo{% if event.photos|length != 1 %}s{% endif %}</span>
+            {% endif %}
         </div>
-        <div style="display:flex;gap:.5rem;">
-            <a href="{{ url_for('web.events_list') }}" class="opt-btn opt-btn-test" style="text-decoration:none;">← Retour</a>
-            <form method="post" action="{{ url_for('web.event_delete', event_slug=event.event_slug) }}" onsubmit="return confirm('Supprimer cet événement ?');" style="margin:0;">
-                <button type="submit" class="opt-btn" style="background:#c0392b;color:#fff;">🗑️ Supprimer</button>
-            </form>
-        </div>
-    </div>
+        {% if event.locations %}
+        <p class="event-hero-locations">
+            {% for loc in event.locations %}
+                {% if loc.matched_city_name %}{{ loc.matched_city_name }}{% else %}{{ loc.region }}{% endif %}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        {% endif %}
+    </article>
 </section>
 
-<!-- Description -->
+<!-- ===== DESCRIPTION + PHOTO ===== -->
 {% if event.description %}
-<section class="panel">
-    <div class="panel-head">
-        <h2>📖 Description</h2>
-    </div>
-    <div class="options-body event-text-body">
-        {% for para in event.description.split('\n\n') %}
-        <p>{{ para }}</p>
-        {% endfor %}
-    </div>
-</section>
+<div class="event-desc-row{% if primary_photo %} event-desc-row-has-photo{% endif %}">
+    <section class="panel">
+        <div class="panel-head">
+            <h2>📖 Description</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in event.description.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% if primary_photo %}
+    <section class="panel event-desc-photo-panel">
+        <img src="{{ url_for('static', filename=primary_photo.photo_path) }}" alt="{{ primary_photo.caption or event.event_name }}">
+        {% if primary_photo.caption %}
+        <span class="event-desc-photo-caption">{{ primary_photo.caption }}</span>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>
 {% endif %}
 
 <!-- Impacts -->
@@ -105,17 +136,23 @@
 <!-- Photos -->
 <section class="panel">
     <div class="panel-head">
-        <h2>📷 Photos</h2>
-        <span>{{ event.photos|length }} photo{% if event.photos|length != 1 %}s{% endif %}</span>
+        <div>
+            <h2>📷 Photos</h2>
+            <span>{{ event.photos|length }} photo{% if event.photos|length != 1 %}s{% endif %}</span>
+        </div>
+        <button type="button" class="event-search-web-btn" id="event-photo-search-btn">🔍 Rechercher sur le web</button>
     </div>
     <div class="options-body">
         {% if event.photos %}
         <div class="event-photos-grid">
             {% for photo in event.photos %}
             <div class="event-photo-card{% if photo.is_primary %} event-photo-primary{% endif %}">
-                <img src="{{ url_for('static', filename=photo.photo_path) }}" alt="{{ photo.caption or event.event_name }}">
+                <img src="{{ url_for('static', filename=photo.photo_path) }}" alt="{{ photo.caption or event.event_name }}" loading="lazy">
                 {% if photo.caption %}
                 <div class="event-photo-caption">{{ photo.caption }}</div>
+                {% endif %}
+                {% if photo.source_url %}
+                <a href="{{ photo.source_url }}" target="_blank" class="event-photo-source" title="Source">🔗</a>
                 {% endif %}
                 <div class="event-photo-actions">
                     {% if not photo.is_primary %}
@@ -127,12 +164,12 @@
             {% endfor %}
         </div>
         {% else %}
-        <p style="opacity:.6;padding:1rem;">Aucune photo.</p>
+        <p style="opacity:.6;padding:1rem;">Aucune photo. Cliquez « Rechercher sur le web » pour en trouver.</p>
         {% endif %}
 
         <!-- Upload form -->
         <div class="event-photo-upload" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--panel-border,#333);">
-            <h4>Ajouter une photo</h4>
+            <h4>📤 Upload manuel</h4>
             <form id="event-photo-form" enctype="multipart/form-data">
                 <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0;">
                     <input type="file" name="photo" accept="image/*" required style="flex:1;min-width:200px;">
@@ -150,6 +187,45 @@
     </div>
 </section>
 
+<!-- ===================== Photo Search Modal ===================== -->
+<div class="photo-search-modal" id="event-photo-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content" style="max-width:1100px;">
+        <div class="photo-search-modal-header">
+            <h3>🔍 Recherche de photos — {{ event.event_name }}</h3>
+            <button type="button" class="photo-search-modal-close">&times;</button>
+        </div>
+        <div class="photo-search-tabs">
+            <button type="button" class="photo-search-tab active" data-evt-tab="auto">🌐 Recherche auto</button>
+            <button type="button" class="photo-search-tab" data-evt-tab="manual">🔎 Recherche manuelle</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <!-- Auto search panel -->
+            <div id="evt-auto-panel">
+                <p class="helper-text" id="evt-auto-status">Cliquez « Rechercher sur le web » pour lancer la recherche.</p>
+                <div class="photo-search-grid" id="evt-auto-grid"></div>
+            </div>
+            <!-- Manual search panel -->
+            <div id="evt-manual-panel" style="display:none;">
+                <p class="helper-text" style="margin:0 0 .5rem;">Cliquez les mots-clés suggérés ou tapez vos propres termes :</p>
+                <div class="evt-pill-tray" id="evt-pill-tray"></div>
+                <div class="evt-search-bar">
+                    <div class="evt-search-input-wrap" id="evt-search-input-wrap">
+                        <input type="text" id="evt-manual-input" class="opt-input" placeholder="Tapez ou cliquez les mots-clés…" autocomplete="off" style="flex:1;">
+                    </div>
+                    <button type="button" class="opt-btn opt-btn-save" id="evt-manual-search-btn">🔍 Chercher</button>
+                </div>
+                <p class="helper-text" id="evt-manual-status"></p>
+                <div class="photo-search-grid" id="evt-manual-grid"></div>
+            </div>
+        </div>
+        <div class="photo-search-modal-footer">
+            <span id="evt-photo-count">0 sélectionnée(s)</span>
+            <button type="button" class="opt-btn opt-btn-save" id="evt-photo-import-btn" disabled>📥 Importer la sélection</button>
+        </div>
+    </div>
+</div>
+
 <!-- Source text -->
 {% if event.source_text %}
 <section class="panel">
@@ -166,7 +242,12 @@
 <script>
 (function() {
     var slug = '{{ event.event_slug }}';
+    var eventName = {{ event.event_name | tojson }};
+    var eventYear = {{ event.event_year | tojson }};
+    var eventCategory = {{ event.event_category | tojson }};
+    var selectedImages = {};
 
+    /* ---- Basic photo CRUD ---- */
     document.getElementById('event-photo-form').addEventListener('submit', function(e) {
         e.preventDefault();
         var form = this;
@@ -194,6 +275,190 @@
             .then(function(r) { return r.json(); })
             .then(function(d) { if (d.success) location.reload(); });
     };
+
+    /* ---- Photo Search Modal ---- */
+    var modal = document.getElementById('event-photo-modal');
+    var autoGrid = document.getElementById('evt-auto-grid');
+    var autoStatus = document.getElementById('evt-auto-status');
+    var manualGrid = document.getElementById('evt-manual-grid');
+    var manualStatus = document.getElementById('evt-manual-status');
+    var manualInput = document.getElementById('evt-manual-input');
+    var pillTray = document.getElementById('evt-pill-tray');
+    var countEl = document.getElementById('evt-photo-count');
+    var importBtn = document.getElementById('evt-photo-import-btn');
+    var autoLoaded = false;
+
+    function openModal() {
+        modal.style.display = '';
+        if (!autoLoaded) {
+            autoLoaded = true;
+            autoStatus.textContent = '⏳ Recherche en cours…';
+            autoGrid.innerHTML = '';
+            fetch('/events/' + encodeURIComponent(slug) + '/photos/search')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.images && d.images.length) {
+                        autoStatus.textContent = d.images.length + ' photos trouvées. Cliquez pour sélectionner.';
+                        renderGrid(autoGrid, d.images);
+                    } else {
+                        autoStatus.textContent = 'Aucune photo trouvée. Essayez la recherche manuelle.';
+                    }
+                })
+                .catch(function(err) {
+                    autoStatus.textContent = '❌ Erreur: ' + err.message;
+                });
+        }
+        buildPills();
+    }
+
+    function closeModal() { modal.style.display = 'none'; }
+
+    document.getElementById('event-photo-search-btn').addEventListener('click', openModal);
+    modal.querySelector('.photo-search-modal-backdrop').addEventListener('click', closeModal);
+    modal.querySelector('.photo-search-modal-close').addEventListener('click', closeModal);
+
+    /* ---- Tabs ---- */
+    modal.querySelectorAll('[data-evt-tab]').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            modal.querySelectorAll('[data-evt-tab]').forEach(function(t) { t.classList.remove('active'); });
+            tab.classList.add('active');
+            var target = tab.getAttribute('data-evt-tab');
+            document.getElementById('evt-auto-panel').style.display = target === 'auto' ? '' : 'none';
+            document.getElementById('evt-manual-panel').style.display = target === 'manual' ? '' : 'none';
+        });
+    });
+
+    /* ---- Render grid of image results ---- */
+    function renderGrid(container, images) {
+        container.innerHTML = '';
+        images.forEach(function(img) {
+            var div = document.createElement('div');
+            div.className = 'photo-search-card';
+            var key = img.url;
+            if (selectedImages[key]) div.classList.add('photo-search-selected');
+            var imgTitle = (img.title || '').replace('File:', '').replace(/_/g, ' ');
+            var imgDesc = (img.description || '').replace(/</g, '&lt;');
+            var captionText = imgDesc || imgTitle.replace(/</g, '&lt;');
+            var tooltipText = imgDesc ? (imgTitle + '\n' + imgDesc) : imgTitle;
+            div.innerHTML =
+                '<img src="' + escHtml(img.thumb_url || img.url) + '" alt="' + escHtml(imgTitle) + '" title="' + tooltipText.replace(/"/g, '&quot;') + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+                '<span class="photo-search-check">✓</span>' +
+                '<span class="photo-search-caption">' + captionText + '</span>' +
+                '<span class="photo-search-size">' + (img.width || '?') + '×' + (img.height || '?') + '</span>';
+            div.addEventListener('click', function() {
+                if (selectedImages[key]) {
+                    delete selectedImages[key];
+                    div.classList.remove('photo-search-selected');
+                } else {
+                    selectedImages[key] = img;
+                    div.classList.add('photo-search-selected');
+                }
+                updateCount();
+            });
+            container.appendChild(div);
+        });
+    }
+
+    function updateCount() {
+        var n = Object.keys(selectedImages).length;
+        countEl.textContent = n + ' sélectionnée(s)';
+        importBtn.disabled = n === 0;
+    }
+
+    function escHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    /* ---- Keyword pills ---- */
+    function buildPills() {
+        pillTray.innerHTML = '';
+        var keywords = [];
+        // Event name words
+        eventName.split(/[\s,\-–—:;()]+/).forEach(function(w) {
+            w = w.trim();
+            if (w.length > 2) keywords.push(w);
+        });
+        // Year
+        if (eventYear) keywords.push(String(eventYear));
+        // Category
+        if (eventCategory) keywords.push(eventCategory.replace('_', ' '));
+        // Common search helpers  
+        var helpers = ['historical', 'archive', 'photograph', 'illustration', 'map', 'document'];
+        keywords = keywords.concat(helpers);
+        // Deduplicate
+        var seen = {};
+        keywords.forEach(function(kw) {
+            var lower = kw.toLowerCase();
+            if (seen[lower]) return;
+            seen[lower] = true;
+            var pill = document.createElement('button');
+            pill.type = 'button';
+            pill.className = 'evt-keyword-pill';
+            pill.textContent = kw;
+            pill.addEventListener('click', function() {
+                var val = manualInput.value.trim();
+                manualInput.value = val ? val + ' ' + kw : kw;
+                pill.classList.toggle('pill-active');
+            });
+            pillTray.appendChild(pill);
+        });
+    }
+
+    /* ---- Manual search ---- */
+    document.getElementById('evt-manual-search-btn').addEventListener('click', doManualSearch);
+    manualInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); doManualSearch(); }
+    });
+
+    function doManualSearch() {
+        var q = manualInput.value.trim();
+        if (!q) return;
+        manualStatus.textContent = '⏳ Recherche « ' + q + ' »…';
+        manualGrid.innerHTML = '';
+        fetch('/events/' + encodeURIComponent(slug) + '/photos/manual-search?q=' + encodeURIComponent(q))
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.images && d.images.length) {
+                    manualStatus.textContent = d.images.length + ' résultats pour « ' + q + ' ».';
+                    renderGrid(manualGrid, d.images);
+                } else {
+                    manualStatus.textContent = 'Aucun résultat pour « ' + q + ' ». Essayez d\'autres mots-clés.';
+                }
+            })
+            .catch(function(err) {
+                manualStatus.textContent = '❌ Erreur: ' + err.message;
+            });
+    }
+
+    /* ---- Import selected ---- */
+    importBtn.addEventListener('click', function() {
+        var images = Object.values(selectedImages);
+        if (!images.length) return;
+        importBtn.disabled = true;
+        importBtn.textContent = '⏳ Import de ' + images.length + ' photo(s)…';
+        fetch('/events/' + encodeURIComponent(slug) + '/photos/import-web', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ images: images })
+        })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.imported > 0) {
+                    location.reload();
+                } else {
+                    importBtn.disabled = false;
+                    importBtn.textContent = '📥 Importer la sélection';
+                    countEl.textContent = '❌ Aucune photo importée. ' + (d.error || '');
+                }
+            })
+            .catch(function(err) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer la sélection';
+                countEl.textContent = '❌ ' + err.message;
+            });
+    });
 })();
 </script>
 

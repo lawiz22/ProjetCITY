@@ -2524,7 +2524,7 @@ def ai_lab_import() -> Response:
 @web.route("/events")
 def events_list() -> str:
     from .db import get_db
-    from .services.event_service import get_events_list, EVENT_CATEGORIES, CATEGORY_LABELS, CATEGORY_EMOJIS
+    from .services.event_service import get_events_list, get_event_primary_photo, EVENT_CATEGORIES, CATEGORY_LABELS, CATEGORY_EMOJIS
 
     conn = get_db()
     filters = {
@@ -2533,6 +2533,8 @@ def events_list() -> str:
         "search": request.args.get("search", ""),
     }
     events = get_events_list(conn, filters)
+    for ev in events:
+        ev["primary_photo"] = get_event_primary_photo(conn, ev["event_slug"])
     return render_template(
         "web/events.html",
         page_title="Événements historiques",
@@ -2652,3 +2654,97 @@ def event_photo_primary(event_slug: str, photo_id: int) -> Response:
         return jsonify({"success": False, "error": "Événement introuvable."})
     set_event_photo_primary(conn, photo_id, event["event_id"])
     return jsonify({"success": True})
+
+
+@web.route("/events/<event_slug>/photos/search")
+def event_photo_search(event_slug: str) -> Response:
+    """AJAX: smart multi-tier search for event photos (Wikipedia + Commons)."""
+    from .db import get_db
+    from .services.event_service import get_event
+    from .services.city_photos import search_annotation_images
+
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"error": "Événement introuvable.", "images": []})
+
+    # Build a label similar to annotation format for the tiered search
+    event_name = event["event_name"]
+    year = event.get("event_year")
+    label = f"{event_name} ({year})" if year else event_name
+
+    # Use the first location's city/region/country for context, or empty
+    locs = event.get("locations", [])
+    city_name = ""
+    region = None
+    country = None
+    for loc in locs:
+        if loc.get("role") == "primary":
+            city_name = loc.get("matched_city_name") or loc.get("region") or ""
+            region = loc.get("region")
+            country = loc.get("country")
+            break
+    if not city_name and locs:
+        loc = locs[0]
+        city_name = loc.get("matched_city_name") or loc.get("region") or ""
+        region = loc.get("region")
+        country = loc.get("country")
+
+    images = search_annotation_images(label, city_name, region, country)
+    return jsonify({"images": images})
+
+
+@web.route("/events/<event_slug>/photos/manual-search")
+def event_photo_manual_search(event_slug: str) -> Response:
+    """AJAX: manual keyword search on Wikimedia Commons for event photos."""
+    from .services.city_photos import _search_commons_batch
+
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"images": []})
+
+    seen_urls: set[str] = set()
+    images = _search_commons_batch(query, seen_urls, limit=40)
+    return jsonify({"images": images})
+
+
+@web.route("/events/<event_slug>/photos/import-web", methods=["POST"])
+def event_photo_import_web(event_slug: str) -> Response:
+    """Import multiple web images into an event's photo library."""
+    from .db import get_db
+    from .services.event_service import get_event, save_event_photo
+    from .services.city_photos import download_web_image
+
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"error": "Événement introuvable.", "imported": 0})
+
+    data = request.get_json(silent=True)
+    if not data or not isinstance(data.get("images"), list):
+        return jsonify({"error": "Aucune image sélectionnée.", "imported": 0})
+
+    imported = 0
+    for img in data["images"]:
+        url = img.get("url", "")
+        if not url:
+            continue
+        result = download_web_image(url)
+        if not result:
+            continue
+        file_bytes, ext = result
+        save_result = save_event_photo(
+            conn,
+            event["event_id"],
+            event_slug,
+            file_bytes,
+            f"web-import{ext}",
+            source_url=img.get("source_page", ""),
+            attribution=img.get("title", "Wikipedia/Wikimedia"),
+            caption=img.get("caption", ""),
+            set_primary=(imported == 0 and not event.get("photos")),
+        )
+        if save_result.get("success"):
+            imported += 1
+
+    return jsonify({"imported": imported})

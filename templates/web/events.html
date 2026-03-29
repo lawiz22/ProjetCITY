@@ -47,31 +47,38 @@
     {% if events %}
     <div class="event-grid">
         {% for ev in events %}
-        <a href="{{ url_for('web.event_detail', event_slug=ev.event_slug) }}" class="event-card">
-            <div class="event-card-header">
-                <span class="event-card-year">{{ ev.event_year or '?' }}</span>
-                <span class="event-card-cat badge badge-{{ ev.event_category }}">
-                    {{ category_emojis.get(ev.event_category, '📌') }} {{ category_labels.get(ev.event_category, ev.event_category) }}
-                </span>
-                {% if ev.event_level == 1 %}
-                <span class="event-card-level event-level-major" title="Impact majeur">⭐</span>
+        <a href="{{ url_for('web.event_detail', event_slug=ev.event_slug) }}" class="event-card{% if ev.primary_photo %} event-card-has-photo{% endif %}">
+            {% if ev.primary_photo %}
+            <div class="event-card-thumb">
+                <img src="{{ url_for('static', filename=ev.primary_photo) }}" alt="" loading="lazy">
+            </div>
+            {% endif %}
+            <div class="event-card-body">
+                <div class="event-card-header">
+                    <span class="event-card-year">{{ ev.event_year or '?' }}</span>
+                    <span class="event-card-cat badge badge-{{ ev.event_category }}">
+                        {{ category_emojis.get(ev.event_category, '📌') }} {{ category_labels.get(ev.event_category, ev.event_category) }}
+                    </span>
+                    {% if ev.event_level == 1 %}
+                    <span class="event-card-level event-level-major" title="Impact majeur">⭐</span>
+                    {% endif %}
+                </div>
+                <h3 class="event-card-title">{{ ev.event_name }}</h3>
+                {% if ev.event_date_start %}
+                <div class="event-card-dates">{{ ev.event_date_start }}{% if ev.event_date_end and ev.event_date_end != ev.event_date_start %} → {{ ev.event_date_end }}{% endif %}</div>
+                {% endif %}
+                <div class="event-card-meta">
+                    {% if ev.location_count %}
+                    <span>📍 {{ ev.location_count }} lieu{% if ev.location_count > 1 %}x{% endif %}</span>
+                    {% endif %}
+                    {% if ev.photo_count %}
+                    <span>📷 {{ ev.photo_count }}</span>
+                    {% endif %}
+                </div>
+                {% if ev.location_names %}
+                <div class="event-card-locations">{{ ev.location_names }}</div>
                 {% endif %}
             </div>
-            <h3 class="event-card-title">{{ ev.event_name }}</h3>
-            {% if ev.event_date_start %}
-            <div class="event-card-dates">{{ ev.event_date_start }}{% if ev.event_date_end and ev.event_date_end != ev.event_date_start %} → {{ ev.event_date_end }}{% endif %}</div>
-            {% endif %}
-            <div class="event-card-meta">
-                {% if ev.location_count %}
-                <span>📍 {{ ev.location_count }} lieu{% if ev.location_count > 1 %}x{% endif %}</span>
-                {% endif %}
-                {% if ev.photo_count %}
-                <span>📷 {{ ev.photo_count }}</span>
-                {% endif %}
-            </div>
-            {% if ev.location_names %}
-            <div class="event-card-locations">{{ ev.location_names }}</div>
-            {% endif %}
         </a>
         {% endfor %}
     </div>
