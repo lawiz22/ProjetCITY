@@ -708,6 +708,15 @@ def _extract_keywords(text: str) -> list[str]:
     return [w for w in words if w.lower() not in _FR_STOPWORDS]
 
 
+def _extract_proper_nouns(text: str) -> list[str]:
+    """Extract proper nouns (capitalized words) and acronyms from text."""
+    import re
+    # Find capitalized words (not at start of sentence) and acronyms
+    words = re.findall(r'\b[A-ZÀ-Ý][a-zà-ÿ]{2,}\b', text)
+    acronyms = re.findall(r'\b[A-Z]{2,}\b', text)
+    return words + acronyms
+
+
 # Geo-context terms appended to queries to avoid off-topic results
 _GEO_CONTEXT = ["city", "ville", "municipality", "history", "historical"]
 
@@ -980,7 +989,8 @@ def search_annotation_images(
       1. Specific: keyword + city + year (best match)
       2. Medium: keyword + city (good match)
       3. Generic: keyword + year or keyword alone (topic fallback)
-      4. Wikipedia article images as final fallback
+      4. Proper noun / named entity queries (for event-style labels)
+      5. Wikipedia article images as final fallback
 
     City name is always present in tier 1-2. Tier 3 drops the city to
     guarantee at least *some* topical photos (e.g. a fire, flood, etc.).
@@ -996,6 +1006,11 @@ def search_annotation_images(
     year_match = re.search(r'\((\d{4})\)', label)
     year = year_match.group(1) if year_match else ""
 
+    # Extract proper nouns from the label (e.g. "Michael Jackson", "Grammy Awards")
+    cleaned_label = re.sub(r'[\U00010000-\U0010ffff]', '', label).strip()
+    cleaned_label = re.sub(r'\(\d{4}\)', '', cleaned_label).strip()
+    proper_nouns = _extract_proper_nouns(cleaned_label)
+
     # Build English queries in same tiers
     en_specific: list[str] = []
     en_medium: list[str] = []
@@ -1009,10 +1024,23 @@ def search_annotation_images(
         en_generic.append(en_title)
 
     # Also extract acronyms / proper nouns
-    cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', label).strip()
-    specials = re.findall(r'[A-Z]{2,}[\w-]*', cleaned)
+    specials = re.findall(r'[A-Z]{2,}[\w-]*', cleaned_label)
     for sp in specials:
         en_medium.append(f"{sp} {city_name}")
+
+    # Build proper-noun-based queries (great for events with names)
+    # E.g. "Michael Jackson Grammy Awards" -> shorter, more targeted
+    pn_queries: list[str] = []
+    if proper_nouns:
+        pn_str = ' '.join(proper_nouns[:4])
+        if year:
+            pn_queries.append(f"{pn_str} {year}")
+        pn_queries.append(pn_str)
+        # Try pairs of proper nouns for very specific results
+        if len(proper_nouns) >= 2:
+            pn_queries.append(f"{proper_nouns[0]} {proper_nouns[1]}")
+            if year:
+                pn_queries.append(f"{proper_nouns[0]} {proper_nouns[1]} {year}")
 
     # Merge English + French queries per tier, English first
     def _dedup(queries: list[str]) -> list[str]:
@@ -1027,7 +1055,7 @@ def search_annotation_images(
 
     tier_specific = _dedup(en_specific + tiers["specific"])
     tier_medium = _dedup(en_medium + tiers["medium"])
-    tier_generic = _dedup(en_generic + tiers["generic"])
+    tier_generic = _dedup(pn_queries + en_generic + tiers["generic"])
 
     images: list[dict[str, Any]] = []
     seen_urls: set[str] = set()

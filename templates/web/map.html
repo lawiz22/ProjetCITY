@@ -18,6 +18,7 @@
                 <button type="button" class="map-layer-pill" data-theme="climate">Climat</button>
                 <button type="button" class="map-layer-pill" data-theme="density">Densité</button>
                 <button type="button" class="map-layer-pill map-layer-pill--time" data-theme="timetravel">⏳ Voyage dans le temps</button>
+                <button type="button" class="map-layer-pill map-layer-pill--time" data-theme="eventtravel">📜 Événements dans le temps</button>
             </div>
         </div>
         <div class="map-toolbar-right">
@@ -203,6 +204,64 @@
             <div class="tt-annotations-scroll" id="tt-annotations-list"></div>
         </div>
     </div>
+
+    <!-- ═══════════ Event Time-Travel slider panel (hidden by default) ═══════════ -->
+    <div class="map-timetravel-panel" id="evt-tt-panel" style="display:none">
+        <div class="map-tt-header">
+            <span class="map-tt-icon">📜</span>
+            <span class="map-tt-title">Événements dans le temps</span>
+            <span class="map-tt-year-display" id="et-year-display">—</span>
+            <span class="map-tt-city-count" id="et-event-count"></span>
+        </div>
+        <div class="map-tt-slider-wrap">
+            <span class="map-tt-bound" id="et-min-year">—</span>
+            <input type="range" id="et-slider" class="map-tt-slider" min="0" max="100" value="50" step="1">
+            <span class="map-tt-bound" id="et-max-year">—</span>
+        </div>
+        <div class="map-tt-controls">
+            <button type="button" class="tt-nav-btn" id="et-back10" title="−10 ans">⏪</button>
+            <button type="button" class="tt-nav-btn" id="et-back1" title="−1 an">◀</button>
+            <button type="button" id="et-play-btn" class="map-tt-play" title="Lecture automatique">▶️ Lecture</button>
+            <button type="button" class="tt-nav-btn" id="et-fwd1" title="+1 an">▶</button>
+            <button type="button" class="tt-nav-btn" id="et-fwd10" title="+10 ans">⏩</button>
+            <select id="et-speed" class="map-tt-speed" title="Vitesse">
+                <option value="3000">Très lent</option>
+                <option value="1500">Lent</option>
+                <option value="800" selected>Normal</option>
+                <option value="350">Rapide</option>
+                <option value="120">Très rapide</option>
+            </select>
+            <label class="tt-autozoom-label" title="Recentrer automatiquement la carte">
+                <input type="checkbox" id="et-autozoom"> Auto-zoom
+            </label>
+        </div>
+    </div>
+
+    <!-- Event time-travel detail panels -->
+    <div class="tt-details-row" id="et-details-row" style="display:none">
+        <!-- Block 1: Active events -->
+        <div class="tt-detail-block tt-cities-block">
+            <h3 class="tt-detail-title">📜 Événements actifs <span id="et-block1-count" class="tt-block1-count"></span></h3>
+            <div class="tt-table-scroll" id="et-events-list"></div>
+        </div>
+        <!-- Block 2: City annotations for affected regions -->
+        <div class="tt-detail-block tt-annotations-block">
+            <div class="tt-chroniques-header">
+                <h3 class="tt-detail-title">📝 Annotations des villes</h3>
+                <div class="tt-chrono-filter" id="et-chrono-filter">
+                    <button type="button" class="tt-chrono-filter-btn" id="et-chrono-filter-btn" title="Filtrer les villes">🔍 Filtrer</button>
+                    <div class="tt-chrono-dropdown" id="et-chrono-dropdown" style="display:none">
+                        <div class="tt-chrono-dropdown-actions">
+                            <button type="button" id="et-chrono-all">Tout</button>
+                            <button type="button" id="et-chrono-none">Aucun</button>
+                        </div>
+                        <div class="tt-chrono-dropdown-list" id="et-chrono-dropdown-list"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tt-annotations-scroll" id="et-annotations-list"></div>
+        </div>
+    </div>
 </section>
 {% endblock %}
 
@@ -211,5 +270,5 @@
 <script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}?v=31"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=39"></script>
 {% endblock %}

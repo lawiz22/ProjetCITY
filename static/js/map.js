@@ -686,7 +686,7 @@
                     '<h3>' + p.city.name + '</h3>' +
                     '<p>' + p.city.country + ' · ' + p.city.region + '</p>' +
                     '<p><strong>' + fmt(p.pop) + '</strong> habitants en <strong>' + year + '</strong></p>' +
-                    '<a href="/cities/' + p.slug + '">Ouvrir la fiche</a>' +
+                    '<a href="/cities/' + p.slug + '" target="_blank">Ouvrir la fiche</a>' +
                     '</div>'
                 );
                 m.addTo(ttMarkerLayer);
@@ -815,7 +815,7 @@
                 aHtml += '<div class="tt-annotation-card">' +
                     '<div class="tt-annotation-header">' +
                     '<span class="tt-annotation-dot" style="background:' + a.color + '"></span>' +
-                    '<strong><a href="/cities/' + a.slug + '">' + a.city + '</a></strong>' +
+                    '<strong><a href="/cities/' + a.slug + '" target="_blank">' + a.city + '</a></strong>' +
                     '<span class="tt-annotation-range">' + a.period.range + '</span>' +
                     '</div>' +
                     '<div class="tt-annotation-title">' + a.period.title + '</div>' +
@@ -846,7 +846,7 @@
                         density = fmt(Math.round(p.city.density)) + '/km²';
                     }
                     html += '<tr>' +
-                        '<td><a href="/cities/' + p.slug + '">' + p.city.name + '</a></td>' +
+                        '<td><a href="/cities/' + p.slug + '" target="_blank">' + p.city.name + '</a></td>' +
                         '<td>' + p.city.region + '</td>' +
                         '<td class="num">' + fmt(p.pop) + '</td>' +
                         '<td class="num">' + density + '</td>' +
@@ -980,6 +980,629 @@
             });
         });
 
+        /* ══════════════════════════════════════════════════════
+           EVENT TIME-TRAVEL ("Événements dans le temps")
+           ══════════════════════════════════════════════════════ */
+        var etData = null;
+        var etLoading = false;
+        var etActive = false;
+        var etPlayInterval = null;
+        var etMarkerLayer = L.layerGroup();
+        var etRegionLayer = L.layerGroup();
+        var etRegionGeo = null; // cached GeoJSON FeatureCollection
+        var etPanel = document.getElementById('evt-tt-panel');
+        var etSlider = document.getElementById('et-slider');
+        var etYearDisplay = document.getElementById('et-year-display');
+        var etEventCount = document.getElementById('et-event-count');
+        var etMinYear = document.getElementById('et-min-year');
+        var etMaxYear = document.getElementById('et-max-year');
+        var etPlayBtn = document.getElementById('et-play-btn');
+        var etSpeed = document.getElementById('et-speed');
+        var etDetailsRow = document.getElementById('et-details-row');
+        var etEventsList = document.getElementById('et-events-list');
+        var etAnnotationsList = document.getElementById('et-annotations-list');
+        var etPreviousTileKey = null;
+
+        // Chroniques filter state
+        var etChronoFilterBtn = document.getElementById('et-chrono-filter-btn');
+        var etChronoDropdown = document.getElementById('et-chrono-dropdown');
+        var etChronoDropdownList = document.getElementById('et-chrono-dropdown-list');
+        var etChronoAll = document.getElementById('et-chrono-all');
+        var etChronoNone = document.getElementById('et-chrono-none');
+        var etChronoChecked = null;
+        var etLastAnnotations = [];
+
+        /* Category colors for event markers */
+        var etCatColors = {
+            guerre: '#e74c3c', catastrophe_naturelle: '#e67e22', economie: '#f1c40f',
+            politique: '#3498db', culture: '#9b59b6', environnement: '#2ecc71',
+            technologie: '#1abc9c', sante: '#e91e63', migration: '#00bcd4', autre: '#95a5a6'
+        };
+
+        /* Map French/variant region names → GeoJSON feature names */
+        var etRegionNameMap = {
+            /* Canada */
+            'Québec': 'Quebec', 'Quebec': 'Quebec', 'Bas-Canada': 'Quebec',
+            'Ontario': 'Ontario', 'Haut-Canada': 'Ontario', 'Région du Haut-Canada': 'Ontario',
+            'Alberta': 'Alberta', 'British Columbia': 'British Columbia',
+            'Colombie-Britannique': 'British Columbia', 'Région des Rocheuses': 'British Columbia',
+            'Manitoba': 'Manitoba', 'Saskatchewan': 'Saskatchewan',
+            'Nouveau-Brunswick': 'New Brunswick', 'New Brunswick': 'New Brunswick',
+            'Nouvelle-Écosse': 'Nova Scotia', 'Nova Scotia': 'Nova Scotia',
+            'Nunavut': 'Nunavut', 'Yukon': 'Yukon Territory', 'Yukon Territory': 'Yukon Territory',
+            'Territoires du Nord-Ouest': 'Northwest Territories', 'Northwest Territories': 'Northwest Territories',
+            'Newfoundland and Labrador': 'Newfoundland and Labrador',
+            'Prairies canadiennes': 'Saskatchewan',
+            /* United States */
+            'Alabama': 'Alabama', 'Alaska': 'Alaska', 'Arizona': 'Arizona',
+            'California': 'California', 'Californie': 'California',
+            'Colorado': 'Colorado', 'Connecticut': 'Connecticut',
+            'District of Columbia': 'District of Columbia', 'Washington D.C.': 'District of Columbia',
+            'Florida': 'Florida', 'Georgia': 'Georgia', 'Géorgie': 'Georgia',
+            'Hawaii': 'Hawaii', 'Hawaï': 'Hawaii',
+            'Idaho': 'Idaho', 'Illinois': 'Illinois', 'Indiana': 'Indiana',
+            'Iowa': 'Iowa', 'Kansas': 'Kansas', 'Kentucky': 'Kentucky',
+            'Louisiana': 'Louisiana', 'Louisiane': 'Louisiana',
+            'Maine': 'Maine', 'Maryland': 'Maryland',
+            'Massachusetts': 'Massachusetts', 'Michigan': 'Michigan',
+            'Minnesota': 'Minnesota', 'Mississippi': 'Mississippi',
+            'Missouri': 'Missouri', 'Montana': 'Montana', 'Montana Territory': 'Montana',
+            'Nebraska': 'Nebraska', 'Nevada': 'Nevada',
+            'New Hampshire': 'New Hampshire', 'New Jersey': 'New Jersey',
+            'New Mexico': 'New Mexico', 'New York': 'New York',
+            'North Carolina': 'North Carolina', 'North Dakota': 'North Dakota',
+            'Ohio': 'Ohio', 'Oklahoma': 'Oklahoma', 'Oregon': 'Oregon',
+            'Pennsylvania': 'Pennsylvania', 'Pennsylvanie': 'Pennsylvania',
+            'Rhode Island': 'Rhode Island',
+            'South Carolina': 'South Carolina', 'Caroline du Sud': 'South Carolina',
+            'South Dakota': 'South Dakota',
+            'Tennessee': 'Tennessee', 'Texas': 'Texas',
+            'Utah': 'Utah', 'Vermont': 'Vermont',
+            'Virginia': 'Virginia', 'Virginie': 'Virginia',
+            'Washington': 'Washington', 'West Virginia': 'West Virginia',
+            'Wisconsin': 'Wisconsin', 'Wyoming': 'Wyoming',
+            'Porto Rico': 'Puerto Rico', 'Puerto Rico': 'Puerto Rico',
+            'Guam': 'Guam',
+            /* Europe */
+            'France': 'France', 'Île-de-France': 'France', 'Nord-Pas-de-Calais': 'France',
+            'Normandie': 'France', 'Caraïbes': 'France',
+            'Allemagne': 'Germany', 'Germany': 'Germany',
+            'Allemagne de l\'Ouest': 'Germany', 'République fédérale d\'Allemagne (RFA)': 'Germany',
+            'République démocratique allemande (RDA)': 'Germany', 'Berlin': 'Germany',
+            'North Rhine-Westphalia': 'Germany',
+            'Royaume-Uni': 'United Kingdom', 'United Kingdom': 'United Kingdom',
+            'Angleterre': 'United Kingdom', 'England': 'United Kingdom', 'Londres': 'United Kingdom',
+            'Italie': 'Italy', 'Italy': 'Italy', 'Latium': 'Italy', 'Lombardy': 'Italy',
+            'Belgique': 'Belgium', 'Belgium': 'Belgium', 'Bruxelles': 'Belgium',
+            'Région de Bruxelles-Capitale': 'Belgium', 'Flandre-Orientale': 'Belgium',
+            'Pays-Bas': 'Netherlands', 'Netherlands': 'Netherlands',
+            'Autriche': 'Austria', 'Austria': 'Austria',
+            'Espagne': 'Spain', 'Spain': 'Spain',
+            'Pologne': 'Poland', 'Poland': 'Poland', 'Varsovie': 'Poland',
+            'Ukraine': 'Ukraine', 'Crimée': 'Ukraine', 'Donbass': 'Ukraine',
+            'Donetsk': 'Ukraine', 'Kiev': 'Ukraine', 'Louhansk': 'Ukraine',
+            /* Russia / ex-USSR */
+            'Russie': 'Russia', 'Russia': 'Russia', 'Moscou': 'Russia',
+            'Saint-Pétersbourg': 'Russia', 'Russie d\'Extrême-Orient': 'Russia',
+            'URSS': 'Russia', 'Union soviétique': 'Russia',
+            'Kazakhstan': 'Kazakhstan',
+            /* Middle East */
+            'Irak': 'Iraq', 'Iraq': 'Iraq', 'Bagdad': 'Iraq', 'Bassorah': 'Iraq', 'Mossoul': 'Iraq',
+            'Iran': 'Iran',
+            'Syrie': 'Syria', 'Syria': 'Syria', 'Damas': 'Syria',
+            'Arabie Saoudite': 'Saudi Arabia', 'Riyad': 'Saudi Arabia',
+            'Jordanie': 'Jordan', 'Jordan': 'Jordan', 'Amman': 'Jordan',
+            'Koweït': 'Kuwait', 'Kuwait': 'Kuwait', 'Koweït City': 'Kuwait',
+            'Turquie': 'Turkey', 'Turkey': 'Turkey',
+            /* Asia */
+            'Japon': 'Japan', 'Japan': 'Japan', 'Tokyo': 'Japan', 'Hiroshima': 'Japan',
+            'Nagasaki': 'Japan', 'Kantō': 'Japan',
+            'Chine': 'China', 'China': 'China', 'Hong Kong': 'China', 'Hubei': 'China',
+            'Corée du Sud': 'South Korea', 'South Korea': 'South Korea',
+            'Seoul': 'South Korea', 'Incheon': 'South Korea', 'Pusan': 'South Korea',
+            'Corée du Nord': 'North Korea', 'North Korea': 'North Korea', 'Pyongyang': 'North Korea',
+            'Corée': 'South Korea', 'Kangwon': 'South Korea',
+            'Vietnam': 'Vietnam', 'Nord Vietnam': 'Vietnam', 'Sud Vietnam': 'Vietnam',
+            'Quang Nam': 'Vietnam', 'Thua Thien-Hue': 'Vietnam',
+            'India': 'India', 'Bengale-Occidental': 'India', 'Delhi': 'India',
+            'Pakistan': 'Pakistan', 'Punjab': 'Pakistan', 'Khyber Pakhtunkhwa': 'Pakistan',
+            'Philippines': 'Philippines', 'Luzon': 'Philippines',
+            'Afghanistan': 'Afghanistan', 'Kaboul': 'Afghanistan', 'Kandahar': 'Afghanistan',
+            /* Americas (non-US) */
+            'Cuba': 'Cuba', 'Havana': 'Cuba',
+            'Mexico': 'Mexico', 'Baja California': 'Mexico', 'Distrito Federal': 'Mexico',
+            'Mexico City': 'Mexico', 'Northern Mexico': 'Mexico', 'Nuevo León': 'Mexico',
+            'Brazil': 'Brazil', 'São Paulo': 'Brazil'
+        };
+
+        /* Load GeoJSON once */
+        function loadRegionGeo(cb) {
+            if (etRegionGeo) return cb(etRegionGeo);
+            fetch('/static/data/regions.geojson')
+                .then(function(r) { return r.json(); })
+                .then(function(d) { etRegionGeo = d; cb(d); })
+                .catch(function() { cb(null); });
+        }
+
+        function fetchEventTTData(cb) {
+            if (etData) return cb(etData);
+            if (etLoading) return;
+            etLoading = true;
+            if (etYearDisplay) etYearDisplay.textContent = 'Chargement…';
+            fetch('/map/event-time-travel')
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    etData = d;
+                    etLoading = false;
+                    cb(d);
+                })
+                .catch(function () {
+                    etLoading = false;
+                    if (etYearDisplay) etYearDisplay.textContent = 'Erreur';
+                });
+        }
+
+        function enterEventTravel() {
+            etActive = true;
+            markerLayer.clearLayers();
+            markerLayer.remove();
+            etRegionLayer.addTo(map);
+            etMarkerLayer.addTo(map);
+            if (etPanel) etPanel.style.display = '';
+
+            etPreviousTileKey = currentTileKey;
+            if (currentTileKey !== 'ohm-historical') {
+                setTileLayer('ohm-historical');
+                if (tileSelect) tileSelect.value = 'ohm-historical';
+            }
+            syncOhmStyleDropdown();
+
+            var mp = document.querySelector('.map-panel-full');
+            if (mp) mp.classList.add('timetravel-active');
+            setTimeout(function(){ map.invalidateSize(); }, 50);
+
+            var readingStrip = document.querySelector('.map-reading-strip');
+            if (readingStrip) readingStrip.style.display = 'none';
+            var densityLeg = document.getElementById('density-legend');
+            if (densityLeg) densityLeg.style.display = 'none';
+
+            fetchEventTTData(function (d) {
+                if (!d.years.length) return;
+                etSlider.min = 0;
+                etSlider.max = d.years.length - 1;
+                etSlider.value = d.years.length - 1;
+                etMinYear.textContent = d.years[0];
+                etMaxYear.textContent = d.years[d.years.length - 1];
+                renderEventTravelYear(d.years[d.years.length - 1]);
+            });
+        }
+
+        function exitEventTravel() {
+            etActive = false;
+            stopETPlay();
+            etMarkerLayer.clearLayers();
+            etMarkerLayer.remove();
+            etRegionLayer.clearLayers();
+            etRegionLayer.remove();
+            markerLayer.addTo(map);
+            if (etPanel) etPanel.style.display = 'none';
+            if (etDetailsRow) etDetailsRow.style.display = 'none';
+
+            if (etPreviousTileKey && etPreviousTileKey !== 'ohm-historical') {
+                setTileLayer(etPreviousTileKey);
+                if (tileSelect) tileSelect.value = etPreviousTileKey;
+            }
+            etPreviousTileKey = null;
+            syncOhmStyleDropdown();
+
+            var mp = document.querySelector('.map-panel-full');
+            if (mp) mp.classList.remove('timetravel-active');
+            setTimeout(function(){ map.invalidateSize(); }, 50);
+
+            var readingStrip = document.querySelector('.map-reading-strip');
+            if (readingStrip) readingStrip.style.display = '';
+
+            render();
+        }
+
+        function renderEventTravelYear(year) {
+            if (!etData) return;
+            etMarkerLayer.clearLayers();
+            etRegionLayer.clearLayers();
+            updateOhmDate(year);
+
+            var events = etData.events;
+            var slugs = Object.keys(events);
+            var activeEvents = [];
+
+            /* Show events whose year matches (± tolerance of 0 — exact year match) */
+            slugs.forEach(function (slug) {
+                var ev = events[slug];
+                if (ev.year === year) {
+                    activeEvents.push({ slug: slug, ev: ev });
+                }
+            });
+
+            /* Collect unique region names to highlight + pick dominant color per region */
+            var regionColors = {}; // geoName → catColor
+            var regionPopups = {}; // geoName → popup html
+            var regionEventSlugs = {}; // geoName → Set of slugs (dedupe)
+            var markerBounds = [];
+
+            activeEvents.forEach(function (item) {
+                var ev = item.ev;
+                var catColor = etCatColors[ev.category] || '#95a5a6';
+                ev.locations.forEach(function (loc) {
+                    var geoName = etRegionNameMap[loc.region];
+                    if (geoName) {
+                        if (!regionColors[geoName]) {
+                            regionColors[geoName] = catColor;
+                            regionPopups[geoName] = '';
+                            regionEventSlugs[geoName] = new Set();
+                        }
+                        if (!regionEventSlugs[geoName].has(item.slug)) {
+                            regionEventSlugs[geoName].add(item.slug);
+                            regionPopups[geoName] += '<p><strong>' + ev.category_emoji + ' ' + ev.name + '</strong> (' + ev.year + ')</p>';
+                        }
+                    }
+                    /* Also place a small circle marker for locations with coords */
+                    if (loc.lat && loc.lng) {
+                        var m = L.circleMarker([loc.lat, loc.lng], {
+                            radius: ev.level === 1 ? 8 : 5,
+                            color: '#fff',
+                            fillColor: catColor,
+                            fillOpacity: 0.9,
+                            weight: 2
+                        });
+                        m.bindPopup(
+                            '<div class="map-popup">' +
+                            '<h3>' + ev.category_emoji + ' ' + ev.name + '</h3>' +
+                            '<p>' + ev.category_label + ' · ' + ev.year + '</p>' +
+                            (loc.city_name ? '<p>📍 ' + loc.city_name + '</p>' : '') +
+                            (ev.description ? '<p style="font-size:.85em;opacity:.8;">' + ev.description.substring(0, 150) + '…</p>' : '') +
+                            '<a href="/events/' + item.slug + '" target="_blank">Voir l\'événement</a>' +
+                            '</div>'
+                        );
+                        m.addTo(etMarkerLayer);
+                        markerBounds.push([loc.lat, loc.lng]);
+                    }
+                });
+            });
+
+            /* Draw region polygons from GeoJSON */
+            loadRegionGeo(function(geo) {
+                if (!geo) return;
+                var regionNames = Object.keys(regionColors);
+                if (!regionNames.length) return;
+                geo.features.forEach(function(feat) {
+                    var fname = feat.properties.name;
+                    if (regionColors[fname]) {
+                        var color = regionColors[fname];
+                        var layer = L.geoJSON(feat, {
+                            style: {
+                                fillColor: color,
+                                fillOpacity: 0.35,
+                                color: color,
+                                weight: 2,
+                                opacity: 0.7
+                            }
+                        });
+                        layer.bindPopup('<div class="map-popup">' + regionPopups[fname] + '</div>');
+                        layer.addTo(etRegionLayer);
+                    }
+                });
+            });
+
+            if (etYearDisplay) etYearDisplay.textContent = year;
+            if (etEventCount) etEventCount.textContent = activeEvents.length + ' événement' + (activeEvents.length !== 1 ? 's' : '');
+            if (ctrls.summary) {
+                ctrls.summary.textContent = activeEvents.length + ' événement(s) en ' + year + '. Couche active\u00a0: Événements dans le temps.';
+            }
+            if (ctrls.visibleCount) {
+                ctrls.visibleCount.textContent = activeEvents.length + ' événements';
+            }
+            var etBlock1Count = document.getElementById('et-block1-count');
+            if (etBlock1Count) {
+                etBlock1Count.textContent = '— ' + activeEvents.length + ' en ' + year;
+            }
+
+            updateETDetails(activeEvents, year);
+
+            var etAutoZoom = document.getElementById('et-autozoom');
+            if (etAutoZoom && etAutoZoom.checked && markerBounds.length) {
+                var bounds = L.latLngBounds(markerBounds);
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+            }
+        }
+
+        function updateETDetails(activeEvents, year) {
+            if (!etDetailsRow) return;
+            etDetailsRow.style.display = activeEvents.length ? '' : 'none';
+
+            /* ── Block 1: Event cards ── */
+            if (etEventsList) {
+                var eHtml = '';
+                activeEvents.forEach(function (item) {
+                    var ev = item.ev;
+                    var catColor = etCatColors[ev.category] || '#95a5a6';
+                    var locNames = ev.locations.map(function (l) { return l.city_name || l.region; }).filter(Boolean);
+                    var photoHtml = '';
+                    if (ev.primary_photo) {
+                        photoHtml = '<img class="et-card-thumb" src="/static/' + ev.primary_photo + '" alt="">';
+                    }
+                    eHtml += '<div class="et-event-card">' +
+                        '<div class="et-event-card-header">' +
+                        '<span class="et-event-dot" style="background:' + catColor + '"></span>' +
+                        '<strong><a href="/events/' + item.slug + '" target="_blank">' + ev.category_emoji + ' ' + ev.name + '</a></strong>' +
+                        '</div>' +
+                        '<div class="et-event-card-body">' +
+                        photoHtml +
+                        '<div class="et-event-card-meta">' +
+                        '<span class="et-event-badge">' + ev.category_label + '</span>' +
+                        (ev.level === 1 ? ' <span class="et-event-badge et-event-badge-major">⭐ Impact majeur</span>' : '') +
+                        (locNames.length ? '<p class="et-event-locs">📍 ' + locNames.join(', ') + '</p>' : '') +
+                        '</div>' +
+                        '</div>' +
+                        (ev.description ? '<p class="et-event-desc">' + ev.description + '</p>' : '') +
+                        '</div>';
+                });
+                if (!activeEvents.length) {
+                    eHtml = '<p class="tt-no-data">Aucun événement pour cette année.</p>';
+                }
+                etEventsList.innerHTML = eHtml;
+            }
+
+            /* ── Block 2: Annotations of cities in affected regions ── */
+            if (etAnnotationsList) {
+                var affectedRegions = new Set();
+                activeEvents.forEach(function (item) {
+                    item.ev.locations.forEach(function (loc) {
+                        if (loc.region && loc.country) {
+                            affectedRegions.add(loc.region + '|' + loc.country);
+                        }
+                    });
+                });
+
+                var cityAnns = etData.city_annotations || {};
+                var annotations = [];
+                Object.keys(cityAnns).forEach(function (cslug) {
+                    var ca = cityAnns[cslug];
+                    var cityRegionKey = ca.region + '|' + ca.country;
+                    if (!affectedRegions.has(cityRegionKey)) return;
+
+                    /* Find the active period for this year */
+                    var activePeriod = null;
+                    if (ca.periods && ca.periods.length) {
+                        for (var i = 0; i < ca.periods.length; i++) {
+                            var pd = ca.periods[i];
+                            var start = pd.start || 0;
+                            var end = pd.end || 9999;
+                            if (year >= start && year <= end) {
+                                activePeriod = pd;
+                                break;
+                            }
+                        }
+                        if (!activePeriod) {
+                            for (var j = ca.periods.length - 1; j >= 0; j--) {
+                                if (ca.periods[j].start && year >= ca.periods[j].start) {
+                                    activePeriod = ca.periods[j];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    /* Collect annotations near this year */
+                    var nearAnns = (ca.annotations || []).filter(function (a) {
+                        return Math.abs(a.year - year) <= 5;
+                    });
+
+                    if (activePeriod || nearAnns.length) {
+                        annotations.push({
+                            city: ca.name,
+                            slug: cslug,
+                            color: ca.color,
+                            region: ca.region,
+                            period: activePeriod,
+                            nearAnnotations: nearAnns
+                        });
+                    }
+                });
+
+                annotations.sort(function (a, b) { return a.city.localeCompare(b.city); });
+                etLastAnnotations = annotations;
+                buildETChronoChecklist(annotations);
+                renderETChronoFiltered();
+            }
+        }
+
+        function buildETChronoChecklist(annotations) {
+            if (!etChronoDropdownList) return;
+            var cities = [];
+            annotations.forEach(function (a) {
+                if (cities.indexOf(a.city) === -1) cities.push(a.city);
+            });
+            cities.sort(function (a, b) { return a.localeCompare(b); });
+            var html = '';
+            cities.forEach(function (city) {
+                var checked = !etChronoChecked || etChronoChecked.has(city);
+                html += '<label><input type="checkbox" value="' + city.replace(/"/g, '&quot;') + '"' +
+                    (checked ? ' checked' : '') + '> ' + city + '</label>';
+            });
+            etChronoDropdownList.innerHTML = html;
+            etChronoDropdownList.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+                cb.addEventListener('change', function () {
+                    var allCbs = etChronoDropdownList.querySelectorAll('input[type="checkbox"]');
+                    var allChecked = true;
+                    var checked = new Set();
+                    allCbs.forEach(function (c) {
+                        if (c.checked) checked.add(c.value);
+                        else allChecked = false;
+                    });
+                    etChronoChecked = allChecked ? null : checked;
+                    etChronoFilterBtn.classList.toggle('is-filtered', !allChecked);
+                    renderETChronoFiltered();
+                });
+            });
+        }
+
+        function renderETChronoFiltered() {
+            if (!etAnnotationsList) return;
+            var filtered = etLastAnnotations;
+            if (etChronoChecked) {
+                filtered = etLastAnnotations.filter(function (a) {
+                    return etChronoChecked.has(a.city);
+                });
+            }
+            var aHtml = '';
+            filtered.forEach(function (a, idx) {
+                aHtml += '<div class="tt-annotation-card tt-annotation-compact">' +
+                    '<div class="tt-annotation-header">' +
+                    '<span class="tt-annotation-dot" style="background:' + a.color + '"></span>' +
+                    '<strong><a href="/cities/' + a.slug + '" target="_blank">' + a.city + '</a></strong>' +
+                    '<span class="tt-annotation-range">' + a.region + '</span>';
+                if (a.nearAnnotations && a.nearAnnotations.length) {
+                    aHtml += '<div class="et-near-annotations" style="margin:0;margin-left:8px;">';
+                    a.nearAnnotations.forEach(function (na) {
+                        aHtml += '<span class="et-ann-badge" style="background:' + (na.color || 'var(--accent)') + '">' +
+                            na.year + ' — ' + na.label + '</span>';
+                    });
+                    aHtml += '</div>';
+                }
+                if (a.period) {
+                    aHtml += '<button class="tt-annotation-toggle" data-idx="' + idx + '" title="Voir les détails">▼</button>';
+                }
+                aHtml += '</div>';
+                if (a.period) {
+                    aHtml += '<div class="tt-annotation-detail" id="tt-ann-detail-' + idx + '" style="display:none;">' +
+                        '<div class="tt-annotation-title">' + a.period.title + ' <span style="opacity:.6;">(' + a.period.range + ')</span></div>' +
+                        '<div class="tt-annotation-summary">' + a.period.summary + '</div>' +
+                        '</div>';
+                }
+                aHtml += '</div>';
+            });
+            if (!filtered.length) {
+                aHtml = '<p class="tt-no-data">Aucune annotation disponible pour les régions touchées.</p>';
+            }
+            etAnnotationsList.innerHTML = aHtml;
+
+            /* Bind toggle buttons */
+            etAnnotationsList.querySelectorAll('.tt-annotation-toggle').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var detail = document.getElementById('tt-ann-detail-' + btn.getAttribute('data-idx'));
+                    if (detail) {
+                        var open = detail.style.display !== 'none';
+                        detail.style.display = open ? 'none' : '';
+                        btn.textContent = open ? '▼' : '▲';
+                    }
+                });
+            });
+        }
+
+        /* ET chrono filter toggle */
+        if (etChronoFilterBtn) {
+            etChronoFilterBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var vis = etChronoDropdown.style.display === 'none';
+                etChronoDropdown.style.display = vis ? '' : 'none';
+            });
+        }
+        document.addEventListener('click', function (e) {
+            if (etChronoDropdown && etChronoDropdown.style.display !== 'none') {
+                if (!etChronoDropdown.contains(e.target) && e.target !== etChronoFilterBtn) {
+                    etChronoDropdown.style.display = 'none';
+                }
+            }
+        });
+        if (etChronoAll) {
+            etChronoAll.addEventListener('click', function () {
+                etChronoChecked = null;
+                var cbs = etChronoDropdownList.querySelectorAll('input[type="checkbox"]');
+                cbs.forEach(function (cb) { cb.checked = true; });
+                etChronoFilterBtn.classList.remove('is-filtered');
+                renderETChronoFiltered();
+            });
+        }
+        if (etChronoNone) {
+            etChronoNone.addEventListener('click', function () {
+                etChronoChecked = new Set();
+                var cbs = etChronoDropdownList.querySelectorAll('input[type="checkbox"]');
+                cbs.forEach(function (cb) { cb.checked = false; });
+                etChronoFilterBtn.classList.add('is-filtered');
+                renderETChronoFiltered();
+            });
+        }
+
+        /* ET Slider */
+        if (etSlider) {
+            etSlider.addEventListener('input', function () {
+                if (!etData) return;
+                var idx = Number(etSlider.value);
+                var year = etData.years[idx];
+                renderEventTravelYear(year);
+            });
+        }
+
+        /* ET Step navigation */
+        function etStepYears(delta) {
+            if (!etData || !etData.years.length) return;
+            var curIdx = Number(etSlider.value);
+            var curYear = etData.years[curIdx];
+            var targetYear = curYear + delta;
+            var bestIdx = curIdx;
+            var bestDist = Infinity;
+            for (var i = 0; i < etData.years.length; i++) {
+                var d = Math.abs(etData.years[i] - targetYear);
+                if (d < bestDist) { bestDist = d; bestIdx = i; }
+            }
+            if (bestIdx === curIdx && delta > 0 && curIdx < etData.years.length - 1) bestIdx = curIdx + 1;
+            if (bestIdx === curIdx && delta < 0 && curIdx > 0) bestIdx = curIdx - 1;
+            etSlider.value = bestIdx;
+            renderEventTravelYear(etData.years[bestIdx]);
+        }
+
+        ['et-back10','et-back1','et-fwd1','et-fwd10'].forEach(function (id) {
+            var btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', function () {
+                var deltas = {'et-back10': -10, 'et-back1': -1, 'et-fwd1': 1, 'et-fwd10': 10};
+                etStepYears(deltas[id]);
+            });
+        });
+
+        /* ET Play / Pause */
+        function stopETPlay() {
+            if (etPlayInterval) {
+                clearInterval(etPlayInterval);
+                etPlayInterval = null;
+            }
+            if (etPlayBtn) etPlayBtn.textContent = '▶️ Lecture';
+        }
+
+        if (etPlayBtn) {
+            etPlayBtn.addEventListener('click', function () {
+                if (etPlayInterval) { stopETPlay(); return; }
+                if (!etData || !etData.years.length) return;
+                etPlayBtn.textContent = '⏸️ Pause';
+                var speed = Number(etSpeed.value) || 800;
+                etPlayInterval = setInterval(function () {
+                    var idx = Number(etSlider.value);
+                    if (idx >= etData.years.length - 1) {
+                        etSlider.value = 0;
+                        idx = 0;
+                    } else {
+                        idx++;
+                        etSlider.value = idx;
+                    }
+                    renderEventTravelYear(etData.years[idx]);
+                }, speed);
+            });
+        }
+        if (etSpeed) {
+            etSpeed.addEventListener('change', function () {
+                if (etPlayInterval) { stopETPlay(); etPlayBtn.click(); }
+            });
+        }
+
         /* Layer pills */
         ctrls.themePills.forEach(function (pill) {
             pill.addEventListener('click', function () {
@@ -992,9 +1615,14 @@
                 if (typeof hideSpotlight === 'function') hideSpotlight();
 
                 if (theme === 'timetravel') {
+                    if (etActive) exitEventTravel();
                     enterTimeTravel();
+                } else if (theme === 'eventtravel') {
+                    if (ttActive) exitTimeTravel();
+                    enterEventTravel();
                 } else {
                     if (ttActive) exitTimeTravel();
+                    if (etActive) exitEventTravel();
                     else render();
                 }
             });
@@ -1006,12 +1634,18 @@
                     if (ttActive && ttData) {
                         var idx = Number(ttSlider.value);
                         renderTimeTravelYear(ttData.years[idx]);
+                    } else if (etActive && etData) {
+                        var idx = Number(etSlider.value);
+                        renderEventTravelYear(etData.years[idx]);
                     } else { render(); }
                 });
                 el.addEventListener('change', function () {
                     if (ttActive && ttData) {
                         var idx = Number(ttSlider.value);
                         renderTimeTravelYear(ttData.years[idx]);
+                    } else if (etActive && etData) {
+                        var idx = Number(etSlider.value);
+                        renderEventTravelYear(etData.years[idx]);
                     } else { render(); }
                 });
             }
@@ -1020,6 +1654,7 @@
         if (ctrls.reset) {
             ctrls.reset.addEventListener('click', function () {
                 if (ttActive) exitTimeTravel();
+                if (etActive) exitEventTravel();
                 ctrls.activeTheme = 'population';
                 ctrls.themePills.forEach(function (p) {
                     p.classList.toggle('is-active', p.getAttribute('data-theme') === 'population');

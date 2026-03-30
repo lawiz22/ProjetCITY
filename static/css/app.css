@@ -3758,12 +3758,125 @@ dt {
     line-height: 1.45;
     color: var(--text-secondary, #666);
 }
+.tt-annotation-compact .tt-annotation-header {
+    flex-wrap: wrap;
+}
+.tt-annotation-toggle {
+    background: none;
+    border: 1px solid var(--border-light, #ddd);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: .65rem;
+    padding: 2px 6px;
+    color: var(--text-secondary, #888);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.tt-annotation-toggle:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+.tt-annotation-detail {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: var(--bg-secondary, #f8f8f8);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent);
+}
 .tt-no-data {
     color: var(--text-secondary, #888);
     font-size: 0.85rem;
     font-style: italic;
     text-align: center;
     padding: 30px 10px;
+}
+
+/* ── Event Time-Travel cards ─────────────────────────────── */
+.et-event-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: .8rem;
+    margin-bottom: .6rem;
+}
+.et-event-card-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .4rem;
+}
+.et-event-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.et-event-card-header a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: .88rem;
+}
+.et-event-card-header a:hover {
+    color: var(--accent);
+}
+.et-event-card-body {
+    display: flex;
+    gap: .6rem;
+    margin-bottom: .35rem;
+}
+.et-card-thumb {
+    width: 60px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+.et-event-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    align-items: center;
+}
+.et-event-badge {
+    display: inline-block;
+    padding: .1rem .45rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.et-event-badge-major {
+    background: #f59e0b;
+}
+.et-event-locs {
+    font-size: .78rem;
+    opacity: .7;
+    margin: 0;
+    width: 100%;
+}
+.et-event-desc {
+    font-size: .8rem;
+    opacity: .75;
+    margin: .2rem 0 0;
+    line-height: 1.4;
+}
+.et-near-annotations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    margin-top: .4rem;
+}
+.et-ann-badge {
+    display: inline-block;
+    padding: .12rem .5rem;
+    border-radius: 999px;
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 @media (max-width: 900px) {
@@ -6524,6 +6637,13 @@ td {
     gap: 1rem;
     padding: 1.2rem;
 }
+.event-grid-large   { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.event-grid-medium  { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.event-grid-small   { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.event-grid-compact { grid-template-columns: 1fr; }
+
+/* Description hidden by default, shown in compact */
+.event-card-desc { display: none; }
 .event-card {
     display: block;
     background: var(--panel-strong, #1a1a2e);
@@ -6538,9 +6658,46 @@ td {
     border-color: var(--accent, #4f46e5);
     transform: translateY(-2px);
 }
+
+/* -- Event card view-mode overrides (must be after .event-card base) -- */
+.event-card-small .event-card-title { font-size: .88rem; }
+.event-card-small .event-card-body  { padding: .6rem .8rem .8rem; }
+.event-card-small .event-card-year  { font-size: .95rem; }
+.event-card-small .badge            { font-size: .65rem; padding: .1rem .4rem; }
+
+.event-card-medium .event-card-title { font-size: .92rem; }
+.event-card-medium .event-card-body  { padding: .7rem .9rem .9rem; }
+
+/* Compact / list view: square thumb on the left */
+a.event-card.event-card-compact {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 0;
+    align-items: stretch;
+}
+.event-card-compact .event-card-thumb {
+    aspect-ratio: 1 / 1;
+    height: auto;
+    width: 120px;
+}
+.event-card-compact .event-card-body {
+    padding: .7rem 1rem;
+}
+.event-card-compact .event-card-title {
+    font-size: .92rem;
+}
+.event-card-compact .event-card-desc {
+    font-size: .78rem;
+    opacity: .6;
+    margin-top: .3rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 .event-card-thumb {
     width: 100%;
-    height: 150px;
+    aspect-ratio: 1 / 1;
     overflow: hidden;
 }
 .event-card-thumb img {

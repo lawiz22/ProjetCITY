@@ -2,52 +2,94 @@
 
 {% block content %}
 
-<!-- Filters -->
 <section class="panel">
     <div class="panel-head">
-        <h2>🗂️ Filtres</h2>
-        <span>{{ events|length }} événement{% if events|length != 1 %}s{% endif %}</span>
-    </div>
-    <div class="options-body" style="padding:1rem 1.5rem;">
-        <form method="get" action="{{ url_for('web.events_list') }}" class="event-filters-form">
-            <div class="event-filters-row">
-                <div class="event-filter-field">
-                    <label class="opt-label">Catégorie</label>
-                    <select name="category" class="opt-input" onchange="this.form.submit()">
-                        <option value="">Toutes</option>
-                        {% for cat in categories %}
-                        <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>
-                            {{ category_emojis[cat] }} {{ category_labels[cat] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="event-filter-field">
-                    <label class="opt-label">Niveau</label>
-                    <select name="level" class="opt-input" onchange="this.form.submit()">
-                        <option value="">Tous</option>
-                        <option value="1" {% if filters.level == '1' %}selected{% endif %}>⭐ Majeur</option>
-                        <option value="2" {% if filters.level == '2' %}selected{% endif %}>📌 Significatif</option>
-                    </select>
-                </div>
-                <div class="event-filter-field" style="flex:2;">
-                    <label class="opt-label">Recherche</label>
-                    <div style="display:flex;gap:6px;">
-                        <input type="text" name="search" class="opt-input" value="{{ filters.search }}" placeholder="Nom, lieu, description…">
-                        <button type="submit" class="opt-btn opt-btn-save" style="padding:.4rem 1rem;">🔍</button>
-                    </div>
-                </div>
+        <div>
+            <h2>📜 Événements historiques</h2>
+            <span id="evt-dir-count">{{ events|length }} événement{% if events|length != 1 %}s{% endif %}</span>
+        </div>
+        <div class="dir-controls">
+            <!-- Category filter -->
+            <div class="dir-filter">
+                <select id="evt-filter-category">
+                    <option value="">Toutes catégories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>
+                        {{ category_emojis[cat] }} {{ category_labels[cat] }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
-        </form>
+            <!-- Level filter -->
+            <div class="dir-filter">
+                <select id="evt-filter-level">
+                    <option value="">Tous niveaux</option>
+                    <option value="1" {% if filters.level == '1' %}selected{% endif %}>⭐ Majeur</option>
+                    <option value="2" {% if filters.level == '2' %}selected{% endif %}>📌 Significatif</option>
+                </select>
+            </div>
+            <!-- Search -->
+            <div class="dir-filter">
+                <input type="text" id="evt-filter-search" placeholder="Rechercher un événement…" value="{{ filters.search }}">
+            </div>
+            <!-- Sort -->
+            <div class="dir-sort">
+                <label for="evt-sort-select">Trier par</label>
+                <select id="evt-sort-select">
+                    <option value="name-asc">Nom A → Z</option>
+                    <option value="name-desc">Nom Z → A</option>
+                    <option value="year-desc">Année ↓ (récent)</option>
+                    <option value="year-asc">Année ↑ (ancien)</option>
+                </select>
+            </div>
+            <!-- View switcher -->
+            <div class="view-switcher" role="group" aria-label="Mode d'affichage">
+                <a class="secondary-button inline-button view-mode-button view-mode-button-large {% if view_mode == 'large' %}is-active{% endif %}" href="{{ url_for('web.events_list', view='large') }}" aria-label="Vue gros bloc" title="Vue gros bloc">
+                    <span class="view-mode-icon view-mode-large" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-medium {% if view_mode == 'medium' %}is-active{% endif %}" href="{{ url_for('web.events_list', view='medium') }}" aria-label="Vue moyen bloc" title="Vue moyen bloc">
+                    <span class="view-mode-icon view-mode-medium" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-small {% if view_mode == 'small' %}is-active{% endif %}" href="{{ url_for('web.events_list', view='small') }}" aria-label="Vue petit bloc" title="Vue petit bloc">
+                    <span class="view-mode-icon view-mode-small" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-compact {% if view_mode == 'compact' %}is-active{% endif %}" href="{{ url_for('web.events_list', view='compact') }}" aria-label="Vue liste" title="Vue liste">
+                    <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
+                </a>
+            </div>
+        </div>
     </div>
-</section>
 
-<!-- Events grid -->
-<section class="panel-grid panel-grid-1">
-    {% if events %}
-    <div class="event-grid">
+    <!-- Pagination top -->
+    <div class="dir-pager" id="evt-pager-top">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Événements par page:</span>
+            <select id="evt-per-page-select">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Tous</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="evt-pager-info-top"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    <div class="event-grid event-grid-{{ view_mode }}" id="evt-dir-grid">
         {% for ev in events %}
-        <a href="{{ url_for('web.event_detail', event_slug=ev.event_slug) }}" class="event-card{% if ev.primary_photo %} event-card-has-photo{% endif %}">
+        <a class="event-card event-card-{{ view_mode }}{% if ev.primary_photo %} event-card-has-photo{% endif %}"
+           href="{{ url_for('web.event_detail', event_slug=ev.event_slug) }}"
+           data-evt-name="{{ ev.event_name }}"
+           data-evt-year="{{ ev.event_year or 0 }}"
+           data-evt-category="{{ ev.event_category }}"
+           data-evt-level="{{ ev.event_level }}"
+           data-evt-locations="{{ ev.location_names or '' }}">
             {% if ev.primary_photo %}
             <div class="event-card-thumb">
                 <img src="{{ url_for('static', filename=ev.primary_photo) }}" alt="" loading="lazy">
@@ -78,16 +120,186 @@
                 {% if ev.location_names %}
                 <div class="event-card-locations">{{ ev.location_names }}</div>
                 {% endif %}
+                {% if ev.description %}
+                <div class="event-card-desc">{{ ev.description[:180] }}{% if ev.description|length > 180 %}…{% endif %}</div>
+                {% endif %}
             </div>
         </a>
         {% endfor %}
     </div>
-    {% else %}
-    <div class="empty-state">
+
+    <!-- Pagination bottom -->
+    <div class="dir-pager" id="evt-pager-bottom">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Événements par page:</span>
+            <select class="evt-per-page-mirror">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Tous</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="evt-pager-info-bottom"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    {% if not events %}
+    <div class="empty-state" style="padding:2rem;">
         <p>Aucun événement trouvé.</p>
         <p>Utilisez l'<a href="{{ url_for('web.ai_lab') }}">AI Lab</a> (Step 4) pour générer des événements historiques.</p>
     </div>
     {% endif %}
 </section>
+
+<!-- Events directory sort, filter & pagination JS -->
+<script>
+(function() {
+    var grid = document.getElementById('evt-dir-grid');
+    var sortSelect = document.getElementById('evt-sort-select');
+    var perPageSelect = document.getElementById('evt-per-page-select');
+    var countSpan = document.getElementById('evt-dir-count');
+    var categorySelect = document.getElementById('evt-filter-category');
+    var levelSelect = document.getElementById('evt-filter-level');
+    var searchInput = document.getElementById('evt-filter-search');
+    if (!grid || !sortSelect || !perPageSelect) return;
+
+    var mirrors = document.querySelectorAll('.evt-per-page-mirror');
+    mirrors.forEach(function(m) {
+        m.value = perPageSelect.value;
+        m.addEventListener('change', function() {
+            perPageSelect.value = m.value;
+            currentPage = 1;
+            render();
+        });
+    });
+
+    var allCards = Array.prototype.slice.call(grid.querySelectorAll('.event-card'));
+    var filtered = allCards.slice();
+    var sorted = allCards.slice();
+    var currentPage = 1;
+
+    /* ---- Filtering ---- */
+    function applyFilters() {
+        var category = categorySelect.value;
+        var level = levelSelect.value;
+        var search = searchInput.value.trim().toLowerCase();
+
+        filtered = allCards.filter(function(c) {
+            if (category && c.dataset.evtCategory !== category) return false;
+            if (level && String(c.dataset.evtLevel) !== level) return false;
+            if (search) {
+                var name = (c.dataset.evtName || '').toLowerCase();
+                var locs = (c.dataset.evtLocations || '').toLowerCase();
+                if (name.indexOf(search) === -1 && locs.indexOf(search) === -1) return false;
+            }
+            return true;
+        });
+        doSort(true);
+    }
+
+    categorySelect.addEventListener('change', applyFilters);
+    levelSelect.addEventListener('change', applyFilters);
+    var searchTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilters, 200);
+    });
+
+    /* ---- Sorting ---- */
+    function getPerPage() {
+        var v = perPageSelect.value;
+        return v === 'all' ? sorted.length || 1 : parseInt(v, 10);
+    }
+
+    function tp() {
+        return Math.max(1, Math.ceil(sorted.length / getPerPage()));
+    }
+
+    function doSort(resetPage) {
+        var val = sortSelect.value;
+        var parts = val.split('-');
+        var field = parts[0];
+        var dir = parts[1];
+        sorted = filtered.slice();
+        sorted.sort(function(a, b) {
+            if (field === 'name') {
+                var va = (a.dataset.evtName || '').toLowerCase();
+                var vb = (b.dataset.evtName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else {
+                var va = parseInt(a.dataset.evtYear, 10) || 0;
+                var vb = parseInt(b.dataset.evtYear, 10) || 0;
+                return dir === 'asc' ? va - vb : vb - va;
+            }
+        });
+        if (resetPage) currentPage = 1;
+        render();
+    }
+
+    /* ---- Render ---- */
+    function render() {
+        var pp = getPerPage();
+        var total = tp();
+        if (currentPage > total) currentPage = total;
+        var start = (currentPage - 1) * pp;
+        var end = start + pp;
+
+        allCards.forEach(function(c) { c.style.display = 'none'; });
+        sorted.slice(start, end).forEach(function(c) { c.style.display = ''; });
+        sorted.forEach(function(c) { grid.appendChild(c); });
+
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+
+        var n = sorted.length;
+        countSpan.textContent = n + ' événement' + (n !== 1 ? 's' : '');
+
+        var infoText = 'Page ' + currentPage + ' de ' + total;
+        document.querySelectorAll('#evt-pager-top .dir-pager-info, #evt-pager-bottom .dir-pager-info').forEach(function(el) { el.textContent = infoText; });
+
+        var isFirst = currentPage <= 1;
+        var isLast = currentPage >= total;
+        var showPager = total > 1;
+
+        [document.getElementById('evt-pager-top'), document.getElementById('evt-pager-bottom')].forEach(function(pager) {
+            if (!pager) return;
+            pager.style.display = showPager ? '' : 'none';
+            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+                var d = btn.dataset.dir;
+                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
+            });
+        });
+    }
+
+    // Arrow clicks
+    document.querySelectorAll('#evt-pager-top .dir-pager-arrow, #evt-pager-bottom .dir-pager-arrow').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var total = tp();
+            switch (btn.dataset.dir) {
+                case 'first': currentPage = 1; break;
+                case 'prev':  if (currentPage > 1) currentPage--; break;
+                case 'next':  if (currentPage < total) currentPage++; break;
+                case 'last':  currentPage = total; break;
+            }
+            render();
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    sortSelect.addEventListener('change', function() { doSort(true); });
+    perPageSelect.addEventListener('change', function() {
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+        currentPage = 1;
+        render();
+    });
+
+    doSort(false);
+})();
+</script>
 
 {% endblock %}

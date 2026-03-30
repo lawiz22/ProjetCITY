@@ -260,6 +260,201 @@ def map_time_travel_data():
     return jsonify({"years": sorted(year_set), "cities": cities})
 
 
+@web.route("/map/event-time-travel")
+def map_event_time_travel_data():
+    """Return events with locations + city annotations for event time-travel mode.
+
+    Response: {
+        years: [sorted unique event_years],
+        events: {event_slug: {name, slug, year, level, category, description,
+                              locations: [{lat, lng, region, country, role, city_name, city_slug}],
+                              primary_photo}},
+        city_annotations: {city_slug: {name, region, country, color, lat, lng,
+                                       annotations: [{year, label, color, type}],
+                                       periods: [{range, title, start, end, summary}]}}
+    }
+    """
+    from .db import get_db
+    from .services.event_service import CATEGORY_LABELS, CATEGORY_EMOJIS, get_event_primary_photo
+
+    conn = get_db()
+
+    # ── 1. Load all events with their locations ──
+    evt_rows = conn.execute(
+        """
+        SELECT e.event_id, e.event_name, e.event_slug, e.event_year,
+               e.event_level, e.event_category, e.description,
+               e.impact_population
+        FROM dim_event e
+        WHERE e.event_year IS NOT NULL
+        ORDER BY e.event_year
+        """
+    ).fetchall()
+
+    events: dict[str, dict] = {}
+    year_set: set[int] = set()
+    event_ids: list[int] = []
+    affected_regions: set[tuple[str, str]] = set()
+
+    for r in evt_rows:
+        slug = r["event_slug"]
+        yr = int(r["event_year"])
+        year_set.add(yr)
+        event_ids.append(r["event_id"])
+        cat = r["event_category"] or "autre"
+        events[slug] = {
+            "name": r["event_name"],
+            "slug": slug,
+            "year": yr,
+            "level": r["event_level"],
+            "category": cat,
+            "category_label": CATEGORY_LABELS.get(cat, cat),
+            "category_emoji": CATEGORY_EMOJIS.get(cat, "📌"),
+            "description": (r["description"] or "")[:300],
+            "impact": (r["impact_population"] or "")[:200],
+            "locations": [],
+            "primary_photo": None,
+        }
+
+    # ── 2. Load locations for all events ──
+    if event_ids:
+        loc_rows = conn.execute(
+            """
+            SELECT el.event_id, el.region, el.country, el.role,
+                   dc.city_name, dc.city_slug, dc.latitude, dc.longitude, dc.city_color
+            FROM dim_event_location el
+            LEFT JOIN dim_city dc ON dc.city_id = el.city_id
+            LEFT JOIN dim_event de ON de.event_id = el.event_id
+            WHERE el.event_id IN ({})
+            ORDER BY el.event_id, el.role
+            """.format(",".join("?" for _ in event_ids)),
+            event_ids,
+        ).fetchall()
+
+        # Map event_id → slug
+        eid_to_slug: dict[int, str] = {}
+        for r in evt_rows:
+            eid_to_slug[r["event_id"]] = r["event_slug"]
+
+        for lr in loc_rows:
+            slug = eid_to_slug.get(lr["event_id"])
+            if not slug or slug not in events:
+                continue
+            loc = {
+                "region": lr["region"],
+                "country": lr["country"],
+                "role": lr["role"],
+                "city_name": lr["city_name"],
+                "city_slug": lr["city_slug"],
+                "lat": lr["latitude"],
+                "lng": lr["longitude"],
+                "color": lr["city_color"] or "#e74c3c",
+            }
+            events[slug]["locations"].append(loc)
+            if lr["region"] and lr["country"]:
+                affected_regions.add((lr["region"], lr["country"]))
+
+    # ── 3. Get primary photo for each event ──
+    for slug in events:
+        photo = get_event_primary_photo(conn, slug)
+        if photo:
+            events[slug]["primary_photo"] = photo
+
+    # ── 4. City annotations for affected regions ──
+    city_annotations: dict[str, dict] = {}
+    if affected_regions:
+        # Get cities in affected regions
+        region_clauses = " OR ".join(
+            "(c.region = ? AND c.country = ?)" for _ in affected_regions
+        )
+        region_params: list[str] = []
+        for reg, cty in affected_regions:
+            region_params.extend([reg, cty])
+
+        city_rows = conn.execute(
+            f"""
+            SELECT c.city_id, c.city_name, c.city_slug, c.region, c.country,
+                   c.city_color, c.latitude, c.longitude
+            FROM dim_city c
+            WHERE ({region_clauses})
+              AND c.latitude IS NOT NULL
+              AND c.longitude IS NOT NULL
+            ORDER BY c.city_slug
+            """,
+            region_params,
+        ).fetchall()
+
+        city_id_map: dict[int, str] = {}
+        for cr in city_rows:
+            cslug = cr["city_slug"]
+            city_id_map[cr["city_id"]] = cslug
+            city_annotations[cslug] = {
+                "name": cr["city_name"],
+                "region": cr["region"],
+                "country": cr["country"],
+                "color": cr["city_color"] or "#2f6fed",
+                "lat": cr["latitude"],
+                "lng": cr["longitude"],
+                "annotations": [],
+                "periods": [],
+            }
+
+        # Fetch annotations for these cities
+        if city_id_map:
+            cids = list(city_id_map.keys())
+            ann_rows = conn.execute(
+                """
+                SELECT f.city_id, f.year,
+                       a.annotation_label, a.annotation_color, a.annotation_type
+                FROM fact_city_population f
+                JOIN dim_annotation a ON a.annotation_id = f.annotation_id
+                WHERE f.city_id IN ({})
+                  AND a.annotation_label IS NOT NULL
+                ORDER BY f.city_id, f.year
+                """.format(",".join("?" for _ in cids)),
+                cids,
+            ).fetchall()
+            for ar in ann_rows:
+                cslug = city_id_map.get(ar["city_id"])
+                if cslug and cslug in city_annotations:
+                    city_annotations[cslug]["annotations"].append({
+                        "year": ar["year"],
+                        "label": ar["annotation_label"],
+                        "color": ar["annotation_color"],
+                        "type": ar["annotation_type"],
+                    })
+
+            # Fetch periods for these cities
+            period_rows = conn.execute(
+                """
+                SELECT c.city_slug,
+                       cpd.period_range_label, cpd.period_title,
+                       cpd.start_year, cpd.end_year, cpd.summary_text
+                FROM dim_city_period_detail cpd
+                JOIN dim_city c ON c.city_id = cpd.city_id
+                WHERE c.city_id IN ({})
+                ORDER BY c.city_slug, cpd.period_order
+                """.format(",".join("?" for _ in cids)),
+                cids,
+            ).fetchall()
+            for pr in period_rows:
+                cslug = pr["city_slug"]
+                if cslug in city_annotations:
+                    city_annotations[cslug]["periods"].append({
+                        "range": pr["period_range_label"],
+                        "title": pr["period_title"],
+                        "start": pr["start_year"],
+                        "end": pr["end_year"],
+                        "summary": pr["summary_text"],
+                    })
+
+    return jsonify({
+        "years": sorted(year_set),
+        "events": events,
+        "city_annotations": city_annotations,
+    })
+
+
 @web.route("/map/city-spotlight/<city_slug>")
 def map_city_spotlight(city_slug: str):
     """Return rich city data for the annotation spotlight panel."""
@@ -2532,6 +2727,9 @@ def events_list() -> str:
         "level": request.args.get("level", ""),
         "search": request.args.get("search", ""),
     }
+    view_mode = request.args.get("view", "small").strip().lower()
+    if view_mode not in {"large", "medium", "small", "compact"}:
+        view_mode = "small"
     events = get_events_list(conn, filters)
     for ev in events:
         ev["primary_photo"] = get_event_primary_photo(conn, ev["event_slug"])
@@ -2540,6 +2738,7 @@ def events_list() -> str:
         page_title="Événements historiques",
         events=events,
         filters=filters,
+        view_mode=view_mode,
         categories=EVENT_CATEGORIES,
         category_labels=CATEGORY_LABELS,
         category_emojis=CATEGORY_EMOJIS,
@@ -2659,6 +2858,7 @@ def event_photo_primary(event_slug: str, photo_id: int) -> Response:
 @web.route("/events/<event_slug>/photos/search")
 def event_photo_search(event_slug: str) -> Response:
     """AJAX: smart multi-tier search for event photos (Wikipedia + Commons)."""
+    import re
     from .db import get_db
     from .services.event_service import get_event
     from .services.city_photos import search_annotation_images
@@ -2671,7 +2871,61 @@ def event_photo_search(event_slug: str) -> Response:
     # Build a label similar to annotation format for the tiered search
     event_name = event["event_name"]
     year = event.get("event_year")
-    label = f"{event_name} ({year})" if year else event_name
+
+    # Clean emoji and extract a concise label
+    clean_name = re.sub(r'[\U00010000-\U0010ffff]', '', event_name).strip()
+
+    # For long event names, build a shorter search-friendly version
+    _stop = {"le", "la", "les", "de", "du", "des", "un", "une", "et", "en",
+             "au", "aux", "ce", "ces", "se", "sa", "son", "ses", "sur", "par",
+             "pour", "dans", "est", "qui", "que", "avec", "vers", "pas", "plus",
+             "très", "tout", "mais", "remporte", "lors", "entre", "sans",
+             "leur", "leurs", "sont", "ont", "été", "fait", "elle", "ils",
+             "aussi", "même", "être", "nous", "vous", "comme", "après",
+             "soirée", "jour", "fois", "cette", "autre", "contre",
+             "album", "essor", "dont", "puis", "avant", "selon",
+             "sous", "chez", "dès", "hors", "via", "notre", "votre"}
+    # Common French event-start words (not useful as search terms)
+    _fr_event_words = {
+        "sortie", "création", "construction", "inauguration", "ouverture",
+        "fermeture", "fondation", "début", "arrivée", "découverte",
+        "naissance", "mort", "adoption", "abolition", "introduction",
+        "apparition", "disparition", "lancement", "publication",
+        "signature", "proclamation", "déclaration", "série",
+        "établissement", "installation", "invention", "ratification",
+        "première", "explosion", "incendie", "inondation",
+        "victoire", "défaite", "assassinat", "attentat", "attentats",
+        "diffusion", "présentation", "annonce", "séisme",
+        "tremblement", "fusion", "annexion", "démolition",
+        "reconstruction", "rénovation", "effondrement",
+        "épidémie", "pandémie", "grève", "émeute",
+    }
+    # Tokenize properly: split on apostrophes and non-letter chars
+    stripped = re.sub(r'\(\d{4}\)', '', clean_name)
+    tokens = re.findall(r"[a-zA-ZÀ-ÿ]{2,}", stripped)
+    meaningful = [w for w in tokens
+                  if w.lower() not in _stop and len(w) >= 3]
+
+    orig_words = clean_name.split()
+    if len(orig_words) > 8 or len(clean_name) > 60:
+        # True proper nouns: capitalized + acronyms + digits, excluding
+        # common French event-start words
+        proper = [w for w in meaningful
+                  if (w[0].isupper() or w.isupper() or w.isdigit())
+                  and w.lower() not in _fr_event_words]
+        other = [w for w in meaningful
+                 if w not in proper and w.lower() not in _fr_event_words]
+        if proper:
+            condensed = list(proper[:5])
+            remaining = max(5 - len(condensed), 1)
+            condensed.extend(other[:remaining])
+            clean_name = ' '.join(condensed[:5])
+        elif len(meaningful) > 5:
+            filtered = [w for w in meaningful
+                        if w.lower() not in _fr_event_words]
+            clean_name = ' '.join(filtered[:5])
+
+    label = f"{clean_name} ({year})" if year else clean_name
 
     # Use the first location's city/region/country for context, or empty
     locs = event.get("locations", [])
@@ -2704,8 +2958,29 @@ def event_photo_manual_search(event_slug: str) -> Response:
         return jsonify({"images": []})
 
     seen_urls: set[str] = set()
-    images = _search_commons_batch(query, seen_urls, limit=40)
-    return jsonify({"images": images})
+    images: list[dict] = []
+
+    # If query has more than 4 words, search with progressively shorter
+    # sub-queries to get better results from Commons API
+    words = query.split()
+    if len(words) <= 4:
+        images = _search_commons_batch(query, seen_urls, limit=40)
+    else:
+        # 1. Try full query first (may return few results)
+        images.extend(_search_commons_batch(query, seen_urls, limit=20))
+        # 2. Try first 4 words
+        sub = " ".join(words[:4])
+        images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+        # 3. Try first 3 words
+        if len(images) < 20:
+            sub = " ".join(words[:3])
+            images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+        # 4. Try last meaningful words (often the subject)
+        if len(images) < 15:
+            sub = " ".join(words[-3:])
+            images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+
+    return jsonify({"images": images[:40]})
 
 
 @web.route("/events/<event_slug>/photos/import-web", methods=["POST"])
