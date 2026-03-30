@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 382
+# Nombre de villes : 386
 #
 
 # ============================================================
@@ -241,6 +241,35 @@ annotations = [
     (1990, 226338, "🛬 Hub fret mondial — Ted Stevens (1985)", 'purple'),
     (2000, 260283, "🌿 Tourisme arctique — croissance (2000)", 'green'),
     (2020, 291247, "🌡️ Séisme 7.1 + réchauffement (2018)", 'orange'),
+]
+
+# ============================================================
+# Arlington (United States)
+# ============================================================
+CITY_NAME = "Arlington, Texas"
+CITY_COLOR = '#008000'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 44, 122, 281, 468, 939, 1939, 2997, 6207, 13210, 23368, 
+    79121, 156073, 398125
+]
+
+annotations = [
+    (1870, 0, "🌳 Territoire agricole avant fondation — détail (1870)", 'gray'),
+    (1890, 0, "🤠 Communauté agricole locale — détail (1890)", 'black'),
+    (1900, 44, "📈 Population d'Arlington en 1900 — détail (1900)", 'green'),
+    (1920, 281, "🚂 Chemin de fer et croissance économique — détail (1920)", 'blue'),
+    (1940, 939, "🕊️ Impact de la Seconde Guerre mondiale — détail (1940)", 'darkred'),
+    (1950, 1939, "🛠️ Développement industriel et urbain — détail (1950)", 'orange'),
+    (1970, 6207, "🎓 Université du Texas à Arlington fondée — détail (1970)", 'purple'),
+    (1990, 23368, "🏙️ Expansion urbaine rapide — détail (1990)", 'red'),
+    (2000, 79121, "🚀 Croissance démographique importante — détail (2000)", 'gold'),
+    (2010, 156073, "📊 Diversification économique — détail (2010)", 'teal'),
+    (2020, 398125, "🌟 Développement durable et innovation — détail (2020)", 'navy'),
 ]
 
 # ============================================================
@@ -2688,6 +2717,34 @@ annotations = [
     (1990, 23000, "🌉 Amélioration des infrastructures — ponts et routes (1990)", 'teal'),
     (2010, 27000, "🌍 Diversification économique — tourisme et services (2010)", 'gold'),
     (2020, 29000, "💻 Modernisation numérique — connectivité accrue (2020)", 'darkred'),
+]
+
+# ============================================================
+# El Paso (United States)
+# ============================================================
+CITY_NAME = "El Paso, Texas"
+CITY_COLOR = '#004d99'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    500, 700, 900, 1200, 1500, 8000, 11000, 13000, 27000, 40000, 50000, 100000, 120000, 
+    140000, 160000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 680000
+]
+
+annotations = [
+    (1850, 8000, "🏙️ Fondation officielle d'El Paso — incorporation (1850)", 'brown'),
+    (1880, 27000, "🚂 Arrivée du chemin de fer — développement économique (1881)", 'green'),
+    (1900, 50000, "🏥 Construction du premier hôpital majeur — santé publique (1900)", 'blue'),
+    (1910, 100000, "🌆 Croissance rapide liée à la Révolution mexicaine — afflux de réfugiés (1910)", 'orange'),
+    (1930, 140000, "🏢 Expansion industrielle — modernisation urbaine (1930)", 'purple'),
+    (1950, 200000, "🚀 Base militaire établie — influence militaire accrue (1950)", 'red'),
+    (1970, 400000, "🏙️ Urbanisation massive — boom démographique (1970)", 'darkred'),
+    (1990, 600000, "🌉 Construction du pont international — échanges transfrontaliers (1990)", 'teal'),
+    (2010, 800000, "🎓 Développement universitaire — UT El Paso expansion (2010)", 'navy'),
+    (2020, 680000, "🦠 Impact COVID-19 — ralentissement démographique (2020)", 'gray'),
 ]
 
 # ============================================================
@@ -6244,6 +6301,33 @@ annotations = [
 ]
 
 # ============================================================
+# Niagara-on-the-Lake (Canada)
+# ============================================================
+CITY_NAME = "Niagara-on-the-Lake, Ontario"
+CITY_COLOR = '#4B8BBE'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    500, 700, 900, 1100, 1300, 1500, 1700, 1600, 1500, 1400, 1300, 1200, 1100, 1200, 
+    1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100
+]
+
+annotations = [
+    (1830, 1100, "⛵ Développement du port et commerce fluvial — croissance économique (1830)", 'green'),
+    (1860, 1700, "🚂 Arrivée du chemin de fer — amélioration des transports (1853)", 'blue'),
+    (1900, 1300, "🏛️ Établissement d'institutions culturelles — théâtre et musées (1900)", 'purple'),
+    (1930, 1200, "🌾 Déclin économique durant la Grande Dépression — baisse démographique (1930)", 'darkred'),
+    (1950, 1400, "🎭 Renaissance culturelle — début du festival Shaw (1953)", 'orange'),
+    (1980, 1700, "🏨 Développement touristique — croissance des visiteurs (1980)", 'gold'),
+    (2000, 1900, "🌿 Protection patrimoniale accrue — conservation du centre historique (2000)", 'teal'),
+    (2010, 2000, "🎉 Expansion des événements culturels — festival annuel renforcé (2010)", 'navy'),
+    (2020, 2100, "🏡 Croissance résidentielle modérée — attractivité régionale (2020)", 'gray'),
+]
+
+# ============================================================
 # Nicolet (Canada)
 # ============================================================
 CITY_NAME = "Nicolet, Québec"
@@ -7862,6 +7946,34 @@ annotations = [
     (1981, 36000, "📉 Déclin manufactures — défis sociaux (1975)", 'red'),
     (2006, 63000, "🔀 Fusion municipale — métropole (2002)", 'blue'),
     (2021, 80000, "🚆 Train exo + renaissance urbaine (2015)", 'teal'),
+]
+
+# ============================================================
+# Saint-Lambert (Canada)
+# ============================================================
+CITY_NAME = "Saint-Lambert, Québec"
+CITY_COLOR = '#007A5E'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    300, 350, 400, 450, 500, 600, 1200, 2500, 5000, 8000, 12000, 16000, 19000, 21000, 
+    23000, 25000, 27000, 28000, 29000, 30000, 31000, 32000, 33000
+]
+
+annotations = [
+    (1860, 1200, "🚂 Arrivée du chemin de fer — développement économique (1860)", 'blue'),
+    (1880, 5000, "🏫 Construction de la première école publique — éducation (1880)", 'orange'),
+    (1890, 8000, "🏥 Ouverture de l'hôpital local — santé publique (1890)", 'red'),
+    (1910, 16000, "🏛️ Érection de l'hôtel de ville — administration locale (1910)", 'purple'),
+    (1930, 21000, "🚗 Développement des infrastructures routières — modernisation (1930)", 'brown'),
+    (1950, 25000, "🏠 Expansion résidentielle majeure — boom démographique (1950)", 'gold'),
+    (1970, 28000, "🌳 Création de parcs municipaux — qualité de vie (1970)", 'teal'),
+    (1990, 30000, "🚇 Amélioration des transports en commun — mobilité (1990)", 'navy'),
+    (2010, 32000, "🏢 Revitalisation du centre-ville — urbanisme (2010)", 'darkred'),
+    (2020, 33000, "🌍 Initiatives écologiques — développement durable (2020)", 'gray'),
 ]
 
 # ============================================================

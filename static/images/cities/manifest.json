@@ -2302,5 +2302,29 @@
     "source_page": "https://en.wikipedia.org/wiki/Columbus%2C_Ohio",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Downtown_Columbus_View_from_Main_St_Bridge_-_edit1.jpg/1280px-Downtown_Columbus_View_from_Main_St_Bridge_-_edit1.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-lambert-quebec": {
+    "filename": "saint-lambert-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saint-Lambert%2C_Mont%C3%A9r%C3%A9gie",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Saint-Lambert%2C_Mont%C3%A9r%C3%A9gie.jpg/1280px-Saint-Lambert%2C_Mont%C3%A9r%C3%A9gie.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "el-paso-texas": {
+    "filename": "el-paso-texas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/El_Paso%2C_Texas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/El_Paso_Cityscape_%28cropped%29.jpg/1280px-El_Paso_Cityscape_%28cropped%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "arlington-texas": {
+    "filename": "arlington-texas.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Arlington%2C_Texas",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Arlington_June_2020_1_%28AT%26T_Stadium%29.jpg/1280px-Arlington_June_2020_1_%28AT%26T_Stadium%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "niagara-on-the-lake-ontario": {
+    "filename": "niagara-on-the-lake-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Niagara-on-the-Lake",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Niagara_on_the_lake.jpg/1280px-Niagara_on_the_lake.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

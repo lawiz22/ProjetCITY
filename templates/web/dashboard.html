@@ -56,8 +56,10 @@
         <strong>{{ '{:,}'.format(metrics.total_population).replace(',', ' ') }}</strong>
         <small>dernière année disponible</small>
     </article>
-    <article class="metric-card metric-card-action">
-        <a class="secondary-button inline-button" href="{{ url_for('web.dashboard_pdf', country=filters.country, region=filters.region, period=filters.period, search=filters.search) }}">⇩ Exporter en PDF</a>
+    <article class="metric-card">
+        <span>Événements historiques</span>
+        <strong>{{ metrics.event_count }}</strong>
+        <small>dans la base de données</small>
     </article>
 </section>
 
@@ -118,6 +120,22 @@
             </div>
         </div>
     </article>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Événements par décennie</h2>
+        </div>
+        <div class="chart-block">
+            <div class="chart-toolbar">
+                <button type="button" class="secondary-button chart-export" data-chart-export>Exporter PNG</button>
+            </div>
+            <div class="chart-frame">
+                <canvas class="chart-canvas" data-chart='{{ chart_payload.eventsByDecade | tojson }}' data-chart-type="bar" data-chart-stacked="true" data-chart-filename="dashboard-events-decade"></canvas>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="panel-grid panel-grid-2">
     <article class="panel">
         <div class="panel-head">
             <h2>Ville la plus peuplée par décennie</h2>

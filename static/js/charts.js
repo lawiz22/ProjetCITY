@@ -560,11 +560,17 @@ function mountChart(canvas) {
         payload.datasets = (payload.datasets || []).map((dataset) => ({ ...dataset }));
     }
 
+    const isStacked = canvas.dataset.chartStacked === 'true';
+
     const chart = new Chart(context, {
         type: chartType,
         data: payload,
         options: (() => {
             const options = buildDefaultOptions(chartType);
+            if (isStacked) {
+                options.scales.x.stacked = true;
+                options.scales.y.stacked = true;
+            }
             if (chartType === 'line') {
                 options.plugins.cityAnnotationBands.annotations = annotations;
             }

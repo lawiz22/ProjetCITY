@@ -230,6 +230,11 @@ class AnalyticsService:
             filtered_params,
         ).fetchone()
 
+        # Event count
+        event_count_row = connection.execute(
+            "SELECT COUNT(*) AS cnt FROM dim_event"
+        ).fetchone()
+
         return {
             "city_count": counts["city_count"] or 0,
             "country_count": counts["country_count"] or 0,
@@ -237,6 +242,7 @@ class AnalyticsService:
             "total_population": summary["total_population"] or 0,
             "avg_population": round(summary["avg_population"] or 0),
             "latest_year": summary["latest_year"] or "n/a",
+            "event_count": event_count_row["cnt"] if event_count_row else 0,
         }
 
     def get_growth_leaders(self, filters: dict[str, str | None]) -> list[dict[str, Any]]:
@@ -420,6 +426,7 @@ class AnalyticsService:
             "cityCount": self._city_count_evolution(filters),
             "cityCountRegion": self._city_count_by_region(filters),
             "topPopByDecade": self._top_pop_by_decade(filters),
+            "eventsByDecade": self._events_by_decade(),
         }
 
     # ── Dashboard chart helpers ──────────────────────────────────
@@ -477,6 +484,39 @@ class AnalyticsService:
                     "cityNames": [r["city_name"] for r in rows],
                 }
             ],
+        }
+
+    def _events_by_decade(self) -> dict[str, Any]:
+        """Count events per decade, split by country (Canada vs United States)."""
+        conn = get_db()
+        rows = conn.execute(
+            """
+            SELECT (e.event_year / 10) * 10 AS decade,
+                   el.country,
+                   COUNT(DISTINCT e.event_id) AS cnt
+            FROM dim_event e
+            JOIN dim_event_location el ON el.event_id = e.event_id
+            WHERE e.event_year IS NOT NULL AND el.country IS NOT NULL
+            GROUP BY decade, el.country
+            ORDER BY decade
+            """
+        ).fetchall()
+        decades = sorted({r["decade"] for r in rows})
+        by_country: dict[str, dict[int, int]] = {}
+        for r in rows:
+            by_country.setdefault(r["country"], {})[r["decade"]] = r["cnt"]
+        datasets = []
+        for country in ("Canada", "United States"):
+            if country not in by_country:
+                continue
+            datasets.append({
+                "label": country,
+                "data": [by_country[country].get(d, 0) for d in decades],
+                "backgroundColor": self._COUNTRY_COLORS.get(country, "#999"),
+            })
+        return {
+            "labels": [f"{d}s" for d in decades],
+            "datasets": datasets,
         }
 
     def _pop_pie_by_country(self, filters: dict[str, str | None]) -> dict[str, Any]:

@@ -1,17 +1,31 @@
 [
   {
-    "timestamp": "2026-03-30T16:41:24.674808+00:00",
+    "timestamp": "2026-03-30T20:03:47.122328+00:00",
     "action": "execute",
     "status": "error",
     "sql": "DELETE FROM dim_city WHERE 1=0",
     "preview": "DELETE FROM dim_city WHERE 1=0"
   },
   {
-    "timestamp": "2026-03-30T16:41:24.643775+00:00",
+    "timestamp": "2026-03-30T20:03:47.090797+00:00",
     "action": "execute",
     "status": "read",
     "sql": "SELECT COUNT(*) AS n FROM dim_city",
     "preview": "SELECT COUNT(*) AS n FROM dim_city"
+  },
+  {
+    "timestamp": "2026-03-30T18:58:58.148832+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, country, peak_year, peak_population, peak_annotation\r\nFROM vw_city_peak_population\r\nORDER BY peak_population DESC;",
+    "preview": "SELECT city_name, country, peak_year, peak_population, peak_annotation"
+  },
+  {
+    "timestamp": "2026-03-30T18:58:32.401176+00:00",
+    "action": "execute",
+    "status": "read",
+    "sql": "SELECT city_name, country, year, population\r\nFROM vw_city_population_analysis\r\nORDER BY year DESC, population DESC",
+    "preview": "SELECT city_name, country, year, population"
   },
   {
     "timestamp": "2026-03-28T12:18:54.862670+00:00",

@@ -6257,6 +6257,41 @@ td {
     display: inline;
 }
 
+/* AI Lab Tabs */
+.ailab-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 0;
+}
+.ailab-tab {
+    padding: 10px 20px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--ink-2);
+    font-size: .9rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color .2s, border-color .2s;
+    margin-bottom: -2px;
+}
+.ailab-tab:hover {
+    color: var(--ink);
+}
+.ailab-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+.ailab-tab-content {
+    display: none;
+}
+.ailab-tab-content.active {
+    display: block;
+}
+
 /* Generate All button */
 .generate-all-btn {
     display: inline-block;
