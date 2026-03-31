@@ -286,6 +286,73 @@ def parse_period_details_text(text: str) -> list[dict[str, Any]]:
     return sections
 
 
+# Regex to detect period headers in AI-generated region text (no separator lines).
+# Matches:  "1608–1763 — TITLE"  or  "1608-1763 — TITLE"
+_REGION_PERIOD_HEADER_RE = re.compile(
+    r"^(\d{4}\s*[–\-]\s*\d{4})\s*[—]\s*(.+)$"
+)
+
+
+def parse_region_period_details_text(text: str) -> list[dict[str, Any]]:
+    """Parse period blocks from AI-generated region Step 2 text.
+
+    Does not require separator lines — headers are detected by the
+    ``YYYY–YYYY — TITLE`` pattern.  Lines starting with ``= Résumé``
+    are extracted as the section summary_text rather than as bullet items.
+    """
+    lines = text.splitlines()
+    sections: list[dict[str, Any]] = []
+    i = 0
+
+    while i < len(lines):
+        line = lines[i].strip()
+        m = _REGION_PERIOD_HEADER_RE.match(line)
+        if not m:
+            i += 1
+            continue
+
+        period_range_label = m.group(1).strip()
+        period_title = m.group(2).strip()
+        start_year, end_year = parse_period_range(period_range_label)
+        i += 1
+
+        items: list[str] = []
+        summary_lines: list[str] = []
+        in_summary = False
+
+        while i < len(lines):
+            stripped = lines[i].strip()
+            # Next period header → stop current section
+            if _REGION_PERIOD_HEADER_RE.match(stripped):
+                break
+            # Start of résumé block
+            if re.match(r"^=\s*Résumé", stripped, re.IGNORECASE):
+                in_summary = True
+                remainder = re.sub(r"^=\s*Résumé\s*:?\s*", "", stripped, flags=re.IGNORECASE).strip()
+                if remainder:
+                    summary_lines.append(remainder)
+                i += 1
+                continue
+            if in_summary:
+                if stripped:
+                    summary_lines.append(stripped)
+            else:
+                if stripped:
+                    items.append(stripped)
+            i += 1
+
+        sections.append({
+            "period_range_label": period_range_label,
+            "period_title": period_title,
+            "start_year": start_year,
+            "end_year": end_year,
+            "items": items,
+            "summary_text": " ".join(summary_lines) if summary_lines else "\n".join(items),
+        })
+
+    return sections
+
+
 # ---------------------------------------------------------------------------
 # Database import
 # ---------------------------------------------------------------------------
@@ -1025,3 +1092,616 @@ def get_city_fiche(conn: sqlite3.Connection, city_id: int) -> dict[str, Any] | N
             for row in sections
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# Country stats parser (Python format)
+# ---------------------------------------------------------------------------
+
+def parse_country_stats_text(text: str) -> dict[str, Any]:
+    """Parse a Python-style country stats block (COUNTRY_NAME, COUNTRY_COLOR, years, population, annotations)."""
+    result: dict[str, Any] = {}
+
+    name_match = re.search(r'COUNTRY_NAME\s*=\s*"([^"]+)"', text)
+    if not name_match:
+        name_match = re.search(r"COUNTRY_NAME\s*=\s*'([^']+)'", text)
+    if not name_match:
+        raise ValueError("COUNTRY_NAME introuvable dans le texte.")
+    result["country_name"] = name_match.group(1).strip()
+
+    color_match = re.search(r"COUNTRY_COLOR\s*=\s*['\"](.+?)['\"]", text)
+    result["country_color"] = color_match.group(1) if color_match else "#333333"
+
+    years_match = re.search(r"years\s*=\s*\[([^\]]+)\]", text, re.DOTALL)
+    if not years_match:
+        raise ValueError("Liste 'years' introuvable.")
+    result["years"] = [int(y.strip()) for y in years_match.group(1).split(",") if y.strip()]
+
+    pop_match = re.search(r"population\s*=\s*\[([^\]]+)\]", text, re.DOTALL)
+    if not pop_match:
+        raise ValueError("Liste 'population' introuvable.")
+    result["population"] = [int(p.strip()) for p in pop_match.group(1).split(",") if p.strip()]
+
+    if len(result["years"]) != len(result["population"]):
+        raise ValueError(
+            f"years ({len(result['years'])}) et population ({len(result['population'])}) "
+            f"n'ont pas la même longueur."
+        )
+
+    annotations: list[tuple] = []
+    ann_match = re.search(r"annotations\s*=\s*\[(.+?)\]\s*$", text, re.DOTALL | re.MULTILINE)
+    if ann_match:
+        try:
+            raw = ast.literal_eval("[" + ann_match.group(1) + "]")
+            annotations = [tuple(a) for a in raw if isinstance(a, (list, tuple)) and len(a) >= 4]
+        except Exception:
+            pass
+    result["annotations"] = annotations
+
+    result["country_slug"] = slugify(result["country_name"])
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Country database import
+# ---------------------------------------------------------------------------
+
+def import_country_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
+    """Insert/update dim_country + fact_country_population rows. Returns country_id."""
+    time_cache: dict[int, int] = {
+        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
+    }
+
+    # Upsert dim_country
+    cursor = conn.execute(
+        """
+        INSERT INTO dim_country (country_name, country_slug, country_color, source_file)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(country_slug) DO UPDATE SET
+            country_name = excluded.country_name,
+            country_color = excluded.country_color,
+            source_file = excluded.source_file
+        RETURNING country_id
+        """,
+        (stats["country_name"], stats["country_slug"], stats["country_color"], "web-import"),
+    )
+    country_id = cursor.fetchone()[0]
+
+    # Build annotation cache
+    annotation_by_year: dict[int, int] = {}
+    for ann in stats["annotations"]:
+        if len(ann) < 4:
+            continue
+        year, _pop, label, color = ann[:4]
+        if not isinstance(year, int) or not isinstance(label, str) or not isinstance(color, str):
+            continue
+        cur = conn.execute(
+            """
+            INSERT INTO dim_annotation (annotation_label, annotation_color)
+            VALUES (?, ?)
+            ON CONFLICT(annotation_label, annotation_color)
+            DO UPDATE SET annotation_color = excluded.annotation_color
+            RETURNING annotation_id
+            """,
+            (label, color),
+        )
+        annotation_by_year[year] = cur.fetchone()[0]
+
+    # Delete existing population rows for this country (to allow re-import)
+    conn.execute("DELETE FROM fact_country_population WHERE country_id = ?", (country_id,))
+
+    # Insert fact rows
+    for year, population in zip(stats["years"], stats["population"]):
+        time_id = upsert_time_dimension(conn, time_cache, year)
+        conn.execute(
+            """
+            INSERT INTO fact_country_population (country_id, time_id, year, population, is_key_year, annotation_id, source_file)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (country_id, time_id, year, population,
+             1 if year in annotation_by_year else 0,
+             annotation_by_year.get(year), "web-import"),
+        )
+
+    return country_id
+
+
+COUNTRY_DETAILS_DIR = PROJECT_ROOT / "data" / "country_details"
+COUNTRY_FICHES_DIR = PROJECT_ROOT / "data" / "country_fiches"
+
+
+def save_country_details_file(country_slug: str, text: str) -> Path:
+    """Save the country details raw text as a .txt file in data/country_details/."""
+    COUNTRY_DETAILS_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = COUNTRY_DETAILS_DIR / f"{country_slug}.txt"
+    file_path.write_text(text, encoding="utf-8")
+    return file_path
+
+
+def save_country_fiche_file(country_slug: str, text: str) -> Path:
+    """Save the country fiche complète as a .txt file in data/country_fiches/."""
+    COUNTRY_FICHES_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = COUNTRY_FICHES_DIR / f"{country_slug}.txt"
+    file_path.write_text(text, encoding="utf-8")
+    return file_path
+
+
+# Mapping of common country names to ISO 3166-1 alpha-2 codes (flagcdn.com format)
+_COUNTRY_ISO2: dict[str, str] = {
+    "Afghanistan": "af", "Albania": "al", "Algeria": "dz", "Andorra": "ad",
+    "Angola": "ao", "Antigua and Barbuda": "ag", "Argentina": "ar", "Armenia": "am",
+    "Australia": "au", "Austria": "at", "Azerbaijan": "az", "Bahamas": "bs",
+    "Bahrain": "bh", "Bangladesh": "bd", "Barbados": "bb", "Belarus": "by",
+    "Belgium": "be", "Belize": "bz", "Benin": "bj", "Bhutan": "bt",
+    "Bolivia": "bo", "Bosnia and Herzegovina": "ba", "Botswana": "bw", "Brazil": "br",
+    "Brunei": "bn", "Bulgaria": "bg", "Burkina Faso": "bf", "Burundi": "bi",
+    "Cabo Verde": "cv", "Cambodia": "kh", "Cameroon": "cm", "Canada": "ca",
+    "Central African Republic": "cf", "Chad": "td", "Chile": "cl", "China": "cn",
+    "Colombia": "co", "Comoros": "km", "Congo": "cg", "Costa Rica": "cr",
+    "Croatia": "hr", "Cuba": "cu", "Cyprus": "cy", "Czech Republic": "cz",
+    "Czechia": "cz", "Denmark": "dk", "Djibouti": "dj", "Dominica": "dm",
+    "Dominican Republic": "do", "Ecuador": "ec", "Egypt": "eg", "El Salvador": "sv",
+    "Equatorial Guinea": "gq", "Eritrea": "er", "Estonia": "ee", "Eswatini": "sz",
+    "Ethiopia": "et", "Fiji": "fj", "Finland": "fi", "France": "fr",
+    "Gabon": "ga", "Gambia": "gm", "Georgia": "ge", "Germany": "de",
+    "Ghana": "gh", "Greece": "gr", "Grenada": "gd", "Guatemala": "gt",
+    "Guinea": "gn", "Guinea-Bissau": "gw", "Guyana": "gy", "Haiti": "ht",
+    "Honduras": "hn", "Hungary": "hu", "Iceland": "is", "India": "in",
+    "Indonesia": "id", "Iran": "ir", "Iraq": "iq", "Ireland": "ie",
+    "Israel": "il", "Italy": "it", "Jamaica": "jm", "Japan": "jp",
+    "Jordan": "jo", "Kazakhstan": "kz", "Kenya": "ke", "Kiribati": "ki",
+    "Kuwait": "kw", "Kyrgyzstan": "kg", "Laos": "la", "Latvia": "lv",
+    "Lebanon": "lb", "Lesotho": "ls", "Liberia": "lr", "Libya": "ly",
+    "Liechtenstein": "li", "Lithuania": "lt", "Luxembourg": "lu", "Madagascar": "mg",
+    "Malawi": "mw", "Malaysia": "my", "Maldives": "mv", "Mali": "ml",
+    "Malta": "mt", "Marshall Islands": "mh", "Mauritania": "mr", "Mauritius": "mu",
+    "Mexico": "mx", "Micronesia": "fm", "Moldova": "md", "Monaco": "mc",
+    "Mongolia": "mn", "Montenegro": "me", "Morocco": "ma", "Mozambique": "mz",
+    "Myanmar": "mm", "Namibia": "na", "Nauru": "nr", "Nepal": "np",
+    "Netherlands": "nl", "New Zealand": "nz", "Nicaragua": "ni", "Niger": "ne",
+    "Nigeria": "ng", "North Korea": "kp", "North Macedonia": "mk", "Norway": "no",
+    "Oman": "om", "Pakistan": "pk", "Palau": "pw", "Panama": "pa",
+    "Papua New Guinea": "pg", "Paraguay": "py", "Peru": "pe", "Philippines": "ph",
+    "Poland": "pl", "Portugal": "pt", "Qatar": "qa", "Romania": "ro",
+    "Russia": "ru", "Rwanda": "rw", "Saint Kitts and Nevis": "kn",
+    "Saint Lucia": "lc", "Saint Vincent and the Grenadines": "vc", "Samoa": "ws",
+    "San Marino": "sm", "Sao Tome and Principe": "st", "Saudi Arabia": "sa",
+    "Senegal": "sn", "Serbia": "rs", "Seychelles": "sc", "Sierra Leone": "sl",
+    "Singapore": "sg", "Slovakia": "sk", "Slovenia": "si", "Solomon Islands": "sb",
+    "Somalia": "so", "South Africa": "za", "South Korea": "kr", "South Sudan": "ss",
+    "Spain": "es", "Sri Lanka": "lk", "Sudan": "sd", "Suriname": "sr",
+    "Sweden": "se", "Switzerland": "ch", "Syria": "sy", "Taiwan": "tw",
+    "Tajikistan": "tj", "Tanzania": "tz", "Thailand": "th", "Timor-Leste": "tl",
+    "Togo": "tg", "Tonga": "to", "Trinidad and Tobago": "tt", "Tunisia": "tn",
+    "Turkey": "tr", "Turkmenistan": "tm", "Tuvalu": "tv", "Uganda": "ug",
+    "Ukraine": "ua", "United Arab Emirates": "ae", "United Kingdom": "gb",
+    "United States": "us", "United States of America": "us", "Uruguay": "uy",
+    "Uzbekistan": "uz", "Vanuatu": "vu", "Vatican City": "va", "Venezuela": "ve",
+    "Vietnam": "vn", "Yemen": "ye", "Zambia": "zm", "Zimbabwe": "zw",
+    # Alias variants (English)
+    "DR Congo": "cd", "Democratic Republic of the Congo": "cd",
+    "Republic of the Congo": "cg", "South Korea": "kr", "North Korea": "kp",
+    "Ivory Coast": "ci", "Côte d'Ivoire": "ci", "Cote d'Ivoire": "ci",
+    "Cape Verde": "cv", "East Timor": "tl", "Swaziland": "sz",
+    "Burma": "mm", "Réunion": "re", "Kosovo": "xk",
+    # French country name aliases
+    "États-Unis": "us", "Etats-Unis": "us", "USA": "us",
+    "Royaume-Uni": "gb", "Grande-Bretagne": "gb",
+    "Allemagne": "de", "Espagne": "es", "Italie": "it", "Grèce": "gr",
+    "Suède": "se", "Finlande": "fi", "Norvège": "no", "Danemark": "dk",
+    "Pologne": "pl", "Hongrie": "hu", "Roumanie": "ro", "Bulgarie": "bg",
+    "Tchéquie": "cz", "République tchèque": "cz", "Slovaquie": "sk",
+    "Slovénie": "si", "Croatie": "hr", "Serbie": "rs",
+    "Suisse": "ch", "Autriche": "at", "Belgique": "be",
+    "Pays-Bas": "nl", "Irlande": "ie", "Portugal": "pt",
+    "Russie": "ru", "Biélorussie": "by", "Bélarus": "by",
+    "Ukraine": "ua", "Géorgie": "ge", "Arménie": "am", "Azerbaïdjan": "az",
+    "Kazakhstan": "kz", "Ouzbékistan": "uz", "Kirghizistan": "kg",
+    "Tadjikistan": "tj", "Turkménistan": "tm", "Mongolie": "mn",
+    "Chine": "cn", "Japon": "jp", "Corée du Sud": "kr", "Corée du Nord": "kp",
+    "Inde": "in", "Pakistan": "pk", "Bangladesh": "bd",
+    "Thaïlande": "th", "Viêt Nam": "vn", "Viet Nam": "vn",
+    "Cambodge": "kh", "Birmanie": "mm", "Indonésie": "id",
+    "Philippines": "ph", "Malaisie": "my", "Singapour": "sg",
+    "Timor oriental": "tl", "Australie": "au", "Nouvelle-Zélande": "nz",
+    "Maroc": "ma", "Algérie": "dz", "Tunisie": "tn", "Libye": "ly",
+    "Égypte": "eg", "Soudan": "sd", "Éthiopie": "et", "Érythrée": "er",
+    "Somalie": "so", "Kenya": "ke", "Kénya": "ke", "Tanzanie": "tz",
+    "Mozambique": "mz", "Afrique du Sud": "za",
+    "Nigéria": "ng", "Sénégal": "sn", "Burkina Faso": "bf", "Niger": "ne",
+    "Tchad": "td", "Cameroun": "cm", "République centrafricaine": "cf",
+    "Congo": "cg", "République démocratique du Congo": "cd",
+    "Brésil": "br", "Mexique": "mx", "Argentine": "ar", "Colombie": "co",
+    "Chili": "cl", "Pérou": "pe", "Vénézuéla": "ve", "Venezuela": "ve",
+    "Équateur": "ec", "Bolivie": "bo",
+    "Arabie saoudite": "sa", "Arabie Saoudite": "sa",
+    "Émirats arabes unis": "ae", "Émirats Arabes Unis": "ae",
+    "Irak": "iq", "Syrie": "sy", "Turquie": "tr", "Türkiye": "tr",
+    "Liban": "lb", "Israël": "il", "Jordanie": "jo",
+    "Koweït": "kw", "Bahreïn": "bh", "Yémen": "ye",
+    "Roumanie": "ro", "Macédoine du Nord": "mk",
+}
+
+
+def download_country_flag(country_name: str, country_slug: str) -> str | None:
+    """Download the flag for a country from flagcdn.com and save to static/images/flags/countries/.
+
+    Returns the relative URL path (e.g. 'images/flags/countries/canada.png') or None on failure.
+    """
+    import urllib.request
+    import urllib.error
+
+    iso2 = _COUNTRY_ISO2.get(country_name)
+    if not iso2:
+        # Try case-insensitive lookup
+        name_lower = country_name.lower()
+        for k, v in _COUNTRY_ISO2.items():
+            if k.lower() == name_lower:
+                iso2 = v
+                break
+    if not iso2:
+        return None
+
+    flags_dir = PROJECT_ROOT / "static" / "images" / "flags" / "countries"
+    flags_dir.mkdir(parents=True, exist_ok=True)
+    dest = flags_dir / f"{country_slug}.png"
+
+    if dest.exists():
+        return f"images/flags/countries/{country_slug}.png"
+
+    url = f"https://flagcdn.com/w160/{iso2}.png"
+    try:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        })
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = resp.read()
+        if len(data) < 100:
+            return None
+        dest.write_bytes(data)
+        return f"images/flags/countries/{country_slug}.png"
+    except (urllib.error.URLError, urllib.error.HTTPError, OSError):
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Region stats parser (Python format)
+# ---------------------------------------------------------------------------
+
+REGION_DETAILS_DIR = PROJECT_ROOT / "data" / "region_details"
+REGION_FICHES_DIR = PROJECT_ROOT / "data" / "region_fiches"
+
+
+def parse_region_stats_text(text: str) -> dict[str, Any]:
+    """Parse a Python-style region stats block (REGION_NAME, REGION_COUNTRY, REGION_COLOR, years, population, annotations)."""
+    result: dict[str, Any] = {}
+
+    name_match = re.search(r'REGION_NAME\s*=\s*"([^"]+)"', text)
+    if not name_match:
+        name_match = re.search(r"REGION_NAME\s*=\s*'([^']+)'", text)
+    if not name_match:
+        raise ValueError("REGION_NAME introuvable dans le texte.")
+    result["region_name"] = name_match.group(1).strip()
+
+    country_match = re.search(r'REGION_COUNTRY\s*=\s*"([^"]+)"', text)
+    if not country_match:
+        country_match = re.search(r"REGION_COUNTRY\s*=\s*'([^']+)'", text)
+    result["region_country"] = country_match.group(1).strip() if country_match else ""
+
+    color_match = re.search(r"REGION_COLOR\s*=\s*['\"](.+?)['\"]", text)
+    result["region_color"] = color_match.group(1) if color_match else "#333333"
+
+    years_match = re.search(r"years\s*=\s*\[([^\]]+)\]", text, re.DOTALL)
+    if not years_match:
+        raise ValueError("Liste 'years' introuvable.")
+    result["years"] = [int(y.strip()) for y in years_match.group(1).split(",") if y.strip()]
+
+    pop_match = re.search(r"population\s*=\s*\[([^\]]+)\]", text, re.DOTALL)
+    if not pop_match:
+        raise ValueError("Liste 'population' introuvable.")
+    result["population"] = [int(p.strip()) for p in pop_match.group(1).split(",") if p.strip()]
+
+    if len(result["years"]) != len(result["population"]):
+        raise ValueError(
+            f"years ({len(result['years'])}) et population ({len(result['population'])}) "
+            f"n'ont pas la même longueur."
+        )
+
+    annotations: list[tuple] = []
+    ann_match = re.search(r"annotations\s*=\s*\[(.+?)\]\s*$", text, re.DOTALL | re.MULTILINE)
+    if ann_match:
+        try:
+            raw = ast.literal_eval("[" + ann_match.group(1) + "]")
+            annotations = [tuple(a) for a in raw if isinstance(a, (list, tuple)) and len(a) >= 4]
+        except Exception:
+            pass
+    result["annotations"] = annotations
+
+    result["region_slug"] = slugify(result["region_name"])
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Region database import
+# ---------------------------------------------------------------------------
+
+def import_region_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
+    """Insert/update dim_region + fact_region_population rows. Returns region_id."""
+    time_cache: dict[int, int] = {
+        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
+    }
+
+    # Upsert dim_region
+    cursor = conn.execute(
+        """
+        INSERT INTO dim_region (region_name, region_slug, country_name, region_color, source_file)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(region_slug) DO UPDATE SET
+            region_name = excluded.region_name,
+            country_name = excluded.country_name,
+            region_color = excluded.region_color,
+            source_file = excluded.source_file
+        RETURNING region_id
+        """,
+        (stats["region_name"], stats["region_slug"], stats["region_country"],
+         stats["region_color"], "web-import"),
+    )
+    region_id = cursor.fetchone()[0]
+
+    # Build annotation cache
+    annotation_by_year: dict[int, int] = {}
+    for ann in stats["annotations"]:
+        if len(ann) < 4:
+            continue
+        year, _pop, label, color = ann[:4]
+        if not isinstance(year, int) or not isinstance(label, str) or not isinstance(color, str):
+            continue
+        cur = conn.execute(
+            """
+            INSERT INTO dim_annotation (annotation_label, annotation_color)
+            VALUES (?, ?)
+            ON CONFLICT(annotation_label, annotation_color)
+            DO UPDATE SET annotation_color = excluded.annotation_color
+            RETURNING annotation_id
+            """,
+            (label, color),
+        )
+        annotation_by_year[year] = cur.fetchone()[0]
+
+    # Delete existing population rows for this region (to allow re-import)
+    conn.execute("DELETE FROM fact_region_population WHERE region_id = ?", (region_id,))
+
+    # Insert fact rows
+    for year, population in zip(stats["years"], stats["population"]):
+        time_id = upsert_time_dimension(conn, time_cache, year)
+        conn.execute(
+            """
+            INSERT INTO fact_region_population (region_id, time_id, year, population, is_key_year, annotation_id, source_file)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (region_id, time_id, year, population,
+             1 if year in annotation_by_year else 0,
+             annotation_by_year.get(year), "web-import"),
+        )
+
+    return region_id
+
+
+def import_region_periods(conn: sqlite3.Connection, region_id: int, region_slug: str, sections: list[dict[str, Any]]) -> int:
+    """Insert period detail rows into dim_region_period_detail. Returns count of periods inserted."""
+    time_cache: dict[int, int] = {
+        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
+    }
+
+    # Remove existing periods for this region
+    existing_ids = [
+        row[0] for row in conn.execute(
+            "SELECT region_period_id FROM dim_region_period_detail WHERE region_id = ?", (region_id,)
+        )
+    ]
+    if existing_ids:
+        placeholders = ",".join("?" * len(existing_ids))
+        conn.execute(f"DELETE FROM dim_region_period_detail_item WHERE region_period_id IN ({placeholders})", existing_ids)
+        conn.execute("DELETE FROM dim_region_period_detail WHERE region_id = ?", (region_id,))
+
+    count = 0
+    for order, section in enumerate(sections, start=1):
+        start_time_id = upsert_time_dimension(conn, time_cache, section["start_year"])
+        end_time_id = upsert_time_dimension(conn, time_cache, section["end_year"])
+        cursor = conn.execute(
+            """
+            INSERT INTO dim_region_period_detail
+                (region_id, period_order, period_range_label, period_title,
+                 start_year, end_year, start_time_id, end_time_id, summary_text, source_file)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING region_period_id
+            """,
+            (region_id, order, section["period_range_label"], section["period_title"],
+             section["start_year"], section["end_year"], start_time_id, end_time_id,
+             section["summary_text"], f"{region_slug}.txt"),
+        )
+        region_period_id = cursor.fetchone()[0]
+        count += 1
+        for item_order, item_text in enumerate(section["items"], start=1):
+            conn.execute(
+                "INSERT INTO dim_region_period_detail_item (region_period_id, item_order, item_text) VALUES (?, ?, ?)",
+                (region_period_id, item_order, item_text),
+            )
+
+    return count
+
+
+def save_region_details_file(region_slug: str, text: str) -> Path:
+    """Save the region period details raw text as a .txt file in data/region_details/."""
+    REGION_DETAILS_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = REGION_DETAILS_DIR / f"{region_slug}.txt"
+    file_path.write_text(text, encoding="utf-8")
+    return file_path
+
+
+def save_region_fiche_file(region_slug: str, text: str) -> Path:
+    """Save the region fiche complète as a .txt file in data/region_fiches/."""
+    REGION_FICHES_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = REGION_FICHES_DIR / f"{region_slug}.txt"
+    file_path.write_text(text, encoding="utf-8")
+    return file_path
+
+
+# ---------------------------------------------------------------------------
+# Region photo & flag download
+# ---------------------------------------------------------------------------
+
+REGION_PHOTO_DIR = PROJECT_ROOT / "static" / "images" / "regions"
+REGION_FLAG_DIR = PROJECT_ROOT / "static" / "images" / "flags" / "regions"
+
+
+def _download_bytes(url: str) -> bytes | None:
+    """Download raw bytes from a URL with a browser-like User-Agent. Returns None on failure."""
+    import urllib.request
+    import urllib.error
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        )
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = resp.read()
+        return data if len(data) > 500 else None
+    except Exception:
+        return None
+
+
+def fetch_and_save_region_flag(region_name: str, region_slug: str) -> str | None:
+    """Search Wikimedia Commons for a region/province flag and save it.
+
+    Returns the relative static path (e.g. 'images/flags/regions/quebec.png') or None.
+    """
+    import json
+    import urllib.parse
+    import urllib.request
+
+    REGION_FLAG_DIR.mkdir(parents=True, exist_ok=True)
+    dest = REGION_FLAG_DIR / f"{region_slug}.png"
+    if dest.exists():
+        return f"images/flags/regions/{region_slug}.png"
+
+    query = f"Flag of {region_name}"
+    search_url = (
+        "https://commons.wikimedia.org/w/api.php?action=query&list=search"
+        f"&srnamespace=6&srsearch={urllib.parse.quote(query)}&srlimit=10&format=json"
+    )
+    try:
+        req = urllib.request.Request(search_url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.load(resp)
+    except Exception:
+        return None
+
+    hits = data.get("query", {}).get("search", [])
+    for hit in hits:
+        title = hit.get("title", "")
+        if not any(title.lower().endswith(ext) for ext in (".svg", ".png", ".jpg", ".jpeg")):
+            continue
+        info_url = (
+            "https://commons.wikimedia.org/w/api.php?action=query"
+            f"&titles={urllib.parse.quote(title)}&prop=imageinfo&iiprop=url"
+            "&iiurlwidth=400&format=json"
+        )
+        try:
+            req2 = urllib.request.Request(info_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req2, timeout=15) as resp2:
+                info = json.load(resp2)
+        except Exception:
+            continue
+        pages = info.get("query", {}).get("pages", {})
+        for page in pages.values():
+            ii_list = page.get("imageinfo", [])
+            if not ii_list:
+                continue
+            img_url = ii_list[0].get("thumburl") or ii_list[0].get("url")
+            if not img_url:
+                continue
+            raw = _download_bytes(img_url)
+            if raw:
+                dest.write_bytes(raw)
+                return f"images/flags/regions/{region_slug}.png"
+    return None
+
+
+def fetch_and_save_region_photo(
+    conn: sqlite3.Connection,
+    region_id: int,
+    region_name: str,
+    region_slug: str,
+    country_name: str,
+) -> str | None:
+    """Download the Wikipedia thumbnail for a region and register it in dim_region_photo.
+
+    Returns the relative static path (e.g. 'images/regions/quebec/abc123.jpg') or None.
+    """
+    import json
+    import urllib.parse
+    import urllib.request
+    import uuid as _uuid
+
+    # Skip if a primary photo already exists
+    existing = conn.execute(
+        "SELECT photo_id FROM dim_region_photo WHERE region_id = ? AND is_primary = 1",
+        (region_id,),
+    ).fetchone()
+    if existing:
+        row = conn.execute(
+            "SELECT filename FROM dim_region_photo WHERE photo_id = ?",
+            (existing["photo_id"],),
+        ).fetchone()
+        if row:
+            return f"images/regions/{region_slug}/{row['filename']}"
+
+    region_dir = REGION_PHOTO_DIR / region_slug
+    region_dir.mkdir(parents=True, exist_ok=True)
+
+    # Try Wikipedia REST summary for a ready-made thumbnail
+    thumb_url = None
+    source_url = ""
+    attribution = ""
+    for search_name in [f"{region_name}", f"{region_name}, {country_name}"]:
+        encoded = urllib.parse.quote(search_name.replace(" ", "_"), safe="()")
+        wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{encoded}"
+        try:
+            req = urllib.request.Request(wiki_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                summary = json.load(resp)
+            img_info = summary.get("originalimage") or summary.get("thumbnail")
+            if img_info and img_info.get("source"):
+                thumb_url = img_info["source"]
+                source_url = (
+                    summary.get("content_urls", {}).get("desktop", {}).get("page", "")
+                )
+                attribution = summary.get("description") or search_name
+                break
+        except Exception:
+            continue
+
+    if not thumb_url:
+        return None
+
+    raw = _download_bytes(thumb_url)
+    if not raw or len(raw) < 5000:
+        return None
+
+    # Determine extension
+    ext = Path(urllib.parse.urlsplit(thumb_url).path).suffix.lower()
+    if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
+        ext = ".jpg"
+    filename = f"{_uuid.uuid4().hex[:12]}{ext}"
+    (region_dir / filename).write_bytes(raw)
+
+    conn.execute(
+        """
+        INSERT INTO dim_region_photo (region_id, filename, caption, source_url, attribution, is_primary)
+        VALUES (?, ?, ?, ?, ?, 1)
+        """,
+        (region_id, filename, region_name, source_url, attribution),
+    )
+    return f"images/regions/{region_slug}/{filename}"

@@ -1,0 +1,1076 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<section class="city-sticky-header">
+    <div class="city-sticky-bar">
+        <div class="city-sticky-copy">
+            <span>{{ region.country_name }}</span>
+            <strong>{{ region.region_name }}</strong>
+        </div>
+        <nav class="city-sticky-nav" aria-label="Navigation rapide région">
+            <a href="#region-chart">Courbe</a>
+            <a href="#region-photos">Photos</a>
+            <a href="#region-annotations">Annotations</a>
+            <a href="#region-timeline">Timeline</a>
+            <a href="#region-fiche">Fiche</a>
+        </nav>
+        <div class="city-sticky-tools">
+            <button type="button" class="city-sticky-tool" data-back-to-top aria-label="Retour en haut" title="Retour en haut">^</button>
+            <button type="button" class="city-sticky-tool" id="region-delete-btn" style="color:#e74c3c;" title="Supprimer cette région">🗑</button>
+        </div>
+    </div>
+</section>
+
+<section class="city-header" style="--city-accent: {{ region.region_color or '#2f6fed' }}; background: {{ region.region_color or '#2f6fed' }}22;{% if region.photo_path %} background-image: url('{{ url_for('static', filename=region.photo_path) }}'); background-size: cover; background-position: center;{% endif %}">
+    <div class="city-header-overlay"></div>
+    <article class="city-header-content">
+        <p class="eyebrow">Région &mdash; {{ region.country_name }}</p>
+        <h2>{{ region.region_name }}</h2>
+        <div class="city-badge-strip">
+            {% if region.trend_label %}
+            <span class="city-badge city-badge-trend city-badge-trend-{{ 'up' if region.trend_label == 'En croissance' else 'down' if region.trend_label == 'En décroissance' else 'stable' }}">{{ region.trend_label }}</span>
+            {% endif %}
+            {% if annotations %}
+            <span class="city-badge">{{ annotations|length }} annotation{% if annotations|length > 1 %}s{% endif %}</span>
+            {% endif %}
+            {% if periods %}
+            <span class="city-badge">{{ periods|length }} période{% if periods|length > 1 %}s{% endif %}</span>
+            {% endif %}
+            {% if region.latest_year %}
+            <span class="city-badge">Suivi jusqu'en {{ region.latest_year }}</span>
+            {% endif %}
+            {% if region.peak_year %}
+            <span class="city-badge">Pic démographique en {{ region.peak_year }}</span>
+            {% endif %}
+        </div>
+        <div class="hero-stat-row">
+            {% if region.latest_population %}
+            <div>
+                <span>Population récente</span>
+                <strong>{{ '{:,}'.format(region.latest_population).replace(',', ' ') }}</strong>
+            </div>
+            <div>
+                <span>Dernière année</span>
+                <strong>{{ region.latest_year }}</strong>
+            </div>
+            {% endif %}
+            {% if region.peak_population %}
+            <div>
+                <span>Pic historique</span>
+                <strong>{{ '{:,}'.format(region.peak_population).replace(',', ' ') }} en {{ region.peak_year }}</strong>
+            </div>
+            {% endif %}
+            {% if region.trend_label %}
+            <div>
+                <span>Tendance</span>
+                <strong>
+                    {% if region.trend_label == 'En croissance' %}
+                        <span style="color:#22c55e;">▲</span> {{ region.trend_label }}
+                    {% elif region.trend_label == 'En décroissance' %}
+                        <span style="color:#ef4444;">▼</span> {{ region.trend_label }}
+                    {% else %}
+                        {{ region.trend_label }}
+                    {% endif %}
+                </strong>
+            </div>
+            {% endif %}
+            {% if region.first_population %}
+            <div>
+                <span>Première population</span>
+                <strong>{{ '{:,}'.format(region.first_population).replace(',', ' ') }} en {{ region.first_year }}</strong>
+            </div>
+            {% endif %}
+        </div>
+    </article>
+    {% if region.flag_path %}
+    <div class="city-header-flag" style="display:flex;align-items:center;justify-content:center;padding:2rem;">
+        <img src="{{ url_for('static', filename=region.flag_path) }}" alt="Drapeau de {{ region.region_name }}" style="max-height:120px;max-width:200px;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.2);">
+    </div>
+    {% endif %}
+</section>
+
+{% if pop_data %}
+<section class="panel city-chart-panel" id="region-chart">
+    <div class="panel-head">
+        <h2>Courbe démographique</h2>
+    </div>
+    <div class="city-chart-layout">
+        <div class="chart-block">
+            <div class="chart-toolbar">
+                <div class="button-row">
+                    <button type="button" class="secondary-button chart-toolbar-button chart-reset" data-chart-reset>Reset zoom</button>
+                    <button type="button" class="secondary-button chart-toolbar-button chart-export" data-chart-export>PNG</button>
+                </div>
+            </div>
+            <div class="chart-stage">
+                <div class="chart-frame chart-frame-large">
+                    <canvas class="chart-canvas" data-chart='{{ chart_payload | tojson }}' data-chart-type="line" data-chart-filename="{{ region.region_slug }}-timeline"></canvas>
+                </div>
+            </div>
+        </div>
+        <aside class="annotation-side-panel" data-annotation-controls>
+            <div class="annotation-toolbar-copy">
+                <strong>Repères historiques</strong>
+                <p class="helper-text" data-annotation-visible-count>{{ annotations|length }} annotation(s) visible(s)</p>
+            </div>
+            <div class="button-row annotation-side-actions">
+                <button type="button" class="secondary-button annotation-toggle-button" data-annotation-select-all>Tout</button>
+                <button type="button" class="secondary-button annotation-toggle-button" data-annotation-clear>Masquer</button>
+            </div>
+            <div class="annotation-side-list">
+                {% for annotation in annotations %}
+                <label class="annotation-list-item" data-annotation-list-item data-annotation-id="annotation-{{ loop.index0 }}" data-annotation-year="{{ annotation.year }}">
+                    <input type="checkbox" data-annotation-toggle data-annotation-id="annotation-{{ loop.index0 }}" checked>
+                    <span class="annotation-dot" style="background: {{ annotation.annotation_color }}"></span>
+                    <span class="annotation-list-year">{{ annotation.year }}</span>
+                    <span class="annotation-list-label">{{ annotation.annotation_label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </aside>
+    </div>
+</section>
+{% endif %}
+
+<section class="panel-grid panel-grid-1" id="region-photos">
+    <article class="panel">
+        <div class="panel-head">
+            <div>
+                <h2>📷 Bibliothèque de photos</h2>
+                <span>{{ region_photos|length }} photo{% if region_photos|length != 1 %}s{% endif %}</span>
+            </div>
+            <div class="photo-lib-actions">
+                <form method="post" action="{{ url_for('web.region_photo_upload', region_slug=region.region_slug) }}" enctype="multipart/form-data" style="display:inline-flex;align-items:center;gap:.5rem;">
+                    <label class="secondary-button" style="cursor:pointer;margin:0;">
+                        Sélect. fichiers
+                        <input type="file" name="photo_files" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none;" onchange="this.form.submit()">
+                    </label>
+                    <button type="submit" class="secondary-button">Uploader</button>
+                </form>
+                <button type="button" class="secondary-button" id="photo-web-search-btn" data-region-slug="{{ region.region_slug }}">🔍 Rechercher sur le web</button>
+            </div>
+        </div>
+        {% if region_photos %}
+        <div class="photo-gallery">
+            {% for photo in region_photos %}
+            <div class="photo-card{% if photo.is_primary %} photo-card-primary{% endif %}">
+                <div class="photo-card-img" style="background-image: url('{{ url_for('static', filename=photo.photo_path) }}');" data-photo-full="{{ url_for('static', filename=photo.photo_path) }}"></div>
+                <div class="photo-card-info">
+                    {% if photo.is_primary %}<span class="photo-badge-primary">★ Principale</span>{% endif %}
+                    {% if photo.source_url %}
+                    <a href="{{ photo.source_url }}" target="_blank" class="photo-exif-badge photo-source-link">🔗 Source</a>
+                    {% endif %}
+                    <div class="photo-card-actions">
+                        {% if not photo.is_primary %}
+                        <form method="post" action="{{ url_for('web.region_photo_set_primary', region_slug=region.region_slug, photo_id=photo.photo_id) }}" style="display:inline;">
+                            <button type="submit" class="photo-action-btn" title="Définir comme photo principale">★</button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{{ url_for('web.region_photo_delete', region_slug=region.region_slug, photo_id=photo.photo_id) }}" style="display:inline;" onsubmit="return confirm('Supprimer cette photo ?');">
+                            <button type="submit" class="photo-action-btn photo-action-delete" title="Supprimer">🗑</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="helper-text" style="padding:1rem 0;">Aucune photo dans la bibliothèque. Utilisez les boutons ci-dessus pour en ajouter.</p>
+        {% endif %}
+    </article>
+</section>
+
+<!-- Photo search modal -->
+<div class="photo-search-modal" id="photo-search-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content">
+        <div class="photo-search-modal-header">
+            <h3>🔍 Recherche de photos — {{ region.region_name }}</h3>
+            <button type="button" class="photo-search-modal-close">&times;</button>
+        </div>
+        <div class="photo-search-tabs">
+            <button type="button" class="photo-search-tab active" data-tab="wikipedia">📖 Wikipedia</button>
+            <button type="button" class="photo-search-tab" data-tab="commons">🖼️ Wikimedia Commons</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <p class="helper-text" id="photo-search-status">Recherche en cours…</p>
+            <div class="photo-search-grid" id="photo-search-grid"></div>
+        </div>
+        <div class="photo-search-modal-footer">
+            <span id="photo-search-selected-count">0 sélectionnée(s)</span>
+            <button type="button" class="secondary-button" id="photo-search-import-btn" disabled>Importer la sélection</button>
+        </div>
+    </div>
+</div>
+
+<!-- Annotation photo search modal -->
+<div class="photo-search-modal" id="ann-photo-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content">
+        <div class="photo-search-modal-header">
+            <h3 id="ann-photo-modal-title">🔍 Recherche de photo</h3>
+            <button type="button" class="photo-search-modal-close">&times;</button>
+        </div>
+        <div class="photo-search-tabs">
+            <button type="button" class="photo-search-tab active" data-ann-tab="search">🌐 Recherche auto</button>
+            <button type="button" class="photo-search-tab" data-ann-tab="manual">🔎 Recherche manuelle</button>
+            <button type="button" class="photo-search-tab" data-ann-tab="existing">📎 Photos existantes</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <div id="ann-manual-panel" style="display:none;">
+                <p class="helper-text" style="margin:0 0 .5rem;">Cliquez ou glissez les mots-clés dans la barre de recherche :</p>
+                <div class="ann-pill-tray" id="ann-pill-tray"></div>
+                <div class="ann-search-bar">
+                    <div class="ann-search-input-wrap" id="ann-search-input-wrap">
+                        <input type="text" id="ann-manual-input" placeholder="Glissez des mots-clés ici ou tapez…" autocomplete="off">
+                    </div>
+                </div>
+                <p class="helper-text" id="ann-manual-status"></p>
+                <div class="photo-search-grid" id="ann-manual-grid"></div>
+            </div>
+            <div id="ann-auto-panel">
+                <p class="helper-text" id="ann-photo-status">Recherche en cours…</p>
+                <div class="photo-search-grid" id="ann-photo-grid"></div>
+            </div>
+        </div>
+        <div class="photo-search-modal-footer">
+            <span id="ann-photo-count">Cliquez pour sélectionner</span>
+            <div class="ann-footer-buttons">
+                <button type="button" class="primary-button ann-manual-search-btn" id="ann-manual-search-btn" style="display:none;">Rechercher</button>
+                <button type="button" class="secondary-button" id="ann-photo-save-btn" disabled>Associer la photo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Annotation add/edit modal -->
+<div class="photo-search-modal" id="ann-form-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content" style="max-width:600px;">
+        <div class="photo-search-modal-header">
+            <h3 id="ann-form-title">Nouvelle annotation</h3>
+            <button type="button" class="photo-search-modal-close" id="ann-form-close">&times;</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <form id="ann-form" autocomplete="off">
+                <div class="ann-form-group">
+                    <label for="ann-form-label">Label <span class="required">*</span></label>
+                    <input type="text" id="ann-form-label" placeholder="Ex: Création de la province" required>
+                </div>
+                <div class="ann-form-row">
+                    <div class="ann-form-group">
+                        <label for="ann-form-year">Année <span class="required">*</span></label>
+                        <select id="ann-form-year" required><option value="">Choisir…</option></select>
+                    </div>
+                    <div class="ann-form-group">
+                        <label for="ann-form-color">Couleur</label>
+                        <select id="ann-form-color">
+                            <option value="red">🔴 Rouge</option>
+                            <option value="blue">🔵 Bleu</option>
+                            <option value="green">🟢 Vert</option>
+                            <option value="orange">🟠 Orange</option>
+                            <option value="purple">🟣 Violet</option>
+                            <option value="black">⚫ Noir</option>
+                            <option value="brown">🟤 Brun</option>
+                            <option value="gold">🟡 Or</option>
+                            <option value="navy">🔵 Marine</option>
+                            <option value="teal">🔵 Sarcelle</option>
+                            <option value="darkred">🔴 Rouge foncé</option>
+                            <option value="darkgreen">🟢 Vert foncé</option>
+                            <option value="pink">🩷 Rose</option>
+                            <option value="gray">⚪ Gris</option>
+                        </select>
+                    </div>
+                    <div class="ann-form-group">
+                        <label for="ann-form-type">Type</label>
+                        <select id="ann-form-type">
+                            <option value="event">Événement</option>
+                            <option value="infrastructure">Infrastructure</option>
+                            <option value="politique">Politique</option>
+                            <option value="catastrophe">Catastrophe</option>
+                            <option value="culturel">Culturel</option>
+                            <option value="économique">Économique</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ann-form-group">
+                    <label>Photo</label>
+                    <div class="ann-form-photo-zone" id="ann-form-photo-zone">
+                        <div class="ann-form-photo-preview" id="ann-form-photo-preview" style="display:none;">
+                            <img id="ann-form-photo-img" src="" alt="">
+                            <button type="button" class="ann-form-photo-remove" id="ann-form-photo-remove" title="Retirer">&times;</button>
+                        </div>
+                        <div class="ann-form-photo-actions" id="ann-form-photo-actions">
+                            <button type="button" class="secondary-button" id="ann-form-photo-search-btn">🔍 Rechercher une photo</button>
+                            <span class="helper-text">La photo sera associée après la sauvegarde</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="helper-text ann-form-error" id="ann-form-error" style="display:none;color:var(--accent);"></p>
+            </form>
+        </div>
+        <div class="photo-search-modal-footer">
+            <button type="button" class="secondary-button" id="ann-form-cancel">Annuler</button>
+            <button type="button" class="primary-button" id="ann-form-save">💾 Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Annotation delete modal -->
+<div class="photo-search-modal" id="ann-delete-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content" style="max-width:420px;">
+        <div class="photo-search-modal-header">
+            <h3>Supprimer l'annotation</h3>
+            <button type="button" class="photo-search-modal-close" id="ann-delete-close">&times;</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <p>Êtes-vous sûr de vouloir supprimer l'annotation <strong id="ann-delete-label"></strong> ?</p>
+            <p class="helper-text">Cette action est irréversible.</p>
+        </div>
+        <div class="photo-search-modal-footer">
+            <button type="button" class="secondary-button" id="ann-delete-cancel">Annuler</button>
+            <button type="button" class="primary-button" id="ann-delete-confirm" style="background:var(--red, #e74c3c);">🗑️ Supprimer</button>
+        </div>
+    </div>
+</div>
+
+<section class="panel annotation-story-panel" id="region-annotations">
+    <div class="panel-head">
+        <div>
+            <h2>Annotations temporelles</h2>
+            <span>Ces cartes ouvrent directement la période détaillée correspondante</span>
+        </div>
+        <button type="button" class="primary-button" id="ann-add-btn">＋ Ajouter</button>
+    </div>
+    <div class="annotation-story-grid">
+        {% for annotation in annotations %}
+        <article class="annotation-card{% if annotation.annotation_photo_filename %} has-photo{% endif %}" data-annotation-card data-annotation-db-id="{{ annotation.annotation_id }}" data-annotation-year="{{ annotation.year }}" data-annotation-label="{{ annotation.annotation_label }}" data-annotation-color="{{ annotation.annotation_color }}" data-annotation-type="{{ annotation.annotation_type }}">
+            {% if annotation.annotation_photo_filename %}
+            <div class="annotation-card-photo" style="background-image: url('{{ url_for('static', filename='images/annotations/' + annotation.annotation_photo_filename) }}');"></div>
+            {% endif %}
+            <div class="annotation-card-body">
+                <div class="annotation-card-head">
+                    <div class="annotation-card-meta">
+                        <span class="annotation-dot annotation-dot-large" style="background: {{ annotation.annotation_color }}"></span>
+                        <div>
+                            <strong>{{ annotation.year }}</strong>
+                            <p>{{ annotation.annotation_type }}</p>
+                        </div>
+                    </div>
+                    <div class="annotation-card-actions">
+                        <button type="button" class="annotation-action-btn" data-ann-edit="{{ annotation.annotation_id }}" title="Modifier">✏️</button>
+                        <button type="button" class="annotation-action-btn annotation-action-delete" data-ann-delete="{{ annotation.annotation_id }}" title="Supprimer">🗑️</button>
+                    </div>
+                </div>
+                <h3>{{ annotation.annotation_label }}</h3>
+                <div class="annotation-photo-actions">
+                    <button type="button" class="annotation-photo-btn" data-ann-link="{{ annotation.annotation_id }}" title="Associer une photo existante">📎</button>
+                    <button type="button" class="annotation-photo-btn" data-ann-search="{{ annotation.annotation_id }}" data-ann-label="{{ annotation.annotation_label }}" title="Rechercher sur le web">🔍</button>
+                </div>
+            </div>
+        </article>
+        {% else %}
+        <p>Aucune annotation pour cette région.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% if periods %}
+<section class="panel timeline-panel" id="region-timeline">
+    <div class="panel-head">
+        <div>
+            <h2>Périodes détaillées</h2>
+            <span>Timeline narrative et démographique</span>
+        </div>
+    </div>
+    <div class="period-timeline">
+        {% for period in periods %}
+        <article class="timeline-card visual-timeline-card">
+            <div class="timeline-rail">
+                <span class="timeline-node"></span>
+                {% if not loop.last %}<span class="timeline-line"></span>{% endif %}
+            </div>
+            <div class="timeline-body">
+                <div class="timeline-header timeline-header-visual">
+                    <span>{{ period.period_range_label }}</span>
+                    <strong>{{ period.period_title }}</strong>
+                    <span class="timeline-step-badge">Étape {{ period.step_index }} / {{ period.step_total }}</span>
+                </div>
+                <div class="timeline-kpis">
+                    <span>Population {{ period.start_population }} → {{ period.end_population }}</span>
+                    {% if period.population_change_pct is not none %}
+                    <span>Variation {{ period.population_change_pct }}%</span>
+                    {% endif %}
+                </div>
+                {% if period.linked_annotations %}
+                <div class="timeline-annotation-links">
+                    {% for annotation in period.linked_annotations %}
+                    <span class="timeline-annotation-chip" style="--annotation-color: {{ annotation.color or '#ef6c3d' }}">
+                        <span class="timeline-annotation-dot"></span>
+                        <span>{{ annotation.year }} · {{ annotation.label }}</span>
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if period.display_bullets %}
+                <ul class="timeline-items">
+                    {% for item in period.display_bullets %}
+                    <li>
+                        <span class="timeline-item-icon">{{ item.icon }}</span>
+                        <span class="timeline-item-text">{{ item.text }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if period.summary_text %}
+                <p class="timeline-summary">{{ period.summary_text }}</p>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if fiche %}
+<section class="panel fiche-panel" id="region-fiche">
+    <div class="panel-head">
+        <div>
+            <h2>📋 Fiche Complète</h2>
+            <span>{{ fiche.sections|length }} sections</span>
+        </div>
+    </div>
+    <div class="fiche-sections">
+        {% for section in fiche.sections %}
+        <article class="fiche-section">
+            <h3 class="fiche-section-title"><span class="fiche-emoji">{{ section.emoji }}</span> {{ section.title }}</h3>
+            {% for blk in section.blocks %}
+                {% if blk.type == 'table' %}
+                <div class="fiche-table-wrap">
+                    <table class="fiche-table">
+                        <thead><tr>{% for h in blk.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+                        <tbody>{% for row in blk.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+                    </table>
+                </div>
+                {% elif blk.type == 'bullets' %}
+                <ul class="fiche-bullets">{% for item in blk['items'] %}<li>{{ item }}</li>{% endfor %}</ul>
+                {% elif blk.type == 'text' %}
+                <p class="fiche-text">{{ blk.value }}</p>
+                {% endif %}
+            {% endfor %}
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if not fiche and not periods %}
+<section class="panel" id="region-fiche">
+    <div class="panel-head">
+        <h2>📋 Fiche Complète</h2>
+        <span>Aucune fiche disponible pour {{ region.region_name }}</span>
+    </div>
+    <p class="helper-text" style="padding:1rem 0;">Utilisez l'AI Lab (onglet Régions) pour générer et importer la fiche de cette région.</p>
+</section>
+{% endif %}
+
+<div style="padding:1.5rem 0 0;display:flex;gap:.75rem;align-items:center;">
+    <a href="{{ url_for('web.region_directory') }}" class="secondary-button">← Retour aux régions</a>
+    <button type="button" class="secondary-button" id="region-delete-btn-footer" style="color:#e74c3c;border-color:#e74c3c;">🗑 Supprimer cette région</button>
+</div>
+
+<!-- Region delete confirm modal -->
+<div class="photo-search-modal" id="region-delete-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content" style="max-width:420px;">
+        <div class="photo-search-modal-header">
+            <h3>Supprimer la région</h3>
+            <button type="button" class="photo-search-modal-close" id="region-delete-modal-close">&times;</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <p>Supprimer <strong>{{ region.region_name }}</strong> de la base de données ?</p>
+            <p class="helper-text">Toutes les données (population, périodes, annotations, photos) seront supprimées. Action irréversible.</p>
+        </div>
+        <div class="photo-search-modal-footer">
+            <button type="button" class="secondary-button" id="region-delete-cancel">Annuler</button>
+            <form method="post" action="{{ url_for('web.region_delete', region_slug=region.region_slug) }}" style="display:inline;">
+                <button type="submit" class="primary-button" style="background:#e74c3c;">🗑 Confirmer la suppression</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+(function(){
+    var modal = document.getElementById('region-delete-modal');
+    if(!modal) return;
+    function open(){ modal.style.display=''; }
+    function close(){ modal.style.display='none'; }
+    var btn = document.getElementById('region-delete-btn');
+    var btnF = document.getElementById('region-delete-btn-footer');
+    if(btn) btn.addEventListener('click', open);
+    if(btnF) btnF.addEventListener('click', open);
+    document.getElementById('region-delete-modal-close').addEventListener('click', close);
+    document.getElementById('region-delete-cancel').addEventListener('click', close);
+    modal.querySelector('.photo-search-modal-backdrop').addEventListener('click', close);
+})();
+</script>
+
+<!-- Photo library web search JS -->
+<script>
+(function() {
+    var searchBtn = document.getElementById('photo-web-search-btn');
+    var modal = document.getElementById('photo-search-modal');
+    if (!searchBtn || !modal) return;
+
+    var backdrop = modal.querySelector('.photo-search-modal-backdrop');
+    var closeBtn = modal.querySelector('.photo-search-modal-close');
+    var grid = document.getElementById('photo-search-grid');
+    var status = document.getElementById('photo-search-status');
+    var countSpan = document.getElementById('photo-search-selected-count');
+    var importBtn = document.getElementById('photo-search-import-btn');
+    var tabs = modal.querySelectorAll('.photo-search-tab');
+    var slug = searchBtn.dataset.regionSlug;
+    var selected = {};
+    var activeTab = 'wikipedia';
+    var cache = {};
+
+    var tabEndpoints = {
+        wikipedia: '/regions/' + encodeURIComponent(slug) + '/photos/search',
+        commons: '/regions/' + encodeURIComponent(slug) + '/photos/search-commons'
+    };
+
+    function renderImages(images) {
+        grid.innerHTML = '';
+        if (!images || images.length === 0) {
+            status.textContent = 'Aucune image trouvée.';
+            return;
+        }
+        status.textContent = images.length + ' image(s) trouvée(s) — cliquez pour sélectionner.';
+        images.forEach(function(img) {
+            var card = document.createElement('div');
+            card.className = 'photo-search-card';
+            if (selected[img.url]) card.className += ' photo-search-selected';
+            var imgTitle = (img.title || '').replace('File:', '').replace(/_/g, ' ');
+            var imgDesc = (img.description || '').replace(/</g, '&lt;');
+            var captionText = imgDesc || imgTitle.replace(/</g, '&lt;');
+            card.innerHTML = '<img src="' + img.thumb_url + '" alt="' + imgTitle + '" loading="lazy" onerror="this.style.display=\'none\'">'
+                + '<span class="photo-search-check">✓</span>'
+                + '<span class="photo-search-caption">' + captionText + '</span>'
+                + '<span class="photo-search-size">' + img.width + '×' + img.height + '</span>';
+            card.addEventListener('click', function() {
+                if (selected[img.url]) { delete selected[img.url]; card.classList.remove('photo-search-selected'); }
+                else { selected[img.url] = img; card.classList.add('photo-search-selected'); }
+                updateCount();
+            });
+            grid.appendChild(card);
+        });
+    }
+
+    function loadTab(tab) {
+        activeTab = tab;
+        tabs.forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
+        grid.innerHTML = '';
+        if (cache[tab]) { renderImages(cache[tab]); return; }
+        status.textContent = 'Recherche en cours…';
+        fetch(tabEndpoints[tab])
+            .then(function(r) { return r.json(); })
+            .then(function(data) { cache[tab] = data.images || []; renderImages(cache[tab]); })
+            .catch(function() { status.textContent = 'Erreur lors de la recherche.'; });
+    }
+
+    function openModal() {
+        modal.style.display = '';
+        importBtn.disabled = true;
+        selected = {}; cache = {};
+        updateCount();
+        loadTab('wikipedia');
+    }
+    function closeModal() { modal.style.display = 'none'; }
+    function updateCount() {
+        var n = Object.keys(selected).length;
+        countSpan.textContent = n + ' sélectionnée(s)';
+        importBtn.disabled = n === 0;
+    }
+
+    searchBtn.addEventListener('click', openModal);
+    backdrop.addEventListener('click', closeModal);
+    closeBtn.addEventListener('click', closeModal);
+    tabs.forEach(function(t) { t.addEventListener('click', function() { loadTab(t.dataset.tab); }); });
+
+    importBtn.addEventListener('click', function() {
+        var images = Object.values(selected);
+        if (!images.length) return;
+        importBtn.disabled = true;
+        importBtn.textContent = 'Importation…';
+        fetch('/regions/' + encodeURIComponent(slug) + '/photos/import-web', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ images: images })
+        }).then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.imported > 0) { location.reload(); }
+            else {
+                importBtn.textContent = 'Aucune image importée';
+                setTimeout(function() { importBtn.textContent = 'Importer la sélection'; importBtn.disabled = false; }, 2000);
+            }
+          }).catch(function() {
+            importBtn.textContent = 'Erreur';
+            setTimeout(function() { importBtn.textContent = 'Importer la sélection'; importBtn.disabled = false; }, 2000);
+          });
+    });
+
+    document.querySelectorAll('.photo-card-img').forEach(function(el) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function() {
+            var src = el.dataset.photoFull;
+            if (!src) return;
+            var overlay = document.createElement('div');
+            overlay.className = 'photo-lightbox';
+            overlay.innerHTML = '<img src="' + src + '" alt="Photo">';
+            overlay.addEventListener('click', function() { overlay.remove(); });
+            document.body.appendChild(overlay);
+        });
+    });
+})();
+</script>
+
+<!-- Annotation CRUD JS -->
+<script>
+(function() {
+    var slug = '{{ region.region_slug }}';
+    var formModal = document.getElementById('ann-form-modal');
+    var deleteModal = document.getElementById('ann-delete-modal');
+    if (!formModal || !deleteModal) return;
+
+    var formTitle = document.getElementById('ann-form-title');
+    var formLabel = document.getElementById('ann-form-label');
+    var formYear = document.getElementById('ann-form-year');
+    var formColor = document.getElementById('ann-form-color');
+    var formType = document.getElementById('ann-form-type');
+    var formSave = document.getElementById('ann-form-save');
+    var formCancel = document.getElementById('ann-form-cancel');
+    var formClose = document.getElementById('ann-form-close');
+    var formBackdrop = formModal.querySelector('.photo-search-modal-backdrop');
+    var formError = document.getElementById('ann-form-error');
+    var photoPreview = document.getElementById('ann-form-photo-preview');
+    var photoImg = document.getElementById('ann-form-photo-img');
+    var photoActions = document.getElementById('ann-form-photo-actions');
+    var photoSearchBtn = document.getElementById('ann-form-photo-search-btn');
+    var photoRemoveBtn = document.getElementById('ann-form-photo-remove');
+
+    var deleteLabel = document.getElementById('ann-delete-label');
+    var deleteConfirm = document.getElementById('ann-delete-confirm');
+    var deleteCancel = document.getElementById('ann-delete-cancel');
+    var deleteClose = document.getElementById('ann-delete-close');
+    var deleteBackdrop = deleteModal.querySelector('.photo-search-modal-backdrop');
+
+    var editingId = null;
+    var pendingPhoto = null;
+
+    function showFormError(msg) { formError.textContent = msg; formError.style.display = ''; }
+    function hideFormError() { formError.style.display = 'none'; }
+
+    function loadYears(selectedYear) {
+        fetch('/regions/' + encodeURIComponent(slug) + '/annotations/years')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                formYear.innerHTML = '<option value="">Choisir…</option>';
+                (data.years || []).forEach(function(y) {
+                    var opt = document.createElement('option');
+                    opt.value = y.year;
+                    opt.textContent = y.year + (y.has_annotation ? ' (a déjà une annotation)' : '');
+                    if (y.year == selectedYear) opt.selected = true;
+                    formYear.appendChild(opt);
+                });
+            });
+    }
+
+    function openFormModal(mode, annId, annData) {
+        editingId = annId || null;
+        hideFormError();
+        pendingPhoto = null;
+        photoPreview.style.display = 'none';
+        photoActions.style.display = '';
+        if (mode === 'edit' && annData) {
+            formTitle.textContent = '✏️ Modifier l\'annotation';
+            formLabel.value = annData.label || '';
+            formColor.value = annData.color || 'red';
+            formType.value = annData.type || 'event';
+            loadYears(annData.year);
+        } else {
+            formTitle.textContent = '＋ Nouvelle annotation';
+            formLabel.value = '';
+            formColor.value = 'red';
+            formType.value = 'event';
+            loadYears(null);
+        }
+        formSave.disabled = false;
+        formSave.textContent = '💾 Enregistrer';
+        formModal.style.display = '';
+        formLabel.focus();
+    }
+
+    function closeFormModal() { formModal.style.display = 'none'; editingId = null; pendingPhoto = null; }
+
+    formBackdrop.addEventListener('click', closeFormModal);
+    formClose.addEventListener('click', closeFormModal);
+    formCancel.addEventListener('click', closeFormModal);
+
+    photoSearchBtn.addEventListener('click', function() {
+        var label = formLabel.value.trim();
+        if (!label) { showFormError('Entrez un label avant de chercher une photo.'); return; }
+        window._annFormPickMode = true;
+        if (typeof window._openAnnPhotoModal === 'function') {
+            window._openAnnPhotoModal(editingId || 'new', label);
+        }
+    });
+
+    photoRemoveBtn.addEventListener('click', function() {
+        photoImg.src = '';
+        photoPreview.style.display = 'none';
+        photoActions.style.display = '';
+        pendingPhoto = null;
+    });
+
+    window._annFormPhotoSelected = function(img) {
+        pendingPhoto = img;
+        photoImg.src = img.thumb_url || img.url;
+        photoPreview.style.display = '';
+        photoActions.style.display = 'none';
+    };
+
+    formSave.addEventListener('click', function() {
+        hideFormError();
+        var label = formLabel.value.trim();
+        var year = formYear.value;
+        var color = formColor.value;
+        var annType = formType.value;
+        if (!label) { showFormError('Le label est requis.'); return; }
+        if (!year) { showFormError('L\'année est requise.'); return; }
+        formSave.disabled = true;
+        formSave.textContent = 'Enregistrement…';
+        var url, method, body;
+        if (editingId) {
+            url = '/regions/' + encodeURIComponent(slug) + '/annotations/' + editingId;
+            method = 'PUT';
+        } else {
+            url = '/regions/' + encodeURIComponent(slug) + '/annotations';
+            method = 'POST';
+        }
+        body = JSON.stringify({ label: label, year: parseInt(year), color: color, type: annType });
+        fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: body })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    var annId = editingId || data.annotation_id;
+                    if (pendingPhoto && annId) {
+                        return fetch('/regions/' + encodeURIComponent(slug) + '/annotations/' + annId + '/photo/save', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: pendingPhoto.url, source_page: pendingPhoto.source_page || '' })
+                        }).then(function() { location.reload(); });
+                    }
+                    location.reload();
+                } else {
+                    showFormError(data.error || 'Erreur inconnue.');
+                    formSave.disabled = false;
+                    formSave.textContent = '💾 Enregistrer';
+                }
+            }).catch(function() {
+                showFormError('Erreur réseau.');
+                formSave.disabled = false;
+                formSave.textContent = '💾 Enregistrer';
+            });
+    });
+
+    var addBtn = document.getElementById('ann-add-btn');
+    if (addBtn) { addBtn.addEventListener('click', function() { openFormModal('create'); }); }
+
+    document.querySelectorAll('[data-ann-edit]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var annId = btn.dataset.annEdit;
+            var card = btn.closest('.annotation-card');
+            openFormModal('edit', annId, {
+                label: card.dataset.annotationLabel,
+                year: card.dataset.annotationYear,
+                color: card.dataset.annotationColor,
+                type: card.dataset.annotationType
+            });
+        });
+    });
+
+    var deleteTargetId = null;
+    document.querySelectorAll('[data-ann-delete]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            deleteTargetId = btn.dataset.annDelete;
+            deleteLabel.textContent = btn.closest('.annotation-card').dataset.annotationLabel;
+            deleteModal.style.display = '';
+        });
+    });
+
+    function closeDeleteModal() { deleteModal.style.display = 'none'; deleteTargetId = null; }
+    deleteBackdrop.addEventListener('click', closeDeleteModal);
+    deleteClose.addEventListener('click', closeDeleteModal);
+    deleteCancel.addEventListener('click', closeDeleteModal);
+
+    deleteConfirm.addEventListener('click', function() {
+        if (!deleteTargetId) return;
+        deleteConfirm.disabled = true;
+        deleteConfirm.textContent = 'Suppression…';
+        fetch('/regions/' + encodeURIComponent(slug) + '/annotations/' + deleteTargetId, { method: 'DELETE' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) { location.reload(); }
+                else {
+                    deleteConfirm.textContent = data.error || 'Erreur';
+                    setTimeout(function() { deleteConfirm.textContent = '🗑️ Supprimer'; deleteConfirm.disabled = false; }, 2000);
+                }
+            }).catch(function() {
+                deleteConfirm.textContent = 'Erreur';
+                setTimeout(function() { deleteConfirm.textContent = '🗑️ Supprimer'; deleteConfirm.disabled = false; }, 2000);
+            });
+    });
+})();
+</script>
+
+<!-- Annotation photo modal JS -->
+<script>
+(function() {
+    var annModal = document.getElementById('ann-photo-modal');
+    if (!annModal) return;
+
+    var annBackdrop = annModal.querySelector('.photo-search-modal-backdrop');
+    var annCloseBtn = annModal.querySelector('.photo-search-modal-close');
+    var annGrid = document.getElementById('ann-photo-grid');
+    var annStatus = document.getElementById('ann-photo-status');
+    var annCountSpan = document.getElementById('ann-photo-count');
+    var annSaveBtn = document.getElementById('ann-photo-save-btn');
+    var annTitle = document.getElementById('ann-photo-modal-title');
+    var annTabs = annModal.querySelectorAll('[data-ann-tab]');
+    var annAutoPanel = document.getElementById('ann-auto-panel');
+    var annManualPanel = document.getElementById('ann-manual-panel');
+    var annPillTray = document.getElementById('ann-pill-tray');
+    var annSearchWrap = document.getElementById('ann-search-input-wrap');
+    var annManualInput = document.getElementById('ann-manual-input');
+    var annManualSearchBtn = document.getElementById('ann-manual-search-btn');
+    var annManualGrid = document.getElementById('ann-manual-grid');
+    var annManualStatus = document.getElementById('ann-manual-status');
+    var slug = '{{ region.region_slug }}';
+    var currentAnnId = null;
+    var currentAnnLabel = '';
+    var selectedImage = null;
+    var selectedPhotoId = null;
+    var annActiveTab = 'search';
+    var annCache = {};
+
+    var existingPhotos = [
+        {% for photo in region_photos %}
+        { photo_id: {{ photo.photo_id }}, filename: '{{ photo.filename }}', caption: '{{ photo.caption|default("", true)|replace("'", "\\'") }}', path: '{{ url_for("static", filename=photo.photo_path) }}' }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    function renderAnnCards(items, mode, targetGrid, targetStatus) {
+        var grid = targetGrid || annGrid;
+        var status = targetStatus || annStatus;
+        grid.innerHTML = '';
+        if (!items || items.length === 0) {
+            status.textContent = mode === 'existing' ? 'Aucune photo dans la bibliothèque.' : 'Aucune image trouvée.';
+            return;
+        }
+        status.textContent = items.length + ' image(s) — cliquez pour sélectionner.';
+        items.forEach(function(img) {
+            var card = document.createElement('div');
+            card.className = 'photo-search-card';
+            var thumbSrc = mode === 'existing' ? img.path : img.thumb_url;
+            var imgTitle = (mode === 'existing' ? (img.caption || img.filename) : (img.title || '')).replace('File:', '').replace(/_/g, ' ');
+            card.innerHTML = '<img src="' + thumbSrc + '" loading="lazy" onerror="this.style.display=\'none\'">'
+                + '<span class="photo-search-check">✓</span>'
+                + '<span class="photo-search-caption">' + imgTitle.replace(/</g, '&lt;') + '</span>';
+            card.addEventListener('click', function() {
+                grid.querySelectorAll('.photo-search-selected').forEach(function(el) { el.classList.remove('photo-search-selected'); });
+                card.classList.add('photo-search-selected');
+                if (mode === 'existing') { selectedPhotoId = img.photo_id; selectedImage = null; }
+                else { selectedImage = img; selectedPhotoId = null; }
+                annCountSpan.textContent = '1 sélectionnée';
+                annSaveBtn.disabled = false;
+                if (window._annFormPickMode && selectedImage) {
+                    if (typeof window._annFormPhotoSelected === 'function') window._annFormPhotoSelected(selectedImage);
+                    window._annFormPickMode = false;
+                    closeAnnModal();
+                }
+            });
+            grid.appendChild(card);
+        });
+    }
+
+    function buildPills(label) {
+        annPillTray.innerHTML = '';
+        var cleaned = label.replace(/[\u{10000}-\u{10FFFF}]/gu, '').trim();
+        var ym = cleaned.match(/\((\d{4})\)/);
+        var year = ym ? ym[1] : '';
+        cleaned = cleaned.replace(/\(\d{4}\)/g, '').replace(/[=+—]/g, ' ').replace(/\s+/g, ' ').trim();
+        var FR_STOP = new Set(['le','la','les','de','du','des','un','une','et','en','au','aux','ce','ces','se','sa','son','ses','sur','par','pour','dans','est','qui','que','avec','vers','pas','plus','très','tout','mais']);
+        var words = cleaned.split(/\s+/).filter(function(w) { return w.length >= 3 && !FR_STOP.has(w.toLowerCase()); });
+        var seen = new Set();
+        var pills = [];
+        words.forEach(function(w) { if (!seen.has(w.toLowerCase())) { seen.add(w.toLowerCase()); pills.push(w); } });
+        var regionName = '{{ region.region_name }}';
+        if (!seen.has(regionName.toLowerCase())) pills.push(regionName);
+        if (year && !seen.has(year)) pills.push(year);
+        pills.forEach(function(text) {
+            var pill = document.createElement('span');
+            pill.className = 'ann-keyword-pill';
+            pill.textContent = text;
+            pill.draggable = true;
+            pill.dataset.keyword = text;
+            pill.addEventListener('dragstart', function(e) { e.dataTransfer.setData('text/plain', text); pill.classList.add('dragging'); });
+            pill.addEventListener('dragend', function() { pill.classList.remove('dragging'); });
+            pill.addEventListener('click', function() { addPillToSearch(text); });
+            annPillTray.appendChild(pill);
+        });
+    }
+
+    function addPillToSearch(text) {
+        var existing = annSearchWrap.querySelectorAll('.ann-search-pill');
+        for (var i = 0; i < existing.length; i++) {
+            if (existing[i].dataset.keyword.toLowerCase() === text.toLowerCase()) return;
+        }
+        var pill = document.createElement('span');
+        pill.className = 'ann-search-pill';
+        pill.dataset.keyword = text;
+        pill.innerHTML = text + '<button type="button">&times;</button>';
+        pill.querySelector('button').addEventListener('click', function(e) { e.stopPropagation(); pill.remove(); });
+        annSearchWrap.insertBefore(pill, annManualInput);
+        annManualInput.value = '';
+        annManualInput.focus();
+    }
+
+    function getManualQuery() {
+        var parts = [];
+        annSearchWrap.querySelectorAll('.ann-search-pill').forEach(function(p) { parts.push(p.dataset.keyword); });
+        var typed = annManualInput.value.trim();
+        if (typed) parts.push(typed);
+        return parts.join(' ');
+    }
+
+    annSearchWrap.addEventListener('dragover', function(e) { e.preventDefault(); annSearchWrap.classList.add('drag-over'); });
+    annSearchWrap.addEventListener('dragleave', function() { annSearchWrap.classList.remove('drag-over'); });
+    annSearchWrap.addEventListener('drop', function(e) {
+        e.preventDefault();
+        annSearchWrap.classList.remove('drag-over');
+        var text = e.dataTransfer.getData('text/plain');
+        if (text) addPillToSearch(text);
+    });
+    annManualInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); var typed = annManualInput.value.trim(); if (typed) addPillToSearch(typed); else doManualSearch(); }
+        if (e.key === 'Backspace' && !annManualInput.value) { var pills = annSearchWrap.querySelectorAll('.ann-search-pill'); if (pills.length) pills[pills.length - 1].remove(); }
+    });
+    annManualSearchBtn.addEventListener('click', doManualSearch);
+
+    function doManualSearch() {
+        var query = getManualQuery();
+        if (!query.trim()) return;
+        annManualStatus.textContent = 'Recherche en cours…';
+        annManualGrid.innerHTML = '';
+        annManualSearchBtn.disabled = true;
+        selectedImage = null; selectedPhotoId = null;
+        annSaveBtn.disabled = true;
+        annCountSpan.textContent = 'Cliquez pour sélectionner';
+        fetch('/regions/' + encodeURIComponent(slug) + '/annotations/manual-search?q=' + encodeURIComponent(query))
+            .then(function(r) { return r.json(); })
+            .then(function(data) { annManualSearchBtn.disabled = false; renderAnnCards(data.images || [], 'manual', annManualGrid, annManualStatus); })
+            .catch(function() { annManualSearchBtn.disabled = false; annManualStatus.textContent = 'Erreur lors de la recherche.'; });
+    }
+
+    function loadAnnTab(tab) {
+        annActiveTab = tab;
+        annTabs.forEach(function(t) { t.classList.toggle('active', t.dataset.annTab === tab); });
+        selectedImage = null; selectedPhotoId = null;
+        annSaveBtn.disabled = true;
+        annCountSpan.textContent = 'Cliquez pour sélectionner';
+        annAutoPanel.style.display = (tab === 'manual') ? 'none' : '';
+        annManualPanel.style.display = (tab === 'manual') ? '' : 'none';
+        annManualSearchBtn.style.display = (tab === 'manual') ? '' : 'none';
+        if (tab === 'manual') {
+            buildPills(currentAnnLabel);
+            annManualGrid.innerHTML = '';
+            annManualStatus.textContent = '';
+            annSearchWrap.querySelectorAll('.ann-search-pill').forEach(function(p) { p.remove(); });
+            annManualInput.value = '';
+            return;
+        }
+        annGrid.innerHTML = '';
+        if (tab === 'existing') { renderAnnCards(existingPhotos, 'existing'); return; }
+        if (annCache[currentAnnId]) { renderAnnCards(annCache[currentAnnId], 'search'); return; }
+        annStatus.textContent = 'Recherche en cours…';
+        fetch('/regions/' + encodeURIComponent(slug) + '/annotations/' + currentAnnId + '/photo/search')
+            .then(function(r) { return r.json(); })
+            .then(function(data) { annCache[currentAnnId] = data.images || []; renderAnnCards(annCache[currentAnnId], 'search'); })
+            .catch(function() { annStatus.textContent = 'Erreur lors de la recherche.'; });
+    }
+
+    function openAnnModal(annId, label) {
+        currentAnnId = annId; currentAnnLabel = label;
+        annTitle.textContent = '🔍 Photo — ' + label;
+        annModal.style.display = '';
+        annCache = {}; selectedImage = null; selectedPhotoId = null;
+        annSaveBtn.disabled = true;
+        annCountSpan.textContent = 'Cliquez pour sélectionner';
+        loadAnnTab('search');
+    }
+    function closeAnnModal() { annModal.style.display = 'none'; }
+
+    annBackdrop.addEventListener('click', closeAnnModal);
+    annCloseBtn.addEventListener('click', closeAnnModal);
+    annTabs.forEach(function(t) { t.addEventListener('click', function() { loadAnnTab(t.dataset.annTab); }); });
+
+    document.querySelectorAll('[data-ann-search]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) { e.stopPropagation(); openAnnModal(btn.dataset.annSearch, btn.dataset.annLabel); });
+    });
+
+    document.querySelectorAll('[data-ann-link]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            currentAnnId = btn.dataset.annLink;
+            currentAnnLabel = btn.closest('.annotation-card').querySelector('h3').textContent;
+            annTitle.textContent = '📎 Photo — ' + currentAnnLabel;
+            annModal.style.display = '';
+            annCache = {}; selectedImage = null; selectedPhotoId = null;
+            annSaveBtn.disabled = true;
+            annCountSpan.textContent = 'Cliquez pour sélectionner';
+            loadAnnTab('existing');
+        });
+    });
+
+    annSaveBtn.addEventListener('click', function() {
+        annSaveBtn.disabled = true;
+        annSaveBtn.textContent = 'Enregistrement…';
+        var url, body;
+        if (selectedPhotoId) {
+            url = '/regions/' + encodeURIComponent(slug) + '/annotations/' + currentAnnId + '/photo/link';
+            body = JSON.stringify({ photo_id: selectedPhotoId });
+        } else if (selectedImage) {
+            url = '/regions/' + encodeURIComponent(slug) + '/annotations/' + currentAnnId + '/photo/save';
+            body = JSON.stringify({ url: selectedImage.url, source_page: selectedImage.source_page || '' });
+        } else { return; }
+        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) { location.reload(); }
+                else {
+                    annSaveBtn.textContent = data.error || 'Erreur';
+                    setTimeout(function() { annSaveBtn.textContent = 'Associer la photo'; annSaveBtn.disabled = false; }, 2000);
+                }
+            }).catch(function() {
+                annSaveBtn.textContent = 'Erreur';
+                setTimeout(function() { annSaveBtn.textContent = 'Associer la photo'; annSaveBtn.disabled = false; }, 2000);
+            });
+    });
+
+    window._openAnnPhotoModal = openAnnModal;
+})();
+</script>
+{% endblock %}

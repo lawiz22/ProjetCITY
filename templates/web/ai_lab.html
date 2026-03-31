@@ -234,26 +234,273 @@
 
 <!-- ==================== TAB: Pays ==================== -->
 <div class="ailab-tab-content" id="ailab-tab-pays">
+
+<!-- ===================== Pays — Configuration ===================== -->
 <section class="panel">
     <div class="panel-head">
-        <h2>🌍 Pays</h2>
+        <h2>Configuration</h2>
     </div>
     <div class="options-body ai-lab-body">
-        <p style="color:var(--ink-2);font-style:italic;">À venir — Génération IA pour les fiches pays.</p>
+        <div class="ai-lab-top-row">
+            <div class="ai-lab-field" style="flex:2;">
+                <label class="opt-label" for="ai-country-input">Pays à générer</label>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <input type="text" id="ai-country-input" class="opt-input" placeholder="ex: Canada" spellcheck="false" style="flex:1;min-width:220px;">
+                    <button type="button" id="country-suggest-btn" class="suggest-city-btn" title="Suggérer un pays">🎲 Suggérer</button>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+
+<!-- ===================== Pays — Générer les 3 étapes ===================== -->
+<section class="panel" id="country-generate-all-panel">
+    <div class="options-body ai-lab-body" style="text-align:center;padding:1.5rem;">
+        <button type="button" class="generate-all-btn" id="country-generate-all-btn">
+            🦣 Générer les 3 étapes
+        </button>
+        <div id="country-generate-all-status" class="generate-all-status" style="display:none;"></div>
+    </div>
+</section>
+
+<!-- ===================== Pays — Step 1 ===================== -->
+<section class="panel ailab-step" id="country-step1-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">1</span>
+            Population &amp; annotations (Python)
+            <span class="ailab-check" id="country-step1-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="country1-prompt">Prompt (modifiable)</label>
+            <textarea id="country1-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_country }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="country1-generate">🚀 Générer Step 1</button>
+        </div>
+        <div class="ai-lab-field" id="country1-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="country1-result" class="opt-input ai-lab-result" rows="20" readonly></textarea>
+            <div style="display:flex;gap:8px;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="country1-copy">📋 Copier</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Pays — Step 2 ===================== -->
+<section class="panel ailab-step" id="country-step2-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">2</span>
+            Fiche détaillée (histoire &amp; démographie)
+            <span class="ailab-check" id="country-step2-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="country2-prompt">Prompt (modifiable)</label>
+            <textarea id="country2-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_country_details }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="country2-generate">🚀 Générer Step 2</button>
+        </div>
+        <div class="ai-lab-field" id="country2-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="country2-result" class="opt-input ai-lab-result" rows="30" readonly></textarea>
+            <div style="display:flex;gap:8px;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="country2-copy">📋 Copier</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Pays — Step 3 ===================== -->
+<section class="panel ailab-step" id="country-step3-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">3</span>
+            Fiche complète (Markdown)
+            <span class="ailab-check" id="country-step3-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="country3-prompt">Prompt (modifiable)</label>
+            <textarea id="country3-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_country_fiche }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="country3-generate">🚀 Générer Step 3</button>
+        </div>
+        <div class="ai-lab-field" id="country3-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="country3-result" class="opt-input ai-lab-result" rows="30" readonly></textarea>
+            <div style="display:flex;gap:8px;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="country3-copy">📋 Copier</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Pays — Importer ===================== -->
+<section class="panel" id="add-country-panel" style="display:none;">
+    <div class="panel-head">
+        <h2>✅ Ajouter le pays</h2>
+        <span>Les 3 étapes sont complètes — prêt à importer</span>
+    </div>
+    <div class="options-body">
+        <p id="add-country-info" style="font-weight:600;margin-bottom:1rem;"></p>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="add-country-btn" style="font-size:1rem;padding:.7rem 2rem;">
+                🌍 Ajouter le pays
+            </button>
+        </div>
+        <div class="opt-test-result" id="add-country-result" style="display:none;"></div>
+    </div>
+</section>
+
 </div><!-- /ailab-tab-pays -->
 
 <!-- ==================== TAB: Régions ==================== -->
 <div class="ailab-tab-content" id="ailab-tab-regions">
+
+<!-- ===================== Régions — Configuration ===================== -->
 <section class="panel">
     <div class="panel-head">
-        <h2>📍 Régions</h2>
+        <h2>Configuration</h2>
     </div>
     <div class="options-body ai-lab-body">
-        <p style="color:var(--ink-2);font-style:italic;">À venir — Génération IA pour les fiches régions.</p>
+        <div class="ai-lab-top-row">
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="ai-region-country">Pays</label>
+                <select id="ai-region-country" class="opt-input" style="flex:1;">
+                    <option value="">— Sélectionner un pays —</option>
+                    {% for c in countries_for_region %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:2;">
+                <label class="opt-label" for="ai-region-input">Région à générer</label>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <input type="text" id="ai-region-input" class="opt-input" placeholder="ex: Alberta, Ontario, California" spellcheck="false" style="flex:1;min-width:220px;">
+                    <button type="button" id="region-suggest-btn" class="suggest-city-btn" title="Suggérer une région">🎲 Suggérer</button>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+
+<!-- ===================== Régions — Générer les 3 étapes ===================== -->
+<section class="panel" id="region-generate-all-panel">
+    <div class="options-body ai-lab-body" style="text-align:center;padding:1.5rem;">
+        <button type="button" class="generate-all-btn" id="region-generate-all-btn">
+            🦣 Générer les 3 étapes
+        </button>
+        <div id="region-generate-all-status" class="generate-all-status" style="display:none;"></div>
+    </div>
+</section>
+
+<!-- ===================== Régions — Step 1 ===================== -->
+<section class="panel ailab-step" id="region-step1-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">1</span>
+            Population &amp; annotations (Python)
+            <span class="ailab-check" id="region-step1-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="region1-prompt">Prompt (modifiable)</label>
+            <textarea id="region1-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_region }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="region1-generate">🚀 Générer Step 1</button>
+        </div>
+        <div class="ai-lab-field" id="region1-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="region1-result" class="opt-input ai-lab-result" rows="20" readonly></textarea>
+            <div style="display:flex;gap:8px;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="region1-copy">📋 Copier</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Régions — Step 2 ===================== -->
+<section class="panel ailab-step" id="region-step2-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">2</span>
+            Périodes historiques (détails)
+            <span class="ailab-check" id="region-step2-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="region2-prompt">Prompt (modifiable)</label>
+            <textarea id="region2-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_region_details }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="region2-generate">🚀 Générer Step 2</button>
+        </div>
+        <div class="ai-lab-field" id="region2-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="region2-result" class="opt-input ai-lab-result" rows="30" readonly></textarea>
+            <div style="display:flex;gap:8px;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="region2-copy">📋 Copier</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Régions — Step 3 ===================== -->
+<section class="panel ailab-step" id="region-step3-panel">
+    <div class="panel-head">
+        <h2>
+            <span class="ailab-step-num">3</span>
+            Fiche complète (Markdown)
+            <span class="ailab-check" id="region-step3-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="region3-prompt">Prompt (modifiable)</label>
+            <textarea id="region3-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_region_fiche }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="region3-generate">🚀 Générer Step 3</button>
+        </div>
+        <div class="ai-lab-field" id="region3-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="region3-result" class="opt-input ai-lab-result" rows="30" readonly></textarea>
+            <div style="display:flex;gap:8px;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="region3-copy">📋 Copier</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Régions — Importer ===================== -->
+<section class="panel" id="add-region-panel" style="display:none;">
+    <div class="panel-head">
+        <h2>✅ Ajouter la région</h2>
+        <span>Les 3 étapes sont complètes — prêt à importer</span>
+    </div>
+    <div class="options-body">
+        <p id="add-region-info" style="font-weight:600;margin-bottom:1rem;"></p>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="add-region-btn" style="font-size:1rem;padding:.7rem 2rem;">
+                📍 Ajouter la région
+            </button>
+        </div>
+        <div class="opt-test-result" id="add-region-result" style="display:none;"></div>
+    </div>
+</section>
+
 </div><!-- /ailab-tab-regions -->
 
 <script>
@@ -279,7 +526,8 @@
     var tokenEl     = document.getElementById('token-mammouth');
     var resetBtn    = document.getElementById('token-reset-mammouth');
     var generateUrl = '{{ url_for("web.options_generate") }}';
-    var suggestUrl  = '{{ url_for("web.ai_lab_suggest_city") }}';
+    var suggestUrl        = '{{ url_for("web.ai_lab_suggest_city") }}';
+    var suggestCountryUrl = '{{ url_for("web.ai_lab_suggest_country") }}';
 
     /* ---- Suggest filters (country / region) ---- */
     var suggestCountry = document.getElementById('ai-suggest-country');
@@ -667,6 +915,674 @@
                 addBtn.textContent = '🏙️ Ajouter la ville';
                 addResult.className = 'opt-test-result opt-test-error';
                 addResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Suggest country button ---- */
+    var countrySuggestBtn = document.getElementById('country-suggest-btn');
+    countrySuggestBtn.addEventListener('click', function () {
+        countrySuggestBtn.disabled = true;
+        countrySuggestBtn.textContent = '⏳ …';
+        var fd = new FormData();
+        fd.append('model', modelSelect.value);
+        fetch(suggestCountryUrl, { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.success && d.reply) {
+                    document.getElementById('ai-country-input').value = d.reply.trim().replace(/^[\s"']+|[\s"']+$/g, '');
+                    if (d.tokens_total != null) tokenEl.textContent = d.tokens_total;
+                } else {
+                    alert(d.error || 'Erreur lors de la suggestion.');
+                }
+            })
+            .catch(function (err) { alert('Erreur réseau: ' + err); })
+            .finally(function () {
+                countrySuggestBtn.disabled = false;
+                countrySuggestBtn.textContent = '🎲 Suggérer';
+            });
+    });
+
+    /* ==================================================================
+     * PAYS TAB — Step 1 + Step 2 + Step 3 with step tracking
+     * ================================================================== */
+    var countryInput = document.getElementById('ai-country-input');
+    var countryStepDone = { 1: false, 2: false, 3: false };
+
+    function checkCountryAllDone() {
+        if (countryStepDone[1] && countryStepDone[2] && countryStepDone[3]) {
+            var panel = document.getElementById('add-country-panel');
+            panel.style.display = '';
+            document.getElementById('add-country-info').textContent = '🌍 ' + countryInput.value.trim();
+        }
+    }
+
+    /* ---- Country Step 1 — Population ---- */
+    var country1GenBtn  = document.getElementById('country1-generate');
+    var country1Prompt  = document.getElementById('country1-prompt');
+    var country1ResWrap = document.getElementById('country1-result-wrap');
+    var country1Result  = document.getElementById('country1-result');
+    var country1Check   = document.getElementById('country-step1-check');
+
+    country1GenBtn.addEventListener('click', function() {
+        var name = countryInput.value.trim();
+        if (!name) { alert('Entrez un nom de pays.'); return; }
+        country1GenBtn.disabled = true;
+        country1GenBtn.textContent = '⏳ Génération en cours…';
+        country1ResWrap.style.display = '';
+        country1Result.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', country1Prompt.value);
+        fd.append('max_tokens', '2000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                country1GenBtn.disabled = false;
+                country1GenBtn.textContent = '🚀 Générer Step 1';
+                if (data.success) {
+                    var text = data.reply.replace(/^```python\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+                    country1Result.value = text;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    country1Check.classList.add('visible');
+                    countryStepDone[1] = true;
+                    checkCountryAllDone();
+                } else {
+                    country1Result.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                country1GenBtn.disabled = false;
+                country1GenBtn.textContent = '🚀 Générer Step 1';
+                country1Result.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('country1-copy').addEventListener('click', function() {
+        country1Result.select();
+        navigator.clipboard.writeText(country1Result.value).then(function() {
+            var btn = document.getElementById('country1-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Country Step 2 — Fiche détaillée ---- */
+    var country2GenBtn  = document.getElementById('country2-generate');
+    var country2Prompt  = document.getElementById('country2-prompt');
+    var country2ResWrap = document.getElementById('country2-result-wrap');
+    var country2Result  = document.getElementById('country2-result');
+    var country2Check   = document.getElementById('country-step2-check');
+
+    country2GenBtn.addEventListener('click', function() {
+        var name = countryInput.value.trim();
+        if (!name) { alert('Entrez un nom de pays.'); return; }
+        country2GenBtn.disabled = true;
+        country2GenBtn.textContent = '⏳ Génération en cours…';
+        country2ResWrap.style.display = '';
+        country2Result.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', country2Prompt.value);
+        fd.append('max_tokens', '4000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                country2GenBtn.disabled = false;
+                country2GenBtn.textContent = '🚀 Générer Step 2';
+                if (data.success) {
+                    country2Result.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    country2Check.classList.add('visible');
+                    countryStepDone[2] = true;
+                    checkCountryAllDone();
+                } else {
+                    country2Result.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                country2GenBtn.disabled = false;
+                country2GenBtn.textContent = '🚀 Générer Step 2';
+                country2Result.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('country2-copy').addEventListener('click', function() {
+        country2Result.select();
+        navigator.clipboard.writeText(country2Result.value).then(function() {
+            var btn = document.getElementById('country2-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Country Step 3 — Fiche complète ---- */
+    var country3GenBtn  = document.getElementById('country3-generate');
+    var country3Prompt  = document.getElementById('country3-prompt');
+    var country3ResWrap = document.getElementById('country3-result-wrap');
+    var country3Result  = document.getElementById('country3-result');
+    var country3Check   = document.getElementById('country-step3-check');
+
+    country3GenBtn.addEventListener('click', function() {
+        var name = countryInput.value.trim();
+        if (!name) { alert('Entrez un nom de pays.'); return; }
+        country3GenBtn.disabled = true;
+        country3GenBtn.textContent = '⏳ Génération en cours…';
+        country3ResWrap.style.display = '';
+        country3Result.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', country3Prompt.value);
+        fd.append('max_tokens', '8000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                country3GenBtn.disabled = false;
+                country3GenBtn.textContent = '🚀 Générer Step 3';
+                if (data.success) {
+                    country3Result.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    country3Check.classList.add('visible');
+                    countryStepDone[3] = true;
+                    checkCountryAllDone();
+                } else {
+                    country3Result.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                country3GenBtn.disabled = false;
+                country3GenBtn.textContent = '🚀 Générer Step 3';
+                country3Result.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('country3-copy').addEventListener('click', function() {
+        country3Result.select();
+        navigator.clipboard.writeText(country3Result.value).then(function() {
+            var btn = document.getElementById('country3-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Country — Générer les 3 étapes ---- */
+    var countryGenAllBtn    = document.getElementById('country-generate-all-btn');
+    var countryGenAllStatus = document.getElementById('country-generate-all-status');
+
+    function runCountryStep(num) {
+        var ids = [
+            null,
+            { prompt: 'country1-prompt', btn: 'country1-generate', wrap: 'country1-result-wrap', result: 'country1-result', check: 'country-step1-check', label: '🚀 Générer Step 1', tokens: '2000', strip: true },
+            { prompt: 'country2-prompt', btn: 'country2-generate', wrap: 'country2-result-wrap', result: 'country2-result', check: 'country-step2-check', label: '🚀 Générer Step 2', tokens: '4000', strip: false },
+            { prompt: 'country3-prompt', btn: 'country3-generate', wrap: 'country3-result-wrap', result: 'country3-result', check: 'country-step3-check', label: '🚀 Générer Step 3', tokens: '8000', strip: false }
+        ];
+        var o = ids[num];
+        var name = countryInput.value.trim();
+        if (!name) return Promise.reject(new Error('Pas de pays'));
+        var genBtn = document.getElementById(o.btn);
+        var resWrap = document.getElementById(o.wrap);
+        var resEl = document.getElementById(o.result);
+        var checkEl = document.getElementById(o.check);
+        genBtn.disabled = true;
+        genBtn.textContent = '⏳ Génération en cours…';
+        resWrap.style.display = '';
+        resEl.value = 'Interrogation de ' + modelSelect.value + '…';
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', document.getElementById(o.prompt).value);
+        fd.append('max_tokens', o.tokens);
+        return fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                genBtn.disabled = false;
+                genBtn.textContent = o.label;
+                if (data.success) {
+                    var text = data.reply;
+                    if (o.strip) text = text.replace(/^```python\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+                    resEl.value = text;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    checkEl.classList.add('visible');
+                    countryStepDone[num] = true;
+                    checkCountryAllDone();
+                    return true;
+                } else {
+                    resEl.value = '❌ ERREUR : ' + data.error;
+                    throw new Error(data.error);
+                }
+            })
+            .catch(function(err) {
+                genBtn.disabled = false;
+                genBtn.textContent = o.label;
+                throw err;
+            });
+    }
+
+    function runCountryStepWithRetry(num, maxRetries) {
+        var attempt = 0;
+        function tryOnce() {
+            attempt++;
+            countryGenAllStatus.innerHTML = '⏳ Step ' + num + '/3 en cours… ' + (attempt > 1 ? '(tentative ' + attempt + '/' + maxRetries + ')' : '');
+            return runCountryStep(num).catch(function(err) {
+                if (attempt < maxRetries) {
+                    countryGenAllStatus.innerHTML = '⚠️ Step ' + num + ' échoué — nouvelle tentative dans 3s…';
+                    return new Promise(function(resolve) { setTimeout(resolve, 3000); }).then(tryOnce);
+                }
+                throw new Error('Step ' + num + ' échoué après ' + maxRetries + ' tentatives : ' + err.message);
+            });
+        }
+        return tryOnce();
+    }
+
+    countryGenAllBtn.addEventListener('click', function() {
+        var name = countryInput.value.trim();
+        if (!name) { alert('Entrez un nom de pays en haut.'); return; }
+        countryGenAllBtn.disabled = true;
+        countryGenAllBtn.textContent = '⏳ Génération en cours…';
+        countryGenAllStatus.style.display = '';
+        countryGenAllStatus.className = 'generate-all-status';
+        runCountryStepWithRetry(1, 3)
+            .then(function() { return runCountryStepWithRetry(2, 3); })
+            .then(function() { return runCountryStepWithRetry(3, 3); })
+            .then(function() {
+                countryGenAllBtn.disabled = false;
+                countryGenAllBtn.textContent = '🦣 Générer les 3 étapes';
+                countryGenAllStatus.innerHTML = '✅ Les 3 étapes sont complétées!';
+                countryGenAllStatus.className = 'generate-all-status generate-all-success';
+            })
+            .catch(function(err) {
+                countryGenAllBtn.disabled = false;
+                countryGenAllBtn.textContent = '🦣 Générer les 3 étapes';
+                countryGenAllStatus.innerHTML = '❌ ' + err.message;
+                countryGenAllStatus.className = 'generate-all-status generate-all-error';
+            });
+    });
+
+    /* ---- Import country button ---- */
+    var addCountryBtn    = document.getElementById('add-country-btn');
+    var addCountryResult = document.getElementById('add-country-result');
+
+    addCountryBtn.addEventListener('click', function() {
+        var statsText   = country1Result.value.trim();
+        var detailsText = country2Result.value.trim();
+        var ficheText   = country3Result.value.trim();
+        if (!statsText) { alert('Le résultat Step 1 est vide.'); return; }
+
+        addCountryBtn.disabled = true;
+        addCountryBtn.textContent = '⏳ Import en cours…';
+        addCountryResult.style.display = '';
+        addCountryResult.className = 'opt-test-result opt-test-pending';
+        addCountryResult.textContent = 'Importation du pays…';
+
+        var fd = new FormData();
+        fd.append('stats_text', statsText);
+        fd.append('details_text', detailsText);
+        fd.append('fiche_text', ficheText);
+
+        fetch('{{ url_for("web.ai_lab_country_import") }}', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                addCountryBtn.disabled = false;
+                addCountryBtn.textContent = '🌍 Ajouter le pays';
+                if (data.success) {
+                    addCountryResult.className = 'opt-test-result opt-test-success';
+                    addCountryResult.innerHTML = '✅ <strong>' + data.country_name + '</strong> importé avec succès!<br>' +
+                        data.messages.join('<br>');
+                } else {
+                    addCountryResult.className = 'opt-test-result opt-test-error';
+                    addCountryResult.innerHTML = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                addCountryBtn.disabled = false;
+                addCountryBtn.textContent = '🌍 Ajouter le pays';
+                addCountryResult.className = 'opt-test-result opt-test-error';
+                addCountryResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ==================================================================
+     * RÉGIONS TAB — Step 1 + Step 2 + Step 3 with step tracking
+     * ================================================================== */
+    var regionInput         = document.getElementById('ai-region-input');
+    var regionCountrySelect = document.getElementById('ai-region-country');
+    var regionStepDone      = { 1: false, 2: false, 3: false };
+    var suggestRegionUrl    = '{{ url_for("web.ai_lab_suggest_region") }}';
+
+    function checkRegionAllDone() {
+        if (regionStepDone[1] && regionStepDone[2] && regionStepDone[3]) {
+            var panel = document.getElementById('add-region-panel');
+            panel.style.display = '';
+            var name = regionInput.value.trim();
+            var country = regionCountrySelect.value;
+            document.getElementById('add-region-info').textContent =
+                '📍 ' + name + (country ? ' (' + country + ')' : '');
+        }
+    }
+
+    /* ---- Suggest region button ---- */
+    var regionSuggestBtn = document.getElementById('region-suggest-btn');
+    regionSuggestBtn.addEventListener('click', function () {
+        regionSuggestBtn.disabled = true;
+        regionSuggestBtn.textContent = '⏳ …';
+        var fd = new FormData();
+        fd.append('model', modelSelect.value);
+        if (regionCountrySelect.value) fd.append('country', regionCountrySelect.value);
+        fetch(suggestRegionUrl, { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.success && d.reply) {
+                    regionInput.value = d.reply.trim().replace(/^[\s"']+|[\s"']+$/g, '');
+                    if (d.tokens_total != null) tokenEl.textContent = d.tokens_total;
+                } else {
+                    alert(d.error || 'Erreur lors de la suggestion.');
+                }
+            })
+            .catch(function (err) { alert('Erreur réseau: ' + err); })
+            .finally(function () {
+                regionSuggestBtn.disabled = false;
+                regionSuggestBtn.textContent = '🎲 Suggérer';
+            });
+    });
+
+    /* ---- Region Step 1 — Population ---- */
+    var region1GenBtn  = document.getElementById('region1-generate');
+    var region1Prompt  = document.getElementById('region1-prompt');
+    var region1ResWrap = document.getElementById('region1-result-wrap');
+    var region1Result  = document.getElementById('region1-result');
+    var region1Check   = document.getElementById('region-step1-check');
+
+    region1GenBtn.addEventListener('click', function() {
+        var name = regionInput.value.trim();
+        if (!name) { alert('Entrez un nom de région.'); return; }
+        region1GenBtn.disabled = true;
+        region1GenBtn.textContent = '⏳ Génération en cours…';
+        region1ResWrap.style.display = '';
+        region1Result.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', region1Prompt.value);
+        fd.append('max_tokens', '2000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                region1GenBtn.disabled = false;
+                region1GenBtn.textContent = '🚀 Générer Step 1';
+                if (data.success) {
+                    var text = data.reply.replace(/^```python\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+                    region1Result.value = text;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    region1Check.classList.add('visible');
+                    regionStepDone[1] = true;
+                    checkRegionAllDone();
+                } else {
+                    region1Result.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                region1GenBtn.disabled = false;
+                region1GenBtn.textContent = '🚀 Générer Step 1';
+                region1Result.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('region1-copy').addEventListener('click', function() {
+        region1Result.select();
+        navigator.clipboard.writeText(region1Result.value).then(function() {
+            var btn = document.getElementById('region1-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Region Step 2 — Périodes historiques ---- */
+    var region2GenBtn  = document.getElementById('region2-generate');
+    var region2Prompt  = document.getElementById('region2-prompt');
+    var region2ResWrap = document.getElementById('region2-result-wrap');
+    var region2Result  = document.getElementById('region2-result');
+    var region2Check   = document.getElementById('region-step2-check');
+
+    region2GenBtn.addEventListener('click', function() {
+        var name = regionInput.value.trim();
+        if (!name) { alert('Entrez un nom de région.'); return; }
+        region2GenBtn.disabled = true;
+        region2GenBtn.textContent = '⏳ Génération en cours…';
+        region2ResWrap.style.display = '';
+        region2Result.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', region2Prompt.value);
+        fd.append('max_tokens', '4000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                region2GenBtn.disabled = false;
+                region2GenBtn.textContent = '🚀 Générer Step 2';
+                if (data.success) {
+                    region2Result.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    region2Check.classList.add('visible');
+                    regionStepDone[2] = true;
+                    checkRegionAllDone();
+                } else {
+                    region2Result.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                region2GenBtn.disabled = false;
+                region2GenBtn.textContent = '🚀 Générer Step 2';
+                region2Result.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('region2-copy').addEventListener('click', function() {
+        region2Result.select();
+        navigator.clipboard.writeText(region2Result.value).then(function() {
+            var btn = document.getElementById('region2-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Region Step 3 — Fiche complète ---- */
+    var region3GenBtn  = document.getElementById('region3-generate');
+    var region3Prompt  = document.getElementById('region3-prompt');
+    var region3ResWrap = document.getElementById('region3-result-wrap');
+    var region3Result  = document.getElementById('region3-result');
+    var region3Check   = document.getElementById('region-step3-check');
+
+    region3GenBtn.addEventListener('click', function() {
+        var name = regionInput.value.trim();
+        if (!name) { alert('Entrez un nom de région.'); return; }
+        region3GenBtn.disabled = true;
+        region3GenBtn.textContent = '⏳ Génération en cours…';
+        region3ResWrap.style.display = '';
+        region3Result.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', region3Prompt.value);
+        fd.append('max_tokens', '8000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                region3GenBtn.disabled = false;
+                region3GenBtn.textContent = '🚀 Générer Step 3';
+                if (data.success) {
+                    region3Result.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    region3Check.classList.add('visible');
+                    regionStepDone[3] = true;
+                    checkRegionAllDone();
+                } else {
+                    region3Result.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                region3GenBtn.disabled = false;
+                region3GenBtn.textContent = '🚀 Générer Step 3';
+                region3Result.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('region3-copy').addEventListener('click', function() {
+        region3Result.select();
+        navigator.clipboard.writeText(region3Result.value).then(function() {
+            var btn = document.getElementById('region3-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Régions — Générer les 3 étapes ---- */
+    var regionGenAllBtn    = document.getElementById('region-generate-all-btn');
+    var regionGenAllStatus = document.getElementById('region-generate-all-status');
+
+    function runRegionStep(num) {
+        var ids = [
+            null,
+            { prompt: 'region1-prompt', btn: 'region1-generate', wrap: 'region1-result-wrap', result: 'region1-result', check: 'region-step1-check', label: '🚀 Générer Step 1', tokens: '2000', strip: true },
+            { prompt: 'region2-prompt', btn: 'region2-generate', wrap: 'region2-result-wrap', result: 'region2-result', check: 'region-step2-check', label: '🚀 Générer Step 2', tokens: '4000', strip: false },
+            { prompt: 'region3-prompt', btn: 'region3-generate', wrap: 'region3-result-wrap', result: 'region3-result', check: 'region-step3-check', label: '🚀 Générer Step 3', tokens: '8000', strip: false }
+        ];
+        var o = ids[num];
+        var name = regionInput.value.trim();
+        if (!name) return Promise.reject(new Error('Pas de région'));
+        var genBtn = document.getElementById(o.btn);
+        var resWrap = document.getElementById(o.wrap);
+        var resEl = document.getElementById(o.result);
+        var checkEl = document.getElementById(o.check);
+        genBtn.disabled = true;
+        genBtn.textContent = '⏳ Génération en cours…';
+        resWrap.style.display = '';
+        resEl.value = 'Interrogation de ' + modelSelect.value + '…';
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', document.getElementById(o.prompt).value);
+        fd.append('max_tokens', o.tokens);
+        return fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                genBtn.disabled = false;
+                genBtn.textContent = o.label;
+                if (data.success) {
+                    var text = data.reply;
+                    if (o.strip) text = text.replace(/^```python\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+                    resEl.value = text;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    checkEl.classList.add('visible');
+                    regionStepDone[num] = true;
+                    checkRegionAllDone();
+                    return true;
+                } else {
+                    resEl.value = '❌ ERREUR : ' + data.error;
+                    throw new Error(data.error);
+                }
+            })
+            .catch(function(err) {
+                genBtn.disabled = false;
+                genBtn.textContent = o.label;
+                throw err;
+            });
+    }
+
+    function runRegionStepWithRetry(num, maxRetries) {
+        var attempt = 0;
+        function tryOnce() {
+            attempt++;
+            regionGenAllStatus.innerHTML = '⏳ Step ' + num + '/3 en cours… ' + (attempt > 1 ? '(tentative ' + attempt + '/' + maxRetries + ')' : '');
+            return runRegionStep(num).catch(function(err) {
+                if (attempt < maxRetries) {
+                    regionGenAllStatus.innerHTML = '⚠️ Step ' + num + ' échoué — nouvelle tentative dans 3s…';
+                    return new Promise(function(resolve) { setTimeout(resolve, 3000); }).then(tryOnce);
+                }
+                throw new Error('Step ' + num + ' échoué après ' + maxRetries + ' tentatives : ' + err.message);
+            });
+        }
+        return tryOnce();
+    }
+
+    regionGenAllBtn.addEventListener('click', function() {
+        var name = regionInput.value.trim();
+        if (!name) { alert('Entrez un nom de région en haut.'); return; }
+        regionGenAllBtn.disabled = true;
+        regionGenAllBtn.textContent = '⏳ Génération en cours…';
+        regionGenAllStatus.style.display = '';
+        regionGenAllStatus.className = 'generate-all-status';
+        runRegionStepWithRetry(1, 3)
+            .then(function() { return runRegionStepWithRetry(2, 3); })
+            .then(function() { return runRegionStepWithRetry(3, 3); })
+            .then(function() {
+                regionGenAllBtn.disabled = false;
+                regionGenAllBtn.textContent = '🦣 Générer les 3 étapes';
+                regionGenAllStatus.innerHTML = '✅ Les 3 étapes sont complétées!';
+                regionGenAllStatus.className = 'generate-all-status generate-all-success';
+            })
+            .catch(function(err) {
+                regionGenAllBtn.disabled = false;
+                regionGenAllBtn.textContent = '🦣 Générer les 3 étapes';
+                regionGenAllStatus.innerHTML = '❌ ' + err.message;
+                regionGenAllStatus.className = 'generate-all-status generate-all-error';
+            });
+    });
+
+    /* ---- Import region button ---- */
+    var addRegionBtn    = document.getElementById('add-region-btn');
+    var addRegionResult = document.getElementById('add-region-result');
+
+    addRegionBtn.addEventListener('click', function() {
+        var statsText   = region1Result.value.trim();
+        var periodsText = region2Result.value.trim();
+        var ficheText   = region3Result.value.trim();
+        if (!statsText) { alert('Le résultat Step 1 est vide.'); return; }
+
+        addRegionBtn.disabled = true;
+        addRegionBtn.textContent = '⏳ Import en cours…';
+        addRegionResult.style.display = '';
+        addRegionResult.className = 'opt-test-result opt-test-pending';
+        addRegionResult.textContent = 'Importation de la région…';
+
+        var fd = new FormData();
+        fd.append('stats_text', statsText);
+        fd.append('periods_text', periodsText);
+        fd.append('fiche_text', ficheText);
+
+        fetch('{{ url_for("web.ai_lab_region_import") }}', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                addRegionBtn.disabled = false;
+                addRegionBtn.textContent = '📍 Ajouter la région';
+                if (data.success) {
+                    addRegionResult.className = 'opt-test-result opt-test-success';
+                    addRegionResult.innerHTML = '✅ <strong>' + data.region_name + '</strong> importée avec succès!<br>' +
+                        data.messages.join('<br>');
+                } else {
+                    addRegionResult.className = 'opt-test-result opt-test-error';
+                    addRegionResult.innerHTML = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                addRegionBtn.disabled = false;
+                addRegionBtn.textContent = '📍 Ajouter la région';
+                addRegionResult.className = 'opt-test-result opt-test-error';
+                addRegionResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
     });
 })();

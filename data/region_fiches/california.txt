@@ -1,0 +1,108 @@
+# California — Fiche Complète
+
+## 📍 Informations Générales
+
+| Critère               | Donnée                                  |
+|-----------------------|----------------------------------------|
+| Région                | California                             |
+| Pays                  | États-Unis d'Amérique                  |
+| Capitale régionale    | Sacramento                             |
+| Plus grande ville     | Los Angeles                           |
+| Statut administratif  | État fédéré (State)                   |
+| Superficie            | 423 970 km²                          |
+| Population (2024)     | ~39,2 millions d’habitants            |
+| Densité              | ~92 hab./km²                         |
+| Langues officielles   | Aucune langue officielle au niveau de l'État (anglais majoritaire, espagnol très répandu) |
+| Devise / Symboles     | Devise : "Eureka" (Je l'ai trouvé) ; Symbole : Ours de Californie (ours grizzli), pavot californien (fleur d'État) |
+
+---
+
+## 👥 Population & Démographie
+
+| Indicateur                  | Valeur / Évolution                        |
+|----------------------------|------------------------------------------|
+| Population 2000             | 33,9 millions                           |
+| Population 2010             | 37,3 millions                           |
+| Population 2024             | ~39,2 millions                         |
+| Croissance démographique   | Environ +0,5% par an (ralentissement récent) |
+| Taux de fécondité          | 1,7 enfant/femme (2023)                  |
+| Espérance de vie (2023)    | 81,0 ans (USA : 77,0 ans)                |
+| Âge médian                 | 38,5 ans                                |
+| Diversité ethnique         | Blanc non hispanique : 36%<br>Hispanique/Latino : 39%<br>Asiatique : 15%<br>Noir : 6%<br>Autres : 4% |
+| Immigration                | 27% de la population née à l’étranger (plus élevé que la moyenne nationale) |
+| Langues parlées            | Anglais (majoritaire), espagnol (30% de la population), chinois, tagalog, vietnamien, coréen |
+
+---
+
+## 📐 Géographie
+
+| Critère                  | Donnée                                  |
+|--------------------------|----------------------------------------|
+| Superficie               | 423 970 km²                           |
+| Frontières               | Oregon (N), Nevada (E), Arizona (SE), Océan Pacifique (O) |
+| Relief                   | Montagnes (Sierra Nevada), Vallée centrale, Déserts (Mojave, Colorado) |
+| Point culminant          | Mont Whitney (4 421 m)                 |
+| Principaux cours d'eau   | Fleuve Sacramento, Fleuve San Joaquin, Mer Salton |
+| Climat                   | Méditerranéen côtier, désertique au sud-est, continental en montagne |
+| Parcs naturels           | Parc national de Yosemite, Parc national de Sequoia, Parc national de Joshua Tree, Parc national de Redwood |
+
+---
+
+## 🏛️ Économie
+
+| Indicateur               | Donnée                                  |
+|-------------------------|----------------------------------------|
+| PIB régional (2023)      | ~3 900 milliards USD (1ère économie régionale US) |
+| Secteurs principaux (%)  | Technologie & innovation : 25%<br>Industrie du divertissement : 15%<br>Agriculture : 10%<br>Tourisme : 8%<br>Manufacture : 12%<br>Services financiers et autres : 30% |
+| Principales industries   | Technologies (Silicon Valley : Apple, Google, Facebook)<br>Cinéma et télévision (Hollywood)<br>Agriculture (produits frais, vin)<br>Aérospatial, énergie renouvelable |
+| Principales entreprises  | Apple, Alphabet (Google), Meta, Tesla, Chevron, Wells Fargo |
+| Défis économiques        | Coût de la vie élevé, crise du logement, inégalités, pénurie d’eau, régulation stricte |
+| Relations économiques    | Premier exportateur US (principalement vers Chine, Mexique, Canada), moteur économique national |
+
+---
+
+## 🎓 Éducation & Culture
+
+| Critère                  | Donnée                                  |
+|--------------------------|----------------------------------------|
+| Principales universités  | Université de Californie (UC Berkeley, UCLA), Stanford, Caltech, Université d'État de Californie (Cal State) |
+| Faits culturels marquants| Berceau de la Silicon Valley, Hollywood (industrie cinématographique mondiale), mouvement hippie des années 1960, influence latino-américaine forte |
+| Patrimoine               | Missions espagnoles historiques, parcs nationaux, architecture Art déco et moderne, musées (Getty, LACMA) |
+| Festivals                | Coachella (musique), Festival du film de Sundance (proche Utah mais influence californienne), Festival de la Tulipe de Sacramento, Carnaval de San Francisco |
+| Identité régionale       | Innovation, diversité culturelle, écologie, activisme social, mode de vie californien (surf, tech, nature) |
+
+---
+
+## 🏥 Santé & Services
+
+| Critère                  | Donnée                                  |
+|--------------------------|----------------------------------------|
+| Système de santé         | Mix public-privé, couverture via Medicaid, Medicare et assurance privée |
+| Espérance de vie         | 81,0 ans (supérieure à la moyenne US) |
+| Principaux hôpitaux      | Cedars-Sinai (Los Angeles), UCSF Medical Center (San Francisco), Stanford Health Care |
+| Défis sanitaires         | Accès aux soins dans zones rurales, crise des opioïdes, santé mentale, gestion des incendies et pollution |
+
+---
+
+## 🏙️ Principales Villes
+
+| Ville         | Population (2024) | Rôle économique                         | Note / Particularités                      |
+|---------------|-------------------|----------------------------------------|--------------------------------------------|
+| Los Angeles   | ~3,9 millions     | Centre du divertissement, commerce, industrie | 2e plus grande ville US, Hollywood          |
+| San Diego     | ~1,4 million      | Défense, tourisme, biotechnologie      | Climat doux, base militaire importante      |
+| San Jose      | ~1,0 million      | Silicon Valley, technologie             | Capitale mondiale de la tech                  |
+| San Francisco | ~880 000          | Finance, technologie, tourisme          | Centre financier, innovation, culture LGBTQ+ |
+| Sacramento    | ~525 000          | Capitale politique, agriculture         | Centre administratif de l’État                |
+
+---
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** : Crise du logement (prix très élevés), gestion durable de l’eau face aux sécheresses récurrentes, réduction des émissions carbone, inégalités socio-économiques croissantes, adaptation aux changements climatiques (incendies, élévation du niveau de la mer).
+- **Projets d'infrastructure** : Développement des transports publics (Caltrain, métro de Los Angeles), investissements dans les énergies renouvelables (solaire, éolien), amélioration des réseaux numériques, construction de logements abordables.
+- **Tendances démographiques** : Ralentissement de la croissance, vieillissement progressif, diversification ethnique accrue, augmentation des populations hispanophones et asiatiques.
+- **Perspectives économiques** : Maintien du leadership technologique mondial, croissance des industries vertes, renforcement du secteur agricole durable, développement du tourisme post-pandémie, défis liés à la compétitivité face à d’autres États comme Texas ou New York.
+
+---
+
+*California reste un moteur économique et culturel majeur des États-Unis, avec une influence mondiale forte, mais doit relever des défis environnementaux et sociaux importants pour assurer sa pérennité.*

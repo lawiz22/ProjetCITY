@@ -13,8 +13,20 @@ from .services.city_import import (
     import_city_fiche,
     import_city_periods,
     import_city_stats,
+    import_country_stats,
+    parse_country_stats_text,
     parse_fiche_text,
+    save_country_details_file,
+    save_country_fiche_file,
+    import_region_stats,
+    parse_region_stats_text,
+    import_region_periods,
+    save_region_details_file,
+    save_region_fiche_file,
     parse_period_details_text,
+    parse_region_period_details_text,
+    fetch_and_save_region_photo,
+    fetch_and_save_region_flag,
     parse_stats_text,
     save_period_details_file,
     save_uploaded_photo,
@@ -23,6 +35,135 @@ from .services.city_import import (
 from .services.pdf_reports import build_city_pdf, build_dashboard_pdf
 
 web = Blueprint("web", __name__)
+
+
+# ---------------------------------------------------------------------------
+# Country period parsing helper
+# ---------------------------------------------------------------------------
+
+def _parse_country_periods(details_text: str, pop_data: list[dict]) -> list[dict]:
+    """Parse a country details file into period dicts matching the city timeline format."""
+    import re as _re
+
+    pop_by_year: dict[int, int] = {r["year"]: r["population"] for r in pop_data}
+    annotations_by_year: dict[int, dict] = {}
+    for r in pop_data:
+        if r.get("annotation_id"):
+            annotations_by_year[r["year"]] = r
+
+    # Period header: "YYYY[–-–]YYYY — TITLE" (em-dash separates range from title)
+    HEADER_RE = _re.compile(
+        r"^(\d{4}[\u2013\u2014\-]\d{4})\s*[\u2014\u2013]\s*(.+)$"
+    )
+
+    def _extract_emoji(value: str):
+        """Return (icon, text) for a line."""
+        stripped = value.strip()
+        m = _re.match(r"^([^\w\s]+)\s*(.*)", stripped, flags=_re.UNICODE)
+        if m:
+            return m.group(1).strip(), m.group(2).strip()
+        return "•", stripped
+
+    def _flush(period, raw_items, summary_lines):
+        if period is None:
+            return
+        summary = " ".join(summary_lines).strip()
+        bullets = []
+        seen: set[str] = set()
+        for item in raw_items:
+            item = item.strip().lstrip("- ").strip()
+            if not item or item.lower().startswith("résumé"):
+                continue
+            icon, text = _extract_emoji(item)
+            if not text or text in seen:
+                continue
+            seen.add(text)
+            bullets.append({"icon": icon, "text": text})
+        period["display_bullets"] = bullets
+        period["summary_text"] = summary
+        # Population range
+        sy, ey = period["start_year"], period["end_year"]
+        start_pop = None
+        end_pop = None
+        if sy is not None and ey is not None:
+            # Closest year >= start_year in range
+            candidates = [y for y in pop_by_year if sy <= y <= ey]
+            if candidates:
+                start_pop = pop_by_year[min(candidates)]
+                end_pop = pop_by_year[max(candidates)]
+        period["start_population"] = f"{start_pop:,}".replace(",", "\u202f") if start_pop else "n/a"
+        period["end_population"] = f"{end_pop:,}".replace(",", "\u202f") if end_pop else "n/a"
+        if start_pop and end_pop and start_pop > 0:
+            pct = round((end_pop - start_pop) / start_pop * 100, 1)
+            period["population_change_pct"] = pct
+        else:
+            period["population_change_pct"] = None
+        # Linked annotations in range
+        linked = []
+        if sy is not None and ey is not None:
+            for y, ann in sorted(annotations_by_year.items()):
+                if sy <= y <= ey:
+                    linked.append({"year": y, "label": ann.get("label", ""), "color": ann.get("color", "#ef6c3d"), "photoUrl": ""})
+        period["linked_annotations"] = linked
+
+    periods: list[dict] = []
+    current: dict | None = None
+    raw_items: list[str] = []
+    summary_lines: list[str] = []
+    in_summary = False
+
+    for line in details_text.splitlines():
+        stripped = line.strip()
+        m = HEADER_RE.match(stripped)
+        if m:
+            _flush(current, raw_items, summary_lines)
+            if current is not None:
+                periods.append(current)
+            range_label = m.group(1).replace("\u2013", "-").replace("\u2014", "-")
+            year_parts = [int(y) for y in _re.findall(r"\d{4}", range_label)]
+            current = {
+                "period_range_label": range_label,
+                "period_title": m.group(2).strip(),
+                "start_year": year_parts[0] if year_parts else None,
+                "end_year": year_parts[-1] if len(year_parts) >= 2 else (year_parts[0] if year_parts else None),
+                "period_detail_id": len(periods),
+            }
+            raw_items = []
+            summary_lines = []
+            in_summary = False
+            continue
+
+        if current is None:
+            continue  # Skip header stats block before first period
+
+        if stripped.startswith("= "):
+            in_summary = True
+            rest = stripped[2:].strip()
+            # Skip the "Résumé :" label itself
+            if rest and not rest.lower().startswith("r\u00e9sum\u00e9"):
+                summary_lines.append(rest)
+            continue
+        if stripped == "=":
+            in_summary = True
+            continue
+
+        if in_summary:
+            if stripped:
+                summary_lines.append(stripped)
+        else:
+            if stripped:
+                raw_items.append(stripped)
+
+    _flush(current, raw_items, summary_lines)
+    if current is not None:
+        periods.append(current)
+
+    # Add step index
+    for i, p in enumerate(periods):
+        p["step_index"] = i + 1
+        p["step_total"] = len(periods)
+
+    return periods
 
 
 @web.route("/")
@@ -131,6 +272,1217 @@ def city_detail_pdf(city_slug: str) -> Response:
     response = Response(pdf_bytes, mimetype="application/pdf")
     response.headers["Content-Disposition"] = f"attachment; filename={city_slug}.pdf"
     return response
+
+
+@web.route("/countries")
+def country_directory() -> str:
+    import os
+    from .db import get_db
+    conn = get_db()
+    view_mode = request.args.get("view", "small").strip().lower()
+    if view_mode not in {"large", "medium", "small", "compact"}:
+        view_mode = "small"
+    rows = conn.execute(
+        """
+        WITH latest AS (
+            SELECT country_id, MAX(year) AS year
+            FROM fact_country_population
+            GROUP BY country_id
+        ),
+        first_row AS (
+            SELECT country_id, MIN(year) AS first_year
+            FROM fact_country_population
+            GROUP BY country_id
+        ),
+        peak AS (
+            SELECT country_id, MAX(population) AS peak_population,
+                   year AS peak_year
+            FROM (
+                SELECT country_id, year, population,
+                       RANK() OVER (PARTITION BY country_id ORDER BY population DESC) AS rk
+                FROM fact_country_population
+            )
+            WHERE rk = 1
+            GROUP BY country_id
+        )
+        SELECT
+            dc.country_id,
+            dc.country_name,
+            dc.country_slug,
+            dc.country_color,
+            fcp.population AS latest_population,
+            latest.year AS latest_year,
+            peak.peak_population,
+            peak.peak_year,
+            first_row.first_year
+        FROM dim_country dc
+        LEFT JOIN latest ON latest.country_id = dc.country_id
+        LEFT JOIN fact_country_population fcp
+            ON fcp.country_id = dc.country_id AND fcp.year = latest.year
+        LEFT JOIN peak ON peak.country_id = dc.country_id
+        LEFT JOIN first_row ON first_row.country_id = dc.country_id
+        ORDER BY dc.country_name
+        """
+    ).fetchall()
+    countries = []
+    for row in rows:
+        r = dict(row)
+        slug = r.get("country_slug") or ""
+        flag_path = f"images/flags/countries/{slug}.png"
+        flag_full = os.path.join(current_app.static_folder, flag_path.replace("/", os.sep))
+        r["flag_path"] = flag_path if os.path.exists(flag_full) else "images/flags/countries/unknown.png"
+        countries.append(r)
+    return render_template(
+        "web/countries.html",
+        page_title="Annuaire des pays",
+        view_mode=view_mode,
+        countries=countries,
+    )
+
+
+@web.route("/countries/<country_slug>")
+def country_detail(country_slug: str) -> str:
+    import os, json
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM dim_country WHERE country_slug = ?", (country_slug,)
+    ).fetchone()
+    if row is None:
+        flash("Pays introuvable dans la base analytique.", "error")
+        return redirect(url_for("web.country_directory"))
+    country = dict(row)
+    pop_rows = conn.execute(
+        """
+        SELECT year, population, is_key_year, annotation_id
+        FROM fact_country_population
+        WHERE country_id = ?
+        ORDER BY year
+        """,
+        (country["country_id"],),
+    ).fetchall()
+    pop_data = [dict(r) for r in pop_rows]
+    latest = max(pop_data, key=lambda r: r["year"]) if pop_data else {}
+    peak = max(pop_data, key=lambda r: r["population"]) if pop_data else {}
+    first = min(pop_data, key=lambda r: r["year"]) if pop_data else {}
+    country["latest_population"] = latest.get("population")
+    country["latest_year"] = latest.get("year")
+    country["peak_population"] = peak.get("population")
+    country["peak_year"] = peak.get("year")
+    country["first_year"] = first.get("year")
+    country["first_population"] = first.get("population")
+    # Flag
+    flag_path = f"images/flags/countries/{country_slug}.png"
+    flag_full = os.path.join(current_app.static_folder, flag_path.replace("/", os.sep))
+    country["flag_path"] = flag_path if os.path.exists(flag_full) else None
+    # Trend
+    if len(pop_data) >= 2:
+        delta = pop_data[-1]["population"] - pop_data[-2]["population"]
+        country["trend_label"] = "En croissance" if delta > 0 else ("En décroissance" if delta < 0 else "Stable")
+    else:
+        country["trend_label"] = "Stable"
+    # Chart payload
+    years = [r["year"] for r in pop_data]
+    populations = [r["population"] for r in pop_data]
+    # Build indexed annotations for chart (same format as city/region)
+    ann_chart_rows = conn.execute(
+        """SELECT fcp.year, da.annotation_id, da.annotation_label, da.annotation_color,
+                  da.annotation_type, da.photo_filename
+           FROM fact_country_population fcp
+           JOIN dim_annotation da ON da.annotation_id = fcp.annotation_id
+           WHERE fcp.country_id = ?
+           ORDER BY fcp.year""",
+        (country["country_id"],),
+    ).fetchall()
+    default_band_width = 2
+    if len(years) > 1:
+        default_band_width = max(1, round((years[1] - years[0]) / 4))
+    indexed_annotations = []
+    for idx, row in enumerate(ann_chart_rows):
+        photo_url = ""
+        if row["photo_filename"]:
+            photo_url = f"/static/images/annotations/{row['photo_filename']}"
+        indexed_annotations.append({
+            "id": f"annotation-{idx}",
+            "year": row["year"],
+            "label": row["annotation_label"],
+            "color": row["annotation_color"] or "#ef6c3d",
+            "type": row["annotation_type"],
+            "xMin": row["year"] - default_band_width,
+            "xMax": row["year"] + default_band_width,
+            "photoUrl": photo_url,
+        })
+    chart_payload = {
+        "labels": years,
+        "datasets": [{
+            "label": country["country_name"],
+            "data": populations,
+            "borderColor": country.get("country_color") or "#2f6fed",
+            "backgroundColor": (country.get("country_color") or "#2f6fed") + "22",
+            "fill": True,
+            "tension": 0.3,
+        }],
+        "annotations": indexed_annotations,
+    }
+    # Fiche
+    fiche_path = os.path.join(current_app.root_path, "..", "data", "country_fiches", f"{country_slug}.txt")
+    fiche = None
+    if os.path.exists(fiche_path):
+        with open(fiche_path, encoding="utf-8") as f:
+            raw_fiche = f.read()
+        _header, fiche_sections = parse_fiche_text(raw_fiche)
+        if fiche_sections:
+            fiche = {"raw_text": raw_fiche, "sections": [
+                {"emoji": s.get("emoji", ""), "title": s.get("title", ""), "blocks": s.get("blocks", [])}
+                for s in fiche_sections
+            ]}
+    # Details → periods
+    details_path = os.path.join(current_app.root_path, "..", "data", "country_details", f"{country_slug}.txt")
+    periods: list[dict] = []
+    details = None
+    if os.path.exists(details_path):
+        with open(details_path, encoding="utf-8") as f:
+            details = f.read()
+        # Enrich pop_data with annotation labels for period linking
+        ann_rows = conn.execute(
+            """
+            SELECT fcp.year, da.annotation_label AS label, da.annotation_color AS color
+            FROM fact_country_population fcp
+            JOIN dim_annotation da ON da.annotation_id = fcp.annotation_id
+            WHERE fcp.country_id = ?
+            """,
+            (country["country_id"],),
+        ).fetchall()
+        ann_by_year = {r["year"]: {"label": r["label"], "color": r["color"]} for r in ann_rows}
+        # Merge annotation info into pop_data for parser
+        pop_with_ann = [
+            {**r, **(ann_by_year.get(r["year"], {}))}
+            for r in pop_data
+        ]
+        periods = _parse_country_periods(details, pop_with_ann)
+    # Annotations for the template
+    ann_rows_tpl = conn.execute(
+        """SELECT fcp.year, da.annotation_id, da.annotation_label, da.annotation_color,
+                  da.annotation_type, da.photo_filename AS annotation_photo_filename
+           FROM fact_country_population fcp
+           JOIN dim_annotation da ON da.annotation_id = fcp.annotation_id
+           WHERE fcp.country_id = ?
+           ORDER BY fcp.year""",
+        (country["country_id"],),
+    ).fetchall()
+    annotations = [dict(r) for r in ann_rows_tpl]
+    # Country photos
+    from .services.city_photos import get_country_photos
+    country_photos = get_country_photos(conn, country_slug)
+    return render_template(
+        "web/country_detail.html",
+        page_title=country["country_name"],
+        country=country,
+        pop_data=pop_data,
+        periods=periods,
+        chart_payload=chart_payload,
+        fiche=fiche,
+        details=details,
+        annotations=annotations,
+        country_photos=country_photos,
+    )
+
+
+# ------------------------------------------------------------------
+#  Country Photo Library routes
+# ------------------------------------------------------------------
+
+@web.route("/countries/<country_slug>/photos/upload", methods=["POST"])
+def country_photo_upload(country_slug: str) -> Response:
+    from .db import get_db
+    from .services.city_photos import save_country_photo_to_library
+    conn = get_db()
+    row = conn.execute("SELECT country_id FROM dim_country WHERE country_slug = ?", (country_slug,)).fetchone()
+    if not row:
+        flash("Pays introuvable.", "error")
+        return redirect(url_for("web.country_directory"))
+    files = request.files.getlist("photo_files")
+    if not files or all(not f.filename for f in files):
+        flash("Aucun fichier sélectionné.", "error")
+        return redirect(url_for("web.country_detail", country_slug=country_slug))
+    imported = 0
+    for f in files:
+        if not f.filename:
+            continue
+        result = save_country_photo_to_library(
+            conn, row["country_id"], country_slug, f.read(), f.filename,
+            attribution="Photo uploadée manuellement.",
+        )
+        if result["success"]:
+            imported += 1
+    flash(f"{imported} photo(s) ajoutée(s) à la bibliothèque.", "success")
+    return redirect(url_for("web.country_detail", country_slug=country_slug))
+
+
+@web.route("/countries/<country_slug>/photos/search")
+def country_photo_search(country_slug: str) -> Response:
+    from .db import get_db
+    from .services.city_photos import search_wikipedia_images
+    conn = get_db()
+    row = conn.execute("SELECT country_name FROM dim_country WHERE country_slug = ?", (country_slug,)).fetchone()
+    if not row:
+        return jsonify({"error": "Pays introuvable.", "images": []})
+    images = search_wikipedia_images(row["country_name"], None, None)
+    return jsonify({"images": images})
+
+
+@web.route("/countries/<country_slug>/photos/search-commons")
+def country_photo_search_commons(country_slug: str) -> Response:
+    from .db import get_db
+    from .services.city_photos import search_commons_images
+    conn = get_db()
+    row = conn.execute("SELECT country_name FROM dim_country WHERE country_slug = ?", (country_slug,)).fetchone()
+    if not row:
+        return jsonify({"error": "Pays introuvable.", "images": []})
+    images = search_commons_images(row["country_name"], None, None)
+    return jsonify({"images": images})
+
+
+@web.route("/countries/<country_slug>/photos/import-web", methods=["POST"])
+def country_photo_import_web(country_slug: str) -> Response:
+    from .db import get_db
+    from .services.city_photos import download_web_image, save_country_photo_to_library
+    conn = get_db()
+    row = conn.execute("SELECT country_id FROM dim_country WHERE country_slug = ?", (country_slug,)).fetchone()
+    if not row:
+        return jsonify({"error": "Pays introuvable.", "imported": 0})
+    data = request.get_json(silent=True)
+    if not data or not isinstance(data.get("images"), list):
+        return jsonify({"error": "Aucune image.", "imported": 0})
+    imported = 0
+    for img in data["images"]:
+        url = img.get("url", "")
+        if not url:
+            continue
+        result = download_web_image(url)
+        if not result:
+            continue
+        file_bytes, ext = result
+        save_result = save_country_photo_to_library(
+            conn, row["country_id"], country_slug, file_bytes, f"web-import{ext}",
+            source_url=img.get("source_page", ""),
+            attribution="Wikipedia/Wikimedia — vérifier les licences.",
+        )
+        if save_result["success"]:
+            imported += 1
+    return jsonify({"imported": imported})
+
+
+@web.route("/countries/<country_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+def country_photo_delete(country_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import delete_country_photo_from_library
+    conn = get_db()
+    deleted = delete_country_photo_from_library(conn, photo_id, country_slug)
+    if deleted:
+        flash("Photo supprimée.", "success")
+    else:
+        flash("Photo introuvable.", "error")
+    return redirect(url_for("web.country_detail", country_slug=country_slug))
+
+
+@web.route("/countries/<country_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+def country_photo_set_primary(country_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import set_country_photo_primary
+    conn = get_db()
+    row = conn.execute("SELECT country_id FROM dim_country WHERE country_slug = ?", (country_slug,)).fetchone()
+    if not row:
+        flash("Pays introuvable.", "error")
+        return redirect(url_for("web.country_directory"))
+    set_country_photo_primary(conn, photo_id, row["country_id"])
+    flash("Photo principale mise à jour.", "success")
+    return redirect(url_for("web.country_detail", country_slug=country_slug))
+
+
+# ------------------------------------------------------------------
+#  Country Annotation routes
+# ------------------------------------------------------------------
+
+@web.route("/countries/<country_slug>/annotations/manual-search")
+def country_annotation_manual_search(country_slug: str) -> Response:
+    from .services.city_photos import _search_commons_batch
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"images": []})
+    seen_urls: set[str] = set()
+    images = _search_commons_batch(query, seen_urls, limit=40)
+    return jsonify({"images": images})
+
+
+@web.route("/countries/<country_slug>/annotations/<int:annotation_id>/photo/search")
+def country_annotation_photo_search(country_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import search_annotation_images
+    conn = get_db()
+    country_row = conn.execute("SELECT country_name FROM dim_country WHERE country_slug = ?", (country_slug,)).fetchone()
+    ann_row = conn.execute("SELECT annotation_label FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)).fetchone()
+    if not country_row or not ann_row:
+        return jsonify({"error": "Introuvable.", "images": []})
+    images = search_annotation_images(ann_row["annotation_label"], country_row["country_name"], None, None)
+    return jsonify({"images": images})
+
+
+@web.route("/countries/<country_slug>/annotations/<int:annotation_id>/photo/save", methods=["POST"])
+def country_annotation_photo_save(country_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import save_annotation_photo_for_country
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data or not data.get("url"):
+        return jsonify({"success": False, "error": "URL manquante."})
+    result = save_annotation_photo_for_country(
+        conn, annotation_id, data["url"], data.get("source_page", ""), country_slug=country_slug
+    )
+    return jsonify(result)
+
+
+@web.route("/countries/<country_slug>/annotations/<int:annotation_id>/photo/link", methods=["POST"])
+def country_annotation_photo_link(country_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import link_existing_country_photo_to_annotation
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data or not data.get("photo_id"):
+        return jsonify({"success": False, "error": "photo_id manquant."})
+    result = link_existing_country_photo_to_annotation(conn, annotation_id, country_slug, int(data["photo_id"]))
+    return jsonify(result)
+
+
+@web.route("/countries/<country_slug>/annotations/years")
+def country_annotation_years(country_slug: str) -> Response:
+    from .db import get_db
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT fcp.year, fcp.annotation_id
+           FROM fact_country_population fcp
+           JOIN dim_country c ON c.country_id = fcp.country_id
+           WHERE c.country_slug = ?
+           ORDER BY fcp.year""",
+        (country_slug,),
+    ).fetchall()
+    years = [{"year": r["year"], "has_annotation": r["annotation_id"] is not None} for r in rows]
+    return jsonify({"years": years})
+
+
+@web.route("/countries/<country_slug>/annotations", methods=["POST"])
+def country_annotation_create(country_slug: str) -> Response:
+    from .db import get_db
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "error": "Données manquantes."})
+    label = (data.get("label") or "").strip()
+    color = (data.get("color") or "red").strip()
+    ann_type = (data.get("type") or "event").strip()
+    year = data.get("year")
+    if not label or not year:
+        return jsonify({"success": False, "error": "Label et année requis."})
+    try:
+        year = int(year)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Année invalide."})
+    pop_row = conn.execute(
+        """SELECT fcp.country_pop_id, fcp.annotation_id
+           FROM fact_country_population fcp
+           JOIN dim_country c ON c.country_id = fcp.country_id
+           WHERE c.country_slug = ? AND fcp.year = ?""",
+        (country_slug, year),
+    ).fetchone()
+    if not pop_row:
+        return jsonify({"success": False, "error": f"Année {year} introuvable pour ce pays."})
+    if pop_row["annotation_id"]:
+        return jsonify({"success": False, "error": f"L'année {year} a déjà une annotation."})
+    cur = conn.execute(
+        "INSERT INTO dim_annotation (annotation_label, annotation_color, annotation_type) VALUES (?, ?, ?)",
+        (label, color, ann_type),
+    )
+    annotation_id = cur.lastrowid
+    conn.execute(
+        "UPDATE fact_country_population SET annotation_id = ? WHERE country_pop_id = ?",
+        (annotation_id, pop_row["country_pop_id"]),
+    )
+    conn.commit()
+    return jsonify({"success": True, "annotation_id": annotation_id})
+
+
+@web.route("/countries/<country_slug>/annotations/<int:annotation_id>", methods=["PUT"])
+def country_annotation_update(country_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "error": "Données manquantes."})
+    label = (data.get("label") or "").strip()
+    color = (data.get("color") or "").strip()
+    ann_type = (data.get("type") or "").strip()
+    new_year = data.get("year")
+    if not label:
+        return jsonify({"success": False, "error": "Label requis."})
+    updates = ["annotation_label = ?"]
+    params: list = [label]
+    if color:
+        updates.append("annotation_color = ?")
+        params.append(color)
+    if ann_type:
+        updates.append("annotation_type = ?")
+        params.append(ann_type)
+    params.append(annotation_id)
+    conn.execute(f"UPDATE dim_annotation SET {', '.join(updates)} WHERE annotation_id = ?", params)
+    if new_year is not None:
+        try:
+            new_year = int(new_year)
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "error": "Année invalide."})
+        old_pop = conn.execute(
+            """SELECT fcp.country_pop_id, fcp.year
+               FROM fact_country_population fcp
+               JOIN dim_country c ON c.country_id = fcp.country_id
+               WHERE c.country_slug = ? AND fcp.annotation_id = ?""",
+            (country_slug, annotation_id),
+        ).fetchone()
+        if not old_pop or old_pop["year"] != new_year:
+            new_pop = conn.execute(
+                """SELECT fcp.country_pop_id, fcp.annotation_id
+                   FROM fact_country_population fcp
+                   JOIN dim_country c ON c.country_id = fcp.country_id
+                   WHERE c.country_slug = ? AND fcp.year = ?""",
+                (country_slug, new_year),
+            ).fetchone()
+            if not new_pop:
+                return jsonify({"success": False, "error": f"Année {new_year} introuvable."})
+            if new_pop["annotation_id"] and new_pop["annotation_id"] != annotation_id:
+                return jsonify({"success": False, "error": f"L'année {new_year} a déjà une annotation."})
+            if old_pop:
+                conn.execute("UPDATE fact_country_population SET annotation_id = NULL WHERE country_pop_id = ?", (old_pop["country_pop_id"],))
+            conn.execute("UPDATE fact_country_population SET annotation_id = ? WHERE country_pop_id = ?", (annotation_id, new_pop["country_pop_id"]))
+    conn.commit()
+    return jsonify({"success": True})
+
+
+@web.route("/countries/<country_slug>/annotations/<int:annotation_id>", methods=["DELETE"])
+def country_annotation_delete(country_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import ANNOTATION_PHOTO_DIR
+    conn = get_db()
+    ann = conn.execute("SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)).fetchone()
+    if not ann:
+        return jsonify({"success": False, "error": "Annotation introuvable."})
+    conn.execute("UPDATE fact_country_population SET annotation_id = NULL WHERE annotation_id = ?", (annotation_id,))
+    if ann["photo_filename"]:
+        from pathlib import Path as _Path
+        photo_path = ANNOTATION_PHOTO_DIR / ann["photo_filename"]
+        if photo_path.exists():
+            photo_path.unlink()
+    conn.execute("DELETE FROM dim_annotation WHERE annotation_id = ?", (annotation_id,))
+    conn.commit()
+    return jsonify({"success": True})
+
+
+@web.route("/countries/<country_slug>/delete", methods=["POST"])
+def country_delete(country_slug: str) -> Response:
+    """Delete a country and all its related data from the DB and filesystem."""
+    import shutil as _shutil
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute(
+        "SELECT country_id, country_name FROM dim_country WHERE country_slug = ?",
+        (country_slug,),
+    ).fetchone()
+    if not row:
+        if request.is_json:
+            return jsonify({"success": False, "error": "Pays introuvable."})
+        flash("Pays introuvable.", "error")
+        return redirect(url_for("web.country_directory"))
+    country_id = row["country_id"]
+    conn.execute(
+        "UPDATE fact_country_population SET annotation_id = NULL WHERE country_id = ?",
+        (country_id,),
+    )
+    conn.execute("DELETE FROM fact_country_population WHERE country_id = ?", (country_id,))
+    conn.execute("DELETE FROM dim_country_photo WHERE country_id = ?", (country_id,))
+    conn.execute("DELETE FROM dim_country WHERE country_id = ?", (country_id,))
+    conn.commit()
+    from pathlib import Path
+    static = Path(current_app.static_folder)
+    country_photo_dir = static / "images" / "countries" / country_slug
+    if country_photo_dir.exists():
+        _shutil.rmtree(str(country_photo_dir))
+    flag_file = static / "images" / "flags" / "countries" / f"{country_slug}.png"
+    if flag_file.exists():
+        flag_file.unlink()
+    data_root = Path(current_app.root_path).parent / "data"
+    for sub in ("country_details", "country_fiches"):
+        txt = data_root / sub / f"{country_slug}.txt"
+        if txt.exists():
+            txt.unlink()
+    if request.is_json:
+        return jsonify({"success": True})
+    flash(f"Pays '{row['country_name']}' supprimé.", "success")
+    return redirect(url_for("web.country_directory"))
+
+
+def _build_region_periods_from_db(conn, region_id: int, pop_data: list[dict]) -> list[dict]:
+    """Build timeline period dicts from dim_region_period_detail (same format as _parse_country_periods)."""
+    import re as _re
+
+    pop_by_year: dict[int, int] = {r["year"]: r["population"] for r in pop_data}
+    annotations_by_year: dict[int, dict] = {}
+    for r in pop_data:
+        if r.get("annotation_id"):
+            annotations_by_year[r["year"]] = r
+
+    def _extract_emoji(value: str):
+        stripped = value.strip()
+        m = _re.match(r"^([^\w\s]+)\s*(.*)", stripped, flags=_re.UNICODE)
+        if m:
+            return m.group(1).strip(), m.group(2).strip()
+        return "•", stripped
+
+    period_rows = conn.execute(
+        """SELECT region_period_id, period_order, period_range_label, period_title,
+                  start_year, end_year, summary_text
+           FROM dim_region_period_detail
+           WHERE region_id = ?
+           ORDER BY period_order""",
+        (region_id,),
+    ).fetchall()
+
+    total = len(period_rows)
+    periods: list[dict] = []
+
+    for i, pr in enumerate(period_rows):
+        item_rows = conn.execute(
+            "SELECT item_text FROM dim_region_period_detail_item "
+            "WHERE region_period_id = ? ORDER BY item_order",
+            (pr["region_period_id"],),
+        ).fetchall()
+
+        bullets: list[dict] = []
+        seen: set[str] = set()
+        for row in item_rows:
+            item = row["item_text"].strip().lstrip("- ").strip()
+            if not item or item.lower().startswith("résumé"):
+                continue
+            icon, text = _extract_emoji(item)
+            if not text or text in seen:
+                continue
+            seen.add(text)
+            bullets.append({"icon": icon, "text": text})
+
+        sy, ey = pr["start_year"], pr["end_year"]
+        start_pop = end_pop = None
+        if sy is not None and ey is not None:
+            candidates = [y for y in pop_by_year if sy <= y <= ey]
+            if candidates:
+                start_pop = pop_by_year[min(candidates)]
+                end_pop = pop_by_year[max(candidates)]
+
+        pct = None
+        if start_pop and end_pop and start_pop > 0:
+            pct = round((end_pop - start_pop) / start_pop * 100, 1)
+
+        linked: list[dict] = []
+        if sy is not None and ey is not None:
+            for y, ann in sorted(annotations_by_year.items()):
+                if sy <= y <= ey:
+                    linked.append({
+                        "year": y,
+                        "label": ann.get("label", ""),
+                        "color": ann.get("color", "#ef6c3d"),
+                    })
+
+        range_label = (pr["period_range_label"] or "")
+        periods.append({
+            "period_range_label": range_label,
+            "period_title": pr["period_title"],
+            "start_year": sy,
+            "end_year": ey,
+            "start_population": f"{start_pop:,}".replace(",", "\u202f") if start_pop else "n/a",
+            "end_population": f"{end_pop:,}".replace(",", "\u202f") if end_pop else "n/a",
+            "population_change_pct": pct,
+            "display_bullets": bullets,
+            "summary_text": pr["summary_text"] or "",
+            "linked_annotations": linked,
+            "step_index": i + 1,
+            "step_total": total,
+        })
+
+    return periods
+
+
+# ---------------------------------------------------------------------------
+# Regions directory + detail
+# ---------------------------------------------------------------------------
+
+@web.route("/regions")
+def region_directory() -> str:
+    import os
+    from .db import get_db
+    conn = get_db()
+    view_mode = request.args.get("view", "small").strip().lower()
+    if view_mode not in {"large", "medium", "small", "compact"}:
+        view_mode = "small"
+    rows = conn.execute(
+        """
+        WITH latest AS (
+            SELECT region_id, MAX(year) AS year
+            FROM fact_region_population
+            GROUP BY region_id
+        ),
+        first_row AS (
+            SELECT region_id, MIN(year) AS first_year
+            FROM fact_region_population
+            GROUP BY region_id
+        ),
+        peak AS (
+            SELECT region_id, MAX(population) AS peak_population,
+                   year AS peak_year
+            FROM (
+                SELECT region_id, year, population,
+                       RANK() OVER (PARTITION BY region_id ORDER BY population DESC) AS rk
+                FROM fact_region_population
+            )
+            WHERE rk = 1
+            GROUP BY region_id
+        )
+        SELECT
+            dr.region_id,
+            dr.region_name,
+            dr.region_slug,
+            dr.country_name,
+            dr.region_color,
+            frp.population AS latest_population,
+            latest.year AS latest_year,
+            peak.peak_population,
+            peak.peak_year,
+            first_row.first_year
+        FROM dim_region dr
+        LEFT JOIN latest ON latest.region_id = dr.region_id
+        LEFT JOIN fact_region_population frp
+            ON frp.region_id = dr.region_id AND frp.year = latest.year
+        LEFT JOIN peak ON peak.region_id = dr.region_id
+        LEFT JOIN first_row ON first_row.region_id = dr.region_id
+        ORDER BY dr.country_name, dr.region_name
+        """
+    ).fetchall()
+    regions = []
+    for row in rows:
+        r = dict(row)
+        slug = r.get("region_slug") or ""
+        # Flag first, then primary photo, else None
+        flag_path = f"images/flags/regions/{slug}.png"
+        flag_full = os.path.join(current_app.static_folder, flag_path.replace("/", os.sep))
+        if os.path.exists(flag_full):
+            r["card_image"] = flag_path
+            r["card_image_type"] = "flag"
+        else:
+            # Try primary photo
+            photo_row = conn.execute(
+                "SELECT filename FROM dim_region_photo WHERE region_id = ? AND is_primary = 1 LIMIT 1",
+                (r["region_id"],),
+            ).fetchone()
+            if photo_row:
+                r["card_image"] = f"images/regions/{slug}/{photo_row['filename']}"
+                r["card_image_type"] = "photo"
+            else:
+                r["card_image"] = None
+                r["card_image_type"] = None
+        regions.append(r)
+    return render_template(
+        "web/regions.html",
+        page_title="Annuaire des régions",
+        view_mode=view_mode,
+        regions=regions,
+    )
+
+
+@web.route("/regions/<region_slug>")
+def region_detail(region_slug: str) -> str:
+    import os
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM dim_region WHERE region_slug = ?", (region_slug,)
+    ).fetchone()
+    if row is None:
+        flash("Région introuvable dans la base analytique.", "error")
+        return redirect(url_for("web.region_directory"))
+    region = dict(row)
+    pop_rows = conn.execute(
+        """SELECT year, population, is_key_year, annotation_id
+           FROM fact_region_population
+           WHERE region_id = ?
+           ORDER BY year""",
+        (region["region_id"],),
+    ).fetchall()
+    pop_data = [dict(r) for r in pop_rows]
+    latest = max(pop_data, key=lambda r: r["year"]) if pop_data else {}
+    peak = max(pop_data, key=lambda r: r["population"]) if pop_data else {}
+    first = min(pop_data, key=lambda r: r["year"]) if pop_data else {}
+    region["latest_population"] = latest.get("population")
+    region["latest_year"] = latest.get("year")
+    region["peak_population"] = peak.get("population")
+    region["peak_year"] = peak.get("year")
+    region["first_year"] = first.get("year")
+    region["first_population"] = first.get("population")
+    # Trend
+    if len(pop_data) >= 2:
+        delta = pop_data[-1]["population"] - pop_data[-2]["population"]
+        region["trend_label"] = "En croissance" if delta > 0 else ("En décroissance" if delta < 0 else "Stable")
+    else:
+        region["trend_label"] = "Stable"
+    # Flag path
+    flag_path = f"images/flags/regions/{region_slug}.png"
+    flag_full = os.path.join(current_app.static_folder, flag_path.replace("/", os.sep))
+    region["flag_path"] = flag_path if os.path.exists(flag_full) else None
+    # Primary photo
+    photo_row = conn.execute(
+        "SELECT filename, source_url, attribution FROM dim_region_photo "
+        "WHERE region_id = ? AND is_primary = 1 LIMIT 1",
+        (region["region_id"],),
+    ).fetchone()
+    region["photo_path"] = (
+        f"images/regions/{region_slug}/{photo_row['filename']}" if photo_row else None
+    )
+    region["photo_attribution"] = photo_row["attribution"] if photo_row else None
+    # Chart payload
+    years = [r["year"] for r in pop_data]
+    populations = [r["population"] for r in pop_data]
+    # Build indexed annotations for chart (same format as city)
+    ann_chart_rows = conn.execute(
+        """SELECT frp.year, da.annotation_id, da.annotation_label, da.annotation_color,
+                  da.annotation_type, da.photo_filename
+           FROM fact_region_population frp
+           JOIN dim_annotation da ON da.annotation_id = frp.annotation_id
+           WHERE frp.region_id = ?
+           ORDER BY frp.year""",
+        (region["region_id"],),
+    ).fetchall()
+    default_band_width = 2
+    if len(years) > 1:
+        default_band_width = max(1, round((years[1] - years[0]) / 4))
+    indexed_annotations = []
+    for idx, row in enumerate(ann_chart_rows):
+        photo_url = ""
+        if row["photo_filename"]:
+            photo_url = f"/static/images/annotations/{row['photo_filename']}"
+        indexed_annotations.append({
+            "id": f"annotation-{idx}",
+            "year": row["year"],
+            "label": row["annotation_label"],
+            "color": row["annotation_color"] or "#ef6c3d",
+            "type": row["annotation_type"],
+            "xMin": row["year"] - default_band_width,
+            "xMax": row["year"] + default_band_width,
+            "photoUrl": photo_url,
+        })
+    chart_payload = {
+        "labels": years,
+        "datasets": [{
+            "label": region["region_name"],
+            "data": populations,
+            "borderColor": region.get("region_color") or "#2f6fed",
+            "backgroundColor": (region.get("region_color") or "#2f6fed") + "22",
+            "fill": True,
+            "tension": 0.3,
+        }],
+        "annotations": indexed_annotations,
+    }
+    # Periods from DB
+    ann_rows = conn.execute(
+        """SELECT frp.year, da.annotation_label AS label, da.annotation_color AS color
+           FROM fact_region_population frp
+           JOIN dim_annotation da ON da.annotation_id = frp.annotation_id
+           WHERE frp.region_id = ?""",
+        (region["region_id"],),
+    ).fetchall()
+    ann_by_year = {r["year"]: {"annotation_id": 1, "label": r["label"], "color": r["color"]} for r in ann_rows}
+    pop_with_ann = [{**r, **(ann_by_year.get(r["year"], {}))} for r in pop_data]
+    periods = _build_region_periods_from_db(conn, region["region_id"], pop_with_ann)
+    # Fiche complète
+    fiche_path = os.path.join(
+        current_app.root_path, "..", "data", "region_fiches", f"{region_slug}.txt"
+    )
+    fiche = None
+    if os.path.exists(fiche_path):
+        with open(fiche_path, encoding="utf-8") as f:
+            raw_fiche = f.read()
+        _header, fiche_sections = parse_fiche_text(raw_fiche)
+        if fiche_sections:
+            fiche = {"raw_text": raw_fiche, "sections": [
+                {"emoji": s.get("emoji", ""), "title": s.get("title", ""), "blocks": s.get("blocks", [])}
+                for s in fiche_sections
+            ]}
+    # Annotations
+    ann_rows = conn.execute(
+        """SELECT frp.year, da.annotation_id, da.annotation_label, da.annotation_color,
+                  da.annotation_type, da.photo_filename AS annotation_photo_filename
+           FROM fact_region_population frp
+           JOIN dim_annotation da ON da.annotation_id = frp.annotation_id
+           WHERE frp.region_id = ?
+           ORDER BY frp.year""",
+        (region["region_id"],),
+    ).fetchall()
+    annotations = [dict(r) for r in ann_rows]
+    # Region photos
+    from .services.city_photos import get_region_photos
+    region_photos = get_region_photos(conn, region_slug)
+    return render_template(
+        "web/region_detail.html",
+        page_title=region["region_name"],
+        region=region,
+        pop_data=pop_data,
+        periods=periods,
+        chart_payload=chart_payload,
+        fiche=fiche,
+        annotations=annotations,
+        region_photos=region_photos,
+    )
+
+
+# ------------------------------------------------------------------
+#  Region Photo Library routes
+# ------------------------------------------------------------------
+
+@web.route("/regions/<region_slug>/photos/upload", methods=["POST"])
+def region_photo_upload(region_slug: str) -> Response:
+    from .db import get_db
+    from .services.city_photos import save_region_photo_to_library
+    conn = get_db()
+    row = conn.execute("SELECT region_id FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    if not row:
+        flash("Région introuvable.", "error")
+        return redirect(url_for("web.region_directory"))
+    files = request.files.getlist("photo_files")
+    if not files or all(not f.filename for f in files):
+        flash("Aucun fichier sélectionné.", "error")
+        return redirect(url_for("web.region_detail", region_slug=region_slug))
+    imported = 0
+    for f in files:
+        if not f.filename:
+            continue
+        result = save_region_photo_to_library(
+            conn, row["region_id"], region_slug, f.read(), f.filename,
+            attribution="Photo uploadée manuellement.",
+        )
+        if result["success"]:
+            imported += 1
+    flash(f"{imported} photo(s) ajoutée(s) à la bibliothèque.", "success")
+    return redirect(url_for("web.region_detail", region_slug=region_slug))
+
+
+@web.route("/regions/<region_slug>/photos/search")
+def region_photo_search(region_slug: str) -> Response:
+    from .db import get_db
+    from .services.city_photos import search_wikipedia_images
+    conn = get_db()
+    row = conn.execute("SELECT region_name, country_name FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    if not row:
+        return jsonify({"error": "Région introuvable.", "images": []})
+    images = search_wikipedia_images(row["region_name"], None, row["country_name"])
+    return jsonify({"images": images})
+
+
+@web.route("/regions/<region_slug>/photos/search-commons")
+def region_photo_search_commons(region_slug: str) -> Response:
+    from .db import get_db
+    from .services.city_photos import search_commons_images
+    conn = get_db()
+    row = conn.execute("SELECT region_name, country_name FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    if not row:
+        return jsonify({"error": "Région introuvable.", "images": []})
+    images = search_commons_images(row["region_name"], None, row["country_name"])
+    return jsonify({"images": images})
+
+
+@web.route("/regions/<region_slug>/photos/import-web", methods=["POST"])
+def region_photo_import_web(region_slug: str) -> Response:
+    from .db import get_db
+    from .services.city_photos import download_web_image, save_region_photo_to_library
+    conn = get_db()
+    row = conn.execute("SELECT region_id FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    if not row:
+        return jsonify({"error": "Région introuvable.", "imported": 0})
+    data = request.get_json(silent=True)
+    if not data or not isinstance(data.get("images"), list):
+        return jsonify({"error": "Aucune image.", "imported": 0})
+    imported = 0
+    for img in data["images"]:
+        url = img.get("url", "")
+        if not url:
+            continue
+        result = download_web_image(url)
+        if not result:
+            continue
+        file_bytes, ext = result
+        save_result = save_region_photo_to_library(
+            conn, row["region_id"], region_slug, file_bytes, f"web-import{ext}",
+            source_url=img.get("source_page", ""),
+            attribution="Wikipedia/Wikimedia — vérifier les licences.",
+        )
+        if save_result["success"]:
+            imported += 1
+    return jsonify({"imported": imported})
+
+
+@web.route("/regions/<region_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+def region_photo_delete(region_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import delete_region_photo_from_library
+    conn = get_db()
+    deleted = delete_region_photo_from_library(conn, photo_id, region_slug)
+    if deleted:
+        flash("Photo supprimée.", "success")
+    else:
+        flash("Photo introuvable.", "error")
+    return redirect(url_for("web.region_detail", region_slug=region_slug))
+
+
+@web.route("/regions/<region_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+def region_photo_set_primary(region_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import set_region_photo_primary
+    conn = get_db()
+    row = conn.execute("SELECT region_id FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    if not row:
+        flash("Région introuvable.", "error")
+        return redirect(url_for("web.region_directory"))
+    set_region_photo_primary(conn, photo_id, row["region_id"])
+    flash("Photo principale mise à jour.", "success")
+    return redirect(url_for("web.region_detail", region_slug=region_slug))
+
+
+# ------------------------------------------------------------------
+#  Region Annotation routes
+# ------------------------------------------------------------------
+
+@web.route("/regions/<region_slug>/annotations/manual-search")
+def region_annotation_manual_search(region_slug: str) -> Response:
+    from .services.city_photos import _search_commons_batch
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"images": []})
+    seen_urls: set[str] = set()
+    images = _search_commons_batch(query, seen_urls, limit=40)
+    return jsonify({"images": images})
+
+
+@web.route("/regions/<region_slug>/annotations/<int:annotation_id>/photo/search")
+def region_annotation_photo_search(region_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import search_annotation_images
+    conn = get_db()
+    region_row = conn.execute("SELECT region_name, country_name FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    ann_row = conn.execute("SELECT annotation_label FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)).fetchone()
+    if not region_row or not ann_row:
+        return jsonify({"error": "Introuvable.", "images": []})
+    images = search_annotation_images(ann_row["annotation_label"], region_row["region_name"], None, region_row["country_name"])
+    return jsonify({"images": images})
+
+
+@web.route("/regions/<region_slug>/annotations/<int:annotation_id>/photo/save", methods=["POST"])
+def region_annotation_photo_save(region_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import save_annotation_photo_for_region
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data or not data.get("url"):
+        return jsonify({"success": False, "error": "URL manquante."})
+    result = save_annotation_photo_for_region(
+        conn, annotation_id, data["url"], data.get("source_page", ""), region_slug=region_slug
+    )
+    return jsonify(result)
+
+
+@web.route("/regions/<region_slug>/annotations/<int:annotation_id>/photo/link", methods=["POST"])
+def region_annotation_photo_link(region_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import link_existing_region_photo_to_annotation
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data or not data.get("photo_id"):
+        return jsonify({"success": False, "error": "photo_id manquant."})
+    result = link_existing_region_photo_to_annotation(conn, annotation_id, region_slug, int(data["photo_id"]))
+    return jsonify(result)
+
+
+@web.route("/regions/<region_slug>/annotations/years")
+def region_annotation_years(region_slug: str) -> Response:
+    from .db import get_db
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT frp.year, frp.annotation_id
+           FROM fact_region_population frp
+           JOIN dim_region r ON r.region_id = frp.region_id
+           WHERE r.region_slug = ?
+           ORDER BY frp.year""",
+        (region_slug,),
+    ).fetchall()
+    years = [{"year": r["year"], "has_annotation": r["annotation_id"] is not None} for r in rows]
+    return jsonify({"years": years})
+
+
+@web.route("/regions/<region_slug>/annotations", methods=["POST"])
+def region_annotation_create(region_slug: str) -> Response:
+    from .db import get_db
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "error": "Données manquantes."})
+    label = (data.get("label") or "").strip()
+    color = (data.get("color") or "red").strip()
+    ann_type = (data.get("type") or "event").strip()
+    year = data.get("year")
+    if not label or not year:
+        return jsonify({"success": False, "error": "Label et année requis."})
+    try:
+        year = int(year)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Année invalide."})
+    pop_row = conn.execute(
+        """SELECT frp.region_pop_id, frp.annotation_id
+           FROM fact_region_population frp
+           JOIN dim_region r ON r.region_id = frp.region_id
+           WHERE r.region_slug = ? AND frp.year = ?""",
+        (region_slug, year),
+    ).fetchone()
+    if not pop_row:
+        return jsonify({"success": False, "error": f"Année {year} introuvable pour cette région."})
+    if pop_row["annotation_id"]:
+        return jsonify({"success": False, "error": f"L'année {year} a déjà une annotation."})
+    cur = conn.execute(
+        "INSERT INTO dim_annotation (annotation_label, annotation_color, annotation_type) VALUES (?, ?, ?)",
+        (label, color, ann_type),
+    )
+    annotation_id = cur.lastrowid
+    conn.execute(
+        "UPDATE fact_region_population SET annotation_id = ? WHERE region_pop_id = ?",
+        (annotation_id, pop_row["region_pop_id"]),
+    )
+    conn.commit()
+    return jsonify({"success": True, "annotation_id": annotation_id})
+
+
+@web.route("/regions/<region_slug>/annotations/<int:annotation_id>", methods=["PUT"])
+def region_annotation_update(region_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    conn = get_db()
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "error": "Données manquantes."})
+    label = (data.get("label") or "").strip()
+    color = (data.get("color") or "").strip()
+    ann_type = (data.get("type") or "").strip()
+    new_year = data.get("year")
+    if not label:
+        return jsonify({"success": False, "error": "Label requis."})
+    updates = ["annotation_label = ?"]
+    params: list = [label]
+    if color:
+        updates.append("annotation_color = ?")
+        params.append(color)
+    if ann_type:
+        updates.append("annotation_type = ?")
+        params.append(ann_type)
+    params.append(annotation_id)
+    conn.execute(f"UPDATE dim_annotation SET {', '.join(updates)} WHERE annotation_id = ?", params)
+    if new_year is not None:
+        try:
+            new_year = int(new_year)
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "error": "Année invalide."})
+        old_pop = conn.execute(
+            """SELECT frp.region_pop_id, frp.year
+               FROM fact_region_population frp
+               JOIN dim_region r ON r.region_id = frp.region_id
+               WHERE r.region_slug = ? AND frp.annotation_id = ?""",
+            (region_slug, annotation_id),
+        ).fetchone()
+        if not old_pop or old_pop["year"] != new_year:
+            new_pop = conn.execute(
+                """SELECT frp.region_pop_id, frp.annotation_id
+                   FROM fact_region_population frp
+                   JOIN dim_region r ON r.region_id = frp.region_id
+                   WHERE r.region_slug = ? AND frp.year = ?""",
+                (region_slug, new_year),
+            ).fetchone()
+            if not new_pop:
+                return jsonify({"success": False, "error": f"Année {new_year} introuvable."})
+            if new_pop["annotation_id"] and new_pop["annotation_id"] != annotation_id:
+                return jsonify({"success": False, "error": f"L'année {new_year} a déjà une annotation."})
+            if old_pop:
+                conn.execute("UPDATE fact_region_population SET annotation_id = NULL WHERE region_pop_id = ?", (old_pop["region_pop_id"],))
+            conn.execute("UPDATE fact_region_population SET annotation_id = ? WHERE region_pop_id = ?", (annotation_id, new_pop["region_pop_id"]))
+    conn.commit()
+    return jsonify({"success": True})
+
+
+@web.route("/regions/<region_slug>/annotations/<int:annotation_id>", methods=["DELETE"])
+def region_annotation_delete(region_slug: str, annotation_id: int) -> Response:
+    from .db import get_db
+    from .services.city_photos import ANNOTATION_PHOTO_DIR
+    conn = get_db()
+    ann = conn.execute("SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)).fetchone()
+    if not ann:
+        return jsonify({"success": False, "error": "Annotation introuvable."})
+    conn.execute("UPDATE fact_region_population SET annotation_id = NULL WHERE annotation_id = ?", (annotation_id,))
+    if ann["photo_filename"]:
+        photo_path = ANNOTATION_PHOTO_DIR / ann["photo_filename"]
+        if photo_path.exists():
+            photo_path.unlink()
+    conn.execute("DELETE FROM dim_annotation WHERE annotation_id = ?", (annotation_id,))
+    conn.commit()
+    return jsonify({"success": True})
+
+
+@web.route("/regions/<region_slug>/delete", methods=["POST"])
+def region_delete(region_slug: str) -> Response:
+    """Delete a region and all its related data from the DB and filesystem."""
+    import shutil as _shutil
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute("SELECT region_id, region_name FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    if not row:
+        if request.is_json:
+            return jsonify({"success": False, "error": "Région introuvable."})
+        flash("Région introuvable.", "error")
+        return redirect(url_for("web.region_directory"))
+    region_id = row["region_id"]
+    # Delete DB rows (cascade order)
+    period_ids = [r[0] for r in conn.execute("SELECT region_period_id FROM dim_region_period_detail WHERE region_id = ?", (region_id,))]
+    if period_ids:
+        placeholders = ",".join("?" * len(period_ids))
+        conn.execute(f"DELETE FROM dim_region_period_detail_item WHERE region_period_id IN ({placeholders})", period_ids)
+    conn.execute("DELETE FROM dim_region_period_detail WHERE region_id = ?", (region_id,))
+    conn.execute("UPDATE fact_region_population SET annotation_id = NULL WHERE region_id = ?", (region_id,))
+    conn.execute("DELETE FROM fact_region_population WHERE region_id = ?", (region_id,))
+    conn.execute("DELETE FROM dim_region_photo WHERE region_id = ?", (region_id,))
+    conn.execute("DELETE FROM dim_region WHERE region_id = ?", (region_id,))
+    conn.commit()
+    # Delete filesystem files
+    from pathlib import Path
+    static = Path(current_app.static_folder)
+    region_photo_dir = static / "images" / "regions" / region_slug
+    if region_photo_dir.exists():
+        _shutil.rmtree(str(region_photo_dir))
+    flag_file = static / "images" / "flags" / "regions" / f"{region_slug}.png"
+    if flag_file.exists():
+        flag_file.unlink()
+    data_root = Path(current_app.root_path).parent / "data"
+    for sub in ("city_details", "city_fiches", "region_details", "region_fiches"):
+        txt = data_root / sub / f"{region_slug}.txt"
+        if txt.exists():
+            txt.unlink()
+    if request.is_json:
+        return jsonify({"success": True})
+    flash(f"Région '{row['region_name']}' supprimée.", "success")
+    return redirect(url_for("web.region_directory"))
 
 
 @web.route("/compare")
@@ -2353,6 +3705,17 @@ def ai_lab() -> str:
     prompt_details = load_prompt("city_data_step2.txt")
     prompt_fiche = load_prompt("city_data_step3.txt")
     prompt_event = load_prompt("event_data.txt")
+    prompt_country = load_prompt("country_data_step1.txt")
+    prompt_country_details = load_prompt("country_data_step2.txt")
+    prompt_country_fiche = load_prompt("country_data_step3.txt")
+    prompt_region = load_prompt("region_data_step1.txt")
+    prompt_region_details = load_prompt("region_data_step2.txt")
+    prompt_region_fiche = load_prompt("region_data_step3.txt")
+    from .db import get_db
+    conn = get_db()
+    countries_for_region = [r["country_name"] for r in conn.execute(
+        "SELECT country_name FROM dim_country ORDER BY country_name COLLATE NOCASE"
+    ).fetchall()]
     return render_template(
         "web/ai_lab.html",
         page_title="AI Lab",
@@ -2362,6 +3725,13 @@ def ai_lab() -> str:
         prompt_details=prompt_details,
         prompt_fiche=prompt_fiche,
         prompt_event=prompt_event,
+        prompt_country=prompt_country,
+        prompt_country_details=prompt_country_details,
+        prompt_country_fiche=prompt_country_fiche,
+        prompt_region=prompt_region,
+        prompt_region_details=prompt_region_details,
+        prompt_region_fiche=prompt_region_fiche,
+        countries_for_region=countries_for_region,
     )
 
 
@@ -2710,6 +4080,302 @@ def ai_lab_import() -> Response:
         "messages": messages,
         "redirect": url_for("web.city_detail", city_slug=stats["city_slug"]),
     })
+
+
+@web.route("/ai-lab/country-import", methods=["POST"])
+def ai_lab_country_import() -> Response:
+    """AJAX import for country population + details — returns JSON."""
+    stats_text = request.form.get("stats_text", "").strip()
+    details_text = request.form.get("details_text", "").strip()
+    fiche_text = request.form.get("fiche_text", "").strip()
+    if not stats_text:
+        return jsonify({"success": False, "error": "Le champ population (Step 1) est vide."})
+
+    try:
+        stats = parse_country_stats_text(stats_text)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": f"Erreur de parsing population: {exc}"})
+
+    from .db import get_db
+    conn = get_db()
+    messages = []
+
+    try:
+        country_id = import_country_stats(conn, stats)
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        return jsonify({"success": False, "error": f"Erreur DB: {exc}"})
+    messages.append(
+        f"Population importée — {len(stats['years'])} années, "
+        f"{len(stats['annotations'])} annotations."
+    )
+
+    # Save details text file
+    if details_text:
+        try:
+            save_country_details_file(stats["country_slug"], details_text)
+            messages.append("Fiche détaillée sauvegardée.")
+        except Exception as exc:
+            messages.append(f"⚠️ Fiche détaillée: {exc}")
+
+    # Save fiche complète file
+    if fiche_text:
+        try:
+            save_country_fiche_file(stats["country_slug"], fiche_text)
+            messages.append("Fiche complète sauvegardée.")
+        except Exception as exc:
+            messages.append(f"⚠️ Fiche complète: {exc}")
+
+    # Sync paysstats_RAW.py
+    try:
+        from scripts.export_paysstats_raw import export_all
+        from pathlib import Path
+        raw_path = Path(__file__).resolve().parent.parent / "paysstats_RAW.py"
+        raw_path.write_text(export_all(), encoding="utf-8")
+        messages.append("paysstats_RAW.py synchronisé.")
+    except Exception as exc:
+        messages.append(f"⚠️ paysstats_RAW.py: {exc}")
+
+    # Download flag
+    try:
+        from .services.city_import import download_country_flag
+        flag_path = download_country_flag(stats["country_name"], stats["country_slug"])
+        if flag_path:
+            messages.append(f"Drapeau téléchargé: {flag_path}")
+        else:
+            messages.append("⚠️ Drapeau non trouvé (code ISO inconnu).")
+    except Exception as exc:
+        messages.append(f"⚠️ Drapeau: {exc}")
+
+    return jsonify({
+        "success": True,
+        "country_name": stats["country_name"],
+        "country_slug": stats["country_slug"],
+        "messages": messages,
+    })
+
+
+@web.route("/ai-lab/suggest-country", methods=["POST"])
+def ai_lab_suggest_country() -> Response:
+    """Ask Mammouth to suggest a random country not yet in the DB."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    conn = get_db()
+
+    existing_rows = conn.execute(
+        "SELECT country_name FROM dim_country ORDER BY country_name"
+    ).fetchall()
+    existing_names = [r["country_name"] for r in existing_rows]
+
+    if existing_names:
+        prompt = (
+            f"Ma base contient déjà ces pays: {', '.join(existing_names)}.\n"
+            f"Suggère UN pays du monde qui n'est PAS dans cette liste. "
+            f"Varie entre grands pays, pays moyens et petits pays connus. "
+            f"Choisis un pays différent à chaque fois.\n"
+            f"Réponds UNIQUEMENT avec le nom du pays en anglais.\n"
+            f"Aucun autre texte."
+        )
+    else:
+        prompt = (
+            "Suggère UN pays du monde au hasard. "
+            "Varie entre grands pays, pays moyens et petits pays connus.\n"
+            "Réponds UNIQUEMENT avec le nom du pays en anglais.\n"
+            "Aucun autre texte."
+        )
+
+    result = generate_city(api_key, model, "", prompt, max_tokens=50, temperature=0.9)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/region-import", methods=["POST"])
+def ai_lab_region_import() -> Response:
+    """AJAX import for region population + period details + fiche — returns JSON."""
+    stats_text = request.form.get("stats_text", "").strip()
+    periods_text = request.form.get("periods_text", "").strip()
+    fiche_text = request.form.get("fiche_text", "").strip()
+    if not stats_text:
+        return jsonify({"success": False, "error": "Le champ population (Step 1) est vide."})
+
+    try:
+        stats = parse_region_stats_text(stats_text)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": f"Erreur de parsing population: {exc}"})
+
+    from .db import get_db
+    conn = get_db()
+    messages: list[str] = []
+
+    try:
+        region_id = import_region_stats(conn, stats)
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        return jsonify({"success": False, "error": f"Erreur DB: {exc}"})
+    messages.append(
+        f"Population importée — {len(stats['years'])} années, "
+        f"{len(stats['annotations'])} annotations."
+    )
+
+    # Import period details into DB
+    if periods_text:
+        try:
+            sections = parse_region_period_details_text(periods_text)
+            if sections:
+                count = import_region_periods(conn, region_id, stats["region_slug"], sections)
+                conn.commit()
+                messages.append(f"Périodes importées — {count} périodes.")
+                save_region_details_file(stats["region_slug"], periods_text)
+            else:
+                messages.append("⚠️ Aucune période trouvée dans le Step 2.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"⚠️ Périodes: {exc}")
+
+    # Save fiche complète file
+    if fiche_text:
+        try:
+            save_region_fiche_file(stats["region_slug"], fiche_text)
+            messages.append("Fiche complète sauvegardée.")
+        except Exception as exc:
+            messages.append(f"⚠️ Fiche complète: {exc}")
+
+    # Sync regionstats_RAW.py in background thread (avoids Flask reloader restart)
+    try:
+        import threading
+        from scripts.export_regionstats_raw import export_all
+        from pathlib import Path
+        def _sync_raw():
+            try:
+                raw_path = Path(__file__).resolve().parent.parent / "regionstats_RAW.py"
+                raw_path.write_text(export_all(), encoding="utf-8")
+            except Exception:
+                pass
+        threading.Thread(target=_sync_raw, daemon=True).start()
+        messages.append("regionstats_RAW.py synchronisé.")
+    except Exception as exc:
+        messages.append(f"⚠️ regionstats_RAW.py: {exc}")
+
+    # Download flag
+    try:
+        flag_path = fetch_and_save_region_flag(stats["region_name"], stats["region_slug"])
+        if flag_path:
+            messages.append(f"Drapeau téléchargé: {flag_path}")
+        else:
+            messages.append("⚠️ Drapeau non trouvé (Wikimedia Commons).")
+    except Exception as exc:
+        messages.append(f"⚠️ Drapeau: {exc}")
+
+    # Download primary photo
+    try:
+        conn2 = get_db()
+        photo_path = fetch_and_save_region_photo(
+            conn2, region_id, stats["region_name"],
+            stats["region_slug"], stats.get("region_country", ""),
+        )
+        conn2.commit()
+        if photo_path:
+            messages.append(f"Photo téléchargée: {photo_path}")
+        else:
+            messages.append("⚠️ Photo Wikipedia non trouvée.")
+    except Exception as exc:
+        messages.append(f"⚠️ Photo: {exc}")
+        photo_path = None
+
+    # Also save flag to region photo library (album)
+    try:
+        import shutil as _shutil
+        from pathlib import Path as _Path
+        flag_dest = _Path(current_app.static_folder) / "images" / "flags" / "regions" / f"{stats['region_slug']}.png"
+        if flag_dest.exists():
+            region_lib_dir = _Path(current_app.static_folder) / "images" / "regions" / stats["region_slug"]
+            region_lib_dir.mkdir(parents=True, exist_ok=True)
+            flag_lib_copy = region_lib_dir / "flag.png"
+            if not flag_lib_copy.exists():
+                _shutil.copy2(str(flag_dest), str(flag_lib_copy))
+            # Register in dim_region_photo if not already there
+            conn3 = get_db()
+            existing_flag = conn3.execute(
+                "SELECT photo_id FROM dim_region_photo WHERE region_id = ? AND filename = 'flag.png'",
+                (region_id,),
+            ).fetchone()
+            if not existing_flag:
+                flag_is_primary = 1 if not photo_path else 0
+                conn3.execute(
+                    "INSERT INTO dim_region_photo (region_id, filename, caption, source_url, attribution, is_primary) "
+                    "VALUES (?, 'flag.png', ?, ?, 'Wikimedia Commons', ?)",
+                    (region_id, f"Drapeau de {stats['region_name']}",
+                     "images/flags/regions/" + stats["region_slug"] + ".png", flag_is_primary),
+                )
+                conn3.commit()
+                messages.append("Drapeau ajouté à l'album de la région.")
+    except Exception as exc:
+        messages.append(f"⚠️ Drapeau album: {exc}")
+
+    return jsonify({
+        "success": True,
+        "region_name": stats["region_name"],
+        "region_slug": stats["region_slug"],
+        "messages": messages,
+    })
+
+
+@web.route("/ai-lab/suggest-region", methods=["POST"])
+def ai_lab_suggest_region() -> Response:
+    """Ask Mammouth to suggest a region/province not yet in the DB for a given country."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    country = request.form.get("country", "").strip()
+    conn = get_db()
+
+    query = "SELECT region_name FROM dim_region"
+    params: tuple = ()
+    if country:
+        query += " WHERE country_name = ?"
+        params = (country,)
+    query += " ORDER BY region_name"
+
+    existing_rows = conn.execute(query, params).fetchall()
+    existing_names = [r["region_name"] for r in existing_rows]
+
+    country_ctx = f" de {country}" if country else ""
+    if existing_names:
+        prompt = (
+            f"Ma base contient déjà ces régions{country_ctx}: {', '.join(existing_names)}.\n"
+            f"Suggère UNE région, province ou état{country_ctx} qui n'est PAS dans cette liste. "
+            f"Choisis une région importante ou bien connue.\n"
+            f"Réponds UNIQUEMENT avec le nom de la région en anglais.\n"
+            f"Aucun autre texte."
+        )
+    else:
+        prompt = (
+            f"Suggère UNE région, province ou état{country_ctx} au hasard. "
+            f"Choisis une région importante ou bien connue.\n"
+            f"Réponds UNIQUEMENT avec le nom de la région en anglais.\n"
+            f"Aucun autre texte."
+        )
+
+    result = generate_city(api_key, model, "", prompt, max_tokens=50, temperature=0.9)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
 
 
 # ---------------------------------------------------------------------------

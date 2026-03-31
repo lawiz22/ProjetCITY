@@ -673,3 +673,119 @@ LEFT JOIN dim_event_location el ON el.event_id = e.event_id
 LEFT JOIN dim_city dc ON dc.city_id = el.city_id
 LEFT JOIN dim_event_photo ep ON ep.event_id = e.event_id
 GROUP BY e.event_id;
+
+-- ────────────────────────────────────────
+-- Country dimension & population
+-- ────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS dim_country (
+    country_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    country_name TEXT NOT NULL,
+    country_slug TEXT NOT NULL UNIQUE,
+    country_color TEXT,
+    source_file TEXT NOT NULL DEFAULT 'manual'
+);
+
+CREATE TABLE IF NOT EXISTS fact_country_population (
+    country_pop_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    country_id INTEGER NOT NULL,
+    time_id INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    population INTEGER NOT NULL,
+    is_key_year INTEGER NOT NULL DEFAULT 0 CHECK (is_key_year IN (0, 1)),
+    annotation_id INTEGER,
+    source_file TEXT NOT NULL DEFAULT 'manual',
+    UNIQUE(country_id, year),
+    FOREIGN KEY (country_id) REFERENCES dim_country(country_id),
+    FOREIGN KEY (time_id) REFERENCES dim_time(time_id),
+    FOREIGN KEY (annotation_id) REFERENCES dim_annotation(annotation_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_country_slug ON dim_country (country_slug);
+CREATE INDEX IF NOT EXISTS idx_country_pop_country ON fact_country_population (country_id);
+CREATE INDEX IF NOT EXISTS idx_country_pop_year ON fact_country_population (year);
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- Region dimension, population & period details
+-- ────────────────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS dim_region (
+    region_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    region_name TEXT NOT NULL,
+    region_slug TEXT NOT NULL UNIQUE,
+    country_name TEXT NOT NULL,
+    region_color TEXT,
+    source_file TEXT NOT NULL DEFAULT 'manual'
+);
+
+CREATE TABLE IF NOT EXISTS fact_region_population (
+    region_pop_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    region_id INTEGER NOT NULL,
+    time_id INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    population INTEGER NOT NULL,
+    is_key_year INTEGER NOT NULL DEFAULT 0 CHECK (is_key_year IN (0, 1)),
+    annotation_id INTEGER,
+    source_file TEXT NOT NULL DEFAULT 'manual',
+    UNIQUE(region_id, year),
+    FOREIGN KEY (region_id) REFERENCES dim_region(region_id),
+    FOREIGN KEY (time_id) REFERENCES dim_time(time_id),
+    FOREIGN KEY (annotation_id) REFERENCES dim_annotation(annotation_id)
+);
+
+CREATE TABLE IF NOT EXISTS dim_region_period_detail (
+    region_period_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    region_id INTEGER NOT NULL,
+    period_order INTEGER NOT NULL,
+    period_range_label TEXT NOT NULL,
+    period_title TEXT NOT NULL,
+    start_year INTEGER,
+    end_year INTEGER,
+    start_time_id INTEGER,
+    end_time_id INTEGER,
+    summary_text TEXT NOT NULL,
+    source_file TEXT NOT NULL,
+    UNIQUE(region_id, period_order),
+    FOREIGN KEY (region_id) REFERENCES dim_region(region_id),
+    FOREIGN KEY (start_time_id) REFERENCES dim_time(time_id),
+    FOREIGN KEY (end_time_id) REFERENCES dim_time(time_id)
+);
+
+CREATE TABLE IF NOT EXISTS dim_region_period_detail_item (
+    item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    region_period_id INTEGER NOT NULL,
+    item_order INTEGER NOT NULL,
+    item_text TEXT NOT NULL,
+    FOREIGN KEY (region_period_id) REFERENCES dim_region_period_detail(region_period_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_region_slug ON dim_region (region_slug);
+CREATE INDEX IF NOT EXISTS idx_region_country ON dim_region (country_name);
+CREATE INDEX IF NOT EXISTS idx_region_pop_region ON fact_region_population (region_id);
+CREATE INDEX IF NOT EXISTS idx_region_pop_year ON fact_region_population (year);
+CREATE INDEX IF NOT EXISTS idx_region_period ON dim_region_period_detail (region_id, period_order);
+CREATE INDEX IF NOT EXISTS idx_region_period_item ON dim_region_period_detail_item (region_period_id, item_order);
+
+CREATE TABLE IF NOT EXISTS dim_region_photo (
+    photo_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    region_id  INTEGER NOT NULL REFERENCES dim_region(region_id) ON DELETE CASCADE,
+    filename   TEXT NOT NULL,
+    caption    TEXT,
+    source_url TEXT,
+    attribution TEXT,
+    is_primary INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_region_photo_region ON dim_region_photo (region_id);
+
+CREATE TABLE IF NOT EXISTS dim_country_photo (
+    photo_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    country_id INTEGER NOT NULL REFERENCES dim_country(country_id) ON DELETE CASCADE,
+    filename   TEXT NOT NULL,
+    caption    TEXT,
+    source_url TEXT,
+    attribution TEXT,
+    is_primary INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_country_photo_country ON dim_country_photo (country_id);

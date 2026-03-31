@@ -1,0 +1,172 @@
+# Canada — Fiche Complète
+
+## 📍 Informations Générales
+
+| Pays   | Canada                              |
+|--------|-----------------------------------|
+| Capitale | Ottawa                           |
+| Plus grande ville | Toronto                   |
+| Surnoms | Le Grand Nord, Le Pays du Sirop d'érable |
+| Devise  | "A Mari Usque Ad Mare" (D'un océan à l'autre) |
+| Hymne national | "O Canada"                 |
+| Fête nationale | 1er juillet (Fête du Canada) |
+| Forme de gouvernement | Monarchie constitutionnelle fédérale |
+| Chef d'État | Charles III (Roi du Canada)  |
+| Chef du gouvernement | Justin Trudeau (Premier ministre) |
+| Fondation | 1er juillet 1867 (Confédération) |
+| Indépendance | 1931 (Statut de Westminster), pleine souveraineté en 1982 (Loi constitutionnelle) |
+| Superficie | 9 984 670 km² (2e plus grand pays du monde) |
+| Frontières | États-Unis (8 891 km), maritime avec Groenland, France (Saint-Pierre-et-Miquelon) |
+
+## 👥 Population
+
+| Année | Population (millions) | Croissance annuelle (%) | Taux de fécondité | Espérance de vie (ans) | Âge médian (ans) | Immigration nette (annuelle) | Langues officielles |
+|-------|----------------------|------------------------|-------------------|-----------------------|------------------|-----------------------------|---------------------|
+| 2000  | 30,7                 | 1,1                    | 1,5               | 79,8                  | 37,6             | 200 000                     | Anglais, Français   |
+| 2010  | 34,0                 | 1,1                    | 1,6               | 81,0                  | 39,5             | 250 000                     | Anglais, Français   |
+| 2020  | 37,6                 | 1,1                    | 1,5               | 82,3                  | 41,1             | 300 000                     | Anglais, Français   |
+| 2024* | 39,0                 | 1,0                    | 1,4               | 82,8                  | 41,8             | 350 000                     | Anglais, Français   |
+
+- Diversité ethnoculturelle : 22% de la population est née à l’étranger (l’un des taux les plus élevés au monde).
+- Principaux groupes : Européens, Asiatiques, Autochtones (Premières Nations, Inuits, Métis).
+- Immigration : politique d’immigration active, visant 500 000 nouveaux arrivants en 2024.
+- Langues : Anglais (58%), Français (22%), nombreuses langues autochtones et immigrantes.
+
+## 📐 Géographie & Densité
+
+| Caractéristique     | Donnée                         |
+|--------------------|--------------------------------|
+| Superficie         | 9 984 670 km²                  |
+| Densité            | 4,1 hab./km² (très faible)     |
+| Frontières terrestres | 8 891 km avec les États-Unis |
+| Littoral           | 202 080 km (plus long au monde)|
+| Point culminant    | Mont Logan (5 959 m)            |
+| Plus grand lac     | Lac Supérieur (82 100 km²)      |
+| Plus long fleuve   | Fleuve Mackenzie (4 241 km)     |
+| Climat             | Varié : Arctique au Nord, continental tempéré au Sud |
+| Répartition urbaine | 81% de la population vit en zones urbaines, principalement dans le sud |
+
+## 🏛️ Économie
+
+- PIB nominal (2023) : 2 400 milliards USD (10e mondial)
+- PIB par habitant : environ 62 000 USD (haut revenu)
+- Taux de chômage (2024) : 5,1%
+- Inflation (2024) : 3,2%
+
+| Secteur            | Part du PIB (%) |
+|--------------------|-----------------|
+| Services           | 70              |
+| Industrie          | 20              |
+| Agriculture        | 2               |
+| Extraction minière | 8               |
+
+| Entreprise               | Secteur          | CA (milliards USD) | Particularités                      |
+|-------------------------|------------------|--------------------|-----------------------------------|
+| Shopify                 | Technologie      | 5,6                | Leader mondial du e-commerce      |
+| Enbridge                | Énergie          | 40,0               | Plus grand réseau de pipelines    |
+| Barrick Gold            | Mines            | 12,0               | Plus grand producteur d’or        |
+| Bombardier              | Aéronautique     | 7,5                | Avions d’affaires et trains       |
+| Canadian National Railway | Transport ferroviaire | 14,0          | Plus grand réseau ferroviaire     |
+
+- Défis : dépendance aux exportations de ressources naturelles, transition énergétique, inflation post-pandémie, vieillissement démographique.
+
+## 🎓 Éducation
+
+| Université               | Classement mondial 2024 (QS) | Ville         | Particularités                      |
+|-------------------------|-----------------------------|---------------|-----------------------------------|
+| Université de Toronto   | 26                          | Toronto       | Plus grande université du Canada  |
+| Université McGill       | 31                          | Montréal      | Réputée en médecine et droit      |
+| Université de la Colombie-Britannique | 45              | Vancouver     | Fort accent sur la recherche      |
+| Université McMaster     | 140                         | Hamilton      | Réputée en santé et ingénierie    |
+
+- Dépenses publiques en éducation : 5,3% du PIB
+- Étudiants internationaux : environ 700 000 (3e mondial)
+- Faits marquants : système bilingue, forte intégration des technologies numériques, accent sur la recherche en intelligence artificielle et climat.
+
+## 🏥 Santé
+
+- Système de santé : Assurance maladie universelle (Medicare), financée par les provinces et le gouvernement fédéral.
+- Espérance de vie : 82,8 ans (2024)
+- Dépenses de santé : 11,5% du PIB
+- Principaux hôpitaux :
+
+| Hôpital                   | Ville         | Spécialité principale         |
+|---------------------------|---------------|-------------------------------|
+| Toronto General Hospital  | Toronto       | Cardiologie, transplantation   |
+| Montreal General Hospital | Montréal      | Soins intensifs, chirurgie     |
+| Vancouver General Hospital| Vancouver     | Traumatologie, oncologie       |
+
+- Défis : pénurie de personnel soignant, accès aux soins en régions éloignées, gestion des maladies chroniques.
+
+## 🏈 Sports & Loisirs
+
+| Sport / Ligue            | Popularité | Performances internationales | Athlètes célèbres             |
+|-------------------------|------------|------------------------------|------------------------------|
+| Hockey sur glace (NHL)  | Très élevée| 9 fois champions olympiques  | Wayne Gretzky, Sidney Crosby  |
+| Football canadien (CFL) | Moyenne    | Ligue professionnelle locale | Anthony Calvillo              |
+| Basketball (NBA)        | Croissante | Plusieurs joueurs NBA         | Steve Nash                   |
+| Curling                 | Populaire  | Multiple championnats mondiaux| Jennifer Jones               |
+
+- Loisirs : ski, randonnée, pêche, festivals culturels (ex : Festival de Jazz de Montréal).
+
+## 🌳 Environnement & Parcs Nationaux
+
+- Plus de 48 parcs nationaux, couvrant environ 300 000 km².
+- Parcs emblématiques : Banff, Jasper, Gros Morne, Parc national de la Gaspésie.
+- Faune : ours polaires, caribous, orignaux, loups, baleines.
+- Changements climatiques : fonte des glaces arctiques, augmentation des feux de forêt, élévation du niveau des mers.
+- Engagements : Accord de Paris respecté, objectif de carboneutralité en 2050, investissements massifs dans les énergies renouvelables.
+
+## 🚗 Transport
+
+| Mode de transport       | Données clés / Projets majeurs                    |
+|------------------------|--------------------------------------------------|
+| Routes                 | 1,1 million km de routes, dépendance à l’automobile |
+| Chemins de fer         | Réseau ferroviaire majeur (CN, CP), projets de modernisation |
+| Transports urbains     | Métros à Toronto, Montréal, Vancouver; projets d’extension |
+| Aérien                 | Plus de 500 aéroports, hubs à Toronto, Vancouver, Montréal |
+| Projets majeurs        | Réseau de trains à grande vitesse envisagé entre Toronto-Montréal |
+
+## 🌡️ Climat
+
+| Saison     | Température moyenne (°C) | Précipitations (mm) | Phénomènes extrêmes          |
+|------------|--------------------------|---------------------|-----------------------------|
+| Hiver      | -10 à -20 (nord plus froid) | 50-100              | Tempêtes de neige, blizzards|
+| Printemps  | 5 à 15                   | 60-90               | Inondations printanières    |
+| Été        | 20 à 30                  | 70-100              | Canicules, orages violents  |
+| Automne    | 5 à 15                   | 50-80               | Feux de forêt               |
+
+- Variabilité climatique importante selon les régions (arctique à tempéré).
+
+## 🏙️ Provinces/États/Régions Notables
+
+| Province/Territoire | Capitale      | Population (millions) | PIB (milliards USD) | Particularités                      |
+|---------------------|---------------|----------------------|---------------------|-----------------------------------|
+| Ontario             | Toronto       | 15,0                 | 900                 | Centre économique et financier    |
+| Québec              | Québec        | 8,5                  | 450                 | Culture francophone dominante     |
+| Colombie-Britannique| Victoria      | 5,3                  | 350                 | Économie tournée vers technologie |
+| Alberta             | Edmonton      | 4,5                  | 350                 | Secteur pétrolier important       |
+| Manitoba            | Winnipeg      | 1,4                  | 70                  | Agriculture et industrie          |
+
+## 📊 Comparaison avec d'Autres Pays
+
+| Pays       | Population (millions) | PIB (milliards USD) | Superficie (km²) | Densité (hab./km²) | Espérance de vie (ans) |
+|------------|----------------------|---------------------|------------------|--------------------|-----------------------|
+| Canada     | 39                   | 2 400               | 9 984 670        | 4,1                | 82,8                  |
+| États-Unis | 335                  | 26 800              | 9 833 520        | 34                 | 78,9                  |
+| Australie  | 26                   | 1 900               | 7 692 000        | 3,4                | 83,0                  |
+| France     | 68                   | 3 000               | 643 801          | 119                | 82,5                  |
+
+## 💡 Le Saviez-Vous ?
+
+- Le Canada est le deuxième plus grand pays du monde par superficie, mais sa densité est très faible, comparable à celle de l’Australie.
+- Invention du téléphone par Alexander Graham Bell en 1876.
+- Culture populaire : Justin Bieber, Céline Dion, Drake, Margaret Atwood.
+- Détient le record du plus long littoral au monde (202 080 km).
+- Le hockey sur glace est considéré comme le sport national, avec une influence culturelle majeure.
+- Le Canada a été le premier pays à légaliser le mariage homosexuel à l’échelle nationale en 2005.
+- Le système de santé universel canadien est un modèle souvent étudié à l’international.
+
+---
+
+*Données mises à jour en 2024, sources : Statistique Canada, Banque mondiale, FMI, QS World University Rankings.*

@@ -1,0 +1,176 @@
+# États-Unis — Fiche Complète
+
+## 📍 Informations Générales
+
+| Pays           | États-Unis d'Amérique (USA)                   |
+|----------------|-----------------------------------------------|
+| Capitale       | Washington, D.C.                              |
+| Plus grande ville | New York                                   |
+| Surnoms        | "The Land of Liberty", "Uncle Sam"           |
+| Devise         | "In God We Trust"                             |
+| Hymne national | "The Star-Spangled Banner"                    |
+| Fête nationale | 4 juillet (Indépendance, 1776)                |
+| Forme de gouvernement | République fédérale présidentielle       |
+| Chef d'État    | Président Joe Biden (depuis 2021)             |
+| Chef du gouvernement | Président Joe Biden (chef de l’exécutif)  |
+| Fondation      | 4 juillet 1776 (Déclaration d'Indépendance)  |
+| Indépendance   | 4 juillet 1776 (Royaume-Uni)                   |
+| Superficie     | 9 833 520 km² (3e pays le plus grand au monde)|
+| Frontières     | Canada (8 891 km), Mexique (3 145 km), Russie (frontière maritime) |
+
+## 👥 Population
+
+| Année | Population (millions) | Croissance annuelle (%) | Taux de fécondité | Espérance de vie (ans) | Âge médian (ans) | Diversité ethnoculturelle | Immigration nette (millions/an) | Langues principales           |
+|-------|----------------------|------------------------|-------------------|-----------------------|------------------|---------------------------|-------------------------------|------------------------------|
+| 1950  | 152                  | -                      | 3,5               | 68,2                  | 30,2             | Majoritairement blanche   | 0,3                           | Anglais (officiel de facto)  |
+| 2000  | 282                  | 1,1                    | 2,1               | 76,8                  | 35,3             | Multiculturelle           | 1,0                           | Anglais, espagnol (2e langue)|
+| 2024  | 334                  | 0,7                    | 1,7               | 78,9                  | 38,5             | Très diversifiée          | 1,1                           | Anglais, espagnol, chinois, tagalog |
+
+- Les États-Unis sont un pays multiculturel avec plus de 40 millions d’immigrants, représentant environ 13% de la population totale.
+- La diversité ethnique comprend environ 60% de Blancs non hispaniques, 18% de Latinos, 13% d’Afro-Américains, 6% d’Asiatiques.
+
+## 📐 Géographie & Densité
+
+| Caractéristique       | Donnée                                         |
+|----------------------|------------------------------------------------|
+| Superficie           | 9 833 520 km²                                  |
+| Densité              | 34 hab./km² (faible comparé à l’UE ou Chine)  |
+| Frontières           | 12 036 km (Canada, Mexique, Russie maritime)  |
+| Littoral             | 19 924 km (Atlantique, Pacifique, Arctique, Golfe du Mexique) |
+| Point culminant      | Mont Denali (6 190 m, Alaska)                   |
+| Plus grand lac       | Lac Supérieur (82 100 km², partagé avec Canada)|
+| Plus long fleuve     | Mississippi-Missouri (6 275 km)                 |
+| Climat               | Varié : arctique en Alaska, désertique au sud-ouest, tempéré dans le centre-est |
+| Répartition urbaine  | 83% de la population vit en zones urbaines (2024) |
+
+## 🏛️ Économie
+
+| Indicateur            | Donnée                                         |
+|-----------------------|------------------------------------------------|
+| PIB (nominal) 2023    | 26 900 milliards USD (1er mondial)             |
+| PIB par habitant      | 80 000 USD (en PPA)                             |
+| Secteurs principaux   | Services (78%), Industrie (19%), Agriculture (3%) |
+| Inflation 2023        | 3,2%                                            |
+| Taux de chômage 2024  | 3,8%                                            |
+
+| Principales entreprises | Secteur             | CA (milliards USD) | Rang mondial |
+|------------------------|---------------------|--------------------|--------------|
+| Apple                  | Technologie         | 450                | 1            |
+| Walmart                | Distribution        | 600                | 1            |
+| Amazon                 | E-commerce/Tech     | 525                | 2            |
+| ExxonMobil             | Énergie             | 450                | 3            |
+| Microsoft              | Technologie         | 350                | 4            |
+
+### Défis économiques
+- Inflation post-pandémie et tensions sur les chaînes d’approvisionnement.
+- Inégalités de revenus importantes (Gini ~0,41).
+- Dépendance énergétique malgré transition vers les énergies renouvelables.
+- Dette publique élevée (~130% du PIB).
+
+## 🎓 Éducation
+
+| Université             | Classement mondial 2024 (QS) | Localisation      | Particularités                      |
+|-----------------------|------------------------------|-------------------|-----------------------------------|
+| Massachusetts Institute of Technology (MIT) | 1                            | Cambridge, MA     | Leader mondial en ingénierie et sciences |
+| Stanford University    | 3                            | Stanford, CA      | Forte en technologie et entrepreneuriat |
+| Harvard University     | 5                            | Cambridge, MA     | Plus ancienne université US, excellence en droit et médecine |
+| California Institute of Technology (Caltech) | 6                            | Pasadena, CA      | Recherche avancée en sciences physiques |
+| University of Chicago  | 10                           | Chicago, IL       | Réputée en économie et sciences sociales |
+
+- Dépenses publiques en éducation : environ 6% du PIB.
+- Plus de 1 million d’étudiants internationaux (2e pays d’accueil mondial).
+- Système éducatif décentralisé avec forte disparité entre États.
+
+## 🏥 Santé
+
+- Système de santé mixte : privé majoritaire, programmes publics (Medicare, Medicaid).
+- Espérance de vie : 78,9 ans (2024), en baisse récente liée à la pandémie et crises opioïdes.
+- Dépenses de santé : 18% du PIB (plus élevé au monde).
+- Accès aux soins inégal selon revenus et régions.
+
+| Hôpital                | Localisation      | Spécialités principales                   | Classement national 2023 |
+|-----------------------|-------------------|-------------------------------------------|-------------------------|
+| Mayo Clinic           | Rochester, MN     | Multidisciplinaire, recherche médicale   | 1                       |
+| Cleveland Clinic      | Cleveland, OH     | Cardiologie, chirurgie                     | 2                       |
+| Johns Hopkins Hospital| Baltimore, MD     | Neurologie, oncologie                      | 3                       |
+| Massachusetts General Hospital | Boston, MA | Soins intensifs, transplantation          | 4                       |
+| UCLA Medical Center   | Los Angeles, CA   | Médecine générale, cancérologie           | 5                       |
+
+### Défis
+- Coût élevé des soins.
+- Inégalités d’accès.
+- Crise des opioïdes et santé mentale.
+
+## 🏈 Sports & Loisirs
+
+| Ligue/Sport           | Popularité          | Niveau international                      | Athlètes célèbres                |
+|-----------------------|---------------------|------------------------------------------|---------------------------------|
+| NFL (Football américain) | Très élevée        | Championnats mondiaux (Super Bowl)       | Tom Brady, Patrick Mahomes      |
+| NBA (Basketball)      | Très élevée          | NBA, championnats mondiaux FIBA          | LeBron James, Stephen Curry     |
+| MLB (Baseball)        | Élevée               | World Series                             | Babe Ruth, Mike Trout           |
+| NHL (Hockey sur glace)| Moyenne              | Stanley Cup, championnats mondiaux       | Wayne Gretzky, Patrick Kane     |
+| Soccer (MLS)          | Croissante           | Coupe du Monde, Gold Cup                  | Christian Pulisic, Megan Rapinoe|
+
+- Les États-Unis ont remporté 117 médailles d’or aux Jeux Olympiques d’été 2020, leader mondial.
+- Sports universitaires très développés, source majeure de talents.
+
+## 🌳 Environnement & Parcs Nationaux
+
+- Plus de 60 parcs nationaux, dont Yellowstone (1er parc national au monde, 1872), Yosemite, Grand Canyon.
+- Faune : bisons, ours grizzlis, aigles, alligators.
+- Engagements : Accord de Paris (réintégré en 2021), objectifs de neutralité carbone d’ici 2050.
+- Problèmes : déforestation, pollution de l’air et de l’eau, incendies de forêt croissants liés au changement climatique.
+
+## 🚗 Transport
+
+| Mode de transport     | Données clés                                | Projets majeurs                         |
+|----------------------|--------------------------------------------|---------------------------------------|
+| Automobile           | 276 millions de véhicules, réseau routier de 6,6 millions km | Développement des véhicules électriques, infrastructures EV |
+| Ferroviaire          | 228 000 km (principalement fret)           | Amélioration du réseau Amtrak, projets de trains à grande vitesse (Californie) |
+| Aérien               | Plus de 13 500 aéroports, hubs majeurs (Atlanta, Chicago) | Modernisation des aéroports, développement des avions électriques |
+| Transports urbains   | Métros (NYC, DC, Chicago), bus              | Expansion des réseaux de transport en commun, projets verts |
+
+## 🌡️ Climat
+
+| Saison       | Température moyenne (°C) | Précipitations (mm) | Phénomènes extrêmes fréquents       |
+|--------------|--------------------------|--------------------|------------------------------------|
+| Hiver        | -5 à 10 (Nord), 10-20 (Sud) | 50-100             | Tempêtes de neige (Nord), ouragans (Sud-Est) |
+| Printemps    | 10-20                    | 70-120             | Tornades (Tornado Alley), inondations |
+| Été          | 20-35                    | 80-150             | Canicules, ouragans, feux de forêt |
+| Automne      | 10-25                    | 60-110             | Ouragans, tempêtes tropicales      |
+
+- Les États-Unis subissent régulièrement des phénomènes extrêmes : ouragans (Floride, Gulf Coast), tornades (Midwest), incendies (Californie).
+
+## 🏙️ Provinces/États/Régions Notables
+
+| État           | Capitale       | Population (millions) | PIB (milliards USD) | Particularités                       |
+|----------------|----------------|----------------------|--------------------|------------------------------------|
+| Californie     | Sacramento     | 39,2                 | 3 900              | 1er PIB d’État, tech, agriculture  |
+| Texas          | Austin         | 30,3                 | 2 300              | Énergie, industrie, croissance rapide |
+| New York       | Albany         | 19,8                 | 2 100              | Finance, médias, culture            |
+| Floride        | Tallahassee    | 22,2                 | 1 200              | Tourisme, retraités, ports          |
+| Illinois       | Springfield    | 12,5                 | 900                | Industrie, agriculture              |
+
+## 📊 Comparaison avec d'Autres Pays
+
+| Pays           | Population (millions) | PIB (milliards USD) | Superficie (km²) | Densité (hab/km²) | Espérance de vie (ans) |
+|----------------|----------------------|--------------------|------------------|-------------------|-----------------------|
+| États-Unis     | 334                  | 26 900             | 9 833 520        | 34                | 78,9                  |
+| Chine          | 1 425                | 19 500             | 9 597 000        | 148               | 77,3                  |
+| Inde           | 1 428                | 3 900              | 3 287 000        | 420               | 70,8                  |
+| Allemagne      | 84                   | 4 800              | 357 000          | 235               | 81,2                  |
+| France         | 68                   | 3 000              | 551 000          | 123               | 82,5                  |
+
+## 💡 Le Saviez-Vous ?
+
+- 🇺🇸 Les États-Unis ont inventé l’Internet (DARPA, années 1960).
+- 🎬 Hollywood est la capitale mondiale du cinéma.
+- 🏆 Détenteur du record de médailles olympiques d’été (plus de 2 900).
+- 📡 Premier pays à avoir envoyé un homme sur la Lune (Neil Armstrong, 1969).
+- 🎵 Musique : berceau du jazz, blues, rock’n’roll.
+- 🌉 Golden Gate Bridge (San Francisco) est l’un des ponts suspendus les plus célèbres au monde.
+- 🏈 Le Super Bowl est l’événement sportif le plus regardé aux États-Unis, avec plus de 100 millions de téléspectateurs.
+
+---
+
+Cette fiche offre un panorama complet et actualisé des États-Unis en 2024, couvrant tous les aspects géopolitiques, économiques, sociaux et culturels majeurs.

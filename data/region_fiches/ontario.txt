@@ -1,0 +1,107 @@
+# Ontario — Fiche Complète
+
+## 📍 Informations Générales
+
+| Critère               | Donnée                                                                                      |
+|-----------------------|--------------------------------------------------------------------------------------------|
+| Région                | Ontario                                                                                    |
+| Pays                  | Canada                                                                                     |
+| Capitale régionale    | Toronto                                                                                    |
+| Plus grande ville     | Toronto                                                                                    |
+| Statut administratif | Province                                                                                   |
+| Superficie            | 1 076 395 km²                                                                             |
+| Population            | 15,2 millions (2023)                                                                       |
+| Densité               | ~14,1 hab./km²                                                                            |
+| Langues officielles   | Anglais (de facto), français (statut officiel dans certaines régions)                      |
+| Devise/Symboles       | Devise : "Ut incepit Fidelis sic permanet" (Loyal she began, loyal she remains)  
+Symbole : Trèfle à trois feuilles, castor, feuille d’érable |
+
+---
+
+## 👥 Population & Démographie
+
+| Indicateur                  | Valeur / Donnée                                                    |
+|-----------------------------|-------------------------------------------------------------------|
+| Population 2000             | 11,4 millions                                                    |
+| Population 2010             | 12,9 millions                                                    |
+| Population 2020             | 14,7 millions                                                    |
+| Population 2023             | 15,2 millions                                                    |
+| Croissance annuelle moyenne| ~1,3 % (2010-2023)                                               |
+| Taux de fécondité          | 1,4 enfant/femme (2023)                                          |
+| Espérance de vie           | 82,3 ans (femmes 84,1 ; hommes 80,4) (2022)                     |
+| Âge médian                 | 41,5 ans                                                        |
+| Diversité ethnique         | 51 % des Ontariens sont issus de minorités visibles (2021)      |
+| Immigration               | 60 % des immigrants du Canada s’installent en Ontario (2023)    |
+| Langues parlées            | Anglais (94 %), français (4,5 %), autres (mandarin, pendjabi, arabe) |
+
+---
+
+## 📐 Géographie
+
+| Critère                  | Donnée                                                                                   |
+|--------------------------|-----------------------------------------------------------------------------------------|
+| Superficie               | 1 076 395 km²                                                                          |
+| Frontières               | Québec (est), Manitoba (ouest), États-Unis (sud), Baie d'Hudson (nord)                  |
+| Relief                   | Majoritairement plat à vallonné, Bouclier canadien au nord, Appalaches à l’extrême sud  |
+| Point culminant          | Ishpatina Ridge (693 m)                                                                |
+| Principaux cours d'eau   | Fleuve Saint-Laurent, rivière des Outaouais, rivière Niagara, lac Ontario, lac Supérieur|
+| Climat                   | Continental humide au sud, subarctique au nord                                        |
+| Parcs naturels           | Parc provincial Algonquin, Parc national de la Péninsule-Bruce, Parc provincial Killarney |
+
+---
+
+## 🏛️ Économie
+
+| Indicateur                  | Donnée / Description                                                                                   |
+|-----------------------------|-----------------------------------------------------------------------------------------------------|
+| PIB régional (2023)          | 900 milliards CAD (~40 % du PIB canadien)                                                           |
+| Principaux secteurs          | Services (75 %), industrie manufacturière (15 %), agriculture (2 %), ressources naturelles (3 %)    |
+| Industries principales       | Automobile (ex. Toyota, Ford), technologies de l’information (ex. Shopify), finance, aérospatial    |
+| Entreprises majeures         | Shopify, Magna International, Manulife, Ontario Power Generation                                   |
+| Défis économiques            | Transition énergétique, pénurie de main-d'œuvre qualifiée, dépendance à l’automobile               |
+| Relations économiques        | Premier exportateur canadien, forte intégration avec les États-Unis (NAFTA/USMCA), hub logistique  |
+
+---
+
+## 🎓 Éducation & Culture
+
+| Élément                     | Description                                                                                          |
+|----------------------------|--------------------------------------------------------------------------------------------------|
+| Principales universités    | Université de Toronto, Université York, Université McMaster, Université d’Ottawa                   |
+| Institutions notables      | Ontario College of Art and Design, Rotman School of Management                                   |
+| Faits culturels marquants  | Centre culturel multiculturel majeur, berceau du hockey sur glace, important patrimoine autochtone|
+| Patrimoine                | Forts historiques (Fort York), musées (ROM, AGO), sites UNESCO (Péninsule Bruce)                  |
+| Festivals                  | Festival international du film de Toronto (TIFF), Caribana, Festival de jazz de Toronto          |
+| Identité régionale        | Mélange urbain et rural, bilinguisme partiel, forte influence autochtone et immigration           |
+
+---
+
+## 🏥 Santé & Services
+
+| Élément                      | Donnée / Description                                                                                   |
+|-----------------------------|-----------------------------------------------------------------------------------------------------|
+| Système de santé régional   | Ontario Health (organisme provincial coordonnant les soins)                                         |
+| Espérance de vie            | 82,3 ans (2022)                                                                                      |
+| Principaux hôpitaux         | Toronto General Hospital, Sunnybrook Health Sciences Centre, Ottawa General Hospital                 |
+| Défis sanitaires            | Vieillissement de la population, accès aux soins en zones rurales, santé mentale                     |
+
+---
+
+## 🏙️ Principales Villes
+
+| Ville       | Population (2023) | Rôle économique                         | Note                              |
+|-------------|-------------------|---------------------------------------|----------------------------------|
+| Toronto     | 2,9 millions      | Centre financier, technologique, culturel | Métropole la plus peuplée du Canada |
+| Ottawa      | 1,1 million       | Capitale fédérale, administration publique | Centre politique national        |
+| Mississauga | 830 000           | Industrie, logistique, aérospatial    | Ville en forte croissance         |
+| Hamilton    | 580 000           | Industrie lourde, santé, éducation    | Réorientation vers les services   |
+| London      | 420 000           | Éducation, santé, services            | Important centre régional         |
+
+---
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** : Gestion de la croissance urbaine, crise du logement à Toronto, transition vers une économie verte, inégalités sociales.
+- **Projets d'infrastructure** : Extension du métro de Toronto (projet Ontario Line), développement des transports en commun à Ottawa, investissements dans les énergies renouvelables.
+- **Tendances démographiques** : Vieillissement progressif, augmentation continue de l’immigration, diversification ethnique accrue.
+- **Perspectives économiques** : Croissance soutenue dans les secteurs technologiques et financiers, développement des industries propres, renforcement des liens commerciaux internationaux, notamment avec les États-Unis et l’Asie-Pacifique.

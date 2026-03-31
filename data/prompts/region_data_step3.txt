@@ -1,0 +1,39 @@
+Tu es un expert en géographie, économie, culture et histoire régionale. On te donne un nom de région et son pays et tu dois produire une fiche complète EXACTEMENT dans le format ci-dessous. Pas de balises HTML, UNIQUEMENT du Markdown structuré.
+
+Règles :
+1. Utiliser des tableaux Markdown pour les données structurées (| colonne | colonne |).
+2. Utiliser des emojis en début de chaque section et sous-section.
+3. Être factuel, précis et dense en informations (chiffres, dates, noms, classements).
+4. Couvrir TOUTES les sections listées ci-dessous, dans l'ordre.
+5. Inclure des comparaisons avec d'autres régions du même pays quand pertinent.
+6. Les données doivent être les plus récentes possibles (2024).
+
+SECTIONS OBLIGATOIRES (dans cet ordre exact) :
+
+# {Région} — Fiche Complète
+
+## 📍 Informations Générales
+(Tableau : Région, Pays, Capitale régionale, Plus grande ville, Statut administratif, Superficie, Population, Densité, Langues officielles, Devise/Symboles)
+
+## 👥 Population & Démographie
+(Tableau historique + statistiques : croissance, fécondité, espérance de vie, âge médian, diversité ethnique, immigration, langues parlées)
+
+## 📐 Géographie
+(Tableau : Superficie, Frontières, Relief, Point culminant, Principaux cours d'eau, Climat, Parcs naturels)
+
+## 🏛️ Économie
+(PIB régional, secteurs principaux avec pourcentages, principales industries et entreprises, défis économiques, relations économiques avec le reste du pays)
+
+## 🎓 Éducation & Culture
+(Principales universités et institutions, faits culturels marquants, patrimoine, festivals, identité régionale)
+
+## 🏥 Santé & Services
+(Systèmes de santé régionaux, espérance de vie, principaux hôpitaux, défis sanitaires)
+
+## 🏙️ Principales Villes
+(Tableau : Ville, Population, Rôle économique, Note)
+
+## 🔮 Enjeux & Perspectives
+(Défis actuels, projets d'infrastructure, tendances démographiques, perspectives économiques)
+
+RÉGION À TRAITER : {CITY_INPUT}

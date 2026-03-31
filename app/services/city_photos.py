@@ -1226,3 +1226,429 @@ def link_existing_photo_to_annotation(
     )
     conn.commit()
     return {"success": True, "filename": new_filename}
+
+
+# ---------------------------------------------------------------------------
+# Region photo library (mirrors city photo library — no EXIF columns)
+# ---------------------------------------------------------------------------
+
+REGION_PHOTO_LIB_DIR = PROJECT_ROOT / "static" / "images" / "regions"
+
+
+def get_region_photos(conn: Any, region_slug: str) -> list[dict[str, Any]]:
+    """Return all photos for a region from DB."""
+    rows = conn.execute(
+        """SELECT p.photo_id, p.filename, p.caption, p.source_url, p.attribution,
+                  p.is_primary, p.created_at
+           FROM dim_region_photo p
+           JOIN dim_region r ON r.region_id = p.region_id
+           WHERE r.region_slug = ?
+           ORDER BY p.is_primary DESC, p.photo_id""",
+        (region_slug,),
+    ).fetchall()
+    return [
+        {
+            "photo_id": r["photo_id"],
+            "filename": r["filename"],
+            "photo_path": f"images/regions/{region_slug}/{r['filename']}",
+            "caption": r["caption"],
+            "source_url": r["source_url"],
+            "attribution": r["attribution"],
+            "is_primary": bool(r["is_primary"]),
+            "created_at": r["created_at"],
+        }
+        for r in rows
+    ]
+
+
+def save_region_photo_to_library(
+    conn: Any,
+    region_id: int,
+    region_slug: str,
+    file_bytes: bytes,
+    original_filename: str,
+    source_url: str = "",
+    attribution: str = "",
+    caption: str = "",
+    set_primary: bool = False,
+) -> dict[str, Any]:
+    """Save a photo into the per-region directory and register in dim_region_photo."""
+    suffix = Path(original_filename).suffix.lower()
+    if suffix not in ALLOWED_EXTENSIONS:
+        return {"success": False, "error": "Format non supporté. Utilisez JPG, PNG ou WebP."}
+
+    photo_dir = REGION_PHOTO_LIB_DIR / region_slug
+    photo_dir.mkdir(parents=True, exist_ok=True)
+    unique_name = f"{uuid.uuid4().hex[:12]}{suffix}"
+    dest = photo_dir / unique_name
+    dest.write_bytes(file_bytes)
+
+    if set_primary:
+        conn.execute("UPDATE dim_region_photo SET is_primary = 0 WHERE region_id = ?", (region_id,))
+
+    existing_count = conn.execute(
+        "SELECT COUNT(*) FROM dim_region_photo WHERE region_id = ?", (region_id,)
+    ).fetchone()[0]
+    if existing_count == 0:
+        set_primary = True
+
+    cursor = conn.execute(
+        """INSERT INTO dim_region_photo
+           (region_id, filename, caption, source_url, attribution, is_primary)
+           VALUES (?, ?, ?, ?, ?, ?) RETURNING photo_id""",
+        (region_id, unique_name, caption, source_url, attribution, 1 if set_primary else 0),
+    )
+    photo_id = cursor.fetchone()[0]
+    conn.commit()
+    return {"success": True, "photo_id": photo_id, "filename": unique_name}
+
+
+def delete_region_photo_from_library(conn: Any, photo_id: int, region_slug: str) -> bool:
+    """Delete a region photo from DB and disk."""
+    row = conn.execute(
+        "SELECT r.region_id, p.filename, p.is_primary "
+        "FROM dim_region_photo p "
+        "JOIN dim_region r ON r.region_id = p.region_id "
+        "WHERE p.photo_id = ? AND r.region_slug = ?",
+        (photo_id, region_slug),
+    ).fetchone()
+    if not row:
+        return False
+    photo_path = REGION_PHOTO_LIB_DIR / region_slug / row["filename"]
+    if photo_path.exists():
+        photo_path.unlink()
+    was_primary = bool(row["is_primary"])
+    region_id = row["region_id"]
+    conn.execute("DELETE FROM dim_region_photo WHERE photo_id = ?", (photo_id,))
+    if was_primary:
+        next_row = conn.execute(
+            "SELECT photo_id FROM dim_region_photo WHERE region_id = ? ORDER BY photo_id LIMIT 1",
+            (region_id,),
+        ).fetchone()
+        if next_row:
+            conn.execute(
+                "UPDATE dim_region_photo SET is_primary = 1 WHERE photo_id = ?",
+                (next_row["photo_id"],),
+            )
+    conn.commit()
+    return True
+
+
+def set_region_photo_primary(conn: Any, photo_id: int, region_id: int) -> None:
+    """Set a region photo as the primary."""
+    conn.execute("UPDATE dim_region_photo SET is_primary = 0 WHERE region_id = ?", (region_id,))
+    conn.execute("UPDATE dim_region_photo SET is_primary = 1 WHERE photo_id = ?", (photo_id,))
+    conn.commit()
+
+
+def save_annotation_photo_for_region(
+    conn: Any,
+    annotation_id: int,
+    image_url: str,
+    source_page: str = "",
+    region_slug: str = "",
+) -> dict[str, Any]:
+    """Download and save a photo for an annotation, also add it to the region photo library."""
+    result = download_web_image(image_url)
+    if not result:
+        return {"success": False, "error": "Impossible de télécharger l'image."}
+
+    file_bytes, ext = result
+    ANNOTATION_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+    filename = f"ann_{annotation_id}_{uuid.uuid4().hex[:8]}{ext}"
+    dest = ANNOTATION_PHOTO_DIR / filename
+    dest.write_bytes(file_bytes)
+
+    old = conn.execute(
+        "SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)
+    ).fetchone()
+    if old and old["photo_filename"]:
+        old_path = ANNOTATION_PHOTO_DIR / old["photo_filename"]
+        if old_path.exists():
+            old_path.unlink()
+
+    conn.execute(
+        "UPDATE dim_annotation SET photo_filename = ?, photo_source_url = ? WHERE annotation_id = ?",
+        (filename, source_page, annotation_id),
+    )
+
+    if region_slug:
+        import re as _re
+        ann_row = conn.execute(
+            "SELECT da.annotation_label, r.region_id "
+            "FROM dim_annotation da "
+            "JOIN fact_region_population frp ON frp.annotation_id = da.annotation_id "
+            "JOIN dim_region r ON r.region_id = frp.region_id "
+            "WHERE da.annotation_id = ? AND r.region_slug = ? LIMIT 1",
+            (annotation_id, region_slug),
+        ).fetchone()
+        if ann_row:
+            label = _re.sub(r'[\U00010000-\U0010ffff]', '', ann_row["annotation_label"]).strip()
+            save_region_photo_to_library(
+                conn,
+                region_id=ann_row["region_id"],
+                region_slug=region_slug,
+                file_bytes=file_bytes,
+                original_filename=f"annotation{ext}",
+                source_url=source_page,
+                attribution="Wikimedia Commons",
+                caption=label,
+            )
+
+    conn.commit()
+    return {"success": True, "filename": filename}
+
+
+def link_existing_region_photo_to_annotation(
+    conn: Any,
+    annotation_id: int,
+    region_slug: str,
+    photo_id: int,
+) -> dict[str, Any]:
+    """Link an existing region photo to an annotation by copying it."""
+    row = conn.execute(
+        "SELECT p.filename FROM dim_region_photo p "
+        "JOIN dim_region r ON r.region_id = p.region_id "
+        "WHERE p.photo_id = ? AND r.region_slug = ?",
+        (photo_id, region_slug),
+    ).fetchone()
+    if not row:
+        return {"success": False, "error": "Photo introuvable."}
+
+    src_path = REGION_PHOTO_LIB_DIR / region_slug / row["filename"]
+    if not src_path.exists():
+        return {"success": False, "error": "Fichier introuvable."}
+
+    ANNOTATION_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+    ext = Path(row["filename"]).suffix
+    new_filename = f"ann_{annotation_id}_{uuid.uuid4().hex[:8]}{ext}"
+    dest = ANNOTATION_PHOTO_DIR / new_filename
+    dest.write_bytes(src_path.read_bytes())
+
+    old = conn.execute(
+        "SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)
+    ).fetchone()
+    if old and old["photo_filename"]:
+        old_path = ANNOTATION_PHOTO_DIR / old["photo_filename"]
+        if old_path.exists():
+            old_path.unlink()
+
+    conn.execute(
+        "UPDATE dim_annotation SET photo_filename = ?, photo_source_url = '' WHERE annotation_id = ?",
+        (new_filename, annotation_id),
+    )
+    conn.commit()
+    return {"success": True, "filename": new_filename}
+
+
+# ---------------------------------------------------------------------------
+# Country photo library helpers
+# ---------------------------------------------------------------------------
+
+COUNTRY_PHOTO_LIB_DIR = PROJECT_ROOT / "static" / "images" / "countries"
+
+
+def get_country_photos(conn: Any, country_slug: str) -> list[dict[str, Any]]:
+    """Return all photos for a country from DB."""
+    rows = conn.execute(
+        """SELECT p.photo_id, p.filename, p.caption, p.source_url, p.attribution,
+                  p.is_primary, p.created_at
+           FROM dim_country_photo p
+           JOIN dim_country c ON c.country_id = p.country_id
+           WHERE c.country_slug = ?
+           ORDER BY p.is_primary DESC, p.photo_id""",
+        (country_slug,),
+    ).fetchall()
+    return [
+        {
+            "photo_id": r["photo_id"],
+            "filename": r["filename"],
+            "photo_path": f"images/countries/{country_slug}/{r['filename']}",
+            "caption": r["caption"],
+            "source_url": r["source_url"],
+            "attribution": r["attribution"],
+            "is_primary": bool(r["is_primary"]),
+            "created_at": r["created_at"],
+        }
+        for r in rows
+    ]
+
+
+def save_country_photo_to_library(
+    conn: Any,
+    country_id: int,
+    country_slug: str,
+    file_bytes: bytes,
+    original_filename: str,
+    source_url: str = "",
+    attribution: str = "",
+    caption: str = "",
+    set_primary: bool = False,
+) -> dict[str, Any]:
+    """Save a photo into the per-country directory and register in dim_country_photo."""
+    suffix = Path(original_filename).suffix.lower()
+    if suffix not in ALLOWED_EXTENSIONS:
+        return {"success": False, "error": "Format non supporté. Utilisez JPG, PNG ou WebP."}
+
+    photo_dir = COUNTRY_PHOTO_LIB_DIR / country_slug
+    photo_dir.mkdir(parents=True, exist_ok=True)
+    unique_name = f"{uuid.uuid4().hex[:12]}{suffix}"
+    dest = photo_dir / unique_name
+    dest.write_bytes(file_bytes)
+
+    if set_primary:
+        conn.execute("UPDATE dim_country_photo SET is_primary = 0 WHERE country_id = ?", (country_id,))
+
+    existing_count = conn.execute(
+        "SELECT COUNT(*) FROM dim_country_photo WHERE country_id = ?", (country_id,)
+    ).fetchone()[0]
+    if existing_count == 0:
+        set_primary = True
+
+    cursor = conn.execute(
+        """INSERT INTO dim_country_photo
+           (country_id, filename, caption, source_url, attribution, is_primary)
+           VALUES (?, ?, ?, ?, ?, ?) RETURNING photo_id""",
+        (country_id, unique_name, caption, source_url, attribution, 1 if set_primary else 0),
+    )
+    photo_id = cursor.fetchone()[0]
+    conn.commit()
+    return {"success": True, "photo_id": photo_id, "filename": unique_name}
+
+
+def delete_country_photo_from_library(conn: Any, photo_id: int, country_slug: str) -> bool:
+    """Delete a country photo from DB and disk."""
+    row = conn.execute(
+        "SELECT c.country_id, p.filename, p.is_primary "
+        "FROM dim_country_photo p "
+        "JOIN dim_country c ON c.country_id = p.country_id "
+        "WHERE p.photo_id = ? AND c.country_slug = ?",
+        (photo_id, country_slug),
+    ).fetchone()
+    if not row:
+        return False
+    photo_path = COUNTRY_PHOTO_LIB_DIR / country_slug / row["filename"]
+    if photo_path.exists():
+        photo_path.unlink()
+    was_primary = bool(row["is_primary"])
+    country_id = row["country_id"]
+    conn.execute("DELETE FROM dim_country_photo WHERE photo_id = ?", (photo_id,))
+    if was_primary:
+        next_row = conn.execute(
+            "SELECT photo_id FROM dim_country_photo WHERE country_id = ? ORDER BY photo_id LIMIT 1",
+            (country_id,),
+        ).fetchone()
+        if next_row:
+            conn.execute(
+                "UPDATE dim_country_photo SET is_primary = 1 WHERE photo_id = ?",
+                (next_row["photo_id"],),
+            )
+    conn.commit()
+    return True
+
+
+def set_country_photo_primary(conn: Any, photo_id: int, country_id: int) -> None:
+    """Set a country photo as the primary."""
+    conn.execute("UPDATE dim_country_photo SET is_primary = 0 WHERE country_id = ?", (country_id,))
+    conn.execute("UPDATE dim_country_photo SET is_primary = 1 WHERE photo_id = ?", (photo_id,))
+    conn.commit()
+
+
+def save_annotation_photo_for_country(
+    conn: Any,
+    annotation_id: int,
+    image_url: str,
+    source_page: str = "",
+    country_slug: str = "",
+) -> dict[str, Any]:
+    """Download and save a photo for an annotation, also add it to the country photo library."""
+    result = download_web_image(image_url)
+    if not result:
+        return {"success": False, "error": "Impossible de télécharger l'image."}
+
+    file_bytes, ext = result
+    ANNOTATION_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+    filename = f"ann_{annotation_id}_{uuid.uuid4().hex[:8]}{ext}"
+    dest = ANNOTATION_PHOTO_DIR / filename
+    dest.write_bytes(file_bytes)
+
+    old = conn.execute(
+        "SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)
+    ).fetchone()
+    if old and old["photo_filename"]:
+        old_path = ANNOTATION_PHOTO_DIR / old["photo_filename"]
+        if old_path.exists():
+            old_path.unlink()
+
+    conn.execute(
+        "UPDATE dim_annotation SET photo_filename = ?, photo_source_url = ? WHERE annotation_id = ?",
+        (filename, source_page, annotation_id),
+    )
+
+    if country_slug:
+        import re as _re
+        ann_row = conn.execute(
+            "SELECT da.annotation_label, c.country_id "
+            "FROM dim_annotation da "
+            "JOIN fact_country_population fcp ON fcp.annotation_id = da.annotation_id "
+            "JOIN dim_country c ON c.country_id = fcp.country_id "
+            "WHERE da.annotation_id = ? AND c.country_slug = ? LIMIT 1",
+            (annotation_id, country_slug),
+        ).fetchone()
+        if ann_row:
+            label = _re.sub(r'[\U00010000-\U0010ffff]', '', ann_row["annotation_label"]).strip()
+            save_country_photo_to_library(
+                conn,
+                country_id=ann_row["country_id"],
+                country_slug=country_slug,
+                file_bytes=file_bytes,
+                original_filename=f"annotation{ext}",
+                source_url=source_page,
+                attribution="Wikimedia Commons",
+                caption=label,
+            )
+
+    conn.commit()
+    return {"success": True, "filename": filename}
+
+
+def link_existing_country_photo_to_annotation(
+    conn: Any,
+    annotation_id: int,
+    country_slug: str,
+    photo_id: int,
+) -> dict[str, Any]:
+    """Link an existing country photo to an annotation by copying it."""
+    row = conn.execute(
+        "SELECT p.filename FROM dim_country_photo p "
+        "JOIN dim_country c ON c.country_id = p.country_id "
+        "WHERE p.photo_id = ? AND c.country_slug = ?",
+        (photo_id, country_slug),
+    ).fetchone()
+    if not row:
+        return {"success": False, "error": "Photo introuvable."}
+
+    src_path = COUNTRY_PHOTO_LIB_DIR / country_slug / row["filename"]
+    if not src_path.exists():
+        return {"success": False, "error": "Fichier introuvable."}
+
+    ANNOTATION_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+    ext = Path(row["filename"]).suffix
+    new_filename = f"ann_{annotation_id}_{uuid.uuid4().hex[:8]}{ext}"
+    dest = ANNOTATION_PHOTO_DIR / new_filename
+    dest.write_bytes(src_path.read_bytes())
+
+    old = conn.execute(
+        "SELECT photo_filename FROM dim_annotation WHERE annotation_id = ?", (annotation_id,)
+    ).fetchone()
+    if old and old["photo_filename"]:
+        old_path = ANNOTATION_PHOTO_DIR / old["photo_filename"]
+        if old_path.exists():
+            old_path.unlink()
+
+    conn.execute(
+        "UPDATE dim_annotation SET photo_filename = ?, photo_source_url = '' WHERE annotation_id = ?",
+        (new_filename, annotation_id),
+    )
+    conn.commit()
+    return {"success": True, "filename": new_filename}

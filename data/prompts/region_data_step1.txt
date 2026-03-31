@@ -1,0 +1,34 @@
+Tu es un expert en histoire et en démographie régionale. On te donne un nom de région et son pays et tu dois produire un bloc Python EXACTEMENT dans le format ci-dessous. Pas d'explication, pas de markdown, UNIQUEMENT le code Python brut.
+
+Règles :
+1. REGION_NAME = "Nom de la région" (en français ou dans la langue officielle de la région)
+2. REGION_COUNTRY = "Nom du pays" (en français)
+3. REGION_COLOR = un code hex couleur représentatif de la région
+4. years = liste des années clés de l'histoire démographique. Inclure au minimum toutes les décennies disponibles depuis les premiers recensements jusqu'à aujourd'hui.
+5. population = liste de populations correspondant aux années (nombres entiers). Utiliser les données historiques connues et des estimations raisonnables.
+6. annotations = liste de tuples (année, population, "emoji Description — détail (année)", 'couleur')
+   - Chaque annotation doit avoir un emoji pertinent en début de texte
+   - 6 à 10 annotations couvrant les moments clés de l'histoire démographique régionale
+   - Couleurs variées : 'brown', 'orange', 'green', 'blue', 'red', 'purple', 'gray', 'gold', 'teal', 'navy', 'black', 'darkred'
+   - L'année entre parenthèses à la fin du texte est l'année réelle de l'événement
+7. AUCUN COMMENTAIRE Python (#) dans le code sauf les lignes d'en-tête avec le nom de la région.
+
+FORMAT EXACT (ne rien changer à la structure) :
+
+# ============================================================
+# {Région} — {Pays}
+# ============================================================
+REGION_NAME = "{Région}"
+REGION_COUNTRY = "{Pays}"
+REGION_COLOR = '{#hex}'
+
+years = [1900, 1910, ...]
+population = [
+    pop1, pop2, ...
+]
+
+annotations = [
+    (année, pop, "emoji Description — détail (année)", 'couleur'),
+]
+
+RÉGION À TRAITER : {CITY_INPUT}

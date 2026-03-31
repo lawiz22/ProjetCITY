@@ -1,0 +1,112 @@
+# Québec — Fiche Complète
+
+## 📍 Informations Générales
+
+| Élément              | Donnée                                  |
+|----------------------|----------------------------------------|
+| Région               | Québec                                 |
+| Pays                 | Canada                                 |
+| Capitale régionale   | Québec (ville)                         |
+| Plus grande ville    | Montréal                              |
+| Statut administratif | Province (province canadienne)         |
+| Superficie           | 1 542 056 km² (2e plus grande province)|
+| Population           | 8 575 779 hab. (2023)                   |
+| Densité              | 5,6 hab./km²                           |
+| Langues officielles  | Français (officielle), Anglais (minoritaire) |
+| Devise/Symboles      | "Je me souviens" (devise), fleur de lys, drapeau bleu et blanc |
+
+## 👥 Population & Démographie
+
+| Année | Population (millions) | Croissance annuelle (%) | Taux de fécondité | Espérance de vie (années) | Âge médian | Diversité ethnique (%) | Immigration (%) | Langues parlées principales |
+|-------|----------------------|------------------------|-------------------|--------------------------|------------|-----------------------|-----------------|-----------------------------|
+| 2000  | 7,2                  | 0,8                    | 1,65              | 79,5                     | 37,2       | 85% francophones, 10% anglophones, 5% autres | 5,0             | Français (78%), Anglais (8%), autres (14%) |
+| 2010  | 7,9                  | 0,9                    | 1,60              | 81,0                     | 40,1       | 80% francophones, 12% anglophones, 8% autres | 6,5             | Français (77%), Anglais (9%), autres (14%) |
+| 2020  | 8,5                  | 1,0                    | 1,53              | 82,3                     | 42,5       | 75% francophones, 13% anglophones, 12% autres | 8,0             | Français (75%), Anglais (10%), autres (15%) |
+| 2023  | 8,58                 | 1,1                    | 1,50              | 82,5                     | 43,0       | 74% francophones, 13% anglophones, 13% autres | 8,5             | Français (74%), Anglais (11%), autres (15%) |
+
+- La population du Québec est la deuxième plus importante du Canada après l'Ontario.
+- Le taux de fécondité est inférieur au seuil de renouvellement (2,1).
+- L'immigration est un moteur clé de la croissance démographique, avec une forte diversité culturelle notamment à Montréal.
+- L'âge médian est en hausse, reflet d'un vieillissement progressif.
+
+## 📐 Géographie
+
+| Élément            | Donnée                                                                                 |
+|--------------------|---------------------------------------------------------------------------------------|
+| Superficie         | 1 542 056 km²                                                                         |
+| Frontières         | Ontario (ouest), Nouveau-Brunswick (est), Terre-Neuve-et-Labrador (nord-est maritime), États-Unis (sud) |
+| Relief             | Bouclier canadien, Appalaches au sud-est, plaines du Saint-Laurent                    |
+| Point culminant    | Mont d'Iberville (1 652 m) dans les Monts Torngat                                    |
+| Principaux cours d'eau | Fleuve Saint-Laurent, Rivière des Outaouais, Rivière Saguenay                       |
+| Climat             | Continental humide au sud, subarctique au nord; hivers longs et froids, étés doux    |
+| Parcs naturels     | Parc national de la Jacques-Cartier, Parc national du Mont-Tremblant, Parc national de la Gaspésie |
+
+- Le fleuve Saint-Laurent est un axe vital économique et historique.
+- Le relief est marqué par une grande diversité, des montagnes aux vastes forêts boréales.
+- Le climat influence fortement les activités économiques, notamment l’agriculture et le tourisme.
+
+## 🏛️ Économie
+
+| Élément                    | Donnée                                                                                   |
+|----------------------------|-----------------------------------------------------------------------------------------|
+| PIB régional               | 460 milliards CAD (2023), 20% du PIB canadien                                           |
+| Principaux secteurs        | Services (75%), Industrie manufacturière (12%), Agriculture (2%), Ressources naturelles (11%) |
+| Principales industries     | Aérospatiale (Bombardier), Technologies de l'information (CGI), Pharmaceutique (Pfizer), Agroalimentaire |
+| Entreprises majeures       | Bombardier, SNC-Lavalin, Couche-Tard, CGI, Cascades                                     |
+| Défis économiques          | Vieillissement de la population active, dépendance aux exportations, transition énergétique |
+| Relations économiques      | Forte intégration avec l’Ontario et les États-Unis, exportations vers USA et UE          |
+
+- Le Québec est un leader canadien dans l’aérospatiale et les technologies propres.
+- Montréal est un pôle financier et technologique majeur au Canada.
+- La province investit dans la transition vers une économie verte et numérique.
+
+## 🎓 Éducation & Culture
+
+| Élément                  | Donnée                                                                                   |
+|--------------------------|-----------------------------------------------------------------------------------------|
+| Universités principales  | Université de Montréal, Université Laval, McGill University, Université de Sherbrooke   |
+| Institutions notables    | INRS, HEC Montréal, École Polytechnique de Montréal                                     |
+| Faits culturels marquants| Siège de la Révolution tranquille (1960-1980), berceau de la littérature francophone nord-américaine |
+| Patrimoine               | Vieux-Québec (UNESCO), Basilique Notre-Dame, Château Frontenac                         |
+| Festivals                | Festival de Jazz de Montréal, Carnaval de Québec, Festival Juste pour rire             |
+| Identité régionale       | Forte identité francophone, culture distincte au sein du Canada, valorisation de la langue française |
+
+- Le système d’éducation est bilingue mais majoritairement francophone.
+- Le Québec est reconnu pour son dynamisme culturel et artistique.
+- La province joue un rôle clé dans la francophonie internationale.
+
+## 🏥 Santé & Services
+
+| Élément                  | Donnée                                                                                   |
+|--------------------------|-----------------------------------------------------------------------------------------|
+| Système de santé         | Régime public universel (RAMQ), accès aux soins primaires et spécialisés               |
+| Espérance de vie         | 82,5 ans (2023)                                                                         |
+| Principaux hôpitaux     | Centre hospitalier de l’Université de Montréal (CHUM), Hôpital général juif, CHU de Québec |
+| Défis sanitaires        | Vieillissement, maladies chroniques, accès aux soins en régions éloignées              |
+
+- Le Québec dispose d’un système de santé performant mais confronté à des pénuries de personnel.
+- Les soins en zones rurales restent un enjeu majeur.
+- La province investit dans la télémédecine et la prévention.
+
+## 🏙️ Principales Villes
+
+| Ville       | Population (2023) | Rôle économique                      | Note (importance)          |
+|-------------|-------------------|------------------------------------|---------------------------|
+| Montréal    | 1 780 000         | Centre financier, technologique, culturel | Très élevée               |
+| Québec      | 550 000           | Capitale politique, tourisme       | Élevée                    |
+| Laval       | 450 000           | Industrie, banlieue résidentielle  | Moyenne                   |
+| Gatineau    | 290 000           | Administration fédérale, services  | Moyenne                   |
+| Longueuil   | 250 000           | Industrie, banlieue résidentielle  | Moyenne                   |
+
+- Montréal domine l’économie et la démographie provinciale.
+- Québec est un centre administratif et touristique majeur.
+- Laval et Gatineau connaissent une croissance rapide liée à la proximité de Montréal et Ottawa.
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels :** Vieillissement démographique, pénurie de main-d’œuvre qualifiée, tensions linguistiques, transition écologique.
+- **Projets d’infrastructure :** Réseau express métropolitain (REM) à Montréal, modernisation des infrastructures routières, développement des transports en commun.
+- **Tendances démographiques :** Croissance modérée, augmentation de la diversité culturelle, vieillissement accru.
+- **Perspectives économiques :** Croissance dans les secteurs technologiques, énergies renouvelables, industries créatives; maintien d’une forte intégration commerciale avec les États-Unis et l’UE.
+
+Le Québec reste une province clé du Canada, alliant richesse culturelle et dynamisme économique, tout en devant relever des défis sociaux et environnementaux majeurs pour assurer sa prospérité future.

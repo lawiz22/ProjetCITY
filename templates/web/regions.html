@@ -1,0 +1,316 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>Annuaire des régions</h2>
+            <span id="dir-count">{{ regions|length }} région{% if regions|length != 1 %}s{% endif %}</span>
+        </div>
+        <div class="dir-controls">
+            <!-- Inline filters -->
+            <div class="dir-filter">
+                <input type="text" id="dir-filter-search" placeholder="Rechercher une région…">
+            </div>
+            <!-- Sort -->
+            <div class="dir-sort">
+                <label for="dir-sort-select">Trier par</label>
+                <select id="dir-sort-select">
+                    <option value="name-asc">Nom A → Z</option>
+                    <option value="name-desc">Nom Z → A</option>
+                    <option value="pop-desc">Population ↓</option>
+                    <option value="pop-asc">Population ↑</option>
+                    <option value="country-asc">Pays A → Z</option>
+                </select>
+            </div>
+            <!-- View switcher -->
+            <div class="view-switcher" role="group" aria-label="Mode d'affichage">
+                <a class="secondary-button inline-button view-mode-button view-mode-button-large {% if view_mode == 'large' %}is-active{% endif %}" href="{{ url_for('web.region_directory', view='large') }}" aria-label="Vue gros bloc" title="Vue gros bloc">
+                    <span class="view-mode-icon view-mode-large" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-medium {% if view_mode == 'medium' %}is-active{% endif %}" href="{{ url_for('web.region_directory', view='medium') }}" aria-label="Vue moyen bloc" title="Vue moyen bloc">
+                    <span class="view-mode-icon view-mode-medium" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-small {% if view_mode == 'small' %}is-active{% endif %}" href="{{ url_for('web.region_directory', view='small') }}" aria-label="Vue petit bloc" title="Vue petit bloc">
+                    <span class="view-mode-icon view-mode-small" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-compact {% if view_mode == 'compact' %}is-active{% endif %}" href="{{ url_for('web.region_directory', view='compact') }}" aria-label="Vue compacte" title="Vue compacte">
+                    <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination top -->
+    <div class="dir-pager" id="dir-pager-top">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Régions par page:</span>
+            <select id="dir-per-page-select">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Toutes</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="dir-pager-info-top"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    <div class="city-grid city-grid-photo city-grid-{{ view_mode }}" id="dir-grid">
+        {% for region in regions %}
+        <div class="city-card-wrap" style="position:relative;" data-region-name="{{ region.region_name }}" data-region-country="{{ region.country_name }}" data-region-pop="{{ region.latest_population or 0 }}">
+        <a class="city-card city-card-photo city-card-{{ view_mode }}"
+           href="{{ url_for('web.region_detail', region_slug=region.region_slug) }}">
+            <div class="city-card-media">
+                {% if region.card_image %}
+                <img src="{{ url_for('static', filename=region.card_image) }}" alt="{{ region.region_name }}" loading="lazy" style="{% if region.card_image_type == 'flag' %}object-fit: contain; background:#f4f4f4;{% else %}object-fit: cover;{% endif %}">
+                {% else %}
+                <div style="background: {{ region.region_color or '#2f6fed' }}; width:100%; height:100%;"></div>
+                {% endif %}
+                <div class="city-card-overlay"></div>
+                <div class="city-card-heading">
+                    <span class="city-dot" style="background: {{ region.region_color or '#2f6fed' }}"></span>
+                    <div class="city-card-heading-copy">
+                        <strong>{{ region.region_name }}</strong>
+                        <small style="opacity:.8;">{{ region.country_name }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="city-card-body">
+                <ul class="city-card-facts">
+                    <li>
+                        <span>Population récente</span>
+                        <strong>
+                            {% if region.latest_population %}
+                                {{ '{:,}'.format(region.latest_population).replace(',', ' ') }} en {{ region.latest_year }}
+                            {% else %}
+                                n.d.
+                            {% endif %}
+                        </strong>
+                    </li>
+                    <li>
+                        <span>Pic historique</span>
+                        <strong>
+                            {% if region.peak_population %}
+                                {{ '{:,}'.format(region.peak_population).replace(',', ' ') }} en {{ region.peak_year }}
+                            {% else %}
+                                n.d.
+                            {% endif %}
+                        </strong>
+                    </li>
+                    <li>
+                        <span>Données depuis</span>
+                        <strong>{{ region.first_year or '—' }}</strong>
+                    </li>
+                </ul>
+            </div>
+        </a>
+        <button type="button" class="region-card-delete-btn"
+                data-region-slug="{{ region.region_slug }}"
+                data-region-name="{{ region.region_name }}"
+                title="Supprimer {{ region.region_name }}"
+                style="position:absolute;top:6px;right:6px;z-index:10;background:rgba(231,76,60,.85);border:none;border-radius:50%;width:26px;height:26px;color:#fff;font-size:12px;cursor:pointer;display:none;line-height:1;padding:0;">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination bottom -->
+    <div class="dir-pager" id="dir-pager-bottom">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Régions par page:</span>
+            <select class="dir-per-page-mirror">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Toutes</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="dir-pager-info-bottom"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+</section>
+
+<!-- Directory sort, filter & pagination JS -->
+<script>
+(function() {
+    var grid = document.getElementById('dir-grid');
+    var sortSelect = document.getElementById('dir-sort-select');
+    var perPageSelect = document.getElementById('dir-per-page-select');
+    var countSpan = document.getElementById('dir-count');
+    var searchInput = document.getElementById('dir-filter-search');
+    if (!grid || !sortSelect || !perPageSelect) return;
+
+    var mirrors = document.querySelectorAll('.dir-per-page-mirror');
+    mirrors.forEach(function(m) {
+        m.value = perPageSelect.value;
+        m.addEventListener('change', function() {
+            perPageSelect.value = m.value;
+            currentPage = 1;
+            render();
+        });
+    });
+
+    var allCards = Array.prototype.slice.call(grid.querySelectorAll('.city-card-wrap'));
+    var filtered = allCards.slice();
+    var sorted = allCards.slice();
+    var currentPage = 1;
+
+    function applyFilters() {
+        var search = searchInput.value.trim().toLowerCase();
+        filtered = allCards.filter(function(c) {
+            if (search) {
+                var name = (c.dataset.regionName || '').toLowerCase();
+                var country = (c.dataset.regionCountry || '').toLowerCase();
+                if (name.indexOf(search) === -1 && country.indexOf(search) === -1) return false;
+            }
+            return true;
+        });
+        doSort(true);
+    }
+
+    var searchTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilters, 200);
+    });
+
+    function getPerPage() {
+        var v = perPageSelect.value;
+        return v === 'all' ? sorted.length : parseInt(v, 10);
+    }
+
+    function tp() {
+        return Math.max(1, Math.ceil(sorted.length / getPerPage()));
+    }
+
+    function doSort(resetPage) {
+        var val = sortSelect.value;
+        var field = val.split('-')[0];
+        var dir = val.split('-')[1];
+        sorted = filtered.slice();
+        sorted.sort(function(a, b) {
+            if (field === 'name') {
+                var va = (a.dataset.regionName || '').toLowerCase();
+                var vb = (b.dataset.regionName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else if (field === 'country') {
+                var va = (a.dataset.regionCountry || '').toLowerCase();
+                var vb = (b.dataset.regionCountry || '').toLowerCase();
+                return va.localeCompare(vb);
+            } else {
+                var va = parseInt(a.dataset.regionPop, 10) || 0;
+                var vb = parseInt(b.dataset.regionPop, 10) || 0;
+                return dir === 'asc' ? va - vb : vb - va;
+            }
+        });
+        if (resetPage) currentPage = 1;
+        render();
+    }
+
+    function render() {
+        var pp = getPerPage();
+        var total = tp();
+        if (currentPage > total) currentPage = total;
+        var start = (currentPage - 1) * pp;
+        var end = start + pp;
+
+        allCards.forEach(function(c) { c.style.display = 'none'; });
+        sorted.slice(start, end).forEach(function(c) { c.style.display = ''; });
+        sorted.forEach(function(c) { grid.appendChild(c); });
+
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+
+        var plural = sorted.length !== 1 ? 's' : '';
+        countSpan.textContent = sorted.length + ' région' + plural;
+
+        var infoText = 'Page ' + currentPage + ' de ' + total;
+        document.querySelectorAll('.dir-pager-info').forEach(function(el) { el.textContent = infoText; });
+
+        var isFirst = currentPage <= 1;
+        var isLast = currentPage >= total;
+        var showPager = total > 1;
+
+        document.querySelectorAll('.dir-pager').forEach(function(pager) {
+            pager.style.display = showPager ? '' : 'none';
+            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+                var d = btn.dataset.dir;
+                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
+            });
+        });
+    }
+
+    document.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var total = tp();
+            switch (btn.dataset.dir) {
+                case 'first': currentPage = 1; break;
+                case 'prev':  if (currentPage > 1) currentPage--; break;
+                case 'next':  if (currentPage < total) currentPage++; break;
+                case 'last':  currentPage = total; break;
+            }
+            render();
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    sortSelect.addEventListener('change', function() { doSort(true); });
+    perPageSelect.addEventListener('change', function() {
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+        currentPage = 1;
+        render();
+    });
+
+    doSort(false);
+})();
+</script>
+
+<!-- Region delete from list JS -->
+<script>
+(function(){
+    // Show delete buttons on card hover
+    document.querySelectorAll('.city-card-wrap').forEach(function(wrap) {
+        var btn = wrap.querySelector('.region-card-delete-btn');
+        if (!btn) return;
+        wrap.addEventListener('mouseenter', function(){ btn.style.display = ''; });
+        wrap.addEventListener('mouseleave', function(){ btn.style.display = 'none'; });
+        btn.addEventListener('click', function(e){
+            e.stopPropagation(); e.preventDefault();
+            var slug = btn.dataset.regionSlug;
+            var name = btn.dataset.regionName;
+            if (!confirm('Supprimer la région « ' + name + ' » ? Cette action est irréversible.')) return;
+            btn.disabled = true;
+            btn.textContent = '…';
+            fetch('/regions/' + encodeURIComponent(slug) + '/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }).then(function(r){ return r.json(); })
+              .then(function(data){
+                if (data.success) {
+                    wrap.style.transition = 'opacity .3s';
+                    wrap.style.opacity = '0';
+                    setTimeout(function(){ wrap.remove(); }, 350);
+                } else {
+                    alert(data.error || 'Erreur lors de la suppression.');
+                    btn.disabled = false; btn.textContent = '✕';
+                }
+              }).catch(function(){
+                alert('Erreur réseau.');
+                btn.disabled = false; btn.textContent = '✕';
+              });
+        });
+    });
+})();
+</script>
+{% endblock %}
