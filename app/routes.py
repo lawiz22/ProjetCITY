@@ -2043,6 +2043,388 @@ def sql_lab_view_delete(view_id: str) -> Response:
 
 
 # ---------------------------------------------------------------------------
+# Database Backup / Restore
+# ---------------------------------------------------------------------------
+
+# Tables in dependency order (parents before children).
+_BACKUP_TABLES: list[dict] = [
+    {"name": "dim_annotation", "pk": "annotation_id",
+     "conflict": "(annotation_id)"},
+    {"name": "ref_population", "pk": "ref_pop_id",
+     "conflict": "(country, region, year)"},
+    {"name": "ref_city", "pk": "ref_city_id",
+     "conflict": "(city_name, region, country)"},
+    {"name": "dim_city", "pk": "city_id",
+     "conflict": "(city_slug)"},
+    {"name": "dim_time", "pk": "time_id",
+     "conflict": "(year)"},
+    {"name": "dim_city_period_detail", "pk": "period_detail_id",
+     "conflict": "(city_id, period_order, source_file)"},
+    {"name": "dim_city_period_detail_item", "pk": "period_detail_item_id",
+     "conflict": "(period_detail_id, item_order)"},
+    {"name": "fact_city_population", "pk": "population_id",
+     "conflict": "(city_id, year)"},
+    {"name": "dim_city_fiche", "pk": "fiche_id",
+     "conflict": "(city_id)"},
+    {"name": "dim_city_fiche_section", "pk": "section_id",
+     "conflict": "(fiche_id, section_order)"},
+    {"name": "dim_city_photo", "pk": "photo_id", "conflict": None},
+    {"name": "dim_event", "pk": "event_id",
+     "conflict": "(event_slug)"},
+    {"name": "dim_event_location", "pk": "event_location_id", "conflict": None},
+    {"name": "dim_event_photo", "pk": "event_photo_id", "conflict": None},
+    {"name": "dim_country", "pk": "country_id",
+     "conflict": "(country_slug)"},
+    {"name": "fact_country_population", "pk": "country_pop_id",
+     "conflict": "(country_id, year)"},
+    {"name": "dim_country_photo", "pk": "photo_id", "conflict": None},
+    {"name": "dim_region", "pk": "region_id",
+     "conflict": "(region_slug)"},
+    {"name": "fact_region_population", "pk": "region_pop_id",
+     "conflict": "(region_id, year)"},
+    {"name": "dim_region_period_detail", "pk": "region_period_id",
+     "conflict": "(region_id, period_order)"},
+    {"name": "dim_region_period_detail_item", "pk": "item_id",
+     "conflict": "(region_period_id, item_order)"},
+    {"name": "dim_region_photo", "pk": "photo_id", "conflict": None},
+    {"name": "raw_document", "pk": "document_id",
+     "conflict": "(entity_type, entity_slug, document_kind)"},
+    {"name": "app_setting", "pk": "setting_key",
+     "conflict": "(setting_key)"},
+]
+
+
+def _serialize_value(value: object) -> object:
+    """Make a value JSON-serialisable."""
+    if value is None or isinstance(value, (int, float, str, bool)):
+        return value
+    if isinstance(value, (datetime,)):
+        return value.isoformat()
+    if isinstance(value, bytes):
+        import base64
+        return {"__bytes__": base64.b64encode(value).decode()}
+    return str(value)
+
+
+@web.route("/sql-lab/backup/export")
+def sql_lab_backup_export() -> Response:
+    """Export the entire database as a JSON file for backup."""
+    import json as _json
+    from .db import get_db
+
+    conn = get_db()
+    backup: dict = {"_meta": {
+        "exported_at": datetime.now().isoformat(),
+        "backend": current_app.config.get("DATABASE_BACKEND", "unknown"),
+        "version": 1,
+    }, "tables": {}}
+
+    for tdef in _BACKUP_TABLES:
+        table = tdef["name"]
+        try:
+            rows = conn.execute(f"SELECT * FROM {table}").fetchall()
+            backup["tables"][table] = [
+                {k: _serialize_value(v) for k, v in dict(r).items()}
+                for r in rows
+            ]
+        except Exception:
+            backup["tables"][table] = []
+
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    payload = _json.dumps(backup, ensure_ascii=False, indent=1, default=str)
+    resp = Response(payload, mimetype="application/json; charset=utf-8")
+    resp.headers["Content-Disposition"] = f"attachment; filename=projetcity-backup-{timestamp}.json"
+    return resp
+
+
+@web.route("/sql-lab/backup/import", methods=["POST"])
+def sql_lab_backup_import() -> Response:
+    """Import a JSON backup, inserting only missing rows (ON CONFLICT DO NOTHING).
+    Then validate FK relationships and report issues."""
+    import json as _json
+    from .db import get_db
+
+    uploaded = request.files.get("backup_file")
+    if not uploaded or not uploaded.filename:
+        flash("Aucun fichier sélectionné.", "error")
+        return redirect(url_for("web.sql_lab"))
+
+    try:
+        raw = uploaded.read().decode("utf-8")
+        backup = _json.loads(raw)
+    except Exception as exc:
+        flash(f"Fichier JSON invalide: {exc}", "error")
+        return redirect(url_for("web.sql_lab"))
+
+    if "tables" not in backup:
+        flash("Format de backup invalide — clé 'tables' manquante.", "error")
+        return redirect(url_for("web.sql_lab"))
+
+    conn = get_db()
+    report: list[str] = []
+    total_inserted = 0
+    is_pg = current_app.config.get("DATABASE_BACKEND") == "postgresql"
+
+    for tdef in _BACKUP_TABLES:
+        table = tdef["name"]
+        rows = backup["tables"].get(table, [])
+        if not rows:
+            continue
+
+        conflict_clause = tdef.get("conflict")
+        inserted = 0
+
+        for idx, row in enumerate(rows):
+            # Restore bytes values
+            for k, v in row.items():
+                if isinstance(v, dict) and "__bytes__" in v:
+                    import base64
+                    row[k] = base64.b64decode(v["__bytes__"])
+
+            columns = list(row.keys())
+            placeholders = ", ".join("?" for _ in columns)
+            col_list = ", ".join(columns)
+
+            if conflict_clause:
+                sql = f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT {conflict_clause} DO NOTHING"
+            else:
+                sql = f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT DO NOTHING"
+
+            sp_name = f"sp_{table}_{idx}"
+            try:
+                if is_pg:
+                    conn.execute(f"SAVEPOINT {sp_name}")
+                cur = conn.execute(sql, list(row.values()))
+                if hasattr(cur, "rowcount") and cur.rowcount > 0:
+                    inserted += 1
+                if is_pg:
+                    conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+            except Exception:
+                if is_pg:
+                    conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
+
+        if inserted:
+            report.append(f"{table}: +{inserted}/{len(rows)}")
+            total_inserted += inserted
+        elif rows:
+            report.append(f"{table}: 0/{len(rows)} (déjà présent)")
+
+    conn.commit()
+
+    # --- Validate FK relationships ---
+    fk_checks = [
+        ("fact_city_population", "city_id", "dim_city", "city_id"),
+        ("fact_city_population", "time_id", "dim_time", "time_id"),
+        ("fact_city_population", "annotation_id", "dim_annotation", "annotation_id"),
+        ("dim_city_period_detail", "city_id", "dim_city", "city_id"),
+        ("dim_city_period_detail_item", "period_detail_id", "dim_city_period_detail", "period_detail_id"),
+        ("dim_city_fiche", "city_id", "dim_city", "city_id"),
+        ("dim_city_fiche_section", "fiche_id", "dim_city_fiche", "fiche_id"),
+        ("dim_city_photo", "city_id", "dim_city", "city_id"),
+        ("fact_country_population", "country_id", "dim_country", "country_id"),
+        ("fact_country_population", "time_id", "dim_time", "time_id"),
+        ("dim_country_photo", "country_id", "dim_country", "country_id"),
+        ("fact_region_population", "region_id", "dim_region", "region_id"),
+        ("fact_region_population", "time_id", "dim_time", "time_id"),
+        ("dim_region_period_detail", "region_id", "dim_region", "region_id"),
+        ("dim_region_period_detail_item", "region_period_id", "dim_region_period_detail", "region_period_id"),
+        ("dim_region_photo", "region_id", "dim_region", "region_id"),
+        ("dim_event_location", "event_id", "dim_event", "event_id"),
+        ("dim_event_photo", "event_id", "dim_event", "event_id"),
+    ]
+
+    fk_issues: list[str] = []
+    for child_table, child_col, parent_table, parent_col in fk_checks:
+        try:
+            orphans = conn.execute(
+                f"""SELECT COUNT(*) FROM {child_table} c
+                    WHERE c.{child_col} IS NOT NULL
+                      AND NOT EXISTS (
+                          SELECT 1 FROM {parent_table} p
+                          WHERE p.{parent_col} = c.{child_col}
+                      )""",
+            ).fetchone()[0]
+            if orphans > 0:
+                fk_issues.append(f"{child_table}.{child_col} → {parent_table}: {orphans} orphelin(s)")
+        except Exception:
+            pass
+
+    summary_parts = []
+    if total_inserted == 0:
+        summary_parts.append("Aucune nouvelle donnée — la BD est déjà à jour")
+    else:
+        summary_parts.append(f"{total_inserted} ligne(s) insérée(s)")
+    if report:
+        summary_parts.append("Détail: " + " | ".join(report))
+    if fk_issues:
+        summary_parts.append("⚠️ FK: " + " | ".join(fk_issues))
+    else:
+        summary_parts.append("✓ Toutes les relations FK sont valides")
+
+    level = "success"
+    if fk_issues:
+        level = "warning"
+    elif total_inserted == 0:
+        level = "success"
+
+    flash(" — ".join(summary_parts), level)
+    return redirect(url_for("web.sql_lab"))
+
+
+@web.route("/sql-lab/backup/import-stream", methods=["POST"])
+def sql_lab_backup_import_stream() -> Response:
+    """Streaming import: sends SSE events so the frontend shows live progress."""
+    import json as _json
+
+    uploaded = request.files.get("backup_file")
+    if not uploaded or not uploaded.filename:
+        def _err():
+            yield 'data: ' + _json.dumps({"type": "error", "message": "Aucun fichier sélectionné."}) + '\n\n'
+        return Response(_err(), mimetype="text/event-stream")
+
+    try:
+        raw = uploaded.read().decode("utf-8")
+        backup = _json.loads(raw)
+    except Exception as exc:
+        def _err2():
+            yield 'data: ' + _json.dumps({"type": "error", "message": f"Fichier JSON invalide: {exc}"}) + '\n\n'
+        return Response(_err2(), mimetype="text/event-stream")
+
+    if "tables" not in backup:
+        def _err3():
+            yield 'data: ' + _json.dumps({"type": "error", "message": "Format invalide — clé 'tables' manquante."}) + '\n\n'
+        return Response(_err3(), mimetype="text/event-stream")
+
+    # Capture what we need before the request context disappears
+    db_backend = current_app.config.get("DATABASE_BACKEND", "sqlite")
+    db_url = current_app.config.get("DATABASE_URL", "")
+    db_path = current_app.config.get("DATABASE_PATH", "")
+    is_pg = db_backend == "postgresql"
+
+    fk_checks = [
+        ("fact_city_population", "city_id", "dim_city", "city_id"),
+        ("fact_city_population", "time_id", "dim_time", "time_id"),
+        ("fact_city_population", "annotation_id", "dim_annotation", "annotation_id"),
+        ("dim_city_period_detail", "city_id", "dim_city", "city_id"),
+        ("dim_city_period_detail_item", "period_detail_id", "dim_city_period_detail", "period_detail_id"),
+        ("dim_city_fiche", "city_id", "dim_city", "city_id"),
+        ("dim_city_fiche_section", "fiche_id", "dim_city_fiche", "fiche_id"),
+        ("dim_city_photo", "city_id", "dim_city", "city_id"),
+        ("fact_country_population", "country_id", "dim_country", "country_id"),
+        ("fact_country_population", "time_id", "dim_time", "time_id"),
+        ("dim_country_photo", "country_id", "dim_country", "country_id"),
+        ("fact_region_population", "region_id", "dim_region", "region_id"),
+        ("fact_region_population", "time_id", "dim_time", "time_id"),
+        ("dim_region_period_detail", "region_id", "dim_region", "region_id"),
+        ("dim_region_period_detail_item", "region_period_id", "dim_region_period_detail", "region_period_id"),
+        ("dim_region_photo", "region_id", "dim_region", "region_id"),
+        ("dim_event_location", "event_id", "dim_event", "event_id"),
+        ("dim_event_photo", "event_id", "dim_event", "event_id"),
+    ]
+
+    def generate():
+        import base64 as _b64
+        from .db import _connect_postgres, _connect_sqlite
+
+        if is_pg:
+            conn = _connect_postgres(db_url)
+        else:
+            conn = _connect_sqlite(db_path)
+
+        total_inserted = 0
+
+        try:
+            for tdef in _BACKUP_TABLES:
+                table = tdef["name"]
+                rows = backup["tables"].get(table, [])
+                if not rows:
+                    yield 'data: ' + _json.dumps({"type": "table_skip", "table": table}) + '\n\n'
+                    continue
+
+                yield 'data: ' + _json.dumps({"type": "table_start", "table": table, "row_count": len(rows)}) + '\n\n'
+
+                conflict_clause = tdef.get("conflict")
+                inserted = 0
+
+                for idx, row in enumerate(rows):
+                    for k, v in row.items():
+                        if isinstance(v, dict) and "__bytes__" in v:
+                            row[k] = _b64.b64decode(v["__bytes__"])
+
+                    columns = list(row.keys())
+                    placeholders = ", ".join("?" for _ in columns)
+                    col_list = ", ".join(columns)
+
+                    if conflict_clause:
+                        sql = f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT {conflict_clause} DO NOTHING"
+                    else:
+                        sql = f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT DO NOTHING"
+
+                    sp_name = f"sp_{table}_{idx}"
+                    try:
+                        if is_pg:
+                            conn.execute(f"SAVEPOINT {sp_name}")
+                        cur = conn.execute(sql, list(row.values()))
+                        rc = cur.rowcount if hasattr(cur, "rowcount") else 0
+                        if rc > 0:
+                            inserted += 1
+                        if is_pg:
+                            conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+                    except Exception:
+                        if is_pg:
+                            conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
+
+                yield 'data: ' + _json.dumps({"type": "table_done", "table": table, "inserted": inserted, "row_count": len(rows)}) + '\n\n'
+                total_inserted += inserted
+
+            conn.commit()
+
+            # FK validation
+            yield 'data: ' + _json.dumps({"type": "fk_start"}) + '\n\n'
+            fk_issues = []
+            for child_table, child_col, parent_table, parent_col in fk_checks:
+                try:
+                    orphans = conn.execute(
+                        f"SELECT COUNT(*) FROM {child_table} c"
+                        f" WHERE c.{child_col} IS NOT NULL"
+                        f" AND NOT EXISTS ("
+                        f"   SELECT 1 FROM {parent_table} p"
+                        f"   WHERE p.{parent_col} = c.{child_col}"
+                        f")",
+                    ).fetchone()[0]
+                    if orphans > 0:
+                        detail = f"{child_table}.{child_col} → {parent_table}: {orphans} orphelin(s)"
+                        fk_issues.append(detail)
+                        yield 'data: ' + _json.dumps({"type": "fk_issue", "detail": detail}) + '\n\n'
+                    else:
+                        yield 'data: ' + _json.dumps({"type": "fk_ok", "relation": f"{child_table}.{child_col} → {parent_table}"}) + '\n\n'
+                except Exception:
+                    pass
+
+            if total_inserted == 0:
+                msg = "Aucune nouvelle donnée — la BD est déjà à jour."
+            else:
+                msg = f"{total_inserted} ligne(s) insérée(s)."
+            if fk_issues:
+                msg += f" ⚠️ {len(fk_issues)} problème(s) FK."
+            else:
+                msg += " ✓ Toutes les relations FK sont valides."
+
+            yield 'data: ' + _json.dumps({"type": "summary", "message": msg, "inserted": total_inserted}) + '\n\n'
+
+        except Exception as exc:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            yield 'data: ' + _json.dumps({"type": "error", "message": str(exc)}) + '\n\n'
+        finally:
+            conn.close()
+
+    return Response(generate(), mimetype="text/event-stream")
+
+
+# ---------------------------------------------------------------------------
 # Add City
 # ---------------------------------------------------------------------------
 
@@ -2360,7 +2742,7 @@ def add_city_merge_import() -> Response:
                     time_id = upsert_time_dimension(conn, time_cache, yr)
                     conn.execute(
                         """INSERT INTO fact_city_population (city_id, time_id, year, population, is_key_year, source_file)
-                           VALUES (?, ?, ?, ?, 0, 'web-import')""",
+                           VALUES (?, ?, ?, ?, FALSE, 'web-import')""",
                         (city_id, time_id, yr, pop),
                     )
                     new_count += 1
@@ -3531,9 +3913,10 @@ def geo_coverage_expand_ref():
     for c in new_cities[:TARGET]:
         try:
             conn.execute(
-                """INSERT OR IGNORE INTO ref_city
+                """INSERT INTO ref_city
                    (city_name, region, country, population, rank)
-                   VALUES (?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?)
+                   ON CONFLICT (city_name, region, country) DO NOTHING""",
                 (c["city_name"], c["region"], c["country"],
                  c["population"], c["rank"]),
             )
@@ -3645,7 +4028,7 @@ def coverage_save_missing_years() -> Response:
         conn.execute(
             """INSERT INTO fact_city_population
                (city_id, time_id, year, population, is_key_year, annotation_id, source_file)
-               VALUES (?, ?, ?, ?, 0, NULL, 'coverage-fill')""",
+               VALUES (?, ?, ?, ?, FALSE, NULL, 'coverage-fill')""",
             (city_id, time_id, year, population),
         )
         inserted += 1

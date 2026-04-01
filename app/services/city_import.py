@@ -498,7 +498,7 @@ def import_city_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (city_id, time_id, year, population,
-             1 if year in annotation_by_year else 0,
+             bool(year in annotation_by_year),
              annotation_by_year.get(year), "web-import"),
         )
 
@@ -1218,7 +1218,7 @@ def import_country_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (country_id, time_id, year, population,
-             1 if year in annotation_by_year else 0,
+             bool(year in annotation_by_year),
              annotation_by_year.get(year), "web-import"),
         )
 
@@ -1486,7 +1486,7 @@ def import_region_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (region_id, time_id, year, population,
-             1 if year in annotation_by_year else 0,
+             bool(year in annotation_by_year),
              annotation_by_year.get(year), "web-import"),
         )
 

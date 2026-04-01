@@ -1,4 +1,5 @@
 Flask
+gunicorn
 matplotlib
 numpy
 pandas
