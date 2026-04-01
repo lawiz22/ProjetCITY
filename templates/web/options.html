@@ -15,6 +15,11 @@
         <h2>Mammouth AI — Configuration</h2>
     </div>
     <div class="options-body">
+        {% if require_user_key %}
+        <div class="opt-notice" style="background:#1a1a2e;border:1px solid #4fc3f7;border-radius:6px;padding:12px 16px;margin-bottom:18px;color:#b0bec5;font-size:.95em;">
+            🔐 <strong style="color:#4fc3f7;">Mode production</strong> — Votre clé API est stockée uniquement dans votre navigateur (cookie de session). Elle n'est jamais enregistrée sur le serveur. Chaque utilisateur doit fournir sa propre clé.
+        </div>
+        {% endif %}
         <form id="options-form" method="POST" action="{{ url_for('web.options_save') }}">
             <!-- API Key -->
             <div class="opt-group">

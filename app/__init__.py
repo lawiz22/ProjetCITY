@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unicodedata
+from datetime import timedelta
 from pathlib import Path
 
 from flask import Flask
@@ -30,8 +31,10 @@ def create_app() -> Flask:
         static_folder=str(root_dir / "static"),
     )
     app.config.from_object(Config())
+    app.permanent_session_lifetime = timedelta(days=31)
     app.register_blueprint(web)
     app.teardown_appcontext(close_db)
     run_migrations(app.config)
     app.jinja_env.globals["flag_url"] = _flag_url
+    app.jinja_env.globals["require_user_key"] = app.config.get("REQUIRE_USER_API_KEY", False)
     return app

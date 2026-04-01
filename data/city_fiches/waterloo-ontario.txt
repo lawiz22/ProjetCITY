@@ -2,48 +2,48 @@
 
 ## 📍 Informations Générales
 
-| Catégorie      | Détails                       |
-|----------------|------------------------------|
-| Ville          | Waterloo                     |
-| État/Province  | Ontario                      |
-| Surnom         | "Silicon Valley canadienne" 💻 / "Ville des innovations" 🚀 |
-| Statut         | Ville                         |
-| Comté/Région   | Région de Waterloo            |
-| Maire          | Dorothy McCabe (depuis 2022) |
-| Fondation      | 1857                         |
-| Université     | Université de Waterloo       |
+| Catégorie       | Détails                      |
+|-----------------|------------------------------|
+| Ville           | Waterloo                     |
+| État/Province   | Ontario                     |
+| Surnom          | "Silicon Valley du Nord" 💻 / "Ville des Innovateurs" 🚀 |
+| Statut          | Ville (City)                |
+| Comté/Région    | Waterloo Region             |
+| Maire           | Dorothy McCabe (depuis 2022) |
+| Fondation       | 1857                        |
+| Université      | University of Waterloo      |
 
 ---
 
 ## 👥 Population
 
-| Année          | Population                   |
-|----------------|------------------------------|
-| 2000           | 89 000                       |
-| 2010           | 98 780                       |
-| 2020           | 104 986                      |
-| 2023 (est.)    | ~110 000                     |
-| Grand Waterloo (RMR) | ~630 000                 |
+| Année               | Population      |
+|---------------------|-----------------|
+| 2000                | 87 000          |
+| 2010                | 98 780          |
+| 2020                | 104 986         |
+| 2023 (est.)          | ~110 000        |
+| Grand Waterloo (RMR) | ~630 000        |
 
-📈 La population de Waterloo a connu une croissance régulière, portée par l'expansion technologique et universitaire.  
-🥇 Waterloo est l'une des villes à la croissance la plus rapide de l'Ontario.  
-🌍 La région métropolitaine comprend aussi Kitchener et Cambridge, formant un important pôle urbain et économique.
+📈 La population de Waterloo connaît une croissance régulière, stimulée par le développement technologique et universitaire.  
+🥇 Waterloo est l'une des villes à la croissance la plus rapide en Ontario.  
+🌍 La région métropolitaine inclut Kitchener et Cambridge, formant un important pôle urbain et économique.
 
 ---
 
 ## 📐 Géographie & Densité
 
-| Donnée         | Valeur                      |
-|----------------|-----------------------------|
-| Superficie     | ~64 km²                     |
-| Densité        | ~1 720 hab./km²             |
-| Plan d'eau     | Rivière Grand               |
-| Relief         | Terrain plat à légèrement vallonné |
-| Altitude       | ~320 m                      |
+| Donnée       | Valeur               |
+|--------------|----------------------|
+| Superficie   | ~64 km²              |
+| Densité      | ~1 720 hab./km²      |
+| Plan d'eau   | Rivière Grand         |
+| Relief       | Plaines, collines douces |
+| Altitude     | ~320 m               |
 
 Distances :  
 - Toronto : 110 km à l’est  
-- London : 100 km à l’ouest  
+- London : 90 km à l’ouest  
 - Hamilton : 80 km au sud-est  
 
 ---
@@ -52,130 +52,130 @@ Distances :
 
 Secteurs Principaux :
 
-🎓 **Technologie et innovation** — Waterloo est un centre mondial pour les startups et entreprises technologiques, notamment grâce à la présence de la firme BlackBerry et de nombreuses jeunes pousses.  
-🏥 **Santé et biotechnologie** — Le secteur médical est en croissance avec des centres de recherche et des hôpitaux spécialisés.  
-💻 **Recherche et développement** — L’Université de Waterloo est un moteur d’innovation avec ses programmes coopératifs et ses laboratoires.  
-🏭 **Manufacture avancée** — Présence d’industries manufacturières intégrant la robotique et l’automatisation.  
-🏛️ **Services financiers et professionnels** — Croissance des services liés aux technologies de l’information et à la finance.
+🎓 **Technologie et innovation** — Waterloo est un centre majeur pour les startups et les entreprises technologiques, notamment grâce à la présence de la firme BlackBerry et de nombreuses startups.  
+🏥 **Santé et biotechnologie** — Développement important dans les technologies médicales et la recherche biomédicale.  
+💻 **Recherche et développement** — Université de Waterloo et Perimeter Institute stimulent l’innovation scientifique et technologique.  
+🏭 **Manufacture avancée** — Industrie manufacturière intégrant la robotique et l’automatisation.  
+🏛️ **Services professionnels** — Finance, services informatiques et conseil en gestion.
 
-Waterloo est un pôle économique dynamique, combinant haute technologie, recherche universitaire et industrie avancée.
+Waterloo est un moteur économique régional, reconnu pour son écosystème technologique dynamique et sa forte collaboration entre universités et entreprises.
 
 ---
 
 ## 🎓 Éducation
 
-| Institution               | Type           | Étudiants      |
-|---------------------------|----------------|----------------|
-| Université de Waterloo    | Université     | ~42 000        |
-| Wilfrid Laurier University | Université     | ~20 000        |
-| Conestoga College         | Collège        | ~12 000        |
+| Institution                | Type          | Étudiants  |
+|----------------------------|---------------|------------|
+| University of Waterloo     | Université    | ~42 000    |
+| Wilfrid Laurier University | Université    | ~20 000    |
+| Conestoga College          | Collège       | ~23 000    |
 
-L’Université de Waterloo est reconnue mondialement pour ses programmes en ingénierie, informatique et sciences appliquées. Le système coopératif permet aux étudiants d’acquérir une expérience professionnelle significative.
+L’Université de Waterloo est réputée mondialement pour ses programmes en ingénierie, informatique et coopératif, favorisant l’insertion professionnelle rapide.
 
 ---
 
 ## 🏥 Santé
 
-- **Grand River Hospital** — Principal centre hospitalier de la région, offrant des services spécialisés en cardiologie, oncologie et soins d’urgence.  
-- Spécialités : soins intensifs, chirurgie, santé mentale.  
-- Environ 3 500 employés.  
-- Affilié à l’Université de Waterloo pour la recherche médicale et la formation clinique.
+- **Grand River Hospital** — Principal centre hospitalier, offrant des soins généraux et spécialisés.  
+- Spécialités : chirurgie, soins intensifs, santé mentale, réadaptation.  
+- Environ 3 000 employés.  
+- Affilié à l’Université de Waterloo pour la recherche clinique et l’enseignement.
 
 ---
 
 ## 🎵 Culture & Musique
 
-| Artiste / Groupe / Personnalité | Lien avec la ville          |
-|---------------------------------|-----------------------------|
-| The Reklaws                      | Duo country originaire de Waterloo |
-| Lights                          | Chanteuse pop/électro née à Waterloo |
-| The Sheepdogs                   | Groupe rock canadien ayant joué à Waterloo |
+| Artiste / Groupe / Personnalité | Lien avec la ville                |
+|---------------------------------|---------------------------------|
+| The Sheepdogs                   | Groupe rock originaire de Waterloo |
+| Feist                          | Chanteuse canadienne ayant étudié à Waterloo |
+| Arkells                        | Groupe rock formé dans la région |
 
-Waterloo propose une scène culturelle dynamique avec des festivals comme le Waterloo Busker Carnival, le festival de jazz et plusieurs galeries d’art. Le Centre culturel Perimeter Institute attire aussi les amateurs de sciences et arts.
+Waterloo accueille plusieurs festivals culturels, dont le Waterloo Busker Carnival et le Uptown Waterloo Jazz Festival. La ville dispose aussi de musées comme le Waterloo Region Museum.
 
 ---
 
 ## 🌿 Environnement & Énergie
 
-- Waterloo s’engage dans la réduction des émissions de gaz à effet de serre avec un plan municipal ambitieux.  
-- Plusieurs initiatives de transport durable, notamment le développement de pistes cyclables.  
-- Présence de parcs urbains et espaces verts importants comme le Waterloo Park.  
+- Programme actif de recyclage et de compostage municipal.  
+- Initiatives pour réduire les émissions de carbone, notamment via le transport durable.  
+- Présence de nombreux parcs et espaces verts, dont le Laurel Creek Conservation Area.  
 - Enjeux : gestion de la croissance urbaine et préservation des terres agricoles environnantes.
 
 ---
 
 ## 🏈 Sports & Loisirs
 
-| Équipe                | Sport          | Ligue          |
-|-----------------------|----------------|----------------|
-| Waterloo Warriors     | Football       | U Sports (universitaire) |
-| Kitchener-Waterloo Titans | Baseball    | Intercounty Baseball League |
+| Équipe               | Sport        | Ligue               |
+|----------------------|--------------|---------------------|
+| Waterloo Warriors    | Football     | U Sports (universitaire) |
+| Kitchener-Waterloo Titans | Basketball | Canadian Elite Basketball League (CEBL) |
 
-Activités de plein air : randonnée, vélo, sports nautiques sur la rivière Grand, patinage en hiver. Le Waterloo Memorial Recreation Complex offre de nombreuses installations sportives.
+Activités de plein air : randonnée, cyclisme, kayak sur la rivière Grand, patinage en hiver. Plusieurs terrains de golf et centres de loisirs.
 
 ---
 
 ## 🚗 Transport
 
-| Mode           | Détails                                  |
-|----------------|-----------------------------------------|
-| Autoroute      | Autoroute 401, Autoroute 7               |
-| Aéroport       | Aéroport international de Region of Waterloo (YKF) |
-| Transport en commun | Réseau Grand River Transit (GRT) avec bus et service ION (train léger) |
-| Train          | Service de train léger ION reliant Waterloo à Kitchener et Cambridge |
+| Mode            | Détails                                      |
+|-----------------|----------------------------------------------|
+| Autoroute       | Autoroute 401, Autoroute 7                    |
+| Aéroport        | Waterloo Regional Airport (YKF)               |
+| Transport en commun | Grand River Transit (GRT) avec bus et service ION (train léger sur rail) |
+| Train           | Via Rail service limité, reliant Toronto et London |
 
-Les corridors principaux relient Waterloo à Toronto et aux autres villes du sud-ouest de l’Ontario, facilitant les déplacements quotidiens.
+Corps important de corridors routiers et ferroviaires reliant Waterloo à Toronto et aux autres grandes villes de l’Ontario.
 
 ---
 
 ## 🌡️ Climat
 
-| Saison         | Température moyenne                    |
-|----------------|--------------------------------------|
-| Hiver (Jan)    | -6 °C                                |
-| Printemps (Avr)| 10 °C                                |
-| Été (Juil)     | 23 °C                                |
-| Automne (Oct)  | 10 °C                                |
+| Saison          | Température moyenne  |
+|-----------------|---------------------|
+| Hiver (Jan)     | -5 °C               |
+| Printemps (Avr) | 10 °C               |
+| Été (Juil)      | 23 °C               |
+| Automne (Oct)   | 10 °C               |
 
-Climat continental humide avec des hivers froids et neigeux, étés chauds et humides. Précipitations bien réparties tout au long de l’année.
+Climat continental humide avec des hivers froids et neigeux, étés chauds et humides. Précipitations modérées réparties toute l’année.
 
 ---
 
 ## 🏙️ Quartiers Notables
 
-| Quartier       | Caractéristique                      |
-|----------------|------------------------------------|
-| Uptown Waterloo| Centre-ville animé avec commerces, restaurants et vie nocturne |
-| Laurelwood    | Quartier résidentiel familial avec écoles et parcs |
-| Beechwood     | Secteur résidentiel calme, proche des universités |
-| Westvale      | Quartier mixte avec zones commerciales et résidentielles |
-| Columbia     | Quartier en développement avec nouveaux logements et infrastructures |
+| Quartier        | Caractéristique                          |
+|-----------------|----------------------------------------|
+| Uptown Waterloo | Centre-ville animé, commerces et restaurants |
+| Columbia Forest | Quartier résidentiel familial avec espaces verts |
+| Beechwood       | Quartier historique avec architecture ancienne |
+| Westvale        | Zone résidentielle avec écoles et parcs |
+| Laurelwood     | Quartier calme, proche de la nature et des sentiers |
 
 ---
 
 ## 📊 Comparaison — Grandes Villes de l’Ontario
 
-| Ville          | Population       | Caractéristique                    |
-|----------------|------------------|----------------------------------|
-| **Waterloo**   | **~110 000**     | Centre technologique et universitaire majeur |
-| Toronto        | 2 900 000+       | Plus grande ville et centre financier du Canada |
-| Ottawa         | ~1 000 000       | Capitale nationale, bilingue      |
-| Hamilton       | ~580 000         | Ville industrielle en transformation |
-| London         | ~430 000         | Centre régional avec université importante |
+| Ville           | Population    | Caractéristique                  |
+|-----------------|---------------|--------------------------------|
+| **Waterloo**    | **~110 000**  | Centre technologique et universitaire majeur |
+| Toronto         | 2 794 356     | Plus grande ville et centre financier |
+| Ottawa          | 1 017 449     | Capitale nationale du Canada   |
+| Hamilton        | 569 353       | Ville industrielle historique  |
+| London          | 422 324       | Centre régional avec université |
 
 ---
 
 ## 💡 Le Saviez-Vous ?
 
-- 💻 **Berceau de BlackBerry** — Waterloo est la ville où la société BlackBerry a été fondée, révolutionnant la téléphonie mobile dans les années 2000.  
-- 🎓 **Programme coopératif unique** — L’Université de Waterloo possède l’un des plus grands programmes coopératifs au monde, intégrant des stages rémunérés dans les cursus.  
-- 🚀 **Perimeter Institute** — Ce centre de recherche en physique théorique est reconnu mondialement et attire des scientifiques de renom.  
-- 🌱 **Ville verte** — Waterloo a été classée parmi les villes les plus écologiques du Canada grâce à ses initiatives en développement durable.  
-- 🎭 **Waterloo Busker Carnival** — Festival annuel international de spectacles de rue qui attire des milliers de visiteurs.  
-- 🏅 **Champion en startups** — Waterloo est souvent comparée à la Silicon Valley pour son écosystème entrepreneurial très dynamique.  
-- 📚 **Bibliothèque innovante** — La bibliothèque municipale de Waterloo est connue pour ses espaces modernes et ses services numériques avancés.  
-- 🚆 **Premier train léger en Ontario** — Le système ION de Waterloo-Kitchener est le premier train léger sur rail construit en Ontario depuis des décennies.  
-- 🏀 **Sports universitaires forts** — Les équipes universitaires de Waterloo sont compétitives dans plusieurs disciplines, notamment le football et le basketball.  
-- 🏞️ **Parc Waterloo** — Ce parc urbain historique offre un espace naturel au cœur de la ville avec des activités toute l’année.  
-- 🎨 **Scène artistique émergente** — De nombreux artistes contemporains et galeries d’art ont choisi Waterloo comme base créative.  
-- 🌍 **Ville multiculturelle** — Waterloo accueille une population diversifiée avec plus de 30 % d’immigrants, enrichissant la vie culturelle locale.
+- 💻 **Silicon Valley du Nord** — Waterloo est surnommée ainsi en raison de la concentration exceptionnelle d’entreprises technologiques et startups.  
+- 🎓 **Coopérative universitaire** — L’Université de Waterloo est pionnière dans les programmes coopératifs, combinant études et stages rémunérés.  
+- 📱 **BlackBerry** — La célèbre entreprise de téléphonie mobile a été fondée à Waterloo, révolutionnant les communications mobiles.  
+- 🚄 **Train léger sur rail** — Le système ION est l’un des premiers trains légers modernes en Ontario en dehors de Toronto.  
+- 🌱 **Ville verte** — Waterloo est reconnue pour ses initiatives environnementales et ses nombreux espaces verts urbains.  
+- 🏛️ **Perimeter Institute** — Centre international de recherche en physique théorique situé à Waterloo, attirant des chercheurs du monde entier.  
+- 🎭 **Festival des artistes de rue** — Le Waterloo Busker Carnival est un événement annuel populaire depuis plus de 40 ans.  
+- 🏆 **Innovation et brevets** — Waterloo est l’une des villes canadiennes avec le plus grand nombre de brevets déposés par habitant.  
+- 📚 **Bibliothèque municipale** — La bibliothèque de Waterloo est l’une des plus modernes et innovantes du pays, avec des espaces dédiés à la technologie.  
+- 🌍 **Multiculturalisme** — La ville accueille une population diversifiée, avec une forte communauté d’étudiants internationaux.  
+- 🏀 **Basketball en croissance** — L’équipe locale, les Kitchener-Waterloo Titans, contribue à populariser le basketball dans la région.  
+- 🏞️ **Rivière Grand** — Ce cours d’eau traverse la ville, offrant des activités récréatives et un cadre naturel apprécié des habitants.

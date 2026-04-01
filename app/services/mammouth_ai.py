@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from flask import current_app, has_app_context, session as flask_session
 
 from .app_state import load_json_setting, save_json_setting
 
@@ -21,12 +22,25 @@ DEFAULT_SETTINGS: dict[str, Any] = {
 }
 
 
+def _require_user_key() -> bool:
+    """Return True when each user must supply their own API key (prod mode)."""
+    return has_app_context() and current_app.config.get("REQUIRE_USER_API_KEY", False)
+
+
 def load_settings() -> dict[str, Any]:
-    return load_json_setting(SETTINGS_KEY, DEFAULT_SETTINGS, fallback_path=SETTINGS_FILE)
+    settings = load_json_setting(SETTINGS_KEY, DEFAULT_SETTINGS, fallback_path=SETTINGS_FILE)
+    if _require_user_key():
+        # In prod mode, the API key lives in the browser session, not in the DB.
+        settings["api_key"] = flask_session.get("mammouth_api_key", "")
+    return settings
 
 
 def save_settings(settings: dict[str, Any]) -> None:
     normalized = {**DEFAULT_SETTINGS, **settings}
+    if _require_user_key():
+        # Store the key in the user's browser session; save everything else to DB.
+        flask_session["mammouth_api_key"] = normalized.pop("api_key", "")
+        flask_session.permanent = True
     save_json_setting(SETTINGS_KEY, normalized, fallback_path=SETTINGS_FILE)
 
 
