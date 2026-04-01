@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 397
+# Nombre de villes : 398
 #
 
 # ============================================================
@@ -1997,6 +1997,25 @@ annotations = [
 # ============================================================
 # Columbia (United States)
 # ============================================================
+CITY_NAME = "Columbia, Maryland"
+CITY_COLOR = '#0077be'
+
+years = [1967, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [0, 23000, 83000, 90000, 97000, 100000, 104000]
+
+annotations = [
+    (1967, 0, "🏗️ Fondation de Columbia — planification urbaine innovante (1967)", 'blue'),
+    (1970, 23000, "🏘️ Premiers habitants s'installent — début du développement résidentiel (1970)", 'green'),
+    (1980, 83000, "🏢 Expansion économique — développement des zones commerciales (1980)", 'orange'),
+    (1990, 90000, "🌳 Mise en place des espaces verts — priorité à l'environnement (1990)", 'teal'),
+    (2000, 97000, "🚇 Amélioration des transports — meilleure connectivité régionale (2000)", 'navy'),
+    (2010, 100000, "📈 Croissance démographique stable — ville mature (2010)", 'brown'),
+    (2020, 104000, "🏙️ Columbia aujourd'hui — communauté planifiée prospère (2020)", 'black'),
+]
+
+# ============================================================
+# Columbia (United States)
+# ============================================================
 CITY_NAME = "Columbia, South Carolina"
 CITY_COLOR = '#003366'
 
@@ -2018,25 +2037,6 @@ annotations = [
     (1980, 110000, "🏙️ Modernisation du centre-ville — revitalisation (1980)", 'teal'),
     (2000, 120000, "🌆 Croissance démographique stable — 21e siècle (2000)", 'navy'),
     (2020, 136632, "📈 Population record — estimation récente (2020)", 'black'),
-]
-
-# ============================================================
-# Columbia (United States)
-# ============================================================
-CITY_NAME = "Columbia, Maryland"
-CITY_COLOR = '#0077be'
-
-years = [1967, 1970, 1980, 1990, 2000, 2010, 2020]
-population = [0, 23000, 83000, 90000, 97000, 100000, 104000]
-
-annotations = [
-    (1967, 0, "🏗️ Fondation de Columbia — planification urbaine innovante (1967)", 'blue'),
-    (1970, 23000, "🏘️ Premiers habitants s'installent — début du développement résidentiel (1970)", 'green'),
-    (1980, 83000, "🏢 Expansion économique — développement des zones commerciales (1980)", 'orange'),
-    (1990, 90000, "🌳 Mise en place des espaces verts — priorité à l'environnement (1990)", 'teal'),
-    (2000, 97000, "🚇 Amélioration des transports — meilleure connectivité régionale (2000)", 'navy'),
-    (2010, 100000, "📈 Croissance démographique stable — ville mature (2010)", 'brown'),
-    (2020, 104000, "🏙️ Columbia aujourd'hui — communauté planifiée prospère (2020)", 'black'),
 ]
 
 # ============================================================
@@ -5109,26 +5109,6 @@ annotations = [
 ]
 
 # ============================================================
-# Lincoln (Canada)
-# ============================================================
-CITY_NAME = "Lincoln, Ontario"
-CITY_COLOR = '#722F37'
-
-years = [1800, 1851, 1881, 1906, 1921, 1941, 1961, 1971, 1981, 1991, 2001, 2011, 2021]
-population = [500, 3000, 5500, 6000, 7200, 8100, 10500, 12000, 14800, 17200, 19500, 22000, 25300]
-
-annotations = [
-    (1800, 500, "🌳 Loyalistes — villages lac Ontario (1790s)", 'brown'),
-    (1851, 3000, "🚂 Great Western Railway — accès marchés (1853)", 'blue'),
-    (1906, 6000, "🔬 Vineland Experimental Station (1906)", 'green'),
-    (1941, 8100, "⚔️ Production fruitière — effort de guerre (1940)", 'gray'),
-    (1971, 12000, "🏛️ Incorporation — fusion villages (1970)", 'purple'),
-    (1981, 14800, "🍷 Inniskillin — révolution viticole (1974)", 'darkred'),
-    (1991, 17200, "🥇 Icewine — Grand Prix Bordeaux (1991)", 'gold'),
-    (2021, 25300, "🍇 30+ domaines — capitale viticole Ontario (2020)", 'green'),
-]
-
-# ============================================================
 # Lincoln (United States)
 # ============================================================
 CITY_NAME = "Lincoln, Nebraska"
@@ -5153,6 +5133,26 @@ annotations = [
     (1970, 149518, "🏈 Cornhuskers — religion du Nebraska (1970)", 'red'),
     (2000, 225581, "🌍 Réfugiés — transformation démographique (1995)", 'blue'),
     (2020, 291082, "🏗️ Haymarket — renaissance urbaine (2013)", 'purple'),
+]
+
+# ============================================================
+# Lincoln (Canada)
+# ============================================================
+CITY_NAME = "Lincoln, Ontario"
+CITY_COLOR = '#722F37'
+
+years = [1800, 1851, 1881, 1906, 1921, 1941, 1961, 1971, 1981, 1991, 2001, 2011, 2021]
+population = [500, 3000, 5500, 6000, 7200, 8100, 10500, 12000, 14800, 17200, 19500, 22000, 25300]
+
+annotations = [
+    (1800, 500, "🌳 Loyalistes — villages lac Ontario (1790s)", 'brown'),
+    (1851, 3000, "🚂 Great Western Railway — accès marchés (1853)", 'blue'),
+    (1906, 6000, "🔬 Vineland Experimental Station (1906)", 'green'),
+    (1941, 8100, "⚔️ Production fruitière — effort de guerre (1940)", 'gray'),
+    (1971, 12000, "🏛️ Incorporation — fusion villages (1970)", 'purple'),
+    (1981, 14800, "🍷 Inniskillin — révolution viticole (1974)", 'darkred'),
+    (1991, 17200, "🥇 Icewine — Grand Prix Bordeaux (1991)", 'gold'),
+    (2021, 25300, "🍇 30+ domaines — capitale viticole Ontario (2020)", 'green'),
 ]
 
 # ============================================================
@@ -6168,34 +6168,6 @@ annotations = [
 # ============================================================
 # Newark (United States)
 # ============================================================
-CITY_NAME = "Newark, Delaware"
-CITY_COLOR = '#0055a4'
-
-years = [
-    1700, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 
-    1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
-]
-population = [
-    200, 1500, 3111, 3933, 4887, 10226, 3000, 45998, 81126, 140072, 181830, 6000, 273546, 
-    7500, 438776, 438776, 12000, 405561, 20000, 281731, 28000, 273546, 31000, 33000
-]
-
-annotations = [
-    (1700, 200, "🏞️ Fondation de Newark — première colonie (1700)", 'brown'),
-    (1800, 1500, "🚂 Arrivée du chemin de fer — développement économique (1800)", 'orange'),
-    (1850, 3000, "🏫 Création de l'Université du Delaware — éducation (1850)", 'green'),
-    (1900, 6000, "🏭 Industrialisation — croissance urbaine (1900)", 'blue'),
-    (1920, 7500, "🎉 Incorporation officielle de la ville (1920)", 'red'),
-    (1950, 12000, "🏠 Boom résidentiel d'après-guerre (1950)", 'purple'),
-    (1970, 20000, "🚧 Expansion des infrastructures (1970)", 'gray'),
-    (1990, 28000, "🎓 Expansion universitaire majeure (1990)", 'gold'),
-    (2010, 31000, "🌆 Modernisation urbaine et services (2010)", 'teal'),
-    (2020, 33000, "📈 Croissance démographique stable (2020)", 'navy'),
-]
-
-# ============================================================
-# Newark (United States)
-# ============================================================
 CITY_NAME = "Newark, New Jersey"
 CITY_COLOR = '#1E8449'
 
@@ -6220,6 +6192,34 @@ annotations = [
     (1990, 275221, "💊 Crise crack & criminalité", 'black'),
     (2010, 277140, "🔄 Légère stabilisation", 'teal'),
     (2020, 311549, "📈 Renaissance & gentrification", 'cyan'),
+]
+
+# ============================================================
+# Newark (United States)
+# ============================================================
+CITY_NAME = "Newark, Delaware"
+CITY_COLOR = '#0055a4'
+
+years = [
+    1700, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 
+    1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 1500, 3111, 3933, 4887, 10226, 3000, 45998, 81126, 140072, 181830, 6000, 273546, 
+    7500, 438776, 438776, 12000, 405561, 20000, 281731, 28000, 273546, 31000, 33000
+]
+
+annotations = [
+    (1700, 200, "🏞️ Fondation de Newark — première colonie (1700)", 'brown'),
+    (1800, 1500, "🚂 Arrivée du chemin de fer — développement économique (1800)", 'orange'),
+    (1850, 3000, "🏫 Création de l'Université du Delaware — éducation (1850)", 'green'),
+    (1900, 6000, "🏭 Industrialisation — croissance urbaine (1900)", 'blue'),
+    (1920, 7500, "🎉 Incorporation officielle de la ville (1920)", 'red'),
+    (1950, 12000, "🏠 Boom résidentiel d'après-guerre (1950)", 'purple'),
+    (1970, 20000, "🚧 Expansion des infrastructures (1970)", 'gray'),
+    (1990, 28000, "🎓 Expansion universitaire majeure (1990)", 'gold'),
+    (2010, 31000, "🌆 Modernisation urbaine et services (2010)", 'teal'),
+    (2020, 33000, "📈 Croissance démographique stable (2020)", 'navy'),
 ]
 
 # ============================================================
@@ -8650,6 +8650,35 @@ annotations = [
     (1983, 350, "💀 Fermeture brutale IOC — ville se vide (1982)", 'black'),
     (2001, 285, "🏘️ Seules communautés autochtones restent (1990)", 'brown'),
     (2021, 175, "✈️ Ville fantôme — accès avion/train seulement (2020)", 'gray'),
+]
+
+# ============================================================
+# Scottsdale (United States)
+# ============================================================
+CITY_NAME = "Scottsdale, Arizona"
+CITY_COLOR = '#FF6F61'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 150, 200, 500, 1200, 3000, 4500, 9000, 16000, 30000, 
+    40000, 202000, 217000, 258000
+]
+
+annotations = [
+    (1900, 150, "🚂 Arrivée du chemin de fer — développement économique (1900)", 'orange'),
+    (1920, 500, "🌵 Début du tourisme lié au désert — premières infrastructures (1920)", 'green'),
+    (1940, 3000, "🏥 Construction du premier hôpital — amélioration des services (1940)", 'blue'),
+    (1950, 4500, "🏙️ Expansion résidentielle après la Seconde Guerre mondiale — boom démographique (1950)", 'red'),
+    (1960, 9000, "🎨 Fondation du Scottsdale Museum of Contemporary Art — développement culturel (1960)", 'purple'),
+    (1970, 16000, "⛳ Développement des terrains de golf — attractivité touristique (1970)", 'gray'),
+    (1980, 30000, "🏢 Croissance économique rapide — urbanisation accrue (1980)", 'gold'),
+    (1990, 40000, "🚗 Amélioration des infrastructures routières — meilleure accessibilité (1990)", 'teal'),
+    (2000, 202000, "🏨 Explosion du tourisme et de l'immobilier — population multipliée (2000)", 'navy'),
+    (2010, 217000, "🌞 Scottsdale reconnue pour son climat et qualité de vie — attractivité continue (2010)", 'black'),
+    (2020, 258000, "📈 Croissance démographique soutenue — ville majeure de l'Arizona (2020)", 'darkred'),
 ]
 
 # ============================================================

@@ -39,8 +39,10 @@ _POSTGIS_INDEX_MARKERS = ("USING GIST", "USING GIN (")
 
 
 def _resolve_database_url() -> str:
-    """Get PG connection URL from env vars (Railway convention first)."""
-    for key in ("PROJETCITY_DATABASE_URL", "DATABASE_URL"):
+    """Get PG connection URL from env vars (Railway's DATABASE_URL wins)."""
+    # On Railway, DATABASE_URL is auto-injected and must take priority
+    # over any stale PROJETCITY_DATABASE_URL that might point to localhost.
+    for key in ("DATABASE_URL", "PROJETCITY_DATABASE_URL"):
         url = os.environ.get(key, "").strip()
         if url and url.startswith(("postgres://", "postgresql://")):
             return url

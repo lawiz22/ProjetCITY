@@ -4,9 +4,10 @@ from __future__ import annotations
 import os
 import secrets
 
-# Railway injects DATABASE_URL — map it to the env var the app expects.
+# Railway injects DATABASE_URL — ALWAYS use it when present (overrides
+# any stale PROJETCITY_DATABASE_URL that might point to localhost).
 _railway_db = os.environ.get("DATABASE_URL", "")
-if _railway_db and not os.environ.get("PROJETCITY_DATABASE_URL"):
+if _railway_db:
     os.environ["PROJETCITY_DATABASE_URL"] = _railway_db
 
 # Enable SQL write by default in production (admin-only pages)
