@@ -32,6 +32,6 @@ def create_app() -> Flask:
     app.config.from_object(Config())
     app.register_blueprint(web)
     app.teardown_appcontext(close_db)
-    run_migrations(app.config["DATABASE_PATH"])
+    run_migrations(app.config)
     app.jinja_env.globals["flag_url"] = _flag_url
     return app

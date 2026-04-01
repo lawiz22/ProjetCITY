@@ -1,6 +1,8 @@
 Flask
+gunicorn
 matplotlib
 numpy
 pandas
 Pillow
+psycopg[binary]
 reportlab

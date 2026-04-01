@@ -2326,5 +2326,17 @@
     "source_page": "https://en.wikipedia.org/wiki/Niagara-on-the-Lake",
     "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Niagara_on_the_lake.jpg/1280px-Niagara_on_the_lake.jpg",
     "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "saint-bruno-de-montarville-quebec": {
+    "filename": "saint-bruno-de-montarville-quebec.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Saint-Bruno-de-Montarville",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/St-Bruno-de-Montarville%2C_Quebec.jpg/1280px-St-Bruno-de-Montarville%2C_Quebec.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
+  },
+  "whitby-ontario": {
+    "filename": "whitby-ontario.jpg",
+    "source_page": "https://en.wikipedia.org/wiki/Whitby",
+    "source_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Whitby_Abbey_%28geograph_7249897%29.jpg/1280px-Whitby_Abbey_%28geograph_7249897%29.jpg",
+    "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution."
   }
 }

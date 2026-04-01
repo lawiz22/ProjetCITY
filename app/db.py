@@ -1,15 +1,252 @@
 from __future__ import annotations
 
+import re
 import sqlite3
+from collections.abc import Iterator, Mapping, Sequence
+from pathlib import Path
+from typing import Any
 
 from flask import current_app, g
 
+try:
+    import psycopg
+except ImportError:  # pragma: no cover - optional until PostgreSQL is enabled
+    psycopg = None
 
-def get_db() -> sqlite3.Connection:
+
+DatabaseError = (sqlite3.Error,) + ((psycopg.Error,) if psycopg is not None else ())
+
+_POSTGRES_PREFIXES = ("postgres://", "postgresql://")
+_AUTO_RETURNING_PK = {
+    "dim_annotation": "annotation_id",
+}
+
+
+def is_postgres_url(value: str | None) -> bool:
+    if not value:
+        return False
+    return value.startswith(_POSTGRES_PREFIXES)
+
+
+def build_sqlite_url(path: str | Path) -> str:
+    return f"sqlite:///{Path(path).resolve().as_posix()}"
+
+
+class DbRow:
+    """Compatibility row object supporting row['col'], row[0] and dict(row)."""
+
+    def __init__(self, columns: Sequence[str], values: Sequence[Any]) -> None:
+        self._columns = tuple(columns)
+        self._values = tuple(values)
+        self._index = {name: idx for idx, name in enumerate(self._columns)}
+
+    def __getitem__(self, key: str | int) -> Any:
+        if isinstance(key, int):
+            return self._values[key]
+        return self._values[self._index[key]]
+
+    def __iter__(self) -> Iterator[Any]:
+        return iter(self._values)
+
+    def __len__(self) -> int:
+        return len(self._columns)
+
+    def keys(self):
+        return self._columns
+
+    def values(self):
+        return self._values
+
+    def items(self):
+        return tuple((column, self._values[idx]) for idx, column in enumerate(self._columns))
+
+    def __repr__(self) -> str:
+        payload = ", ".join(f"{column}={self._values[idx]!r}" for idx, column in enumerate(self._columns))
+        return f"DbRow({payload})"
+
+
+class PostgresCursorWrapper:
+    def __init__(
+        self,
+        cursor: Any,
+        *,
+        prefetched_rows: Sequence[Sequence[Any]] | None = None,
+        lastrowid: Any = None,
+    ) -> None:
+        self._cursor = cursor
+        self._prefetched_rows = list(prefetched_rows or [])
+        self.lastrowid = lastrowid
+        self._columns = tuple(column.name for column in (cursor.description or ()))
+
+    @property
+    def description(self):
+        if not self._columns:
+            return None
+        return [(column, None, None, None, None, None, None) for column in self._columns]
+
+    @property
+    def rowcount(self) -> int:
+        return self._cursor.rowcount
+
+    def _wrap_row(self, row: Sequence[Any] | None) -> DbRow | None:
+        if row is None:
+            self.close()
+            return None
+        return DbRow(self._columns, row)
+
+    def fetchone(self) -> DbRow | None:
+        if self._prefetched_rows:
+            return self._wrap_row(self._prefetched_rows.pop(0))
+        return self._wrap_row(self._cursor.fetchone())
+
+    def fetchmany(self, size: int | None = None) -> list[DbRow]:
+        remaining = size if size is not None else 1
+        rows: list[Sequence[Any]] = []
+
+        if remaining > 0 and self._prefetched_rows:
+            rows.extend(self._prefetched_rows[:remaining])
+            self._prefetched_rows = self._prefetched_rows[remaining:]
+            remaining -= len(rows)
+
+        if remaining > 0:
+            rows.extend(self._cursor.fetchmany(remaining))
+
+        if not rows:
+            self.close()
+            return []
+
+        return [DbRow(self._columns, row) for row in rows]
+
+    def fetchall(self) -> list[DbRow]:
+        rows = list(self._prefetched_rows)
+        self._prefetched_rows = []
+        rows.extend(self._cursor.fetchall())
+        self.close()
+        return [DbRow(self._columns, row) for row in rows]
+
+    def __iter__(self) -> Iterator[DbRow]:
+        while True:
+            row = self.fetchone()
+            if row is None:
+                break
+            yield row
+
+    def close(self) -> None:
+        if self._cursor is not None and not self._cursor.closed:
+            self._cursor.close()
+
+    def __del__(self) -> None:  # pragma: no cover - best effort cleanup
+        try:
+            self.close()
+        except Exception:
+            pass
+
+
+class PostgresConnectionWrapper:
+    def __init__(self, dsn: str) -> None:
+        if psycopg is None:
+            raise RuntimeError(
+                "PostgreSQL support requires psycopg. Install `psycopg[binary]` first."
+            )
+        self._connection = psycopg.connect(dsn)
+
+    def _translate_placeholders(self, sql: str) -> str:
+        result: list[str] = []
+        in_single = False
+        in_double = False
+        index = 0
+
+        while index < len(sql):
+            char = sql[index]
+
+            if char == "'" and not in_double:
+                if in_single and index + 1 < len(sql) and sql[index + 1] == "'":
+                    result.append("''")
+                    index += 2
+                    continue
+                in_single = not in_single
+                result.append(char)
+            elif char == '"' and not in_single:
+                in_double = not in_double
+                result.append(char)
+            elif char == "?" and not in_single and not in_double:
+                result.append("%s")
+            else:
+                result.append(char)
+            index += 1
+
+        return "".join(result)
+
+    def _inject_returning_for_lastrowid(self, sql: str) -> tuple[str, str | None]:
+        normalized = sql.strip().rstrip(";")
+        if re.search(r"\breturning\b", normalized, flags=re.IGNORECASE):
+            return normalized, None
+
+        match = re.match(r"(?is)^insert\s+into\s+([a-zA-Z_][\w]*)\b", normalized)
+        if not match:
+            return normalized, None
+
+        table_name = match.group(1)
+        pk_column = _AUTO_RETURNING_PK.get(table_name)
+        if pk_column is None:
+            return normalized, None
+
+        return f"{normalized} RETURNING {pk_column}", pk_column
+
+    def execute(self, sql: str, params: Sequence[Any] | None = None) -> PostgresCursorWrapper:
+        translated_sql = self._translate_placeholders(sql)
+        final_sql, auto_returning_pk = self._inject_returning_for_lastrowid(translated_sql)
+        cursor = self._connection.cursor()
+        cursor.execute(final_sql, params)
+
+        prefetched_rows: list[Sequence[Any]] = []
+        lastrowid = None
+        if auto_returning_pk is not None:
+            first_row = cursor.fetchone()
+            if first_row is not None:
+                prefetched_rows.append(first_row)
+                lastrowid = first_row[0]
+
+        return PostgresCursorWrapper(
+            cursor,
+            prefetched_rows=prefetched_rows,
+            lastrowid=lastrowid,
+        )
+
+    def executemany(self, sql: str, seq_of_params: Sequence[Sequence[Any]]) -> Any:
+        translated_sql = self._translate_placeholders(sql)
+        cursor = self._connection.cursor()
+        cursor.executemany(translated_sql, seq_of_params)
+        return cursor
+
+    def commit(self) -> None:
+        self._connection.commit()
+
+    def rollback(self) -> None:
+        self._connection.rollback()
+
+    def close(self) -> None:
+        self._connection.close()
+
+
+def _connect_sqlite(db_path: str | Path) -> sqlite3.Connection:
+    connection = sqlite3.connect(db_path)
+    connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON;")
+    return connection
+
+
+def _connect_postgres(database_url: str) -> PostgresConnectionWrapper:
+    return PostgresConnectionWrapper(database_url)
+
+
+def get_db() -> Any:
     if "db" not in g:
-        connection = sqlite3.connect(current_app.config["DATABASE_PATH"])
-        connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA foreign_keys = ON;")
+        backend = current_app.config["DATABASE_BACKEND"]
+        if backend == "postgresql":
+            connection = _connect_postgres(current_app.config["DATABASE_URL"])
+        else:
+            connection = _connect_sqlite(current_app.config["DATABASE_PATH"])
         g.db = connection
     return g.db
 
@@ -20,8 +257,21 @@ def close_db(_error: Exception | None = None) -> None:
         connection.close()
 
 
-def run_migrations(db_path: str) -> None:
-    """Apply lightweight schema migrations (add missing columns)."""
+def run_migrations(config: Mapping[str, Any] | str | Path) -> None:
+    """Apply lightweight SQLite-only migrations.
+
+    PostgreSQL schema management lives in sql/schema_postgres.sql for now.
+    """
+    if isinstance(config, Mapping):
+        backend = config.get("DATABASE_BACKEND", "sqlite")
+        db_path = config.get("DATABASE_PATH")
+    else:
+        backend = "sqlite"
+        db_path = config
+
+    if backend != "sqlite" or not db_path:
+        return
+
     conn = sqlite3.connect(db_path)
     try:
         cols = {row[1] for row in conn.execute("PRAGMA table_info(dim_annotation)")}
@@ -30,8 +280,8 @@ def run_migrations(db_path: str) -> None:
         if "photo_source_url" not in cols:
             conn.execute("ALTER TABLE dim_annotation ADD COLUMN photo_source_url TEXT")
 
-        # Region tables (created if missing)
-        conn.execute("""
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS dim_region (
                 region_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 region_name TEXT NOT NULL,
@@ -40,8 +290,10 @@ def run_migrations(db_path: str) -> None:
                 region_color TEXT,
                 source_file TEXT NOT NULL DEFAULT 'manual'
             )
-        """)
-        conn.execute("""
+            """
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS fact_region_population (
                 region_pop_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 region_id INTEGER NOT NULL,
@@ -56,8 +308,10 @@ def run_migrations(db_path: str) -> None:
                 FOREIGN KEY (time_id) REFERENCES dim_time(time_id),
                 FOREIGN KEY (annotation_id) REFERENCES dim_annotation(annotation_id)
             )
-        """)
-        conn.execute("""
+            """
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS dim_region_period_detail (
                 region_period_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 region_id INTEGER NOT NULL,
@@ -75,8 +329,10 @@ def run_migrations(db_path: str) -> None:
                 FOREIGN KEY (start_time_id) REFERENCES dim_time(time_id),
                 FOREIGN KEY (end_time_id) REFERENCES dim_time(time_id)
             )
-        """)
-        conn.execute("""
+            """
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS dim_region_period_detail_item (
                 item_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 region_period_id INTEGER NOT NULL,
@@ -84,8 +340,10 @@ def run_migrations(db_path: str) -> None:
                 item_text TEXT NOT NULL,
                 FOREIGN KEY (region_period_id) REFERENCES dim_region_period_detail(region_period_id)
             )
-        """)
-        conn.execute("""
+            """
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS dim_region_photo (
                 photo_id   INTEGER PRIMARY KEY AUTOINCREMENT,
                 region_id  INTEGER NOT NULL REFERENCES dim_region(region_id) ON DELETE CASCADE,
@@ -96,7 +354,8 @@ def run_migrations(db_path: str) -> None:
                 is_primary INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL DEFAULT (datetime('now'))
             )
-        """)
+            """
+        )
         conn.commit()
     finally:
         conn.close()

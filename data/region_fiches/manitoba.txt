@@ -1,0 +1,123 @@
+# Manitoba — Fiche Complète
+
+## 📍 Informations Générales
+
+| Critère               | Donnée                                      |
+|-----------------------|---------------------------------------------|
+| Région                | Manitoba                                    |
+| Pays                  | Canada                                     |
+| Capitale régionale    | Winnipeg                                   |
+| Plus grande ville     | Winnipeg                                   |
+| Statut administratif  | Province (province canadienne)             |
+| Superficie            | 649 950 km²                                |
+| Population (2023)     | Environ 1,39 million d’habitants           |
+| Densité               | ~2,1 hab./km²                             |
+| Langues officielles   | Anglais, Français (officiellement bilingue au niveau provincial depuis 2010) |
+| Devise / Symboles     | Devise : « Gloriosus et Liber » (Glorieux et libre) ; symbole : le bison canadien |
+
+---
+
+## 👥 Population & Démographie
+
+| Indicateur                  | Donnée / Évolution                        |
+|-----------------------------|------------------------------------------|
+| Population 2000              | ~1,13 million                            |
+| Population 2010              | ~1,23 million                            |
+| Population 2023              | ~1,39 million                            |
+| Croissance démographique    | ~1,2% annuel (2020-2023)                 |
+| Taux de fécondité           | 1,6 enfants par femme (2023)             |
+| Espérance de vie (2023)     | 79,8 ans (hommes), 83,5 ans (femmes)    |
+| Âge médian                  | 38,4 ans                                |
+| Diversité ethnique          | 18% Autochtones (Premières Nations, Métis, Inuits), 15% immigrants récents, majorité d’origine européenne (britannique, ukrainienne, allemande) |
+| Immigration annuelle        | Environ 15 000 nouveaux immigrants (2023) |
+| Langues parlées             | Anglais (majoritaire), français (minorité), cri, ojibwé, autres langues autochtones |
+
+---
+
+## 📐 Géographie
+
+| Critère                | Donnée                                      |
+|------------------------|---------------------------------------------|
+| Superficie             | 649 950 km²                                |
+| Frontières             | Ontario (est), Saskatchewan (ouest), Nunavut (nord), États-Unis (Minnesota, Dakota du Nord au sud) |
+| Relief                 | Majoritairement plaine, prairies, bouclier canadien au nord-est |
+| Point culminant        | Baldy Mountain (832 m)                      |
+| Principaux cours d'eau | Fleuve Rouge, Rivière Assiniboine, Rivière Churchill |
+| Climat                 | Continental humide, hivers très froids (-20°C en moyenne en janvier), étés chauds (20-25°C) |
+| Parcs naturels         | Parc national du Mont-Riding, Parc national du Lac-Saint-Martin, Parc provincial Whiteshell |
+
+---
+
+## 🏛️ Économie
+
+| Indicateur / Secteur         | Donnée / Pourcentage                      |
+|-----------------------------|------------------------------------------|
+| PIB régional (2023)          | Environ 75 milliards CAD                  |
+| Secteurs principaux          | Agriculture (15%), fabrication (14%), services publics (13%), commerce de détail (12%), santé (10%) |
+| Principales industries       | Agriculture (blé, canola, porc, bœuf), agroalimentaire, fabrication de machines, transport ferroviaire (CN, CNR), technologies de l’information |
+| Entreprises majeures         | Great-West Lifeco, James Richardson & Sons, StandardAero, New Flyer Industries |
+| Défis économiques           | Diversification économique, dépendance aux matières premières, accès aux marchés internationaux, transition énergétique |
+| Relations économiques        | Manitoba est un hub logistique central au Canada, reliant l’Est et l’Ouest via le transport ferroviaire et routier |
+
+---
+
+## 🎓 Éducation & Culture
+
+| Élément                      | Description                              |
+|-----------------------------|------------------------------------------|
+| Principales universités     | Université du Manitoba (Winnipeg), Université de Winnipeg, Université de Brandon |
+| Institutions notables       | Red River College, Collège universitaire de Saint-Boniface (francophone) |
+| Faits culturels marquants   | Forte présence des peuples autochtones, bilinguisme officiel, patrimoine ukrainien et francophone important |
+| Patrimoine                 | Fort Garry, Musée des droits de la personne, sites historiques autochtones |
+| Festivals                   | Festival du Voyageur (plus grand festival hivernal francophone au Canada), Winnipeg Folk Festival, Folklorama (festival multiculturel) |
+| Identité régionale          | Mélange de cultures autochtones, francophones et anglophones, forte tradition agricole et industrielle |
+
+---
+
+## 🏥 Santé & Services
+
+| Élément                      | Donnée / Description                      |
+|-----------------------------|------------------------------------------|
+| Système de santé régional   | Manitoba Health, Seniors and Active Living (MHSAL) gère le système public |
+| Espérance de vie            | 79,8 ans (hommes), 83,5 ans (femmes)    |
+| Principaux hôpitaux         | Hôpital général de Winnipeg, Hôpital Grace, Hôpital Saint-Boniface, Hôpital de Brandon |
+| Défis sanitaires            | Accès aux soins dans les zones rurales et autochtones, santé mentale, maladies chroniques (diabète, cardiopathies) |
+
+---
+
+## 🏙️ Principales Villes
+
+| Ville       | Population (2023) | Rôle économique                  | Note / Particularité                      |
+|-------------|-------------------|---------------------------------|-------------------------------------------|
+| Winnipeg    | ~750 000          | Capitale, centre industriel, financier et culturel | 7e plus grande ville du Canada            |
+| Brandon     | ~52 000           | Agriculture, éducation          | 2e plus grande ville, centre agricole majeur |
+| Steinbach   | ~18 000           | Industrie manufacturière        | Forte communauté mennonite                 |
+| Thompson    | ~13 000           | Exploitation minière            | Porte d’entrée vers le Nord du Manitoba    |
+
+---
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** :  
+  - Réduction des inégalités socio-économiques, notamment chez les populations autochtones  
+  - Adaptation au changement climatique (inondations récurrentes, agriculture)  
+  - Modernisation des infrastructures de transport et énergie  
+  - Maintien et développement du bilinguisme officiel dans un contexte anglophone majoritaire  
+
+- **Projets d'infrastructure** :  
+  - Extension du réseau de transport public à Winnipeg  
+  - Modernisation du corridor ferroviaire central canadien  
+  - Développement de projets hydroélectriques et énergies renouvelables  
+
+- **Tendances démographiques** :  
+  - Croissance modérée avec un vieillissement progressif de la population  
+  - Augmentation de la diversité ethnique via l’immigration, notamment en provenance d’Asie et d’Afrique  
+
+- **Perspectives économiques** :  
+  - Diversification vers les technologies propres et numériques  
+  - Renforcement du rôle de hub logistique central au Canada  
+  - Valorisation des ressources naturelles dans une optique durable  
+
+---
+
+*Le Manitoba se distingue par son rôle stratégique au cœur du Canada, sa richesse culturelle et naturelle, ainsi que par ses défis liés à la diversité et au développement durable.*

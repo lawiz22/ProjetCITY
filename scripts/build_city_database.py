@@ -582,7 +582,7 @@ def build_database() -> tuple[int, int]:
                     "city_color": city["city_color"],
                     "year": year,
                     "population": population,
-                    "is_key_year": 1 if year in city["key_years"] else 0,
+                    "is_key_year": bool(year in city["key_years"]),
                     "annotation_id": annotation_by_year.get(year),
                     "source_file": city["source_file"],
                 }

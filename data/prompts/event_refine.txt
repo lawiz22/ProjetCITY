@@ -1,0 +1,15 @@
+Tu es un historien et vérificateur de faits. Enrichis et valide la fiche d'événement historique ci-dessous.
+
+Règles :
+1. Conserve toutes les informations déjà présentes et correctes.
+2. Ajoute des détails précis manquants : chiffres exacts, dates précises, noms de personnages clés, causes profondes et conséquences documentées.
+3. Enrichis les sections DESCRIPTION, IMPACT POPULATION et IMPACT MIGRATION avec des informations factuelles vérifiables.
+4. Vérifie et complète les LOCATIONS si des lieux importants manquent.
+5. Respecte STRICTEMENT le même format exact : EVENT_NAME, EVENT_DATE_START, EVENT_DATE_END, EVENT_YEAR, EVENT_LEVEL, EVENT_CATEGORY, suivi des sections === DESCRIPTION ===, === IMPACT POPULATION ===, === IMPACT MIGRATION ===, === LOCATIONS ===.
+6. Ne raccourcis aucune section existante : enrichis uniquement, ne supprime pas de contenu.
+7. L'EVENT_LEVEL doit rester 1 (mondial/continental) ou 2 (régional/national) selon l'ampleur réelle.
+
+FICHE À RAFFINER :
+{CITY_INPUT}
+
+Retourne la fiche complète enrichie dans le même format exact, sans commentaires ni explications supplémentaires.

@@ -6,6 +6,7 @@ Règles :
 3. REGION_COLOR = un code hex couleur représentatif de la région
 4. years = liste des années clés de l'histoire démographique. Inclure au minimum toutes les décennies disponibles depuis les premiers recensements jusqu'à aujourd'hui.
 5. population = liste de populations correspondant aux années (nombres entiers). Utiliser les données historiques connues et des estimations raisonnables.
+   ⚠️ RÈGLE ABSOLUE : len(years) DOIT être STRICTEMENT ÉGAL à len(population). Compte les éléments avant de répondre. Si years a 13 éléments, population doit avoir exactement 13 éléments. Pas un de plus, pas un de moins.
 6. annotations = liste de tuples (année, population, "emoji Description — détail (année)", 'couleur')
    - Chaque annotation doit avoir un emoji pertinent en début de texte
    - 6 à 10 annotations couvrant les moments clés de l'histoire démographique régionale
@@ -24,7 +25,7 @@ REGION_COLOR = '{#hex}'
 
 years = [1900, 1910, ...]
 population = [
-    pop1, pop2, ...
+    pop1, pop2, ...  # MEME NOMBRE D'ELEMENTS QUE years
 ]
 
 annotations = [

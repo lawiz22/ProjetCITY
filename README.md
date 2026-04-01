@@ -19,6 +19,56 @@ python run_web.py
 
 ---
 
+## Test local PostgreSQL/PostGIS
+
+L'app reste SQLite par dÃ©faut, mais tu peux maintenant tester la migration sur un PostgreSQL local en parallÃ¨le.
+
+Sous Windows PowerShell:
+
+```powershell
+Copy-Item .env.postgres.example .env.postgres -Force   # optionnel si tu veux repartir du template
+docker compose --env-file .env.postgres up -d
+```
+
+La base Postgres/PostGIS sera disponible sur `127.0.0.1:5432`, avec le schÃ©ma [`sql/schema_postgres.sql`](sql/schema_postgres.sql) appliquÃ© automatiquement au premier dÃ©marrage du volume.
+
+Migration depuis la base SQLite actuelle:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+Get-Content .env.postgres | ForEach-Object {
+  if ($_ -match '^\s*([^#][^=]*)=(.*)$') {
+    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
+  }
+}
+python scripts\migrate_sqlite_to_postgres.py --pg-dsn "$env:PROJETCITY_DATABASE_URL" --truncate-target
+```
+
+Ensuite tu peux lancer l'app en mode PostgreSQL:
+
+```powershell
+python run_web.py
+```
+
+Smoke test recommandÃ©:
+- ouvrir `/`, `/cities`, `/map`, `/events`, `/sql-lab`
+- tester une lecture SQL Lab
+- tester un import ou une modification simple sur une ville, un pays ou une rÃ©gion
+
+Pour arrÃªter la base:
+
+```powershell
+docker compose --env-file .env.postgres down
+```
+
+Pour repartir de zÃ©ro:
+
+```powershell
+docker compose --env-file .env.postgres down -v
+```
+
+---
+
 ## Pages principales
 
 ### Dashboard (`/`)

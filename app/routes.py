@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 
 from flask import Blueprint, Response, current_app, flash, jsonify, redirect, render_template, request, url_for
 
 from .services.analytics import AnalyticsService, SqlExecutionError
+from .services.app_state import delete_raw_document, load_raw_document
 from .services.city_import import (
     _resolve_duplicate_slug,
     delete_city_fiche,
@@ -295,15 +297,18 @@ def country_directory() -> str:
             GROUP BY country_id
         ),
         peak AS (
-            SELECT country_id, MAX(population) AS peak_population,
+            SELECT country_id,
+                   population AS peak_population,
                    year AS peak_year
             FROM (
                 SELECT country_id, year, population,
-                       RANK() OVER (PARTITION BY country_id ORDER BY population DESC) AS rk
+                       ROW_NUMBER() OVER (
+                           PARTITION BY country_id
+                           ORDER BY population DESC, year ASC
+                       ) AS rn
                 FROM fact_country_population
-            )
-            WHERE rk = 1
-            GROUP BY country_id
+            ) ranked_peak
+            WHERE rn = 1
         )
         SELECT
             dc.country_id,
@@ -425,11 +430,10 @@ def country_detail(country_slug: str) -> str:
         "annotations": indexed_annotations,
     }
     # Fiche
-    fiche_path = os.path.join(current_app.root_path, "..", "data", "country_fiches", f"{country_slug}.txt")
+    fiche_path = Path(current_app.root_path).parent / "data" / "country_fiches" / f"{country_slug}.txt"
     fiche = None
-    if os.path.exists(fiche_path):
-        with open(fiche_path, encoding="utf-8") as f:
-            raw_fiche = f.read()
+    raw_fiche = load_raw_document("country", country_slug, "fiche", fallback_path=fiche_path)
+    if raw_fiche:
         _header, fiche_sections = parse_fiche_text(raw_fiche)
         if fiche_sections:
             fiche = {"raw_text": raw_fiche, "sections": [
@@ -437,12 +441,11 @@ def country_detail(country_slug: str) -> str:
                 for s in fiche_sections
             ]}
     # Details → periods
-    details_path = os.path.join(current_app.root_path, "..", "data", "country_details", f"{country_slug}.txt")
+    details_path = Path(current_app.root_path).parent / "data" / "country_details" / f"{country_slug}.txt"
     periods: list[dict] = []
     details = None
-    if os.path.exists(details_path):
-        with open(details_path, encoding="utf-8") as f:
-            details = f.read()
+    details = load_raw_document("country", country_slug, "period_detail", fallback_path=details_path)
+    if details:
         # Enrich pop_data with annotation labels for period linking
         ann_rows = conn.execute(
             """
@@ -817,10 +820,19 @@ def country_delete(country_slug: str) -> Response:
     if flag_file.exists():
         flag_file.unlink()
     data_root = Path(current_app.root_path).parent / "data"
-    for sub in ("country_details", "country_fiches"):
-        txt = data_root / sub / f"{country_slug}.txt"
-        if txt.exists():
-            txt.unlink()
+    delete_raw_document(
+        "country",
+        country_slug,
+        "period_detail",
+        fallback_path=data_root / "country_details" / f"{country_slug}.txt",
+    )
+    delete_raw_document(
+        "country",
+        country_slug,
+        "fiche",
+        fallback_path=data_root / "country_fiches" / f"{country_slug}.txt",
+    )
+    conn.commit()
     if request.is_json:
         return jsonify({"success": True})
     flash(f"Pays '{row['country_name']}' supprimé.", "success")
@@ -941,15 +953,18 @@ def region_directory() -> str:
             GROUP BY region_id
         ),
         peak AS (
-            SELECT region_id, MAX(population) AS peak_population,
+            SELECT region_id,
+                   population AS peak_population,
                    year AS peak_year
             FROM (
                 SELECT region_id, year, population,
-                       RANK() OVER (PARTITION BY region_id ORDER BY population DESC) AS rk
+                       ROW_NUMBER() OVER (
+                           PARTITION BY region_id
+                           ORDER BY population DESC, year ASC
+                       ) AS rn
                 FROM fact_region_population
-            )
-            WHERE rk = 1
-            GROUP BY region_id
+            ) ranked_peak
+            WHERE rn = 1
         )
         SELECT
             dr.region_id,
@@ -984,7 +999,7 @@ def region_directory() -> str:
         else:
             # Try primary photo
             photo_row = conn.execute(
-                "SELECT filename FROM dim_region_photo WHERE region_id = ? AND is_primary = 1 LIMIT 1",
+                "SELECT filename FROM dim_region_photo WHERE region_id = ? AND is_primary = TRUE LIMIT 1",
                 (r["region_id"],),
             ).fetchone()
             if photo_row:
@@ -1044,7 +1059,7 @@ def region_detail(region_slug: str) -> str:
     # Primary photo
     photo_row = conn.execute(
         "SELECT filename, source_url, attribution FROM dim_region_photo "
-        "WHERE region_id = ? AND is_primary = 1 LIMIT 1",
+        "WHERE region_id = ? AND is_primary = TRUE LIMIT 1",
         (region["region_id"],),
     ).fetchone()
     region["photo_path"] = (
@@ -1106,13 +1121,10 @@ def region_detail(region_slug: str) -> str:
     pop_with_ann = [{**r, **(ann_by_year.get(r["year"], {}))} for r in pop_data]
     periods = _build_region_periods_from_db(conn, region["region_id"], pop_with_ann)
     # Fiche complète
-    fiche_path = os.path.join(
-        current_app.root_path, "..", "data", "region_fiches", f"{region_slug}.txt"
-    )
+    fiche_path = Path(current_app.root_path).parent / "data" / "region_fiches" / f"{region_slug}.txt"
     fiche = None
-    if os.path.exists(fiche_path):
-        with open(fiche_path, encoding="utf-8") as f:
-            raw_fiche = f.read()
+    raw_fiche = load_raw_document("region", region_slug, "fiche", fallback_path=fiche_path)
+    if raw_fiche:
         _header, fiche_sections = parse_fiche_text(raw_fiche)
         if fiche_sections:
             fiche = {"raw_text": raw_fiche, "sections": [
@@ -1475,10 +1487,19 @@ def region_delete(region_slug: str) -> Response:
     if flag_file.exists():
         flag_file.unlink()
     data_root = Path(current_app.root_path).parent / "data"
-    for sub in ("city_details", "city_fiches", "region_details", "region_fiches"):
-        txt = data_root / sub / f"{region_slug}.txt"
-        if txt.exists():
-            txt.unlink()
+    delete_raw_document(
+        "region",
+        region_slug,
+        "period_detail",
+        fallback_path=data_root / "region_details" / f"{region_slug}.txt",
+    )
+    delete_raw_document(
+        "region",
+        region_slug,
+        "fiche",
+        fallback_path=data_root / "region_fiches" / f"{region_slug}.txt",
+    )
+    conn.commit()
     if request.is_json:
         return jsonify({"success": True})
     flash(f"Région '{row['region_name']}' supprimée.", "success")
@@ -2022,6 +2043,388 @@ def sql_lab_view_delete(view_id: str) -> Response:
 
 
 # ---------------------------------------------------------------------------
+# Database Backup / Restore
+# ---------------------------------------------------------------------------
+
+# Tables in dependency order (parents before children).
+_BACKUP_TABLES: list[dict] = [
+    {"name": "dim_annotation", "pk": "annotation_id",
+     "conflict": "(annotation_id)"},
+    {"name": "ref_population", "pk": "ref_pop_id",
+     "conflict": "(country, region, year)"},
+    {"name": "ref_city", "pk": "ref_city_id",
+     "conflict": "(city_name, region, country)"},
+    {"name": "dim_city", "pk": "city_id",
+     "conflict": "(city_slug)"},
+    {"name": "dim_time", "pk": "time_id",
+     "conflict": "(year)"},
+    {"name": "dim_city_period_detail", "pk": "period_detail_id",
+     "conflict": "(city_id, period_order, source_file)"},
+    {"name": "dim_city_period_detail_item", "pk": "period_detail_item_id",
+     "conflict": "(period_detail_id, item_order)"},
+    {"name": "fact_city_population", "pk": "population_id",
+     "conflict": "(city_id, year)"},
+    {"name": "dim_city_fiche", "pk": "fiche_id",
+     "conflict": "(city_id)"},
+    {"name": "dim_city_fiche_section", "pk": "section_id",
+     "conflict": "(fiche_id, section_order)"},
+    {"name": "dim_city_photo", "pk": "photo_id", "conflict": None},
+    {"name": "dim_event", "pk": "event_id",
+     "conflict": "(event_slug)"},
+    {"name": "dim_event_location", "pk": "event_location_id", "conflict": None},
+    {"name": "dim_event_photo", "pk": "event_photo_id", "conflict": None},
+    {"name": "dim_country", "pk": "country_id",
+     "conflict": "(country_slug)"},
+    {"name": "fact_country_population", "pk": "country_pop_id",
+     "conflict": "(country_id, year)"},
+    {"name": "dim_country_photo", "pk": "photo_id", "conflict": None},
+    {"name": "dim_region", "pk": "region_id",
+     "conflict": "(region_slug)"},
+    {"name": "fact_region_population", "pk": "region_pop_id",
+     "conflict": "(region_id, year)"},
+    {"name": "dim_region_period_detail", "pk": "region_period_id",
+     "conflict": "(region_id, period_order)"},
+    {"name": "dim_region_period_detail_item", "pk": "item_id",
+     "conflict": "(region_period_id, item_order)"},
+    {"name": "dim_region_photo", "pk": "photo_id", "conflict": None},
+    {"name": "raw_document", "pk": "document_id",
+     "conflict": "(entity_type, entity_slug, document_kind)"},
+    {"name": "app_setting", "pk": "setting_key",
+     "conflict": "(setting_key)"},
+]
+
+
+def _serialize_value(value: object) -> object:
+    """Make a value JSON-serialisable."""
+    if value is None or isinstance(value, (int, float, str, bool)):
+        return value
+    if isinstance(value, (datetime,)):
+        return value.isoformat()
+    if isinstance(value, bytes):
+        import base64
+        return {"__bytes__": base64.b64encode(value).decode()}
+    return str(value)
+
+
+@web.route("/sql-lab/backup/export")
+def sql_lab_backup_export() -> Response:
+    """Export the entire database as a JSON file for backup."""
+    import json as _json
+    from .db import get_db
+
+    conn = get_db()
+    backup: dict = {"_meta": {
+        "exported_at": datetime.now().isoformat(),
+        "backend": current_app.config.get("DATABASE_BACKEND", "unknown"),
+        "version": 1,
+    }, "tables": {}}
+
+    for tdef in _BACKUP_TABLES:
+        table = tdef["name"]
+        try:
+            rows = conn.execute(f"SELECT * FROM {table}").fetchall()
+            backup["tables"][table] = [
+                {k: _serialize_value(v) for k, v in dict(r).items()}
+                for r in rows
+            ]
+        except Exception:
+            backup["tables"][table] = []
+
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    payload = _json.dumps(backup, ensure_ascii=False, indent=1, default=str)
+    resp = Response(payload, mimetype="application/json; charset=utf-8")
+    resp.headers["Content-Disposition"] = f"attachment; filename=projetcity-backup-{timestamp}.json"
+    return resp
+
+
+@web.route("/sql-lab/backup/import", methods=["POST"])
+def sql_lab_backup_import() -> Response:
+    """Import a JSON backup, inserting only missing rows (ON CONFLICT DO NOTHING).
+    Then validate FK relationships and report issues."""
+    import json as _json
+    from .db import get_db
+
+    uploaded = request.files.get("backup_file")
+    if not uploaded or not uploaded.filename:
+        flash("Aucun fichier sélectionné.", "error")
+        return redirect(url_for("web.sql_lab"))
+
+    try:
+        raw = uploaded.read().decode("utf-8")
+        backup = _json.loads(raw)
+    except Exception as exc:
+        flash(f"Fichier JSON invalide: {exc}", "error")
+        return redirect(url_for("web.sql_lab"))
+
+    if "tables" not in backup:
+        flash("Format de backup invalide — clé 'tables' manquante.", "error")
+        return redirect(url_for("web.sql_lab"))
+
+    conn = get_db()
+    report: list[str] = []
+    total_inserted = 0
+    is_pg = current_app.config.get("DATABASE_BACKEND") == "postgresql"
+
+    for tdef in _BACKUP_TABLES:
+        table = tdef["name"]
+        rows = backup["tables"].get(table, [])
+        if not rows:
+            continue
+
+        conflict_clause = tdef.get("conflict")
+        inserted = 0
+
+        for idx, row in enumerate(rows):
+            # Restore bytes values
+            for k, v in row.items():
+                if isinstance(v, dict) and "__bytes__" in v:
+                    import base64
+                    row[k] = base64.b64decode(v["__bytes__"])
+
+            columns = list(row.keys())
+            placeholders = ", ".join("?" for _ in columns)
+            col_list = ", ".join(columns)
+
+            if conflict_clause:
+                sql = f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT {conflict_clause} DO NOTHING"
+            else:
+                sql = f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT DO NOTHING"
+
+            sp_name = f"sp_{table}_{idx}"
+            try:
+                if is_pg:
+                    conn.execute(f"SAVEPOINT {sp_name}")
+                cur = conn.execute(sql, list(row.values()))
+                if hasattr(cur, "rowcount") and cur.rowcount > 0:
+                    inserted += 1
+                if is_pg:
+                    conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+            except Exception:
+                if is_pg:
+                    conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
+
+        if inserted:
+            report.append(f"{table}: +{inserted}/{len(rows)}")
+            total_inserted += inserted
+        elif rows:
+            report.append(f"{table}: 0/{len(rows)} (déjà présent)")
+
+    conn.commit()
+
+    # --- Validate FK relationships ---
+    fk_checks = [
+        ("fact_city_population", "city_id", "dim_city", "city_id"),
+        ("fact_city_population", "time_id", "dim_time", "time_id"),
+        ("fact_city_population", "annotation_id", "dim_annotation", "annotation_id"),
+        ("dim_city_period_detail", "city_id", "dim_city", "city_id"),
+        ("dim_city_period_detail_item", "period_detail_id", "dim_city_period_detail", "period_detail_id"),
+        ("dim_city_fiche", "city_id", "dim_city", "city_id"),
+        ("dim_city_fiche_section", "fiche_id", "dim_city_fiche", "fiche_id"),
+        ("dim_city_photo", "city_id", "dim_city", "city_id"),
+        ("fact_country_population", "country_id", "dim_country", "country_id"),
+        ("fact_country_population", "time_id", "dim_time", "time_id"),
+        ("dim_country_photo", "country_id", "dim_country", "country_id"),
+        ("fact_region_population", "region_id", "dim_region", "region_id"),
+        ("fact_region_population", "time_id", "dim_time", "time_id"),
+        ("dim_region_period_detail", "region_id", "dim_region", "region_id"),
+        ("dim_region_period_detail_item", "region_period_id", "dim_region_period_detail", "region_period_id"),
+        ("dim_region_photo", "region_id", "dim_region", "region_id"),
+        ("dim_event_location", "event_id", "dim_event", "event_id"),
+        ("dim_event_photo", "event_id", "dim_event", "event_id"),
+    ]
+
+    fk_issues: list[str] = []
+    for child_table, child_col, parent_table, parent_col in fk_checks:
+        try:
+            orphans = conn.execute(
+                f"""SELECT COUNT(*) FROM {child_table} c
+                    WHERE c.{child_col} IS NOT NULL
+                      AND NOT EXISTS (
+                          SELECT 1 FROM {parent_table} p
+                          WHERE p.{parent_col} = c.{child_col}
+                      )""",
+            ).fetchone()[0]
+            if orphans > 0:
+                fk_issues.append(f"{child_table}.{child_col} → {parent_table}: {orphans} orphelin(s)")
+        except Exception:
+            pass
+
+    summary_parts = []
+    if total_inserted == 0:
+        summary_parts.append("Aucune nouvelle donnée — la BD est déjà à jour")
+    else:
+        summary_parts.append(f"{total_inserted} ligne(s) insérée(s)")
+    if report:
+        summary_parts.append("Détail: " + " | ".join(report))
+    if fk_issues:
+        summary_parts.append("⚠️ FK: " + " | ".join(fk_issues))
+    else:
+        summary_parts.append("✓ Toutes les relations FK sont valides")
+
+    level = "success"
+    if fk_issues:
+        level = "warning"
+    elif total_inserted == 0:
+        level = "success"
+
+    flash(" — ".join(summary_parts), level)
+    return redirect(url_for("web.sql_lab"))
+
+
+@web.route("/sql-lab/backup/import-stream", methods=["POST"])
+def sql_lab_backup_import_stream() -> Response:
+    """Streaming import: sends SSE events so the frontend shows live progress."""
+    import json as _json
+
+    uploaded = request.files.get("backup_file")
+    if not uploaded or not uploaded.filename:
+        def _err():
+            yield 'data: ' + _json.dumps({"type": "error", "message": "Aucun fichier sélectionné."}) + '\n\n'
+        return Response(_err(), mimetype="text/event-stream")
+
+    try:
+        raw = uploaded.read().decode("utf-8")
+        backup = _json.loads(raw)
+    except Exception as exc:
+        def _err2():
+            yield 'data: ' + _json.dumps({"type": "error", "message": f"Fichier JSON invalide: {exc}"}) + '\n\n'
+        return Response(_err2(), mimetype="text/event-stream")
+
+    if "tables" not in backup:
+        def _err3():
+            yield 'data: ' + _json.dumps({"type": "error", "message": "Format invalide — clé 'tables' manquante."}) + '\n\n'
+        return Response(_err3(), mimetype="text/event-stream")
+
+    # Capture what we need before the request context disappears
+    db_backend = current_app.config.get("DATABASE_BACKEND", "sqlite")
+    db_url = current_app.config.get("DATABASE_URL", "")
+    db_path = current_app.config.get("DATABASE_PATH", "")
+    is_pg = db_backend == "postgresql"
+
+    fk_checks = [
+        ("fact_city_population", "city_id", "dim_city", "city_id"),
+        ("fact_city_population", "time_id", "dim_time", "time_id"),
+        ("fact_city_population", "annotation_id", "dim_annotation", "annotation_id"),
+        ("dim_city_period_detail", "city_id", "dim_city", "city_id"),
+        ("dim_city_period_detail_item", "period_detail_id", "dim_city_period_detail", "period_detail_id"),
+        ("dim_city_fiche", "city_id", "dim_city", "city_id"),
+        ("dim_city_fiche_section", "fiche_id", "dim_city_fiche", "fiche_id"),
+        ("dim_city_photo", "city_id", "dim_city", "city_id"),
+        ("fact_country_population", "country_id", "dim_country", "country_id"),
+        ("fact_country_population", "time_id", "dim_time", "time_id"),
+        ("dim_country_photo", "country_id", "dim_country", "country_id"),
+        ("fact_region_population", "region_id", "dim_region", "region_id"),
+        ("fact_region_population", "time_id", "dim_time", "time_id"),
+        ("dim_region_period_detail", "region_id", "dim_region", "region_id"),
+        ("dim_region_period_detail_item", "region_period_id", "dim_region_period_detail", "region_period_id"),
+        ("dim_region_photo", "region_id", "dim_region", "region_id"),
+        ("dim_event_location", "event_id", "dim_event", "event_id"),
+        ("dim_event_photo", "event_id", "dim_event", "event_id"),
+    ]
+
+    def generate():
+        import base64 as _b64
+        from .db import _connect_postgres, _connect_sqlite
+
+        if is_pg:
+            conn = _connect_postgres(db_url)
+        else:
+            conn = _connect_sqlite(db_path)
+
+        total_inserted = 0
+
+        try:
+            for tdef in _BACKUP_TABLES:
+                table = tdef["name"]
+                rows = backup["tables"].get(table, [])
+                if not rows:
+                    yield 'data: ' + _json.dumps({"type": "table_skip", "table": table}) + '\n\n'
+                    continue
+
+                yield 'data: ' + _json.dumps({"type": "table_start", "table": table, "row_count": len(rows)}) + '\n\n'
+
+                conflict_clause = tdef.get("conflict")
+                inserted = 0
+
+                for idx, row in enumerate(rows):
+                    for k, v in row.items():
+                        if isinstance(v, dict) and "__bytes__" in v:
+                            row[k] = _b64.b64decode(v["__bytes__"])
+
+                    columns = list(row.keys())
+                    placeholders = ", ".join("?" for _ in columns)
+                    col_list = ", ".join(columns)
+
+                    if conflict_clause:
+                        sql = f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT {conflict_clause} DO NOTHING"
+                    else:
+                        sql = f"INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT DO NOTHING"
+
+                    sp_name = f"sp_{table}_{idx}"
+                    try:
+                        if is_pg:
+                            conn.execute(f"SAVEPOINT {sp_name}")
+                        cur = conn.execute(sql, list(row.values()))
+                        rc = cur.rowcount if hasattr(cur, "rowcount") else 0
+                        if rc > 0:
+                            inserted += 1
+                        if is_pg:
+                            conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+                    except Exception:
+                        if is_pg:
+                            conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
+
+                yield 'data: ' + _json.dumps({"type": "table_done", "table": table, "inserted": inserted, "row_count": len(rows)}) + '\n\n'
+                total_inserted += inserted
+
+            conn.commit()
+
+            # FK validation
+            yield 'data: ' + _json.dumps({"type": "fk_start"}) + '\n\n'
+            fk_issues = []
+            for child_table, child_col, parent_table, parent_col in fk_checks:
+                try:
+                    orphans = conn.execute(
+                        f"SELECT COUNT(*) FROM {child_table} c"
+                        f" WHERE c.{child_col} IS NOT NULL"
+                        f" AND NOT EXISTS ("
+                        f"   SELECT 1 FROM {parent_table} p"
+                        f"   WHERE p.{parent_col} = c.{child_col}"
+                        f")",
+                    ).fetchone()[0]
+                    if orphans > 0:
+                        detail = f"{child_table}.{child_col} → {parent_table}: {orphans} orphelin(s)"
+                        fk_issues.append(detail)
+                        yield 'data: ' + _json.dumps({"type": "fk_issue", "detail": detail}) + '\n\n'
+                    else:
+                        yield 'data: ' + _json.dumps({"type": "fk_ok", "relation": f"{child_table}.{child_col} → {parent_table}"}) + '\n\n'
+                except Exception:
+                    pass
+
+            if total_inserted == 0:
+                msg = "Aucune nouvelle donnée — la BD est déjà à jour."
+            else:
+                msg = f"{total_inserted} ligne(s) insérée(s)."
+            if fk_issues:
+                msg += f" ⚠️ {len(fk_issues)} problème(s) FK."
+            else:
+                msg += " ✓ Toutes les relations FK sont valides."
+
+            yield 'data: ' + _json.dumps({"type": "summary", "message": msg, "inserted": total_inserted}) + '\n\n'
+
+        except Exception as exc:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            yield 'data: ' + _json.dumps({"type": "error", "message": str(exc)}) + '\n\n'
+        finally:
+            conn.close()
+
+    return Response(generate(), mimetype="text/event-stream")
+
+
+# ---------------------------------------------------------------------------
 # Add City
 # ---------------------------------------------------------------------------
 
@@ -2339,7 +2742,7 @@ def add_city_merge_import() -> Response:
                     time_id = upsert_time_dimension(conn, time_cache, yr)
                     conn.execute(
                         """INSERT INTO fact_city_population (city_id, time_id, year, population, is_key_year, source_file)
-                           VALUES (?, ?, ?, ?, 0, 'web-import')""",
+                           VALUES (?, ?, ?, ?, FALSE, 'web-import')""",
                         (city_id, time_id, yr, pop),
                     )
                     new_count += 1
@@ -3510,9 +3913,10 @@ def geo_coverage_expand_ref():
     for c in new_cities[:TARGET]:
         try:
             conn.execute(
-                """INSERT OR IGNORE INTO ref_city
+                """INSERT INTO ref_city
                    (city_name, region, country, population, rank)
-                   VALUES (?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?)
+                   ON CONFLICT (city_name, region, country) DO NOTHING""",
                 (c["city_name"], c["region"], c["country"],
                  c["population"], c["rank"]),
             )
@@ -3624,7 +4028,7 @@ def coverage_save_missing_years() -> Response:
         conn.execute(
             """INSERT INTO fact_city_population
                (city_id, time_id, year, population, is_key_year, annotation_id, source_file)
-               VALUES (?, ?, ?, ?, 0, NULL, 'coverage-fill')""",
+               VALUES (?, ?, ?, ?, FALSE, NULL, 'coverage-fill')""",
             (city_id, time_id, year, population),
         )
         inserted += 1
@@ -3714,7 +4118,17 @@ def ai_lab() -> str:
     from .db import get_db
     conn = get_db()
     countries_for_region = [r["country_name"] for r in conn.execute(
-        "SELECT country_name FROM dim_country ORDER BY country_name COLLATE NOCASE"
+        "SELECT country_name FROM dim_country ORDER BY LOWER(country_name), country_name"
+    ).fetchall()]
+    countries_for_event = countries_for_region
+    regions_for_event = [r["region_name"] for r in conn.execute(
+        "SELECT region_name FROM dim_region ORDER BY LOWER(region_name), region_name"
+    ).fetchall()]
+    from .services.event_service import CATEGORY_LABELS, CATEGORY_EMOJIS
+    prompt_refine_event = load_prompt("event_refine.txt")
+    events_for_refine = [dict(r) for r in conn.execute(
+        "SELECT event_name, event_slug, event_year, event_category "
+        "FROM dim_event ORDER BY event_year DESC, LOWER(event_name), event_name"
     ).fetchall()]
     return render_template(
         "web/ai_lab.html",
@@ -3732,6 +4146,12 @@ def ai_lab() -> str:
         prompt_region_details=prompt_region_details,
         prompt_region_fiche=prompt_region_fiche,
         countries_for_region=countries_for_region,
+        countries_for_event=countries_for_event,
+        regions_for_event=regions_for_event,
+        event_category_labels=CATEGORY_LABELS,
+        event_category_emojis=CATEGORY_EMOJIS,
+        prompt_refine_event=prompt_refine_event,
+        events_for_refine=events_for_refine,
     )
 
 
@@ -4310,7 +4730,7 @@ def ai_lab_region_import() -> Response:
                 (region_id,),
             ).fetchone()
             if not existing_flag:
-                flag_is_primary = 1 if not photo_path else 0
+                flag_is_primary = not photo_path
                 conn3.execute(
                     "INSERT INTO dim_region_photo (region_id, filename, caption, source_url, attribution, is_primary) "
                     "VALUES (?, 'flag.png', ?, ?, 'Wikimedia Commons', ?)",
@@ -4376,6 +4796,277 @@ def ai_lab_suggest_region() -> Response:
     if result.get("success"):
         result["tokens_total"] = load_settings().get("tokens_used", 0)
     return jsonify(result)
+
+
+@web.route("/ai-lab/suggest-event", methods=["POST"])
+def ai_lab_suggest_event() -> Response:
+    """Ask Mammouth to suggest a historical event not yet in the DB."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .services.event_service import CATEGORY_LABELS
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    filter_country  = request.form.get("country", "").strip()
+    filter_region   = request.form.get("region", "").strip()
+    filter_category = request.form.get("category", "").strip()
+
+    conn = get_db()
+
+    # Collect existing event names + slugs to exclude
+    existing_rows = conn.execute(
+        "SELECT event_name, event_slug, event_year FROM dim_event ORDER BY event_name"
+    ).fetchall()
+    existing_entries = [
+        f"{r['event_name']} ({r['event_year']})" if r["event_year"] else r["event_name"]
+        for r in existing_rows
+    ]
+
+    # Build context filters description
+    context_parts: list[str] = []
+    if filter_country:
+        context_parts.append(f"lié au pays '{filter_country}'")
+    if filter_region:
+        context_parts.append(f"lié à la région '{filter_region}'")
+    if filter_category:
+        label = CATEGORY_LABELS.get(filter_category, filter_category)
+        context_parts.append(f"dans la catégorie '{label}'")
+    context_str = ", ".join(context_parts) if context_parts else "de n'importe quel pays, région ou catégorie"
+
+    if existing_entries:
+        exclusion_block = (
+            f"Ma base contient déjà ces {len(existing_entries)} événements (nom + année) :\n"
+            f"{chr(10).join('- ' + e for e in existing_entries[:100])}\n"
+            f"{'[… et plus]' if len(existing_entries) > 100 else ''}\n\n"
+            f"RÈGLE ABSOLUE : ne suggère PAS un événement déjà présent dans cette liste, "
+            f"ni un synonyme, ni une variante du même événement "
+            f"(ex: si 'Ouragan Katrina' est listé, ne suggère pas 'Katrina 2005' ou 'Hurricane Katrina').\n\n"
+        )
+    else:
+        exclusion_block = ""
+
+    prompt = (
+        f"{exclusion_block}"
+        f"Suggère UN événement historique important {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
+        f"L'événement doit être réel, documenté, et significatif (guerre, catastrophe, révolution, découverte, traité, etc.).\n"
+        f"Réponds UNIQUEMENT avec le nom court et clair de l'événement (en français ou en anglais selon l'usage courant).\n"
+        f"Aucun autre texte, aucune explication."
+    )
+
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+# ---------------------------------------------------------------------------
+# AI Lab — Raffinement (Event)
+# ---------------------------------------------------------------------------
+
+@web.route("/ai-lab/refine/event/<event_slug>")
+def ai_lab_refine_event_load(event_slug: str) -> Response:
+    """Load an event's current data as JSON for the Raffinement tab."""
+    from .db import get_db
+    from .services.event_service import get_event
+
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"success": False, "error": "Événement introuvable."})
+
+    # Use stored source_text or reconstruct from fields
+    source_text = event.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'EVENT_NAME = "{event["event_name"]}"',
+            f'EVENT_DATE_START = "{event.get("event_date_start") or ""}"',
+            f'EVENT_DATE_END = "{event.get("event_date_end") or ""}"',
+            f'EVENT_YEAR = {event.get("event_year") or ""}',
+            f'EVENT_LEVEL = {event.get("event_level") or 1}',
+            f'EVENT_CATEGORY = "{event.get("event_category") or "autre"}"',
+            "",
+            "=== DESCRIPTION ===",
+            event.get("description") or "",
+            "",
+            "=== IMPACT POPULATION ===",
+            event.get("impact_population") or "",
+            "",
+            "=== IMPACT MIGRATION ===",
+            event.get("impact_migration") or "",
+            "",
+            "=== LOCATIONS ===",
+        ]
+        for loc in event.get("locations", []):
+            if loc.get("city_name"):
+                lines.append(f"{loc['city_name']}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    return jsonify({
+        "success": True,
+        "event_name": event["event_name"],
+        "event_year": event.get("event_year"),
+        "event_category": event.get("event_category"),
+        "event_level": event.get("event_level"),
+        "description": (event.get("description") or "")[:300],
+        "location_count": len(event.get("locations", [])),
+        "source_text": source_text,
+    })
+
+
+@web.route("/ai-lab/refine/event/generate", methods=["POST"])
+def ai_lab_refine_event_generate() -> Response:
+    """Generate a refined version of an event via AI."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+    from .services.event_service import get_event
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    event_slug = request.form.get("event_slug", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not event_slug:
+        return jsonify({"success": False, "error": "Événement non spécifié."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    # Load current event text from DB
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"success": False, "error": "Événement introuvable."})
+
+    source_text = event.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'EVENT_NAME = "{event["event_name"]}"',
+            f'EVENT_DATE_START = "{event.get("event_date_start") or ""}"',
+            f'EVENT_DATE_END = "{event.get("event_date_end") or ""}"',
+            f'EVENT_YEAR = {event.get("event_year") or ""}',
+            f'EVENT_LEVEL = {event.get("event_level") or 1}',
+            f'EVENT_CATEGORY = "{event.get("event_category") or "autre"}"',
+            "",
+            "=== DESCRIPTION ===",
+            event.get("description") or "",
+            "",
+            "=== IMPACT POPULATION ===",
+            event.get("impact_population") or "",
+            "",
+            "=== IMPACT MIGRATION ===",
+            event.get("impact_migration") or "",
+            "",
+            "=== LOCATIONS ===",
+        ]
+        for loc in event.get("locations", []):
+            if loc.get("city_name"):
+                lines.append(f"{loc['city_name']}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    # city_input = source_text so {CITY_INPUT} in prompt gets replaced with event text
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.3)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/event/synthesize", methods=["POST"])
+def ai_lab_refine_event_synthesize() -> Response:
+    """Ask AI to reconcile the original and refined event versions."""
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+    from .db import get_db
+    from .services.event_service import get_event
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    event_slug = request.form.get("event_slug", "").strip()
+    new_text = request.form.get("new_text", "").strip()
+
+    if not event_slug or not new_text:
+        return jsonify({"success": False, "error": "Données manquantes pour la synthèse."})
+
+    # Load original event text
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"success": False, "error": "Événement introuvable."})
+
+    source_text = event.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'EVENT_NAME = "{event["event_name"]}"',
+            f'EVENT_DATE_START = "{event.get("event_date_start") or ""}"',
+            f'EVENT_DATE_END = "{event.get("event_date_end") or ""}"',
+            f'EVENT_YEAR = {event.get("event_year") or ""}',
+            f'EVENT_LEVEL = {event.get("event_level") or 1}',
+            f'EVENT_CATEGORY = "{event.get("event_category") or "autre"}"',
+            "",
+            "=== DESCRIPTION ===",
+            event.get("description") or "",
+            "",
+            "=== IMPACT POPULATION ===",
+            event.get("impact_population") or "",
+            "",
+            "=== IMPACT MIGRATION ===",
+            event.get("impact_migration") or "",
+            "",
+            "=== LOCATIONS ===",
+        ]
+        for loc in event.get("locations", []):
+            if loc.get("city_name"):
+                lines.append(f"{loc['city_name']}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    prompt_text = load_prompt("event_synthesize.txt").replace("{NEW_TEXT}", new_text)
+    # {CITY_INPUT} will be replaced with source_text (original) by generate_city
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.2)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/event/save", methods=["POST"])
+def ai_lab_refine_event_save() -> Response:
+    """Save the (refined or synthesized) event text to the database."""
+    from .db import get_db
+    from .services.event_service import parse_event_text, import_event
+
+    text = request.form.get("event_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+
+    try:
+        data = parse_event_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    event_id = import_event(conn, data)
+    return jsonify({
+        "success": True,
+        "event_name": data["event_name"],
+        "event_slug": data["event_slug"],
+        "event_id": event_id,
+        "redirect": url_for("web.event_detail", event_slug=data["event_slug"]),
+    })
 
 
 # ---------------------------------------------------------------------------

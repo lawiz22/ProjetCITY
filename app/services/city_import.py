@@ -3,7 +3,6 @@ from __future__ import annotations
 import ast
 import json
 import re
-import sqlite3
 import time
 import unicodedata
 from pathlib import Path
@@ -12,6 +11,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
 
+from flask import current_app, has_app_context
+
+from .app_state import delete_raw_document, save_raw_document
 from .city_photos import CITY_PHOTO_DIR, CITY_PHOTO_MANIFEST, clear_city_photo_manifest_cache
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -87,9 +89,17 @@ REGION_ALIASES = {
     "DC": "District of Columbia",
 }
 
+
+def _should_update_legacy_city_manifest() -> bool:
+    if not has_app_context():
+        return True
+    return current_app.config.get("DATABASE_BACKEND") != "postgresql"
+
 USER_AGENT = "CentralCityScrutinizer/1.0 (city photo cache)"
 SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
 SEARCH_URL = "https://en.wikipedia.org/w/api.php?action=query&list=search&utf8=1&format=json&srlimit=5&srsearch={query}"
+
+DbConnection = Any
 
 
 def slugify(value: str) -> str:
@@ -141,6 +151,42 @@ def build_time_row(year: int) -> dict[str, Any]:
         "century": century,
         "period_label": build_period_label(year),
     }
+
+
+def _build_time_cache(conn: DbConnection) -> dict[int, int]:
+    return {year: time_id for time_id, year in conn.execute("SELECT time_id, year FROM dim_time")}
+
+
+def _upsert_annotation(conn: DbConnection, label: str, color: str) -> int:
+    cursor = conn.execute(
+        """
+        INSERT INTO dim_annotation (annotation_label, annotation_color)
+        VALUES (?, ?)
+        ON CONFLICT(annotation_label, annotation_color)
+        DO UPDATE SET annotation_color = excluded.annotation_color
+        RETURNING annotation_id
+        """,
+        (label, color),
+    )
+    row = cursor.fetchone()
+    if row is None:
+        raise RuntimeError("Impossible de créer ou retrouver l'annotation.")
+    return row[0]
+
+
+def _delete_rows_by_ids(
+    conn: DbConnection,
+    table_name: str,
+    id_column: str,
+    ids: list[int],
+) -> None:
+    if not ids:
+        return
+    placeholders = ",".join("?" for _ in ids)
+    conn.execute(
+        f"DELETE FROM {table_name} WHERE {id_column} IN ({placeholders})",
+        ids,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -357,7 +403,7 @@ def parse_region_period_details_text(text: str) -> list[dict[str, Any]]:
 # Database import
 # ---------------------------------------------------------------------------
 
-def upsert_time_dimension(conn: sqlite3.Connection, time_cache: dict[int, int], year: int | None) -> int | None:
+def upsert_time_dimension(conn: DbConnection, time_cache: dict[int, int], year: int | None) -> int | None:
     if year is None:
         return None
     if year in time_cache:
@@ -388,7 +434,7 @@ def _ascii_name(name: str) -> str:
     return unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii").lower()
 
 
-def _resolve_duplicate_slug(conn: sqlite3.Connection, stats: dict[str, Any]) -> None:
+def _resolve_duplicate_slug(conn: DbConnection, stats: dict[str, Any]) -> None:
     """If a city with the same accent-stripped name already exists in the same
     region, reuse its slug and name so the UPSERT merges instead of creating a
     duplicate (e.g. Philadelphie vs Philadelphia)."""
@@ -406,12 +452,10 @@ def _resolve_duplicate_slug(conn: sqlite3.Connection, stats: dict[str, Any]) -> 
             return
 
 
-def import_city_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
+def import_city_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
     """Insert/update dim_city + fact_city_population rows. Returns city_id."""
     _resolve_duplicate_slug(conn, stats)
-    time_cache: dict[int, int] = {
-        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
-    }
+    time_cache = _build_time_cache(conn)
 
     # Upsert dim_city
     cursor = conn.execute(
@@ -440,17 +484,7 @@ def import_city_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
         year, _pop, label, color = ann[:4]
         if not isinstance(year, int) or not isinstance(label, str) or not isinstance(color, str):
             continue
-        cur = conn.execute(
-            """
-            INSERT INTO dim_annotation (annotation_label, annotation_color)
-            VALUES (?, ?)
-            ON CONFLICT(annotation_label, annotation_color)
-            DO UPDATE SET annotation_color = excluded.annotation_color
-            RETURNING annotation_id
-            """,
-            (label, color),
-        )
-        annotation_by_year[year] = cur.fetchone()[0]
+        annotation_by_year[year] = _upsert_annotation(conn, label, color)
 
     # Delete existing population rows for this city (to allow re-import)
     conn.execute("DELETE FROM fact_city_population WHERE city_id = ?", (city_id,))
@@ -464,18 +498,16 @@ def import_city_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (city_id, time_id, year, population,
-             1 if year in annotation_by_year else 0,
+             bool(year in annotation_by_year),
              annotation_by_year.get(year), "web-import"),
         )
 
     return city_id
 
 
-def import_city_periods(conn: sqlite3.Connection, city_id: int, city_slug: str, sections: list[dict[str, Any]]) -> int:
+def import_city_periods(conn: DbConnection, city_id: int, city_slug: str, sections: list[dict[str, Any]]) -> int:
     """Insert period detail rows. Returns count of periods inserted."""
-    time_cache: dict[int, int] = {
-        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
-    }
+    time_cache = _build_time_cache(conn)
 
     # Remove existing periods for this city
     existing_ids = [
@@ -484,8 +516,7 @@ def import_city_periods(conn: sqlite3.Connection, city_id: int, city_slug: str, 
         )
     ]
     if existing_ids:
-        placeholders = ",".join("?" * len(existing_ids))
-        conn.execute(f"DELETE FROM dim_city_period_detail_item WHERE period_detail_id IN ({placeholders})", existing_ids)
+        _delete_rows_by_ids(conn, "dim_city_period_detail_item", "period_detail_id", existing_ids)
         conn.execute("DELETE FROM dim_city_period_detail WHERE city_id = ?", (city_id,))
 
     count = 0
@@ -517,9 +548,8 @@ def import_city_periods(conn: sqlite3.Connection, city_id: int, city_slug: str, 
 
 def save_period_details_file(city_slug: str, text: str) -> Path:
     """Save the period details text as a .txt file in data/city_details/."""
-    DETAILS_DIR.mkdir(parents=True, exist_ok=True)
     file_path = DETAILS_DIR / f"{city_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("city", city_slug, "period_detail", text, fallback_path=file_path)
     return file_path
 
 
@@ -653,24 +683,25 @@ def fetch_and_save_city_photo(city_slug: str, city_name: str, region: str | None
     if last_error:
         return {"success": False, "error": f"Téléchargement échoué: {last_error}"}
 
-    # Update manifest
-    manifest: dict[str, Any] = {}
-    if CITY_PHOTO_MANIFEST.exists():
-        try:
-            manifest = json.loads(CITY_PHOTO_MANIFEST.read_text(encoding="utf-8"))
-        except Exception:
-            manifest = {}
+    source_page = summary.get("content_urls", {}).get("desktop", {}).get("page", "")
+    if _should_update_legacy_city_manifest():
+        manifest: dict[str, Any] = {}
+        if CITY_PHOTO_MANIFEST.exists():
+            try:
+                manifest = json.loads(CITY_PHOTO_MANIFEST.read_text(encoding="utf-8"))
+            except Exception:
+                manifest = {}
 
-    manifest[city_slug] = {
-        "filename": filename,
-        "source_page": summary.get("content_urls", {}).get("desktop", {}).get("page", ""),
-        "source_image": image_url,
-        "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution.",
-    }
-    CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-    clear_city_photo_manifest_cache()
+        manifest[city_slug] = {
+            "filename": filename,
+            "source_page": source_page,
+            "source_image": image_url,
+            "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution.",
+        }
+        CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+        clear_city_photo_manifest_cache()
 
-    return {"success": True, "filename": filename, "source_page": manifest[city_slug]["source_page"]}
+    return {"success": True, "filename": filename, "source_page": source_page}
 
 
 def save_uploaded_photo(city_slug: str, file_storage: Any) -> dict[str, Any]:
@@ -688,20 +719,21 @@ def save_uploaded_photo(city_slug: str, file_storage: Any) -> dict[str, Any]:
 
     # Update manifest
     manifest: dict[str, Any] = {}
-    if CITY_PHOTO_MANIFEST.exists():
+    if _should_update_legacy_city_manifest() and CITY_PHOTO_MANIFEST.exists():
         try:
             manifest = json.loads(CITY_PHOTO_MANIFEST.read_text(encoding="utf-8"))
         except Exception:
             manifest = {}
 
-    manifest[city_slug] = {
-        "filename": filename,
-        "source_page": "",
-        "source_image": "upload",
-        "attribution": "Photo uploadée manuellement.",
-    }
-    CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-    clear_city_photo_manifest_cache()
+    if _should_update_legacy_city_manifest():
+        manifest[city_slug] = {
+            "filename": filename,
+            "source_page": "",
+            "source_image": "upload",
+            "attribution": "Photo uploadée manuellement.",
+        }
+        CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+        clear_city_photo_manifest_cache()
 
     return {"success": True, "filename": filename}
 
@@ -949,7 +981,7 @@ def _parse_content_blocks(lines: list[str]) -> list[dict[str, Any]]:
 # Fiche Complète database import
 # ---------------------------------------------------------------------------
 
-def import_city_fiche(conn: sqlite3.Connection, city_id: int, city_slug: str,
+def import_city_fiche(conn: DbConnection, city_id: int, city_slug: str,
                       raw_text: str, sections: list[dict[str, Any]]) -> int:
     """Insert/update fiche complète for a city. Saves to DB + .txt file. Returns fiche_id."""
     # Remove existing fiche
@@ -1000,7 +1032,7 @@ def _parse_fiche_number(val: str) -> float | None:
         return None
 
 
-def _update_density_from_fiche(conn: sqlite3.Connection, city_id: int,
+def _update_density_from_fiche(conn: DbConnection, city_id: int,
                                sections: list[dict[str, Any]]) -> None:
     """Extract area_km2 and density from fiche geography section and update dim_city."""
     area: float | None = None
@@ -1039,7 +1071,7 @@ def _update_density_from_fiche(conn: sqlite3.Connection, city_id: int,
         )
 
 
-def delete_city_fiche(conn: sqlite3.Connection, city_id: int, city_slug: str) -> bool:
+def delete_city_fiche(conn: DbConnection, city_id: int, city_slug: str) -> bool:
     """Delete fiche complète from DB and remove .txt file."""
     existing = conn.execute(
         "SELECT fiche_id FROM dim_city_fiche WHERE city_id = ?", (city_id,)
@@ -1049,20 +1081,18 @@ def delete_city_fiche(conn: sqlite3.Connection, city_id: int, city_slug: str) ->
     conn.execute("DELETE FROM dim_city_fiche_section WHERE fiche_id = ?", (existing[0],))
     conn.execute("DELETE FROM dim_city_fiche WHERE fiche_id = ?", (existing[0],))
     file_path = FICHES_DIR / f"{city_slug}.txt"
-    if file_path.exists():
-        file_path.unlink()
+    delete_raw_document("city", city_slug, "fiche", fallback_path=file_path)
     return True
 
 
 def save_fiche_file(city_slug: str, text: str) -> Path:
     """Save the fiche complète raw text as a .txt file in data/city_fiches/."""
-    FICHES_DIR.mkdir(parents=True, exist_ok=True)
     file_path = FICHES_DIR / f"{city_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("city", city_slug, "fiche", text, fallback_path=file_path)
     return file_path
 
 
-def get_city_fiche(conn: sqlite3.Connection, city_id: int) -> dict[str, Any] | None:
+def get_city_fiche(conn: DbConnection, city_id: int) -> dict[str, Any] | None:
     """Load a city's fiche complète with all sections."""
     fiche = conn.execute(
         "SELECT fiche_id, raw_text, created_at FROM dim_city_fiche WHERE city_id = ?",
@@ -1147,11 +1177,9 @@ def parse_country_stats_text(text: str) -> dict[str, Any]:
 # Country database import
 # ---------------------------------------------------------------------------
 
-def import_country_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
+def import_country_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
     """Insert/update dim_country + fact_country_population rows. Returns country_id."""
-    time_cache: dict[int, int] = {
-        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
-    }
+    time_cache = _build_time_cache(conn)
 
     # Upsert dim_country
     cursor = conn.execute(
@@ -1176,17 +1204,7 @@ def import_country_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int
         year, _pop, label, color = ann[:4]
         if not isinstance(year, int) or not isinstance(label, str) or not isinstance(color, str):
             continue
-        cur = conn.execute(
-            """
-            INSERT INTO dim_annotation (annotation_label, annotation_color)
-            VALUES (?, ?)
-            ON CONFLICT(annotation_label, annotation_color)
-            DO UPDATE SET annotation_color = excluded.annotation_color
-            RETURNING annotation_id
-            """,
-            (label, color),
-        )
-        annotation_by_year[year] = cur.fetchone()[0]
+        annotation_by_year[year] = _upsert_annotation(conn, label, color)
 
     # Delete existing population rows for this country (to allow re-import)
     conn.execute("DELETE FROM fact_country_population WHERE country_id = ?", (country_id,))
@@ -1200,7 +1218,7 @@ def import_country_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (country_id, time_id, year, population,
-             1 if year in annotation_by_year else 0,
+             bool(year in annotation_by_year),
              annotation_by_year.get(year), "web-import"),
         )
 
@@ -1213,17 +1231,15 @@ COUNTRY_FICHES_DIR = PROJECT_ROOT / "data" / "country_fiches"
 
 def save_country_details_file(country_slug: str, text: str) -> Path:
     """Save the country details raw text as a .txt file in data/country_details/."""
-    COUNTRY_DETAILS_DIR.mkdir(parents=True, exist_ok=True)
     file_path = COUNTRY_DETAILS_DIR / f"{country_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("country", country_slug, "period_detail", text, fallback_path=file_path)
     return file_path
 
 
 def save_country_fiche_file(country_slug: str, text: str) -> Path:
     """Save the country fiche complète as a .txt file in data/country_fiches/."""
-    COUNTRY_FICHES_DIR.mkdir(parents=True, exist_ok=True)
     file_path = COUNTRY_FICHES_DIR / f"{country_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("country", country_slug, "fiche", text, fallback_path=file_path)
     return file_path
 
 
@@ -1427,11 +1443,9 @@ def parse_region_stats_text(text: str) -> dict[str, Any]:
 # Region database import
 # ---------------------------------------------------------------------------
 
-def import_region_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
+def import_region_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
     """Insert/update dim_region + fact_region_population rows. Returns region_id."""
-    time_cache: dict[int, int] = {
-        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
-    }
+    time_cache = _build_time_cache(conn)
 
     # Upsert dim_region
     cursor = conn.execute(
@@ -1458,17 +1472,7 @@ def import_region_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
         year, _pop, label, color = ann[:4]
         if not isinstance(year, int) or not isinstance(label, str) or not isinstance(color, str):
             continue
-        cur = conn.execute(
-            """
-            INSERT INTO dim_annotation (annotation_label, annotation_color)
-            VALUES (?, ?)
-            ON CONFLICT(annotation_label, annotation_color)
-            DO UPDATE SET annotation_color = excluded.annotation_color
-            RETURNING annotation_id
-            """,
-            (label, color),
-        )
-        annotation_by_year[year] = cur.fetchone()[0]
+        annotation_by_year[year] = _upsert_annotation(conn, label, color)
 
     # Delete existing population rows for this region (to allow re-import)
     conn.execute("DELETE FROM fact_region_population WHERE region_id = ?", (region_id,))
@@ -1482,18 +1486,16 @@ def import_region_stats(conn: sqlite3.Connection, stats: dict[str, Any]) -> int:
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (region_id, time_id, year, population,
-             1 if year in annotation_by_year else 0,
+             bool(year in annotation_by_year),
              annotation_by_year.get(year), "web-import"),
         )
 
     return region_id
 
 
-def import_region_periods(conn: sqlite3.Connection, region_id: int, region_slug: str, sections: list[dict[str, Any]]) -> int:
+def import_region_periods(conn: DbConnection, region_id: int, region_slug: str, sections: list[dict[str, Any]]) -> int:
     """Insert period detail rows into dim_region_period_detail. Returns count of periods inserted."""
-    time_cache: dict[int, int] = {
-        year: tid for tid, year in conn.execute("SELECT time_id, year FROM dim_time")
-    }
+    time_cache = _build_time_cache(conn)
 
     # Remove existing periods for this region
     existing_ids = [
@@ -1502,8 +1504,7 @@ def import_region_periods(conn: sqlite3.Connection, region_id: int, region_slug:
         )
     ]
     if existing_ids:
-        placeholders = ",".join("?" * len(existing_ids))
-        conn.execute(f"DELETE FROM dim_region_period_detail_item WHERE region_period_id IN ({placeholders})", existing_ids)
+        _delete_rows_by_ids(conn, "dim_region_period_detail_item", "region_period_id", existing_ids)
         conn.execute("DELETE FROM dim_region_period_detail WHERE region_id = ?", (region_id,))
 
     count = 0
@@ -1535,17 +1536,15 @@ def import_region_periods(conn: sqlite3.Connection, region_id: int, region_slug:
 
 def save_region_details_file(region_slug: str, text: str) -> Path:
     """Save the region period details raw text as a .txt file in data/region_details/."""
-    REGION_DETAILS_DIR.mkdir(parents=True, exist_ok=True)
     file_path = REGION_DETAILS_DIR / f"{region_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("region", region_slug, "period_detail", text, fallback_path=file_path)
     return file_path
 
 
 def save_region_fiche_file(region_slug: str, text: str) -> Path:
     """Save the region fiche complète as a .txt file in data/region_fiches/."""
-    REGION_FICHES_DIR.mkdir(parents=True, exist_ok=True)
     file_path = REGION_FICHES_DIR / f"{region_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("region", region_slug, "fiche", text, fallback_path=file_path)
     return file_path
 
 
@@ -1630,7 +1629,7 @@ def fetch_and_save_region_flag(region_name: str, region_slug: str) -> str | None
 
 
 def fetch_and_save_region_photo(
-    conn: sqlite3.Connection,
+    conn: DbConnection,
     region_id: int,
     region_name: str,
     region_slug: str,
@@ -1647,7 +1646,7 @@ def fetch_and_save_region_photo(
 
     # Skip if a primary photo already exists
     existing = conn.execute(
-        "SELECT photo_id FROM dim_region_photo WHERE region_id = ? AND is_primary = 1",
+        "SELECT photo_id FROM dim_region_photo WHERE region_id = ? AND is_primary = TRUE",
         (region_id,),
     ).fetchone()
     if existing:
@@ -1700,7 +1699,7 @@ def fetch_and_save_region_photo(
     conn.execute(
         """
         INSERT INTO dim_region_photo (region_id, filename, caption, source_url, attribution, is_primary)
-        VALUES (?, ?, ?, ?, ?, 1)
+        VALUES (?, ?, ?, ?, ?, TRUE)
         """,
         (region_id, filename, region_name, source_url, attribution),
     )

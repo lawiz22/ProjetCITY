@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import time
 import uuid
 from functools import lru_cache
@@ -10,6 +9,10 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
+
+from flask import has_app_context
+
+from app.db import get_db
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CITY_PHOTO_DIR = PROJECT_ROOT / "static" / "images" / "cities"
@@ -52,38 +55,43 @@ def clear_city_photo_manifest_cache() -> None:
     load_city_photo_manifest.cache_clear()
 
 
+def _get_photo_row(conn: Any, slug: str) -> Any:
+    row = conn.execute(
+        """SELECT p.photo_id, p.filename, p.source_url, p.attribution
+           FROM dim_city_photo p
+           JOIN dim_city c ON c.city_id = p.city_id
+           WHERE c.city_slug = ? AND p.is_primary = TRUE
+           LIMIT 1""",
+        (slug,),
+    ).fetchone()
+    if row:
+        return row
+    return conn.execute(
+        """SELECT p.photo_id, p.filename, p.source_url, p.attribution
+           FROM dim_city_photo p
+           JOIN dim_city c ON c.city_id = p.city_id
+           WHERE c.city_slug = ?
+           ORDER BY p.photo_id
+           LIMIT 1""",
+        (slug,),
+    ).fetchone()
+
+
 # ---------------------------------------------------------------------------
 # Primary photo helper (DB-first, fallback to manifest)
 # ---------------------------------------------------------------------------
 
 def get_city_photo(slug: str, conn: Any = None) -> dict[str, Any]:
     """Return the primary photo for a city. Checks DB first, then manifest."""
-    if conn is not None:
-        row = conn.execute(
-            """SELECT p.photo_id, p.filename, p.source_url, p.attribution
-               FROM dim_city_photo p
-               JOIN dim_city c ON c.city_id = p.city_id
-               WHERE c.city_slug = ? AND p.is_primary = 1
-               LIMIT 1""",
-            (slug,),
-        ).fetchone()
-        if row:
-            return {
-                "photo_path": f"images/cities/{slug}/{row['filename']}",
-                "photo_source": row["source_url"],
-                "photo_attribution": row["attribution"],
-                "has_photo": True,
-            }
-        # Check if any photo exists (pick first)
-        row = conn.execute(
-            """SELECT p.photo_id, p.filename, p.source_url, p.attribution
-               FROM dim_city_photo p
-               JOIN dim_city c ON c.city_id = p.city_id
-               WHERE c.city_slug = ?
-               ORDER BY p.photo_id
-               LIMIT 1""",
-            (slug,),
-        ).fetchone()
+    connection = conn
+    if connection is None and has_app_context():
+        try:
+            connection = get_db()
+        except Exception:
+            connection = None
+
+    if connection is not None:
+        row = _get_photo_row(connection, slug)
         if row:
             return {
                 "photo_path": f"images/cities/{slug}/{row['filename']}",
@@ -249,7 +257,7 @@ def save_photo_to_library(
     # If set_primary, unset other primaries
     if set_primary:
         conn.execute(
-            "UPDATE dim_city_photo SET is_primary = 0 WHERE city_id = ?", (city_id,)
+            "UPDATE dim_city_photo SET is_primary = FALSE WHERE city_id = ?", (city_id,)
         )
 
     # Check if city has no photos yet — auto-set primary
@@ -266,7 +274,7 @@ def save_photo_to_library(
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            RETURNING photo_id""",
         (city_id, unique_name, caption, source_url, attribution,
-         1 if set_primary else 0,
+         bool(set_primary),
          exif["lat"], exif["lon"], exif["date"], exif["camera"]),
     )
     photo_id = cursor.fetchone()[0]
@@ -307,7 +315,7 @@ def delete_photo_from_library(conn: Any, photo_id: int, city_slug: str) -> bool:
         ).fetchone()
         if next_row:
             conn.execute(
-                "UPDATE dim_city_photo SET is_primary = 1 WHERE photo_id = ?",
+                "UPDATE dim_city_photo SET is_primary = TRUE WHERE photo_id = ?",
                 (next_row["photo_id"],),
             )
 
@@ -318,10 +326,10 @@ def delete_photo_from_library(conn: Any, photo_id: int, city_slug: str) -> bool:
 def set_photo_primary(conn: Any, photo_id: int, city_id: int) -> bool:
     """Set a photo as the primary for its city."""
     conn.execute(
-        "UPDATE dim_city_photo SET is_primary = 0 WHERE city_id = ?", (city_id,)
+        "UPDATE dim_city_photo SET is_primary = FALSE WHERE city_id = ?", (city_id,)
     )
     conn.execute(
-        "UPDATE dim_city_photo SET is_primary = 1 WHERE photo_id = ?", (photo_id,)
+        "UPDATE dim_city_photo SET is_primary = TRUE WHERE photo_id = ?", (photo_id,)
     )
     conn.commit()
     return True
@@ -1284,7 +1292,7 @@ def save_region_photo_to_library(
     dest.write_bytes(file_bytes)
 
     if set_primary:
-        conn.execute("UPDATE dim_region_photo SET is_primary = 0 WHERE region_id = ?", (region_id,))
+        conn.execute("UPDATE dim_region_photo SET is_primary = FALSE WHERE region_id = ?", (region_id,))
 
     existing_count = conn.execute(
         "SELECT COUNT(*) FROM dim_region_photo WHERE region_id = ?", (region_id,)
@@ -1296,7 +1304,7 @@ def save_region_photo_to_library(
         """INSERT INTO dim_region_photo
            (region_id, filename, caption, source_url, attribution, is_primary)
            VALUES (?, ?, ?, ?, ?, ?) RETURNING photo_id""",
-        (region_id, unique_name, caption, source_url, attribution, 1 if set_primary else 0),
+        (region_id, unique_name, caption, source_url, attribution, bool(set_primary)),
     )
     photo_id = cursor.fetchone()[0]
     conn.commit()
@@ -1327,7 +1335,7 @@ def delete_region_photo_from_library(conn: Any, photo_id: int, region_slug: str)
         ).fetchone()
         if next_row:
             conn.execute(
-                "UPDATE dim_region_photo SET is_primary = 1 WHERE photo_id = ?",
+                "UPDATE dim_region_photo SET is_primary = TRUE WHERE photo_id = ?",
                 (next_row["photo_id"],),
             )
     conn.commit()
@@ -1336,8 +1344,8 @@ def delete_region_photo_from_library(conn: Any, photo_id: int, region_slug: str)
 
 def set_region_photo_primary(conn: Any, photo_id: int, region_id: int) -> None:
     """Set a region photo as the primary."""
-    conn.execute("UPDATE dim_region_photo SET is_primary = 0 WHERE region_id = ?", (region_id,))
-    conn.execute("UPDATE dim_region_photo SET is_primary = 1 WHERE photo_id = ?", (photo_id,))
+    conn.execute("UPDATE dim_region_photo SET is_primary = FALSE WHERE region_id = ?", (region_id,))
+    conn.execute("UPDATE dim_region_photo SET is_primary = TRUE WHERE photo_id = ?", (photo_id,))
     conn.commit()
 
 
@@ -1497,7 +1505,7 @@ def save_country_photo_to_library(
     dest.write_bytes(file_bytes)
 
     if set_primary:
-        conn.execute("UPDATE dim_country_photo SET is_primary = 0 WHERE country_id = ?", (country_id,))
+        conn.execute("UPDATE dim_country_photo SET is_primary = FALSE WHERE country_id = ?", (country_id,))
 
     existing_count = conn.execute(
         "SELECT COUNT(*) FROM dim_country_photo WHERE country_id = ?", (country_id,)
@@ -1509,7 +1517,7 @@ def save_country_photo_to_library(
         """INSERT INTO dim_country_photo
            (country_id, filename, caption, source_url, attribution, is_primary)
            VALUES (?, ?, ?, ?, ?, ?) RETURNING photo_id""",
-        (country_id, unique_name, caption, source_url, attribution, 1 if set_primary else 0),
+        (country_id, unique_name, caption, source_url, attribution, bool(set_primary)),
     )
     photo_id = cursor.fetchone()[0]
     conn.commit()
@@ -1540,7 +1548,7 @@ def delete_country_photo_from_library(conn: Any, photo_id: int, country_slug: st
         ).fetchone()
         if next_row:
             conn.execute(
-                "UPDATE dim_country_photo SET is_primary = 1 WHERE photo_id = ?",
+                "UPDATE dim_country_photo SET is_primary = TRUE WHERE photo_id = ?",
                 (next_row["photo_id"],),
             )
     conn.commit()
@@ -1549,8 +1557,8 @@ def delete_country_photo_from_library(conn: Any, photo_id: int, country_slug: st
 
 def set_country_photo_primary(conn: Any, photo_id: int, country_id: int) -> None:
     """Set a country photo as the primary."""
-    conn.execute("UPDATE dim_country_photo SET is_primary = 0 WHERE country_id = ?", (country_id,))
-    conn.execute("UPDATE dim_country_photo SET is_primary = 1 WHERE photo_id = ?", (photo_id,))
+    conn.execute("UPDATE dim_country_photo SET is_primary = FALSE WHERE country_id = ?", (country_id,))
+    conn.execute("UPDATE dim_country_photo SET is_primary = TRUE WHERE photo_id = ?", (photo_id,))
     conn.commit()
 
 

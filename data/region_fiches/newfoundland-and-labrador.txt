@@ -1,0 +1,105 @@
+# Newfoundland and Labrador — Fiche Complète
+
+## 📍 Informations Générales
+
+| Critère               | Donnée                                      |
+|-----------------------|---------------------------------------------|
+| Région                | Newfoundland and Labrador                    |
+| Pays                  | Canada                                      |
+| Capitale régionale    | St. John's                                  |
+| Plus grande ville     | St. John's                                  |
+| Statut administratif  | Province canadienne                         |
+| Superficie            | 405 212 km² (4e plus grande province du Canada) |
+| Population            | 521 758 hab. (2023, Statistique Canada)    |
+| Densité               | 1,29 hab./km²                              |
+| Langues officielles   | Anglais                                     |
+| Devise/Symboles       | « Quaerite Prime Regnum Dei » (Cherchez d'abord le Royaume de Dieu) ; symbole : morue, phoque, iceberg |
+
+## 👥 Population & Démographie
+
+| Année | Population | Croissance annuelle (%) | Taux de fécondité | Espérance de vie (hommes/femmes) | Âge médian | Diversité ethnique (%) | Immigration nette | Langues parlées principales |
+|-------|------------|------------------------|-------------------|---------------------------------|------------|-----------------------|-------------------|-----------------------------|
+| 2000  | 565 000    | -                      | 1,5               | 75,0 / 80,5                     | 38 ans     | Européenne majoritaire | Faible            | Anglais (98%), français (1%) |
+| 2010  | 514 000    | -0,9                   | 1,4               | 77,0 / 82,0                     | 42 ans     | Européenne majoritaire | Faible            | Anglais (98%), français (1%) |
+| 2023  | 521 758    | +0,15                  | 1,3               | 78,5 / 83,2                     | 45 ans     | Majoritairement blanche (90%), Autochtones (5%), autres (5%) | Modérée (retour de jeunes) | Anglais (98%), français (1%), Inuktitut (minoritaire) |
+
+- La population est en légère reprise après une décennie de déclin, grâce à des politiques d’attraction et au retour de jeunes diplômés.
+- Forte proportion de population âgée (plus de 20% > 65 ans).
+- Immigration modérée, surtout en provenance d’Asie et d’Europe.
+
+## 📐 Géographie
+
+| Critère             | Donnée                                                                                      |
+|---------------------|---------------------------------------------------------------------------------------------|
+| Superficie          | 405 212 km²                                                                                |
+| Frontières          | Océan Atlantique à l’est, Québec à l’ouest, mer du Labrador au nord                         |
+| Relief              | Montagnes Appalachian, plateaux, fjords, côtes découpées                                   |
+| Point culminant     | Mont Caubvick (814 m)                                                                      |
+| Principaux cours d'eau | Fleuve Churchill, rivière Exploits, rivière Humber                                        |
+| Climat              | Subarctique à subpolaire, hivers longs et froids, étés frais et humides                    |
+| Parcs naturels      | Parc national Gros Morne (UNESCO), parc national Terra Nova, parc provincial de Mealy Mountains |
+
+- La province est composée de deux parties distinctes : l’île de Terre-Neuve et la région continentale du Labrador.
+- Le climat est plus rigoureux au Labrador, avec des hivers plus longs et plus froids.
+
+## 🏛️ Économie
+
+| Critère                  | Donnée                                                                                   |
+|--------------------------|------------------------------------------------------------------------------------------|
+| PIB régional (2023)      | Environ 33 milliards CAD (4,5% du PIB canadien)                                          |
+| Secteurs principaux (%)  | Services (55%), Industrie extractive (20%), Construction (10%), Agriculture/Pêche (5%)   |
+| Principales industries   | Pêche (morue, crabe, homard), exploitation minière (fer, nickel, zinc), pétrole offshore (Terre-Neuve), tourisme |
+| Entreprises majeures     | Nalcor Energy, Vale Newfoundland & Labrador, Ocean Choice International                  |
+| Défis économiques        | Déclin historique de la pêche, dépendance aux ressources naturelles, éloignement géographique, vieillissement de la population |
+| Relations économiques    | Forte dépendance aux transferts fédéraux, exportations vers USA et Europe, intégration progressive avec le corridor économique atlantique |
+
+- L’économie est fortement liée aux ressources naturelles, avec un recentrage sur l’énergie renouvelable et le tourisme durable.
+- Le secteur pétrolier offshore reste un moteur clé, bien que soumis à la volatilité des prix mondiaux.
+
+## 🎓 Éducation & Culture
+
+| Critère                  | Donnée                                                                                   |
+|--------------------------|------------------------------------------------------------------------------------------|
+| Universités principales  | Memorial University of Newfoundland (St. John’s), College of the North Atlantic         |
+| Faits culturels marquants| Forte tradition orale, musique folklorique celtique et irlandaise, littérature régionale (ex. Michael Crummey) |
+| Patrimoine               | Sites historiques de pêche, architecture coloniale britannique, vestiges autochtones    |
+| Festivals                | Festival de musique de St. John's, George Street Festival, Labrador Winter Games        |
+| Identité régionale       | Forte identité maritime, attachement à la mer, culture autochtone et coloniale mélangée |
+
+- La province valorise son patrimoine unique, notamment via le tourisme culturel et les musées.
+- La Memorial University est un centre de recherche clé sur l’Arctique et les ressources marines.
+
+## 🏥 Santé & Services
+
+| Critère                  | Donnée                                                                                   |
+|--------------------------|------------------------------------------------------------------------------------------|
+| Système de santé         | Régie provinciale de la santé (Eastern Health, Central Health, Labrador-Grenfell Health)|
+| Espérance de vie         | 78,5 ans (hommes), 83,2 ans (femmes)                                                    |
+| Principaux hôpitaux      | Health Sciences Centre (St. John’s), Central Health (Grand Falls-Windsor), Labrador Health Centre (Happy Valley-Goose Bay) |
+| Défis sanitaires         | Accès aux soins en zones rurales et nordiques, maladies chroniques, santé mentale       |
+
+- Les infrastructures hospitalières sont concentrées dans les grandes villes, avec des efforts pour améliorer la télémédecine dans les zones isolées.
+
+## 🏙️ Principales Villes
+
+| Ville           | Population (2023) | Rôle économique                | Note (importance régionale) |
+|-----------------|-------------------|-------------------------------|-----------------------------|
+| St. John's      | 114 000           | Capitale, centre administratif, port, tourisme | ⭐⭐⭐⭐⭐                      |
+| Mount Pearl     | 23 000            | Banlieue résidentielle, industrie légère       | ⭐⭐⭐                        |
+| Corner Brook    | 19 000            | Industrie papetière, services                    | ⭐⭐                         |
+| Happy Valley-Goose Bay | 8 000        | Centre militaire, services régionaux            | ⭐⭐                         |
+| Gander          | 11 000            | Transport aérien, services                        | ⭐⭐                         |
+
+- St. John’s concentre la majorité des activités économiques et culturelles.
+- Corner Brook est un pôle industriel important sur la côte ouest de Terre-Neuve.
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** : Vieillissement démographique, fuite des jeunes vers le continent, dépendance aux ressources naturelles, accès aux services en zones isolées.
+- **Projets d'infrastructure** : Développement du réseau routier Labrador-Québec, expansion des capacités portuaires à St. John’s, investissements dans les énergies renouvelables (hydroélectricité, éolien).
+- **Tendances démographiques** : Stabilisation de la population grâce à l’immigration et au retour des jeunes, mais vieillissement persistant.
+- **Perspectives économiques** : Diversification vers les technologies marines, tourisme durable, valorisation des ressources minières et énergétiques, renforcement des liens commerciaux avec l’Atlantique canadien et les États-Unis.
+
+---
+
+Newfoundland and Labrador se distingue par son immense territoire, son identité maritime forte et ses ressources naturelles abondantes, mais fait face à des défis structurels liés à son isolement et à sa démographie. Sa capacité à diversifier son économie et à moderniser ses infrastructures sera clé pour son avenir.
