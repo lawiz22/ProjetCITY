@@ -694,4 +694,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import os as _os
+    if _os.environ.get("RAILWAY_ENVIRONMENT"):
+        print("Skipping SQLite build on Railway (PostgreSQL backend).")
+    else:
+        main()
