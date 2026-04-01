@@ -172,12 +172,23 @@ def main() -> None:
 
     for stmt in statements:
         clean = stmt.strip()
-        if not clean or clean.startswith("--"):
-            if clean.startswith("-- [SKIPPED"):
-                skip_count += 1
+        if not clean:
+            continue
+        # Strip leading comment lines — but keep the SQL that follows them.
+        lines = clean.splitlines()
+        sql_lines = []
+        for ln in lines:
+            stripped_ln = ln.strip()
+            if stripped_ln.startswith("--"):
+                if stripped_ln.startswith("-- [SKIPPED"):
+                    skip_count += 1
+                continue
+            sql_lines.append(ln)
+        executable = "\n".join(sql_lines).strip()
+        if not executable:
             continue
         try:
-            conn.execute(clean)
+            conn.execute(executable)
             conn.commit()
             ok_count += 1
         except psycopg.errors.DuplicateTable:
@@ -189,7 +200,7 @@ def main() -> None:
         except Exception as exc:
             conn.rollback()
             # Log but don't crash — some statements are best-effort
-            short = clean[:120].replace("\n", " ")
+            short = executable[:120].replace("\n", " ")
             print(f"[init_postgres] WARN: {exc.__class__.__name__}: {short}…")
 
     conn.close()
