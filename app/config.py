@@ -3,9 +3,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from scripts.build_city_database import DATABASE_FILE
-
 from .db import build_sqlite_url, is_postgres_url
+
+# Default SQLite database path (same value as scripts/build_city_database.py)
+_DEFAULT_DB_FILE = Path(__file__).resolve().parents[1] / "data" / "city_analysis.db"
 
 
 def _resolve_sqlite_path(raw_value: str | None, default_path: Path) -> Path:
@@ -33,10 +34,10 @@ class Config:
         DATABASE_BACKEND = "postgresql" if is_postgres_url(_DATABASE_URL_ENV) else "sqlite"
         DATABASE_PATH = (
             None if DATABASE_BACKEND == "postgresql"
-            else _resolve_sqlite_path(_DATABASE_URL_ENV, DATABASE_FILE)
+            else _resolve_sqlite_path(_DATABASE_URL_ENV, _DEFAULT_DB_FILE)
         )
     else:
-        DATABASE_PATH = _resolve_sqlite_path(_DATABASE_PATH_ENV or None, DATABASE_FILE)
+        DATABASE_PATH = _resolve_sqlite_path(_DATABASE_PATH_ENV or None, _DEFAULT_DB_FILE)
         DATABASE_URL = build_sqlite_url(DATABASE_PATH)
         DATABASE_BACKEND = "sqlite"
 

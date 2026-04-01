@@ -2,49 +2,49 @@
 
 ## 📍 Informations Générales
 
-| Catégorie      | Détails                          |
-|----------------|---------------------------------|
-| Ville          | Sainte-Julie                    |
-| État/Province  | Québec                         |
-| Surnom         | "La Ville aux Fleurs" 🌸 / "La Porte de la Montérégie" 🚪 |
-| Statut         | Ville                           |
-| Comté/Région   | Marguerite-D'Youville           |
-| Maire          | Nathalie Simon (depuis 2021)   |
-| Fondation      | 1854 (paroisse), statut ville en 1971 |
-| Université     | Proximité de l'Université de Montréal (campus Longueuil) |
+| Catégorie       | Détails                        |
+|-----------------|-------------------------------|
+| Ville           | Sainte-Julie                  |
+| État/Province   | Québec                       |
+| Surnom          | "Ville fleurie" 🌸 / "La ville aux 100 parcs" 🌳 |
+| Statut          | Municipalité                  |
+| Comté/Région    | Marguerite-D'Youville         |
+| Maire           | André Bergeron (depuis 2013)  |
+| Fondation       | 1854                         |
+| Université      | Aucune université sur place (proximité de l'Université de Sherbrooke et Université de Montréal) |
 
 ---
 
 ## 👥 Population
 
-| Année           | Population    |
-|-----------------|---------------|
-| 2000            | 23 000        |
-| 2010            | 28 000        |
-| 2020            | 29 500        |
-| 2023 (est.)     | ~30 000       |
-| Grand Montréal (RMR) | ~4 000 000   |
+| Année           | Population                   |
+|-----------------|------------------------------|
+| 2000            | 19 000                       |
+| 2010            | 26 000                       |
+| 2020            | 29 500                       |
+| 2023 (est.)     | ~30 000                      |
+| Grand Montréal (RMR) | ~4 000 000               |
 
-📈 Sainte-Julie a connu une croissance démographique régulière, principalement grâce à son attractivité résidentielle dans la grande région de Montréal.  
-🥇 Elle est l’une des villes les plus peuplées de la Rive-Sud de Montréal.  
-🌍 La population est majoritairement francophone avec une proportion croissante de familles et de jeunes professionnels.
+📈 Sainte-Julie connaît une croissance démographique régulière, principalement due à son attractivité résidentielle et sa proximité avec Montréal.  
+🥇 Elle est l’une des municipalités à la croissance la plus rapide dans la Montérégie.  
+🌍 La population est majoritairement francophone, avec une proportion croissante de familles et jeunes professionnels.
 
 ---
 
 ## 📐 Géographie & Densité
 
-| Donnée         | Valeur                          |
-|----------------|--------------------------------|
-| Superficie     | ~72 km²                        |
-| Densité        | ~417 hab./km²                  |
-| Plan d'eau     | Rivière Richelieu              |
+| Donnée          | Valeur                       |
+|-----------------|------------------------------|
+| Superficie      | ~72 km²                      |
+| Densité        | ~420 hab./km²                |
+| Plan d'eau      | Rivière Richelieu            |
 | Relief         | Plaines agricoles et zones boisées |
-| Altitude       | ~20 m                         |
+| Altitude       | ~20 m                       |
 
 Distances :  
-- 30 km à l’est de Montréal  
-- 60 km au sud de Laval  
-- 70 km au nord de la frontière américaine (New York)
+- 35 km à l’est de Montréal  
+- 70 km au sud-ouest de Trois-Rivières  
+- 90 km au nord de la frontière américaine (Vermont)
 
 ---
 
@@ -52,130 +52,128 @@ Distances :
 
 Secteurs Principaux :
 
-🎓 **Services éducatifs** — Présence d’écoles primaires et secondaires, proximité des institutions montréalaises.  
-🏥 **Santé et services sociaux** — Cliniques et services de santé locaux, avec accès aux hôpitaux de la Rive-Sud.  
-💻 **Technologies de l’information** — Croissance de PME dans les technologies et services numériques.  
+🎓 **Services publics et éducation** — Présence d’écoles primaires et secondaires, services municipaux développés.  
+🏥 **Santé et services sociaux** — Cliniques locales et accès aux hôpitaux régionaux.  
+💻 **Technologies et PME** — Croissance de petites entreprises dans les technologies et services.  
 🏭 **Industrie légère** — Zones industrielles avec entreprises manufacturières et logistiques.  
-🏛️ **Commerce de détail** — Centres commerciaux et commerces de proximité dynamiques.
+🏛️ **Commerce de détail** — Centres commerciaux et commerces de proximité en expansion.
 
-Sainte-Julie est une ville résidentielle avec un tissu économique diversifié, bénéficiant de sa proximité avec Montréal et son accès aux infrastructures régionales.
+Sainte-Julie est une ville résidentielle avec un tissu économique diversifié, favorisant l’emploi local tout en étant un pôle d’habitation pour les travailleurs de la grande région métropolitaine.
 
 ---
 
 ## 🎓 Éducation
 
-| Institution               | Type           | Étudiants approximatifs |
-|--------------------------|----------------|-------------------------|
-| École secondaire de Sainte-Julie | Secondaire     | ~1 000                  |
-| Cégep Édouard-Montpetit (Longueuil) | Collège        | ~7 000                  |
-| Université de Montréal (campus Longueuil) | Université     | ~5 000                  |
+| Institution                | Type          | Étudiants approximatifs |
+|----------------------------|---------------|-------------------------|
+| École secondaire André-Laurendeau | Secondaire    | ~1 000                  |
+| École primaire Sainte-Julie | Primaire      | ~1 500                  |
+| Cégep régional (à proximité) | Collège      | ~5 000 (dans la région) |
 
-La ville offre un accès facile à des établissements d’enseignement de qualité, favorisant le développement local et régional.
+La ville met l’accent sur l’éducation de qualité avec plusieurs écoles publiques et privées, ainsi que des programmes extrascolaires variés.
 
 ---
 
 ## 🏥 Santé
 
-- **Centre de santé et de services sociaux (CSSS) Marguerite-D'Youville** — Services de santé primaires et spécialisés.  
+- **Centre de santé et de services sociaux (CSSS) Marguerite-D'Youville** — Offre des soins de première ligne et services communautaires.  
 - Spécialités : soins ambulatoires, services de réadaptation, santé mentale.  
-- Employés : environ 500 professionnels de la santé dans la région.  
-- Affiliations : Collaboration avec les centres hospitaliers de Longueuil et Montréal.
+- Environ 300 employés dans les services de santé locaux.  
+- Affiliations avec les hôpitaux régionaux de Longueuil et Montréal pour les soins spécialisés.
 
 ---
 
 ## 🎵 Culture & Musique
 
-| Artiste / Groupe / Personnalité | Lien avec la ville             |
-|---------------------------------|-------------------------------|
-| Les Cowboys Fringants            | Groupe québécois populaire, concerts fréquents en Montérégie |
-| Marie-Mai                       | Chanteuse pop-rock originaire de la région |
-| Daniel Boucher                  | Auteur-compositeur-interprète québécois |
+| Artiste / Groupe / Personnalité | Lien avec la ville                   |
+|---------------------------------|------------------------------------|
+| Les Cowboys Fringants            | Groupe québécois apprécié dans la région |
+| Marie-Mai                       | Chanteuse originaire de la Montérégie (proximité) |
 
-Sainte-Julie organise annuellement des festivals culturels, notamment le Festival de la Fête nationale et des événements artistiques locaux. La ville dispose aussi d’une bibliothèque municipale dynamique et d’un centre culturel.
+Sainte-Julie organise plusieurs événements culturels annuels, notamment le Festival de la musique et des arts, et dispose d’une bibliothèque municipale dynamique. La ville valorise la culture locale avec des activités pour tous les âges.
 
 ---
 
 ## 🌿 Environnement & Énergie
 
-- Sainte-Julie est engagée dans la gestion durable des espaces verts avec plus de 20 parcs et sentiers.  
-- Initiatives locales pour la réduction des déchets et le compostage.  
-- Développement de pistes cyclables pour encourager la mobilité douce.  
-- Enjeux : préservation des terres agricoles face à l’urbanisation croissante.  
-- Participation à des programmes régionaux de protection de la rivière Richelieu.
+- Plus de 100 parcs et espaces verts, favorisant la biodiversité locale.  
+- Initiatives municipales pour la gestion durable des déchets et le compostage.  
+- Promotion des transports actifs (pistes cyclables et sentiers pédestres).  
+- Enjeux : protection des berges de la rivière Richelieu et gestion de la croissance urbaine pour limiter l’étalement.
 
 ---
 
 ## 🏈 Sports & Loisirs
 
-| Équipe               | Sport       | Ligue                |
-|----------------------|-------------|----------------------|
-| Les Panthères de Sainte-Julie | Hockey sur glace | Ligue locale junior  |
-| Club de soccer de Sainte-Julie | Soccer      | Ligue régionale      |
+| Équipe                 | Sport        | Ligue               |
+|-----------------------|--------------|---------------------|
+| Les Panthères de Sainte-Julie | Hockey sur glace | Ligue locale       |
+| Club de soccer Sainte-Julie    | Soccer       | Ligue régionale     |
 
-La ville offre de nombreuses infrastructures sportives : patinoires, terrains de soccer, piscines, ainsi que des sentiers pour la randonnée et le vélo.
+La ville offre de nombreuses infrastructures sportives : patinoires, terrains de soccer, piscines, ainsi que des sentiers pour la randonnée et le vélo. Le parc régional de la rivière Richelieu est un lieu prisé pour les activités de plein air.
 
 ---
 
 ## 🚗 Transport
 
-| Mode            | Détails                                      |
-|-----------------|----------------------------------------------|
-| Autoroute       | Autoroute 20 (Transcanadienne), Route 229    |
-| Aéroport        | Aéroport Montréal-Trudeau (YUL) à 35 km      |
-| Transport en commun | Réseau de bus CIT Sorel-Varennes, accès au métro Longueuil via bus |
-| Train           | Service de train de banlieue vers Montréal (via Saint-Lambert) |
+| Mode                | Détails                                      |
+|---------------------|----------------------------------------------|
+| Autoroute           | Autoroute 20 (Transcanadienne), Route 229    |
+| Aéroport            | Aéroport Montréal-Trudeau (YUL) à 40 km      |
+| Transport en commun  | Réseau de bus CIT de la Rive-Sud              |
+| Train               | Gare de Sainte-Julie (service de train de banlieue vers Montréal) |
 
-Sainte-Julie bénéficie d’un accès rapide à Montréal et aux grands axes routiers, facilitant les déplacements domicile-travail.
+Sainte-Julie bénéficie d’une bonne desserte routière et d’un accès rapide à Montréal, facilitant les déplacements quotidiens des résidents.
 
 ---
 
 ## 🌡️ Climat
 
-| Saison          | Température moyenne                      |
-|-----------------|-----------------------------------------|
-| Hiver (Janvier) | -8 °C                                   |
-| Printemps (Avril) | 8 °C                                  |
-| Été (Juillet)   | 23 °C                                   |
-| Automne (Octobre) | 10 °C                                 |
+| Saison        | Température moyenne |
+|---------------|---------------------|
+| Hiver (Jan)   | -8 °C               |
+| Printemps (Avr)| 8 °C                |
+| Été (Juil)    | 23 °C               |
+| Automne (Oct) | 10 °C               |
 
-Climat continental humide avec hivers froids et neigeux, étés chauds et humides. Précipitations réparties tout au long de l’année.
+Climat continental humide avec hivers froids et enneigés, étés chauds et humides. Précipitations bien réparties tout au long de l’année, avec un enneigement important en hiver.
 
 ---
 
 ## 🏙️ Quartiers Notables
 
-| Quartier          | Caractéristique                              |
-|-------------------|---------------------------------------------|
-| Vieux Sainte-Julie | Centre historique, architecture patrimoniale |
-| Quartier des Fleurs | Résidentiel, espaces verts abondants        |
-| Parc Industriel    | Zone économique et industrielle              |
-| Le Boisé           | Quartier récent, mixte résidentiel et commercial |
-| Domaine de la Rivière | Proximité de la rivière Richelieu, secteur naturel |
+| Quartier           | Caractéristique                             |
+|--------------------|--------------------------------------------|
+| Quartier Saint-Amable | Zone résidentielle familiale avec écoles  |
+| Quartier La Seigneurie | Secteur mixte résidentiel et commercial  |
+| Quartier Les Jardins | Secteur récent avec nombreux parcs        |
+| Quartier Le Vieux Sainte-Julie | Centre historique avec bâtiments patrimoniaux |
+| Quartier Industriel  | Zone dédiée aux entreprises et industries  |
 
 ---
 
-## 📊 Comparaison — Grandes Villes de Québec (Rive-Sud)
+## 📊 Comparaison — Grandes Villes de Québec (Montérégie)
 
-| Ville           | Population  | Caractéristique                       |
-|-----------------|-------------|-------------------------------------|
-| **Sainte-Julie** | **30 000** | Ville résidentielle en pleine croissance |
-| Longueuil       | 250 000     | Centre urbain majeur et économique   |
-| Brossard        | 90 000      | Ville multiculturelle et commerciale |
-| Saint-Jean-sur-Richelieu | 95 000 | Ville industrielle et agricole       |
+| Ville           | Population       | Caractéristique                          |
+|-----------------|------------------|-----------------------------------------|
+| **Sainte-Julie** | **30 000**       | Croissance résidentielle rapide         |
+| Longueuil       | 250 000          | 3e plus grande ville du Québec           |
+| Boucherville    | 43 000           | Ville résidentielle et industrielle      |
+| Saint-Jean-sur-Richelieu | 95 000    | Ville historique et centre industriel    |
 
 ---
 
 ## 💡 Le Saviez-Vous ?
 
-- 🌸 **Surnom "Ville aux Fleurs"** — Sainte-Julie est reconnue pour ses nombreux espaces verts et ses concours floraux annuels qui embellissent la ville.  
-- 🚪 **Porte de la Montérégie** — Située à l’entrée de la région agricole de la Montérégie, elle est un point de passage stratégique vers le sud du Québec.  
-- 🏞️ **Rivière Richelieu** — La ville borde cette rivière historique, qui fut une voie de transport importante dès la Nouvelle-France.  
-- 🏡 **Croissance résidentielle** — Sainte-Julie est l’une des villes de la Rive-Sud qui a connu la plus forte croissance démographique depuis 20 ans.  
-- 🎭 **Centre culturel** — Le Centre culturel de Sainte-Julie accueille chaque année des dizaines d’événements artistiques et spectacles.  
-- 🚲 **Mobilité durable** — La ville a développé un réseau de pistes cyclables de plus de 30 km pour encourager les déplacements actifs.  
-- 🏞️ **Parc régional** — Le parc de la Rivière Richelieu offre des sentiers de randonnée et des activités nautiques en été.  
-- 🛤️ **Histoire ferroviaire** — Sainte-Julie a été traversée par une ligne de chemin de fer importante au XIXe siècle, favorisant son développement industriel.  
-- 🎉 **Fête nationale** — La ville organise une des plus grandes célébrations de la Saint-Jean-Baptiste sur la Rive-Sud.  
-- 🌿 **Agriculture urbaine** — Plusieurs initiatives locales encouragent les jardins communautaires et l’agriculture urbaine.  
-- 🏀 **Sports amateurs** — Le hockey et le soccer sont très populaires, avec des clubs actifs et des infrastructures modernes.  
-- 🏫 **Proximité universitaire** — Bien que Sainte-Julie ne possède pas d’université, elle bénéficie de sa proximité avec les campus de Longueuil et Montréal, favorisant l’accès à l’éducation supérieure.
+- 🌳 **Plus de 100 parcs** — Sainte-Julie est reconnue pour son vaste réseau de parcs, offrant un accès facile à la nature pour ses résidents.  
+- 🚲 **Pistes cyclables étendues** — La ville investit dans un réseau cyclable de plus de 50 km, favorisant les déplacements actifs.  
+- 🏡 **Croissance démographique soutenue** — Entre 2000 et 2020, la population a augmenté de plus de 50 %.  
+- 🏞️ **Rivière Richelieu** — Ce cours d’eau historique a joué un rôle clé dans le développement économique et culturel de la région.  
+- 🎭 **Festival de la musique** — Un événement annuel qui attire des artistes locaux et régionaux, dynamisant la scène culturelle.  
+- 🏰 **Patrimoine religieux** — L’église Saint-Julien-de-Brioude, construite au 19e siècle, est un monument historique important.  
+- ♻️ **Engagement écologique** — Sainte-Julie a mis en place un programme de compostage obligatoire pour réduire les déchets.  
+- 🚌 **Transport en commun performant** — Le réseau CIT Rive-Sud permet des connexions efficaces vers Montréal et les villes environnantes.  
+- 🏀 **Loisirs pour tous** — La ville offre des programmes sportifs pour tous les âges, allant du hockey au yoga.  
+- 🌾 **Agriculture urbaine** — Plusieurs jardins communautaires encouragent la production locale et la sensibilisation à l’environnement.  
+- 🏠 **Ville fleurie** — Sainte-Julie a remporté plusieurs prix pour la qualité de ses aménagements paysagers et son cadre de vie.  
+- 📚 **Bibliothèque moderne** — La bibliothèque municipale est un centre culturel important avec des activités variées pour les familles.
