@@ -286,6 +286,12 @@ BOOLEAN_COLUMNS: dict[str, set[str]] = {
 }
 
 
+def clean_text_value(value: Any) -> tuple[Any, bool]:
+    if isinstance(value, str) and "\x00" in value:
+        return value.replace("\x00", ""), True
+    return value, False
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Migrate ProjetCITY data from SQLite to PostgreSQL/PostGIS."
@@ -330,26 +336,44 @@ def sqlite_table_exists(sqlite_conn: sqlite3.Connection, table_name: str) -> boo
     return row is not None
 
 
-def fetch_sqlite_rows(sqlite_conn: sqlite3.Connection, spec: TableCopySpec) -> list[tuple[Any, ...]]:
-    if not sqlite_table_exists(sqlite_conn, spec.name):
-        return []
+def collect_invalid_source_rows(sqlite_conn: sqlite3.Connection) -> dict[str, set[int]]:
+    invalid_rows: dict[str, set[int]] = {}
+    for table_name, rowid, _parent_table, _fkid in sqlite_conn.execute("PRAGMA foreign_key_check"):
+        invalid_rows.setdefault(table_name, set()).add(int(rowid))
+    return invalid_rows
 
-    sql = f"SELECT {', '.join(spec.columns)} FROM {spec.name}"
+
+def fetch_sqlite_rows(
+    sqlite_conn: sqlite3.Connection,
+    spec: TableCopySpec,
+    invalid_source_rows: dict[str, set[int]] | None = None,
+) -> tuple[list[tuple[Any, ...]], int]:
+    if not sqlite_table_exists(sqlite_conn, spec.name):
+        return [], 0
+
+    invalid_rowids = invalid_source_rows.get(spec.name, set()) if invalid_source_rows else set()
+    sql = f"SELECT rowid AS __rowid__, {', '.join(spec.columns)} FROM {spec.name}"
     rows = sqlite_conn.execute(sql).fetchall()
     transformed: list[tuple[Any, ...]] = []
     bool_columns = BOOLEAN_COLUMNS.get(spec.name, set())
+    sanitized_values = 0
 
     for row in rows:
+        if invalid_rowids and row["__rowid__"] in invalid_rowids:
+            continue
         values: list[Any] = []
         for column in spec.columns:
             value = row[column]
             if column in bool_columns and value is not None:
                 values.append(bool(value))
             else:
-                values.append(value)
+                cleaned_value, was_sanitized = clean_text_value(value)
+                if was_sanitized:
+                    sanitized_values += 1
+                values.append(cleaned_value)
         transformed.append(tuple(values))
 
-    return transformed
+    return transformed, sanitized_values
 
 
 def truncate_target_tables(pg_conn) -> None:
@@ -361,10 +385,15 @@ def truncate_target_tables(pg_conn) -> None:
     pg_conn.commit()
 
 
-def copy_table(sqlite_conn: sqlite3.Connection, pg_conn, spec: TableCopySpec) -> int:
-    rows = fetch_sqlite_rows(sqlite_conn, spec)
+def copy_table(
+    sqlite_conn: sqlite3.Connection,
+    pg_conn,
+    spec: TableCopySpec,
+    invalid_source_rows: dict[str, set[int]] | None = None,
+) -> tuple[int, int]:
+    rows, sanitized_values = fetch_sqlite_rows(sqlite_conn, spec, invalid_source_rows)
     if not rows:
-        return 0
+        return 0, sanitized_values
 
     placeholders = ", ".join(["%s"] * len(spec.columns))
     insert_sql = (
@@ -378,7 +407,7 @@ def copy_table(sqlite_conn: sqlite3.Connection, pg_conn, spec: TableCopySpec) ->
     pg_conn.commit()
     if spec.pk_column:
         reset_sequence(pg_conn, spec.name, spec.pk_column)
-    return len(rows)
+    return len(rows), sanitized_values
 
 
 def reset_sequence(pg_conn, table_name: str, pk_column: str) -> None:
@@ -527,18 +556,24 @@ def backfill_city_geometry(pg_conn) -> int:
     return rowcount
 
 
-def validate_counts(sqlite_conn: sqlite3.Connection, pg_conn) -> list[str]:
+def validate_counts(
+    sqlite_conn: sqlite3.Connection,
+    pg_conn,
+    invalid_source_rows: dict[str, set[int]] | None = None,
+) -> list[str]:
     mismatches: list[str] = []
     with pg_conn.cursor() as cur:
         for spec in TABLE_COPY_ORDER:
             if not sqlite_table_exists(sqlite_conn, spec.name):
                 continue
             sqlite_count = sqlite_conn.execute(f"SELECT COUNT(*) FROM {spec.name}").fetchone()[0]
+            skipped_count = len(invalid_source_rows.get(spec.name, set())) if invalid_source_rows else 0
+            expected_postgres_count = sqlite_count - skipped_count
             cur.execute(f"SELECT COUNT(*) FROM {spec.name}")
             postgres_count = cur.fetchone()[0]
-            if sqlite_count != postgres_count:
+            if expected_postgres_count != postgres_count:
                 mismatches.append(
-                    f"{spec.name}: sqlite={sqlite_count} postgres={postgres_count}"
+                    f"{spec.name}: sqlite={sqlite_count} skipped={skipped_count} expected_postgres={expected_postgres_count} postgres={postgres_count}"
                 )
     return mismatches
 
@@ -546,6 +581,7 @@ def validate_counts(sqlite_conn: sqlite3.Connection, pg_conn) -> list[str]:
 def run(args: argparse.Namespace) -> None:
     sqlite_conn = connect_sqlite(args.sqlite_path)
     pg_conn = connect_postgres(args.pg_dsn)
+    invalid_source_rows = collect_invalid_source_rows(sqlite_conn)
 
     try:
         if not args.skip_schema:
@@ -557,9 +593,18 @@ def run(args: argparse.Namespace) -> None:
             truncate_target_tables(pg_conn)
 
         print("[3/5] Copying SQLite tables")
+        total_skipped = sum(len(rowids) for rowids in invalid_source_rows.values())
+        if total_skipped:
+            print(f"  - skipped invalid SQLite child rows detected by foreign_key_check: {total_skipped}")
+            for table_name in sorted(invalid_source_rows):
+                print(f"    * {table_name}: {len(invalid_source_rows[table_name])}")
         for spec in TABLE_COPY_ORDER:
-            copied = copy_table(sqlite_conn, pg_conn, spec)
-            print(f"  - {spec.name}: {copied} rows")
+            copied, sanitized = copy_table(sqlite_conn, pg_conn, spec, invalid_source_rows)
+            skipped = len(invalid_source_rows.get(spec.name, set()))
+            suffix = f" ({skipped} skipped)" if skipped else ""
+            if sanitized:
+                suffix += f" ({sanitized} text values cleaned)" if suffix else f" ({sanitized} text values cleaned)"
+            print(f"  - {spec.name}: {copied} rows{suffix}")
 
         print("[4/5] Importing filesystem-backed state")
         if not args.skip_documents:
@@ -576,13 +621,16 @@ def run(args: argparse.Namespace) -> None:
         print(f"  - dim_city geom backfill: {geom_updates}")
 
         print("[5/5] Validating row counts")
-        mismatches = validate_counts(sqlite_conn, pg_conn)
+        mismatches = validate_counts(sqlite_conn, pg_conn, invalid_source_rows)
         if mismatches:
             print("Count mismatches detected:")
             for mismatch in mismatches:
                 print(f"  - {mismatch}")
         else:
-            print("All copied table counts match.")
+            if total_skipped:
+                print("All copied table counts match after skipping invalid SQLite rows.")
+            else:
+                print("All copied table counts match.")
 
         print("")
         print("Migration skeleton completed.")

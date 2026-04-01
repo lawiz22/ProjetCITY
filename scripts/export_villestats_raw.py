@@ -7,48 +7,53 @@ Run:  python scripts/export_villestats_raw.py
 """
 from __future__ import annotations
 
-import sqlite3
 import textwrap
+from collections import defaultdict
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent.parent / "data" / "city_analysis.db"
+try:
+    from scripts._export_db import case_insensitive_order, connect_for_export
+except ImportError:  # pragma: no cover - direct script execution
+    from _export_db import case_insensitive_order, connect_for_export
+
 OUTPUT_PATH = Path(__file__).resolve().parent.parent / "villestats_RAW.py"
 
 
 def export_all() -> str:
     """Return the full Python source text for villestats_RAW.py."""
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = connect_for_export()
+    try:
+        cities = conn.execute(
+            f"SELECT city_id, city_name, city_slug, region, country, city_color "
+            f"FROM dim_city ORDER BY {case_insensitive_order('city_name')}"
+        ).fetchall()
+        city_rows = conn.execute(
+            """
+            SELECT city_id, year, population, annotation_label, annotation_color
+            FROM vw_city_population_analysis
+            ORDER BY city_id, year
+            """
+        ).fetchall()
+    finally:
+        conn.close()
 
-    cities = conn.execute(
-        "SELECT city_id, city_name, city_slug, region, country, city_color "
-        "FROM dim_city ORDER BY city_name COLLATE NOCASE"
-    ).fetchall()
+    rows_by_city: dict[int, list[object]] = defaultdict(list)
+    for row in city_rows:
+        rows_by_city[row["city_id"]].append(row)
 
     blocks: list[str] = []
 
     for city in cities:
         city_id = city["city_id"]
+        rows = rows_by_city.get(city_id, [])
+        if not rows:
+            continue
+
         city_name = city["city_name"]
         region = city["region"] or ""
         country = city["country"]
         city_color = city["city_color"] or "#333333"
-
-        # Build CITY_NAME value: "Name, Region" or "Name, Country" if no region
-        if region:
-            raw_name = f"{city_name}, {region}"
-        else:
-            raw_name = f"{city_name}, {country}"
-
-        rows = conn.execute(
-            "SELECT v.year, v.population, v.annotation_label, v.annotation_color "
-            "FROM vw_city_population_analysis v "
-            "WHERE v.city_id = ? ORDER BY v.year",
-            (city_id,),
-        ).fetchall()
-
-        if not rows:
-            continue
+        raw_name = f"{city_name}, {region}" if region else f"{city_name}, {country}"
 
         years = [r["year"] for r in rows]
         pops = [r["population"] for r in rows]
@@ -62,7 +67,6 @@ def export_all() -> str:
                     f'    ({r["year"]}, {r["population"]}, "{label}", \'{color}\'),'
                 )
 
-        # Format years line(s)
         years_str = format_list(years)
         pop_str = format_list(pops)
 
@@ -86,8 +90,6 @@ def export_all() -> str:
             block_lines.append("annotations = []")
 
         blocks.append("\n".join(block_lines))
-
-    conn.close()
 
     header = textwrap.dedent("""\
         # -*- coding: utf-8 -*-

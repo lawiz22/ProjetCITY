@@ -7,9 +7,12 @@ from typing import Any
 
 import requests
 
+from .app_state import load_json_setting, save_json_setting
+
 MAMMOUTH_API_BASE = "https://api.mammouth.ai/v1"
 MAMMOUTH_MODELS_URL = "https://api.mammouth.ai/public/models"
 SETTINGS_FILE = Path(__file__).resolve().parents[2] / "data" / "mammouth_settings.json"
+SETTINGS_KEY = "mammouth_settings"
 
 DEFAULT_SETTINGS: dict[str, Any] = {
     "api_key": "",
@@ -19,21 +22,12 @@ DEFAULT_SETTINGS: dict[str, Any] = {
 
 
 def load_settings() -> dict[str, Any]:
-    if SETTINGS_FILE.exists():
-        try:
-            data = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
-            return {**DEFAULT_SETTINGS, **data}
-        except (json.JSONDecodeError, OSError):
-            pass
-    return dict(DEFAULT_SETTINGS)
+    return load_json_setting(SETTINGS_KEY, DEFAULT_SETTINGS, fallback_path=SETTINGS_FILE)
 
 
 def save_settings(settings: dict[str, Any]) -> None:
-    SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SETTINGS_FILE.write_text(
-        json.dumps(settings, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
+    normalized = {**DEFAULT_SETTINGS, **settings}
+    save_json_setting(SETTINGS_KEY, normalized, fallback_path=SETTINGS_FILE)
 
 
 def add_tokens(count: int) -> int:

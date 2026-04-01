@@ -14,6 +14,7 @@ from typing import Any, Iterable, Sequence
 from flask import current_app
 
 from app.db import DatabaseError, get_db
+from app.services.app_state import load_raw_document
 from app.services.city_photos import get_city_photo
 
 
@@ -56,8 +57,8 @@ def _get_city_origin_metadata(city_slug: str) -> dict[str, int | None]:
 
     # 1) Try period details text file
     details_path = Path(current_app.root_path).parent / "data" / "city_details" / f"{city_slug}.txt"
-    if details_path.exists():
-        source_text = details_path.read_text(encoding="utf-8")
+    source_text = load_raw_document("city", city_slug, "period_detail", fallback_path=details_path)
+    if source_text:
         patterns = (
             r"(?:fond(?:ation|e|ée|é)|founded|established|incorporated|cr[eé]ation|na[iî]t).{0,80}?(1[5-9]\d{2}|20\d{2})",
             r"(1[5-9]\d{2}|20\d{2}).{0,80}?(?:fond(?:ation|e|ée|é)|founded|established|incorporated|cr[eé]ation|na[iî]t)",
@@ -103,6 +104,15 @@ def _get_city_origin_metadata(city_slug: str) -> dict[str, int | None]:
 
 
 class AnalyticsService:
+    def _uses_database_sql_state(self) -> bool:
+        return current_app.config.get("DATABASE_BACKEND") == "postgresql"
+
+    def _annotation_preview_aggregate_sql(self) -> str:
+        payload = "CAST(year AS TEXT) || '|' || annotation_label || '|' || annotation_color"
+        if current_app.config.get("DATABASE_BACKEND") == "postgresql":
+            return f"STRING_AGG({payload}, '||' ORDER BY year)"
+        return f"GROUP_CONCAT({payload}, '||')"
+
     def _normalize_narrative_text(self, value: str | None) -> str:
         if not value:
             return ""
@@ -289,8 +299,8 @@ class AnalyticsService:
                 s.growth_since,
                 pd_start.population AS start_population,
                 pd_end.population AS current_population,
-                ROUND(CAST(pd_end.population AS REAL) / pd_start.population, 1) AS growth_factor,
-                ROUND(((pd_end.population - pd_start.population) * 100.0) / pd_start.population, 1) AS growth_pct
+                ROUND(CAST(pd_end.population AS NUMERIC) / NULLIF(pd_start.population, 0), 1) AS growth_factor,
+                ROUND(CAST((pd_end.population - pd_start.population) * 100.0 AS NUMERIC) / NULLIF(pd_start.population, 0), 1) AS growth_pct
             FROM streaks s
             JOIN pop_data pd_start ON pd_start.city_id = s.city_id AND pd_start.year = s.growth_since
             JOIN pop_data pd_end ON pd_end.city_id = s.city_id AND pd_end.year = s.latest_year
@@ -358,7 +368,7 @@ class AnalyticsService:
                 peak.peak_population,
                 v.population AS current_population,
                 v.year AS current_year,
-                ROUND(((v.population - peak.peak_population) * 100.0) / peak.peak_population, 1) AS decline_pct
+                ROUND(CAST((v.population - peak.peak_population) * 100.0 AS NUMERIC) / NULLIF(peak.peak_population, 0), 1) AS decline_pct
             FROM filtered_analysis v
             INNER JOIN latest_year ly
                 ON ly.city_slug = v.city_slug
@@ -731,7 +741,7 @@ class AnalyticsService:
             annotation_rollup AS (
                 SELECT city_id,
                        COUNT(*) AS annotation_count,
-                       GROUP_CONCAT(CAST(year AS TEXT) || '|' || annotation_label || '|' || annotation_color, '||') AS annotation_preview
+                       {self._annotation_preview_aggregate_sql()} AS annotation_preview
                 FROM vw_annotated_events_by_period
                 WHERE 1 = 1 {self._analysis_filter_sql(filters, alias=None, include_city=True)}
                 GROUP BY city_id
@@ -1413,6 +1423,28 @@ class AnalyticsService:
         return buffer.getvalue(), first_result["statement"]
 
     def get_sql_history(self) -> list[dict[str, str]]:
+        if self._uses_database_sql_state():
+            connection = get_db()
+            rows = connection.execute(
+                """
+                SELECT occurred_at, action, status, sql_text, preview
+                FROM sql_query_history
+                ORDER BY occurred_at DESC, history_id DESC
+                LIMIT ?
+                """,
+                (current_app.config["SQL_HISTORY_LIMIT"],),
+            ).fetchall()
+            return [
+                {
+                    "timestamp": row["occurred_at"].isoformat() if row["occurred_at"] else "",
+                    "action": row["action"],
+                    "status": row["status"],
+                    "sql": row["sql_text"],
+                    "preview": row["preview"] or "",
+                }
+                for row in rows
+            ]
+
         history_path = self._sql_history_path()
         if not history_path.exists():
             return []
@@ -1424,6 +1456,28 @@ class AnalyticsService:
         return entries[: current_app.config["SQL_HISTORY_LIMIT"]]
 
     def get_saved_views(self) -> list[dict[str, str]]:
+        if self._uses_database_sql_state():
+            connection = get_db()
+            rows = connection.execute(
+                """
+                SELECT view_id, name, description, sql_text, created_at
+                FROM sql_saved_view
+                ORDER BY updated_at DESC, created_at DESC, view_id DESC
+                LIMIT ?
+                """,
+                (current_app.config["SAVED_VIEWS_LIMIT"],),
+            ).fetchall()
+            return [
+                {
+                    "id": row["view_id"],
+                    "name": row["name"],
+                    "description": row["description"] or "",
+                    "sql": row["sql_text"],
+                    "created_at": row["created_at"].isoformat() if row["created_at"] else "",
+                }
+                for row in rows
+            ]
+
         views_path = self._saved_views_path()
         if not views_path.exists():
             return []
@@ -1433,14 +1487,52 @@ class AnalyticsService:
             return []
         entries = [entry for entry in data if isinstance(entry, dict)]
         return entries[: current_app.config["SAVED_VIEWS_LIMIT"]]
-
     def save_sql_view(self, name: str, description: str, sql: str) -> None:
         cleaned_sql = sql.strip()
         cleaned_name = name.strip()
         if not cleaned_name:
             raise SqlExecutionError("Nom de vue requis pour la sauvegarde.")
         if not cleaned_sql:
-            raise SqlExecutionError("Requête SQL vide: rien à sauvegarder.")
+            raise SqlExecutionError("RequÃªte SQL vide: rien Ã  sauvegarder.")
+
+        if self._uses_database_sql_state():
+            connection = get_db()
+            existing = connection.execute(
+                "SELECT view_id FROM sql_saved_view WHERE name = ?",
+                (cleaned_name,),
+            ).fetchone()
+            if existing:
+                connection.execute(
+                    """
+                    UPDATE sql_saved_view
+                    SET description = ?, sql_text = ?, updated_at = NOW()
+                    WHERE view_id = ?
+                    """,
+                    (description.strip(), cleaned_sql, existing["view_id"]),
+                )
+            else:
+                connection.execute(
+                    """
+                    INSERT INTO sql_saved_view (view_id, name, description, sql_text)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (uuid.uuid4().hex[:10], cleaned_name, description.strip(), cleaned_sql),
+                )
+            connection.execute(
+                """
+                DELETE FROM sql_saved_view
+                WHERE view_id IN (
+                    SELECT view_id
+                    FROM sql_saved_view
+                    ORDER BY updated_at DESC, created_at DESC, view_id DESC
+                    OFFSET ?
+                )
+                """,
+                (current_app.config["SAVED_VIEWS_LIMIT"],),
+            )
+            connection.commit()
+            return
+
         views_path = self._saved_views_path()
         views_path.parent.mkdir(parents=True, exist_ok=True)
         existing = self.get_saved_views()
@@ -1456,6 +1548,12 @@ class AnalyticsService:
         views_path.write_text(json.dumps(updated, ensure_ascii=False, indent=2), encoding="utf-8")
 
     def delete_sql_view(self, view_id: str) -> None:
+        if self._uses_database_sql_state():
+            connection = get_db()
+            connection.execute("DELETE FROM sql_saved_view WHERE view_id = ?", (view_id,))
+            connection.commit()
+            return
+
         views_path = self._saved_views_path()
         existing = self.get_saved_views()
         filtered = [item for item in existing if item.get("id") != view_id]
@@ -1463,6 +1561,12 @@ class AnalyticsService:
         views_path.write_text(json.dumps(filtered, ensure_ascii=False, indent=2), encoding="utf-8")
 
     def clear_sql_history(self) -> None:
+        if self._uses_database_sql_state():
+            connection = get_db()
+            connection.execute("DELETE FROM sql_query_history")
+            connection.commit()
+            return
+
         history_path = self._sql_history_path()
         history_path.parent.mkdir(parents=True, exist_ok=True)
         history_path.write_text("[]", encoding="utf-8")
@@ -1683,6 +1787,35 @@ class AnalyticsService:
         cleaned_sql = sql.strip()
         if not cleaned_sql:
             return
+
+        if self._uses_database_sql_state():
+            connection = get_db()
+            connection.execute(
+                "DELETE FROM sql_query_history WHERE sql_text = ? AND action = ?",
+                (cleaned_sql, action),
+            )
+            connection.execute(
+                """
+                INSERT INTO sql_query_history (action, status, sql_text, preview)
+                VALUES (?, ?, ?, ?)
+                """,
+                (action, status, cleaned_sql, cleaned_sql.splitlines()[0][:120]),
+            )
+            connection.execute(
+                """
+                DELETE FROM sql_query_history
+                WHERE history_id IN (
+                    SELECT history_id
+                    FROM sql_query_history
+                    ORDER BY occurred_at DESC, history_id DESC
+                    OFFSET ?
+                )
+                """,
+                (current_app.config["SQL_HISTORY_LIMIT"],),
+            )
+            connection.commit()
+            return
+
         history_path = self._sql_history_path()
         history_path.parent.mkdir(parents=True, exist_ok=True)
         entries = self.get_sql_history()

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 
 from flask import Blueprint, Response, current_app, flash, jsonify, redirect, render_template, request, url_for
 
 from .services.analytics import AnalyticsService, SqlExecutionError
+from .services.app_state import delete_raw_document, load_raw_document
 from .services.city_import import (
     _resolve_duplicate_slug,
     delete_city_fiche,
@@ -295,15 +297,18 @@ def country_directory() -> str:
             GROUP BY country_id
         ),
         peak AS (
-            SELECT country_id, MAX(population) AS peak_population,
+            SELECT country_id,
+                   population AS peak_population,
                    year AS peak_year
             FROM (
                 SELECT country_id, year, population,
-                       RANK() OVER (PARTITION BY country_id ORDER BY population DESC) AS rk
+                       ROW_NUMBER() OVER (
+                           PARTITION BY country_id
+                           ORDER BY population DESC, year ASC
+                       ) AS rn
                 FROM fact_country_population
-            )
-            WHERE rk = 1
-            GROUP BY country_id
+            ) ranked_peak
+            WHERE rn = 1
         )
         SELECT
             dc.country_id,
@@ -425,11 +430,10 @@ def country_detail(country_slug: str) -> str:
         "annotations": indexed_annotations,
     }
     # Fiche
-    fiche_path = os.path.join(current_app.root_path, "..", "data", "country_fiches", f"{country_slug}.txt")
+    fiche_path = Path(current_app.root_path).parent / "data" / "country_fiches" / f"{country_slug}.txt"
     fiche = None
-    if os.path.exists(fiche_path):
-        with open(fiche_path, encoding="utf-8") as f:
-            raw_fiche = f.read()
+    raw_fiche = load_raw_document("country", country_slug, "fiche", fallback_path=fiche_path)
+    if raw_fiche:
         _header, fiche_sections = parse_fiche_text(raw_fiche)
         if fiche_sections:
             fiche = {"raw_text": raw_fiche, "sections": [
@@ -437,12 +441,11 @@ def country_detail(country_slug: str) -> str:
                 for s in fiche_sections
             ]}
     # Details → periods
-    details_path = os.path.join(current_app.root_path, "..", "data", "country_details", f"{country_slug}.txt")
+    details_path = Path(current_app.root_path).parent / "data" / "country_details" / f"{country_slug}.txt"
     periods: list[dict] = []
     details = None
-    if os.path.exists(details_path):
-        with open(details_path, encoding="utf-8") as f:
-            details = f.read()
+    details = load_raw_document("country", country_slug, "period_detail", fallback_path=details_path)
+    if details:
         # Enrich pop_data with annotation labels for period linking
         ann_rows = conn.execute(
             """
@@ -817,10 +820,19 @@ def country_delete(country_slug: str) -> Response:
     if flag_file.exists():
         flag_file.unlink()
     data_root = Path(current_app.root_path).parent / "data"
-    for sub in ("country_details", "country_fiches"):
-        txt = data_root / sub / f"{country_slug}.txt"
-        if txt.exists():
-            txt.unlink()
+    delete_raw_document(
+        "country",
+        country_slug,
+        "period_detail",
+        fallback_path=data_root / "country_details" / f"{country_slug}.txt",
+    )
+    delete_raw_document(
+        "country",
+        country_slug,
+        "fiche",
+        fallback_path=data_root / "country_fiches" / f"{country_slug}.txt",
+    )
+    conn.commit()
     if request.is_json:
         return jsonify({"success": True})
     flash(f"Pays '{row['country_name']}' supprimé.", "success")
@@ -941,15 +953,18 @@ def region_directory() -> str:
             GROUP BY region_id
         ),
         peak AS (
-            SELECT region_id, MAX(population) AS peak_population,
+            SELECT region_id,
+                   population AS peak_population,
                    year AS peak_year
             FROM (
                 SELECT region_id, year, population,
-                       RANK() OVER (PARTITION BY region_id ORDER BY population DESC) AS rk
+                       ROW_NUMBER() OVER (
+                           PARTITION BY region_id
+                           ORDER BY population DESC, year ASC
+                       ) AS rn
                 FROM fact_region_population
-            )
-            WHERE rk = 1
-            GROUP BY region_id
+            ) ranked_peak
+            WHERE rn = 1
         )
         SELECT
             dr.region_id,
@@ -984,7 +999,7 @@ def region_directory() -> str:
         else:
             # Try primary photo
             photo_row = conn.execute(
-                "SELECT filename FROM dim_region_photo WHERE region_id = ? AND is_primary = 1 LIMIT 1",
+                "SELECT filename FROM dim_region_photo WHERE region_id = ? AND is_primary = TRUE LIMIT 1",
                 (r["region_id"],),
             ).fetchone()
             if photo_row:
@@ -1044,7 +1059,7 @@ def region_detail(region_slug: str) -> str:
     # Primary photo
     photo_row = conn.execute(
         "SELECT filename, source_url, attribution FROM dim_region_photo "
-        "WHERE region_id = ? AND is_primary = 1 LIMIT 1",
+        "WHERE region_id = ? AND is_primary = TRUE LIMIT 1",
         (region["region_id"],),
     ).fetchone()
     region["photo_path"] = (
@@ -1106,13 +1121,10 @@ def region_detail(region_slug: str) -> str:
     pop_with_ann = [{**r, **(ann_by_year.get(r["year"], {}))} for r in pop_data]
     periods = _build_region_periods_from_db(conn, region["region_id"], pop_with_ann)
     # Fiche complète
-    fiche_path = os.path.join(
-        current_app.root_path, "..", "data", "region_fiches", f"{region_slug}.txt"
-    )
+    fiche_path = Path(current_app.root_path).parent / "data" / "region_fiches" / f"{region_slug}.txt"
     fiche = None
-    if os.path.exists(fiche_path):
-        with open(fiche_path, encoding="utf-8") as f:
-            raw_fiche = f.read()
+    raw_fiche = load_raw_document("region", region_slug, "fiche", fallback_path=fiche_path)
+    if raw_fiche:
         _header, fiche_sections = parse_fiche_text(raw_fiche)
         if fiche_sections:
             fiche = {"raw_text": raw_fiche, "sections": [
@@ -1475,10 +1487,19 @@ def region_delete(region_slug: str) -> Response:
     if flag_file.exists():
         flag_file.unlink()
     data_root = Path(current_app.root_path).parent / "data"
-    for sub in ("city_details", "city_fiches", "region_details", "region_fiches"):
-        txt = data_root / sub / f"{region_slug}.txt"
-        if txt.exists():
-            txt.unlink()
+    delete_raw_document(
+        "region",
+        region_slug,
+        "period_detail",
+        fallback_path=data_root / "region_details" / f"{region_slug}.txt",
+    )
+    delete_raw_document(
+        "region",
+        region_slug,
+        "fiche",
+        fallback_path=data_root / "region_fiches" / f"{region_slug}.txt",
+    )
+    conn.commit()
     if request.is_json:
         return jsonify({"success": True})
     flash(f"Région '{row['region_name']}' supprimée.", "success")
@@ -3714,17 +3735,17 @@ def ai_lab() -> str:
     from .db import get_db
     conn = get_db()
     countries_for_region = [r["country_name"] for r in conn.execute(
-        "SELECT country_name FROM dim_country ORDER BY country_name COLLATE NOCASE"
+        "SELECT country_name FROM dim_country ORDER BY LOWER(country_name), country_name"
     ).fetchall()]
     countries_for_event = countries_for_region
     regions_for_event = [r["region_name"] for r in conn.execute(
-        "SELECT region_name FROM dim_region ORDER BY region_name COLLATE NOCASE"
+        "SELECT region_name FROM dim_region ORDER BY LOWER(region_name), region_name"
     ).fetchall()]
     from .services.event_service import CATEGORY_LABELS, CATEGORY_EMOJIS
     prompt_refine_event = load_prompt("event_refine.txt")
     events_for_refine = [dict(r) for r in conn.execute(
         "SELECT event_name, event_slug, event_year, event_category "
-        "FROM dim_event ORDER BY event_year DESC, event_name COLLATE NOCASE"
+        "FROM dim_event ORDER BY event_year DESC, LOWER(event_name), event_name"
     ).fetchall()]
     return render_template(
         "web/ai_lab.html",
@@ -4326,7 +4347,7 @@ def ai_lab_region_import() -> Response:
                 (region_id,),
             ).fetchone()
             if not existing_flag:
-                flag_is_primary = 1 if not photo_path else 0
+                flag_is_primary = not photo_path
                 conn3.execute(
                     "INSERT INTO dim_region_photo (region_id, filename, caption, source_url, attribution, is_primary) "
                     "VALUES (?, 'flag.png', ?, ?, 'Wikimedia Commons', ?)",

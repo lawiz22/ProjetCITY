@@ -11,6 +11,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
 
+from flask import current_app, has_app_context
+
+from .app_state import delete_raw_document, save_raw_document
 from .city_photos import CITY_PHOTO_DIR, CITY_PHOTO_MANIFEST, clear_city_photo_manifest_cache
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -85,6 +88,12 @@ REGION_ALIASES = {
     "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
     "DC": "District of Columbia",
 }
+
+
+def _should_update_legacy_city_manifest() -> bool:
+    if not has_app_context():
+        return True
+    return current_app.config.get("DATABASE_BACKEND") != "postgresql"
 
 USER_AGENT = "CentralCityScrutinizer/1.0 (city photo cache)"
 SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
@@ -539,9 +548,8 @@ def import_city_periods(conn: DbConnection, city_id: int, city_slug: str, sectio
 
 def save_period_details_file(city_slug: str, text: str) -> Path:
     """Save the period details text as a .txt file in data/city_details/."""
-    DETAILS_DIR.mkdir(parents=True, exist_ok=True)
     file_path = DETAILS_DIR / f"{city_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("city", city_slug, "period_detail", text, fallback_path=file_path)
     return file_path
 
 
@@ -675,24 +683,25 @@ def fetch_and_save_city_photo(city_slug: str, city_name: str, region: str | None
     if last_error:
         return {"success": False, "error": f"Téléchargement échoué: {last_error}"}
 
-    # Update manifest
-    manifest: dict[str, Any] = {}
-    if CITY_PHOTO_MANIFEST.exists():
-        try:
-            manifest = json.loads(CITY_PHOTO_MANIFEST.read_text(encoding="utf-8"))
-        except Exception:
-            manifest = {}
+    source_page = summary.get("content_urls", {}).get("desktop", {}).get("page", "")
+    if _should_update_legacy_city_manifest():
+        manifest: dict[str, Any] = {}
+        if CITY_PHOTO_MANIFEST.exists():
+            try:
+                manifest = json.loads(CITY_PHOTO_MANIFEST.read_text(encoding="utf-8"))
+            except Exception:
+                manifest = {}
 
-    manifest[city_slug] = {
-        "filename": filename,
-        "source_page": summary.get("content_urls", {}).get("desktop", {}).get("page", ""),
-        "source_image": image_url,
-        "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution.",
-    }
-    CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-    clear_city_photo_manifest_cache()
+        manifest[city_slug] = {
+            "filename": filename,
+            "source_page": source_page,
+            "source_image": image_url,
+            "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution.",
+        }
+        CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+        clear_city_photo_manifest_cache()
 
-    return {"success": True, "filename": filename, "source_page": manifest[city_slug]["source_page"]}
+    return {"success": True, "filename": filename, "source_page": source_page}
 
 
 def save_uploaded_photo(city_slug: str, file_storage: Any) -> dict[str, Any]:
@@ -710,20 +719,21 @@ def save_uploaded_photo(city_slug: str, file_storage: Any) -> dict[str, Any]:
 
     # Update manifest
     manifest: dict[str, Any] = {}
-    if CITY_PHOTO_MANIFEST.exists():
+    if _should_update_legacy_city_manifest() and CITY_PHOTO_MANIFEST.exists():
         try:
             manifest = json.loads(CITY_PHOTO_MANIFEST.read_text(encoding="utf-8"))
         except Exception:
             manifest = {}
 
-    manifest[city_slug] = {
-        "filename": filename,
-        "source_page": "",
-        "source_image": "upload",
-        "attribution": "Photo uploadée manuellement.",
-    }
-    CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-    clear_city_photo_manifest_cache()
+    if _should_update_legacy_city_manifest():
+        manifest[city_slug] = {
+            "filename": filename,
+            "source_page": "",
+            "source_image": "upload",
+            "attribution": "Photo uploadée manuellement.",
+        }
+        CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+        clear_city_photo_manifest_cache()
 
     return {"success": True, "filename": filename}
 
@@ -1071,16 +1081,14 @@ def delete_city_fiche(conn: DbConnection, city_id: int, city_slug: str) -> bool:
     conn.execute("DELETE FROM dim_city_fiche_section WHERE fiche_id = ?", (existing[0],))
     conn.execute("DELETE FROM dim_city_fiche WHERE fiche_id = ?", (existing[0],))
     file_path = FICHES_DIR / f"{city_slug}.txt"
-    if file_path.exists():
-        file_path.unlink()
+    delete_raw_document("city", city_slug, "fiche", fallback_path=file_path)
     return True
 
 
 def save_fiche_file(city_slug: str, text: str) -> Path:
     """Save the fiche complète raw text as a .txt file in data/city_fiches/."""
-    FICHES_DIR.mkdir(parents=True, exist_ok=True)
     file_path = FICHES_DIR / f"{city_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("city", city_slug, "fiche", text, fallback_path=file_path)
     return file_path
 
 
@@ -1223,17 +1231,15 @@ COUNTRY_FICHES_DIR = PROJECT_ROOT / "data" / "country_fiches"
 
 def save_country_details_file(country_slug: str, text: str) -> Path:
     """Save the country details raw text as a .txt file in data/country_details/."""
-    COUNTRY_DETAILS_DIR.mkdir(parents=True, exist_ok=True)
     file_path = COUNTRY_DETAILS_DIR / f"{country_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("country", country_slug, "period_detail", text, fallback_path=file_path)
     return file_path
 
 
 def save_country_fiche_file(country_slug: str, text: str) -> Path:
     """Save the country fiche complète as a .txt file in data/country_fiches/."""
-    COUNTRY_FICHES_DIR.mkdir(parents=True, exist_ok=True)
     file_path = COUNTRY_FICHES_DIR / f"{country_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("country", country_slug, "fiche", text, fallback_path=file_path)
     return file_path
 
 
@@ -1530,17 +1536,15 @@ def import_region_periods(conn: DbConnection, region_id: int, region_slug: str, 
 
 def save_region_details_file(region_slug: str, text: str) -> Path:
     """Save the region period details raw text as a .txt file in data/region_details/."""
-    REGION_DETAILS_DIR.mkdir(parents=True, exist_ok=True)
     file_path = REGION_DETAILS_DIR / f"{region_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("region", region_slug, "period_detail", text, fallback_path=file_path)
     return file_path
 
 
 def save_region_fiche_file(region_slug: str, text: str) -> Path:
     """Save the region fiche complète as a .txt file in data/region_fiches/."""
-    REGION_FICHES_DIR.mkdir(parents=True, exist_ok=True)
     file_path = REGION_FICHES_DIR / f"{region_slug}.txt"
-    file_path.write_text(text, encoding="utf-8")
+    save_raw_document("region", region_slug, "fiche", text, fallback_path=file_path)
     return file_path
 
 
@@ -1642,7 +1646,7 @@ def fetch_and_save_region_photo(
 
     # Skip if a primary photo already exists
     existing = conn.execute(
-        "SELECT photo_id FROM dim_region_photo WHERE region_id = ? AND is_primary = 1",
+        "SELECT photo_id FROM dim_region_photo WHERE region_id = ? AND is_primary = TRUE",
         (region_id,),
     ).fetchone()
     if existing:
@@ -1695,7 +1699,7 @@ def fetch_and_save_region_photo(
     conn.execute(
         """
         INSERT INTO dim_region_photo (region_id, filename, caption, source_url, attribution, is_primary)
-        VALUES (?, ?, ?, ?, ?, 1)
+        VALUES (?, ?, ?, ?, ?, TRUE)
         """,
         (region_id, filename, region_name, source_url, attribution),
     )

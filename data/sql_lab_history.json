@@ -1,13 +1,13 @@
 [
   {
-    "timestamp": "2026-04-01T12:01:59.226346+00:00",
+    "timestamp": "2026-04-01T15:46:19.009436+00:00",
     "action": "execute",
     "status": "error",
     "sql": "DELETE FROM dim_city WHERE 1=0",
     "preview": "DELETE FROM dim_city WHERE 1=0"
   },
   {
-    "timestamp": "2026-04-01T12:01:59.180294+00:00",
+    "timestamp": "2026-04-01T15:46:18.961318+00:00",
     "action": "execute",
     "status": "read",
     "sql": "SELECT COUNT(*) AS n FROM dim_city",

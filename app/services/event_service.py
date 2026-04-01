@@ -365,7 +365,7 @@ def save_event_photo(
     dest.write_bytes(file_bytes)
 
     if set_primary:
-        conn.execute("UPDATE dim_event_photo SET is_primary = 0 WHERE event_id = ?", (event_id,))
+        conn.execute("UPDATE dim_event_photo SET is_primary = FALSE WHERE event_id = ?", (event_id,))
 
     max_order = conn.execute(
         "SELECT COALESCE(MAX(photo_order), -1) FROM dim_event_photo WHERE event_id = ?",
@@ -377,7 +377,7 @@ def save_event_photo(
            (event_id, filename, caption, source_url, attribution, is_primary, photo_order)
            VALUES (?, ?, ?, ?, ?, ?, ?)""",
         (event_id, unique_name, caption, source_url, attribution,
-         1 if set_primary else 0, max_order + 1),
+         bool(set_primary), max_order + 1),
     )
     conn.commit()
     return {"success": True, "filename": unique_name}
@@ -398,7 +398,7 @@ def delete_event_photo(conn: Any, event_photo_id: int, event_slug: str) -> None:
     conn.execute("DELETE FROM dim_event_photo WHERE event_photo_id = ?", (event_photo_id,))
     if was_primary:
         conn.execute(
-            """UPDATE dim_event_photo SET is_primary = 1
+            """UPDATE dim_event_photo SET is_primary = TRUE
                WHERE event_photo_id = (
                    SELECT event_photo_id FROM dim_event_photo
                    WHERE event_id = ? ORDER BY photo_order LIMIT 1
@@ -409,8 +409,8 @@ def delete_event_photo(conn: Any, event_photo_id: int, event_slug: str) -> None:
 
 
 def set_event_photo_primary(conn: Any, event_photo_id: int, event_id: int) -> None:
-    conn.execute("UPDATE dim_event_photo SET is_primary = 0 WHERE event_id = ?", (event_id,))
-    conn.execute("UPDATE dim_event_photo SET is_primary = 1 WHERE event_photo_id = ?", (event_photo_id,))
+    conn.execute("UPDATE dim_event_photo SET is_primary = FALSE WHERE event_id = ?", (event_id,))
+    conn.execute("UPDATE dim_event_photo SET is_primary = TRUE WHERE event_photo_id = ?", (event_photo_id,))
     conn.commit()
 
 
@@ -419,7 +419,7 @@ def get_event_primary_photo(conn: Any, event_slug: str) -> str | None:
     row = conn.execute(
         """SELECT ep.filename FROM dim_event_photo ep
            JOIN dim_event e ON e.event_id = ep.event_id
-           WHERE e.event_slug = ? AND ep.is_primary = 1 LIMIT 1""",
+           WHERE e.event_slug = ? AND ep.is_primary = TRUE LIMIT 1""",
         (event_slug,),
     ).fetchone()
     if row:

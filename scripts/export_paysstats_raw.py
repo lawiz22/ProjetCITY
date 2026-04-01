@@ -7,11 +7,15 @@ Run:  python scripts/export_paysstats_raw.py
 """
 from __future__ import annotations
 
-import sqlite3
 import textwrap
+from collections import defaultdict
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent.parent / "data" / "city_analysis.db"
+try:
+    from scripts._export_db import case_insensitive_order, connect_for_export
+except ImportError:  # pragma: no cover - direct script execution
+    from _export_db import case_insensitive_order, connect_for_export
+
 OUTPUT_PATH = Path(__file__).resolve().parent.parent / "paysstats_RAW.py"
 
 
@@ -36,33 +40,37 @@ def format_list(values: list[int]) -> str:
 
 def export_all() -> str:
     """Return the full Python source text for paysstats_RAW.py."""
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = connect_for_export()
+    try:
+        countries = conn.execute(
+            f"SELECT country_id, country_name, country_slug, country_color "
+            f"FROM dim_country ORDER BY {case_insensitive_order('country_name')}"
+        ).fetchall()
+        country_rows = conn.execute(
+            """
+            SELECT fp.country_id, fp.year, fp.population, a.annotation_label, a.annotation_color
+            FROM fact_country_population fp
+            LEFT JOIN dim_annotation a ON fp.annotation_id = a.annotation_id
+            ORDER BY fp.country_id, fp.year
+            """
+        ).fetchall()
+    finally:
+        conn.close()
 
-    countries = conn.execute(
-        "SELECT country_id, country_name, country_slug, country_color "
-        "FROM dim_country ORDER BY country_name COLLATE NOCASE"
-    ).fetchall()
+    rows_by_country: dict[int, list[object]] = defaultdict(list)
+    for row in country_rows:
+        rows_by_country[row["country_id"]].append(row)
 
     blocks: list[str] = []
 
     for country in countries:
         country_id = country["country_id"]
-        country_name = country["country_name"]
-        country_color = country["country_color"] or "#333333"
-
-        rows = conn.execute(
-            """SELECT fp.year, fp.population, a.annotation_label, a.annotation_color
-               FROM fact_country_population fp
-               LEFT JOIN dim_annotation a ON fp.annotation_id = a.annotation_id
-               WHERE fp.country_id = ?
-               ORDER BY fp.year""",
-            (country_id,),
-        ).fetchall()
-
+        rows = rows_by_country.get(country_id, [])
         if not rows:
             continue
 
+        country_name = country["country_name"]
+        country_color = country["country_color"] or "#333333"
         years = [r["year"] for r in rows]
         pops = [r["population"] for r in rows]
 
@@ -98,8 +106,6 @@ def export_all() -> str:
             block_lines.append("annotations = []")
 
         blocks.append("\n".join(block_lines))
-
-    conn.close()
 
     header = textwrap.dedent("""\
         # -*- coding: utf-8 -*-
