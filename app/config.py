@@ -25,7 +25,7 @@ class Config:
     ROOT_DIR = Path(__file__).resolve().parents[1]
     SECRET_KEY = os.environ.get("PROJETCITY_SECRET_KEY", "projetcity-dev")
 
-    _DATABASE_URL_ENV = os.environ.get("PROJETCITY_DATABASE_URL", "").strip()
+    _DATABASE_URL_ENV = (os.environ.get("DATABASE_URL") or os.environ.get("PROJETCITY_DATABASE_URL", "")).strip()
     _DATABASE_PATH_ENV = os.environ.get("PROJETCITY_DATABASE_PATH", "").strip()
 
     if _DATABASE_URL_ENV:
