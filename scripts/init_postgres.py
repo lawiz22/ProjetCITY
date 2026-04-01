@@ -104,15 +104,37 @@ def _adapt_schema(sql: str, has_postgis: bool) -> str:
 
 def main() -> None:
     import argparse
+    import time
+    from urllib.parse import urlparse
 
     parser = argparse.ArgumentParser(description="Init PostgreSQL schema for ProjetCITY")
     parser.add_argument("--url", help="PostgreSQL connection URL (overrides env vars)")
     args = parser.parse_args()
 
     db_url = args.url or _resolve_database_url()
-    print(f"[init_postgres] Connecting to PostgreSQL…")
 
-    conn = psycopg.connect(db_url, autocommit=False)
+    # Log host (without credentials) for debugging
+    try:
+        parsed = urlparse(db_url)
+        print(f"[init_postgres] Target: {parsed.hostname}:{parsed.port or 5432}/{parsed.path.lstrip('/')}")
+    except Exception:
+        pass
+
+    # Retry connection — Railway PG may not be ready at container start
+    max_retries = 10
+    retry_delay = 2  # seconds
+    conn = None
+    for attempt in range(1, max_retries + 1):
+        print(f"[init_postgres] Connecting to PostgreSQL… (attempt {attempt}/{max_retries})")
+        try:
+            conn = psycopg.connect(db_url, autocommit=False)
+            break
+        except psycopg.OperationalError as exc:
+            if attempt == max_retries:
+                print(f"[init_postgres] FATAL: could not connect after {max_retries} attempts.")
+                raise
+            print(f"[init_postgres] Connection failed ({exc}), retrying in {retry_delay}s…")
+            time.sleep(retry_delay)
 
     # Check PostGIS availability
     has_postgis = _check_postgis(conn)
