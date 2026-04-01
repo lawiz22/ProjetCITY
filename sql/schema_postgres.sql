@@ -563,3 +563,273 @@ SELECT
 FROM base b
 LEFT JOIN annotation_rollup ar
     ON ar.period_detail_id = b.period_detail_id;
+
+CREATE OR REPLACE VIEW vw_city_growth_by_decade AS
+WITH ordered_pop AS (
+    SELECT
+        dc.city_id,
+        dc.city_name,
+        dc.country,
+        dt.year,
+        dt.decade,
+        f.population,
+        LAG(dt.year) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS prev_year,
+        LAG(f.population) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS prev_population,
+        LAG(dt.decade) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS prev_decade
+    FROM fact_city_population f
+    INNER JOIN dim_city dc
+        ON dc.city_id = f.city_id
+    INNER JOIN dim_time dt
+        ON dt.time_id = f.time_id
+)
+SELECT
+    city_id,
+    city_name,
+    country,
+    decade,
+    prev_year AS start_year,
+    year AS end_year,
+    prev_population AS start_population,
+    population AS end_population,
+    population - prev_population AS absolute_growth,
+    ROUND(
+        CASE
+            WHEN prev_population IS NULL OR prev_population = 0 THEN NULL
+            ELSE ((population - prev_population) * 100.0) / prev_population
+        END,
+        2
+    ) AS growth_pct
+FROM ordered_pop
+WHERE prev_year IS NOT NULL;
+
+CREATE OR REPLACE VIEW vw_city_peak_population AS
+SELECT
+    dc.city_id,
+    dc.city_name,
+    dc.region,
+    dc.country,
+    f.year AS peak_year,
+    f.population AS peak_population,
+    dt.period_label,
+    da.annotation_label AS peak_annotation
+FROM fact_city_population f
+INNER JOIN dim_city dc
+    ON dc.city_id = f.city_id
+INNER JOIN dim_time dt
+    ON dt.time_id = f.time_id
+LEFT JOIN dim_annotation da
+    ON da.annotation_id = f.annotation_id
+WHERE f.population_id = (
+    SELECT f2.population_id
+    FROM fact_city_population f2
+    WHERE f2.city_id = f.city_id
+    ORDER BY f2.population DESC, f2.year DESC
+    LIMIT 1
+);
+
+CREATE OR REPLACE VIEW vw_city_decline_periods AS
+WITH yearly_changes AS (
+    SELECT
+        dc.city_id,
+        dc.city_name,
+        dc.country,
+        dt.year,
+        f.population,
+        LAG(dt.year) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS previous_year,
+        LAG(f.population) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS previous_population
+    FROM fact_city_population f
+    INNER JOIN dim_city dc
+        ON dc.city_id = f.city_id
+    INNER JOIN dim_time dt
+        ON dt.time_id = f.time_id
+)
+SELECT
+    city_id,
+    city_name,
+    country,
+    previous_year,
+    year AS current_year,
+    previous_population,
+    population AS current_population,
+    population - previous_population AS absolute_change,
+    ROUND(
+        CASE
+            WHEN previous_population = 0 THEN NULL
+            ELSE ((population - previous_population) * 100.0) / previous_population
+        END,
+        2
+    ) AS change_pct
+FROM yearly_changes
+WHERE previous_population IS NOT NULL
+  AND population < previous_population;
+
+CREATE OR REPLACE VIEW vw_city_rebound_periods AS
+WITH yearly_changes AS (
+    SELECT
+        dc.city_id,
+        dc.city_name,
+        dc.country,
+        dt.year,
+        f.population,
+        LAG(dt.year) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS previous_year,
+        LAG(f.population) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS previous_population,
+        LAG(f.population, 2) OVER (PARTITION BY dc.city_id ORDER BY dt.year) AS two_periods_back_population
+    FROM fact_city_population f
+    INNER JOIN dim_city dc
+        ON dc.city_id = f.city_id
+    INNER JOIN dim_time dt
+        ON dt.time_id = f.time_id
+)
+SELECT
+    city_id,
+    city_name,
+    country,
+    previous_year,
+    year AS current_year,
+    previous_population,
+    population AS current_population,
+    population - previous_population AS absolute_change,
+    ROUND(
+        CASE
+            WHEN previous_population = 0 THEN NULL
+            ELSE ((population - previous_population) * 100.0) / previous_population
+        END,
+        2
+    ) AS change_pct
+FROM yearly_changes
+WHERE previous_population IS NOT NULL
+  AND population > previous_population
+  AND (
+      two_periods_back_population IS NULL
+      OR previous_population <= two_periods_back_population
+  );
+
+CREATE OR REPLACE VIEW vw_annotated_events_by_period AS
+SELECT
+    dc.city_id,
+    dc.city_name,
+    dc.region,
+    dc.country,
+    dt.year,
+    dt.decade,
+    dt.period_label,
+    f.population,
+    da.annotation_id,
+    da.annotation_label,
+    da.annotation_color,
+    da.annotation_type
+FROM fact_city_population f
+INNER JOIN dim_city dc
+    ON dc.city_id = f.city_id
+INNER JOIN dim_time dt
+    ON dt.time_id = f.time_id
+INNER JOIN dim_annotation da
+    ON da.annotation_id = f.annotation_id;
+
+CREATE OR REPLACE VIEW vw_fiche_coverage AS
+SELECT
+    dc.city_id,
+    dc.city_name,
+    dc.city_slug,
+    dc.country,
+    dc.region,
+    f.created_at AS fiche_created,
+    COUNT(s.section_id) AS section_count,
+    STRING_AGG(s.section_title, ' | ' ORDER BY s.section_order) AS section_list,
+    SUM(CASE WHEN s.section_title = 'Population' THEN 1 ELSE 0 END) AS has_population,
+    SUM(CASE WHEN s.section_title = 'Economie' THEN 1 ELSE 0 END) AS has_economie,
+    SUM(CASE WHEN s.section_title = 'Education' THEN 1 ELSE 0 END) AS has_education,
+    SUM(CASE WHEN s.section_title = 'Transport' THEN 1 ELSE 0 END) AS has_transport,
+    SUM(CASE WHEN s.section_title = 'Climat' THEN 1 ELSE 0 END) AS has_climat,
+    SUM(CASE WHEN s.section_title = 'Sante' THEN 1 ELSE 0 END) AS has_sante,
+    SUM(CASE WHEN s.section_title LIKE '%Sport%' THEN 1 ELSE 0 END) AS has_sports,
+    SUM(CASE WHEN s.section_title LIKE '%Quartier%' THEN 1 ELSE 0 END) AS has_quartiers
+FROM dim_city dc
+INNER JOIN dim_city_fiche f ON f.city_id = dc.city_id
+LEFT JOIN dim_city_fiche_section s ON s.fiche_id = f.fiche_id
+GROUP BY dc.city_id, dc.city_name, dc.city_slug, dc.country, dc.region, f.created_at;
+
+CREATE OR REPLACE VIEW vw_fiche_section_catalog AS
+SELECT
+    s.section_title,
+    s.section_emoji,
+    COUNT(DISTINCT f.city_id) AS city_count,
+    ROUND(COUNT(DISTINCT f.city_id) * 100.0 / NULLIF((SELECT COUNT(*) FROM dim_city_fiche), 0), 1) AS coverage_pct,
+    ROUND(AVG(LENGTH(s.content_json)), 0) AS avg_content_length,
+    MIN(dc.city_name) AS example_city
+FROM dim_city_fiche_section s
+INNER JOIN dim_city_fiche f ON f.fiche_id = s.fiche_id
+INNER JOIN dim_city dc ON dc.city_id = f.city_id
+GROUP BY s.section_title, s.section_emoji
+ORDER BY city_count DESC;
+
+CREATE OR REPLACE VIEW vw_fiche_city_richness AS
+SELECT
+    dc.city_id,
+    dc.city_name,
+    dc.city_slug,
+    dc.country,
+    dc.region,
+    COUNT(s.section_id) AS section_count,
+    SUM(LENGTH(s.content_json)) AS total_content_length,
+    ROUND(AVG(LENGTH(s.content_json)), 0) AS avg_section_length,
+    MAX(LENGTH(s.content_json)) AS longest_section_length,
+    f.created_at AS fiche_created
+FROM dim_city dc
+INNER JOIN dim_city_fiche f ON f.city_id = dc.city_id
+LEFT JOIN dim_city_fiche_section s ON s.fiche_id = f.fiche_id
+GROUP BY dc.city_id, dc.city_name, dc.city_slug, dc.country, dc.region, f.created_at
+ORDER BY total_content_length DESC;
+
+CREATE OR REPLACE VIEW vw_fiche_section_content_stats AS
+SELECT
+    s.section_title,
+    COUNT(*) AS total_sections,
+    ROUND(AVG(LENGTH(s.content_json)), 0) AS avg_length,
+    MIN(LENGTH(s.content_json)) AS min_length,
+    MAX(LENGTH(s.content_json)) AS max_length,
+    SUM(CASE WHEN s.content_json LIKE '%"type": "table"%' THEN 1 ELSE 0 END) AS with_table,
+    SUM(CASE WHEN s.content_json LIKE '%"type": "bullets"%' THEN 1 ELSE 0 END) AS with_bullets,
+    SUM(CASE WHEN s.content_json LIKE '%"type": "text"%' THEN 1 ELSE 0 END) AS with_text,
+    ROUND(SUM(CASE WHEN s.content_json LIKE '%"type": "table"%' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS table_pct,
+    ROUND(SUM(CASE WHEN s.content_json LIKE '%"type": "bullets"%' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS bullets_pct
+FROM dim_city_fiche_section s
+GROUP BY s.section_title
+ORDER BY total_sections DESC;
+
+CREATE OR REPLACE VIEW vw_event_summary AS
+SELECT
+    e.event_id,
+    e.event_name,
+    e.event_slug,
+    e.event_date_start,
+    e.event_date_end,
+    e.event_year,
+    e.event_level,
+    e.event_category,
+    e.description,
+    e.impact_population,
+    e.impact_migration,
+    e.created_at,
+    COUNT(DISTINCT el.event_location_id) AS location_count,
+    COUNT(DISTINCT ep.event_photo_id) AS photo_count,
+    STRING_AGG(DISTINCT COALESCE(dc.city_name, el.region), ',') AS location_names
+FROM dim_event e
+LEFT JOIN dim_event_location el ON el.event_id = e.event_id
+LEFT JOIN dim_city dc ON dc.city_id = el.city_id
+LEFT JOIN dim_event_photo ep ON ep.event_id = e.event_id
+GROUP BY
+    e.event_id,
+    e.event_name,
+    e.event_slug,
+    e.event_date_start,
+    e.event_date_end,
+    e.event_year,
+    e.event_level,
+    e.event_category,
+    e.description,
+    e.impact_population,
+    e.impact_migration,
+    e.created_at;
+
+COMMIT;
