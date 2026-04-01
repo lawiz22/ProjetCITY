@@ -291,7 +291,11 @@ def get_events_list(conn: Any, filters: dict[str, Any] | None = None) -> list[di
             sql += " AND event_level = ?"
             params.append(int(filters["level"]))
         if filters.get("search"):
-            sql += " AND (event_name LIKE ? OR description LIKE ? OR location_names LIKE ?)"
+            sql += (
+                " AND (LOWER(event_name) LIKE LOWER(?)"
+                " OR LOWER(description) LIKE LOWER(?)"
+                " OR LOWER(location_names) LIKE LOWER(?))"
+            )
             q = f"%{filters['search']}%"
             params.extend([q, q, q])
     sql += " ORDER BY event_year DESC, event_name"

@@ -143,7 +143,147 @@ TABLE_COPY_ORDER: tuple[TableCopySpec, ...] = (
         ("item_id", "region_period_id", "item_order", "item_text"),
         "item_id",
     ),
+    TableCopySpec(
+        "fact_city_population",
+        (
+            "population_id",
+            "city_id",
+            "time_id",
+            "year",
+            "population",
+            "is_key_year",
+            "annotation_id",
+            "source_file",
+        ),
+        "population_id",
+    ),
+    TableCopySpec(
+        "fact_country_population",
+        (
+            "country_pop_id",
+            "country_id",
+            "time_id",
+            "year",
+            "population",
+            "is_key_year",
+            "annotation_id",
+            "source_file",
+        ),
+        "country_pop_id",
+    ),
+    TableCopySpec(
+        "fact_region_population",
+        (
+            "region_pop_id",
+            "region_id",
+            "time_id",
+            "year",
+            "population",
+            "is_key_year",
+            "annotation_id",
+            "source_file",
+        ),
+        "region_pop_id",
+    ),
+    TableCopySpec(
+        "dim_city_fiche",
+        ("fiche_id", "city_id", "raw_text", "created_at"),
+        "fiche_id",
+    ),
+    TableCopySpec(
+        "dim_city_fiche_section",
+        ("section_id", "fiche_id", "section_order", "section_emoji", "section_title", "content_json"),
+        "section_id",
+    ),
+    TableCopySpec(
+        "dim_city_photo",
+        (
+            "photo_id",
+            "city_id",
+            "filename",
+            "caption",
+            "source_url",
+            "attribution",
+            "is_primary",
+            "exif_lat",
+            "exif_lon",
+            "exif_date",
+            "exif_camera",
+            "created_at",
+        ),
+        "photo_id",
+    ),
+    TableCopySpec(
+        "dim_country_photo",
+        ("photo_id", "country_id", "filename", "caption", "source_url", "attribution", "is_primary", "created_at"),
+        "photo_id",
+    ),
+    TableCopySpec(
+        "dim_region_photo",
+        ("photo_id", "region_id", "filename", "caption", "source_url", "attribution", "is_primary", "created_at"),
+        "photo_id",
+    ),
+    TableCopySpec(
+        "dim_event",
+        (
+            "event_id",
+            "event_name",
+            "event_slug",
+            "event_date_start",
+            "event_date_end",
+            "event_year",
+            "event_level",
+            "event_category",
+            "description",
+            "impact_population",
+            "impact_migration",
+            "source_text",
+            "created_at",
+        ),
+        "event_id",
+    ),
+    TableCopySpec(
+        "dim_event_location",
+        ("event_location_id", "event_id", "city_id", "region", "country", "role"),
+        "event_location_id",
+    ),
+    TableCopySpec(
+        "dim_event_photo",
+        (
+            "event_photo_id",
+            "event_id",
+            "filename",
+            "caption",
+            "source_url",
+            "attribution",
+            "is_primary",
+            "photo_order",
+            "created_at",
+        ),
+        "event_photo_id",
+    ),
 )
+
+
+DOCUMENT_IMPORTS: tuple[DocumentImportSpec, ...] = (
+    DocumentImportSpec("city", "period_detail", PROJECT_ROOT / "data" / "city_details"),
+    DocumentImportSpec("city", "fiche", PROJECT_ROOT / "data" / "city_fiches"),
+    DocumentImportSpec("country", "period_detail", PROJECT_ROOT / "data" / "country_details"),
+    DocumentImportSpec("country", "fiche", PROJECT_ROOT / "data" / "country_fiches"),
+    DocumentImportSpec("region", "period_detail", PROJECT_ROOT / "data" / "region_details"),
+    DocumentImportSpec("region", "fiche", PROJECT_ROOT / "data" / "region_fiches"),
+)
+
+
+BOOLEAN_COLUMNS: dict[str, set[str]] = {
+    "fact_city_population": {"is_key_year"},
+    "fact_country_population": {"is_key_year"},
+    "fact_region_population": {"is_key_year"},
+    "dim_city_photo": {"is_primary"},
+    "dim_country_photo": {"is_primary"},
+    "dim_region_photo": {"is_primary"},
+    "dim_event_photo": {"is_primary"},
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -169,3 +309,297 @@ def connect_sqlite(path: Path) -> sqlite3.Connection:
 
 def connect_postgres(dsn: str):
     return psycopg.connect(dsn)
+
+
+def apply_schema(pg_conn, schema_path: Path) -> None:
+    schema_sql = schema_path.read_text(encoding="utf-8")
+    previous_autocommit = pg_conn.autocommit
+    pg_conn.autocommit = True
+    try:
+        with pg_conn.cursor() as cur:
+            cur.execute(schema_sql)
+    finally:
+        pg_conn.autocommit = previous_autocommit
+
+
+def sqlite_table_exists(sqlite_conn: sqlite3.Connection, table_name: str) -> bool:
+    row = sqlite_conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+        (table_name,),
+    ).fetchone()
+    return row is not None
+
+
+def fetch_sqlite_rows(sqlite_conn: sqlite3.Connection, spec: TableCopySpec) -> list[tuple[Any, ...]]:
+    if not sqlite_table_exists(sqlite_conn, spec.name):
+        return []
+
+    sql = f"SELECT {', '.join(spec.columns)} FROM {spec.name}"
+    rows = sqlite_conn.execute(sql).fetchall()
+    transformed: list[tuple[Any, ...]] = []
+    bool_columns = BOOLEAN_COLUMNS.get(spec.name, set())
+
+    for row in rows:
+        values: list[Any] = []
+        for column in spec.columns:
+            value = row[column]
+            if column in bool_columns and value is not None:
+                values.append(bool(value))
+            else:
+                values.append(value)
+        transformed.append(tuple(values))
+
+    return transformed
+
+
+def truncate_target_tables(pg_conn) -> None:
+    table_names = [spec.name for spec in TABLE_COPY_ORDER]
+    table_names.extend(["raw_document", "app_setting", "sql_saved_view", "sql_query_history"])
+    sql = "TRUNCATE TABLE " + ", ".join(table_names) + " RESTART IDENTITY CASCADE"
+    with pg_conn.cursor() as cur:
+        cur.execute(sql)
+    pg_conn.commit()
+
+
+def copy_table(sqlite_conn: sqlite3.Connection, pg_conn, spec: TableCopySpec) -> int:
+    rows = fetch_sqlite_rows(sqlite_conn, spec)
+    if not rows:
+        return 0
+
+    placeholders = ", ".join(["%s"] * len(spec.columns))
+    insert_sql = (
+        f"INSERT INTO {spec.name} ({', '.join(spec.columns)}) "
+        f"VALUES ({placeholders})"
+    )
+
+    with pg_conn.cursor() as cur:
+        cur.executemany(insert_sql, rows)
+
+    pg_conn.commit()
+    if spec.pk_column:
+        reset_sequence(pg_conn, spec.name, spec.pk_column)
+    return len(rows)
+
+
+def reset_sequence(pg_conn, table_name: str, pk_column: str) -> None:
+    sql = f"""
+        SELECT setval(
+            pg_get_serial_sequence(%s, %s),
+            COALESCE((SELECT MAX({pk_column}) FROM {table_name}), 1),
+            true
+        )
+    """
+    with pg_conn.cursor() as cur:
+        cur.execute(sql, (table_name, pk_column))
+    pg_conn.commit()
+
+
+def import_raw_documents(pg_conn, project_root: Path) -> int:
+    inserted = 0
+    with pg_conn.cursor() as cur:
+        for spec in DOCUMENT_IMPORTS:
+            directory = project_root / spec.directory.relative_to(PROJECT_ROOT)
+            if not directory.exists():
+                continue
+
+            for path in sorted(directory.glob("*.txt")):
+                content = path.read_text(encoding="utf-8")
+                cur.execute(
+                    """
+                    INSERT INTO raw_document (entity_type, entity_slug, document_kind, content, source_origin)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON CONFLICT (entity_type, entity_slug, document_kind) DO UPDATE
+                    SET content = EXCLUDED.content,
+                        source_origin = EXCLUDED.source_origin,
+                        updated_at = NOW()
+                    """,
+                    (spec.entity_type, path.stem, spec.document_kind, content, "filesystem"),
+                )
+                inserted += 1
+    pg_conn.commit()
+    return inserted
+
+
+def import_mammouth_settings(pg_conn, project_root: Path) -> int:
+    settings_path = project_root / "data" / "mammouth_settings.json"
+    if not settings_path.exists():
+        return 0
+
+    payload = json.loads(settings_path.read_text(encoding="utf-8"))
+    with pg_conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO app_setting (setting_key, setting_value)
+            VALUES (%s, %s::jsonb)
+            ON CONFLICT (setting_key) DO UPDATE
+            SET setting_value = EXCLUDED.setting_value,
+                updated_at = NOW()
+            """,
+            ("mammouth_settings", json.dumps(payload, ensure_ascii=False)),
+        )
+    pg_conn.commit()
+    return 1
+
+
+def import_saved_views(pg_conn, project_root: Path) -> int:
+    path = project_root / "data" / "saved_views.json"
+    if not path.exists():
+        return 0
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, list):
+        return 0
+
+    inserted = 0
+    with pg_conn.cursor() as cur:
+        for entry in payload:
+            if not isinstance(entry, dict):
+                continue
+            cur.execute(
+                """
+                INSERT INTO sql_saved_view (view_id, name, description, sql_text, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, COALESCE(%s::timestamptz, NOW()), NOW())
+                ON CONFLICT (view_id) DO UPDATE
+                SET name = EXCLUDED.name,
+                    description = EXCLUDED.description,
+                    sql_text = EXCLUDED.sql_text,
+                    updated_at = NOW()
+                """,
+                (
+                    entry.get("id"),
+                    entry.get("name", ""),
+                    entry.get("description", ""),
+                    entry.get("sql", ""),
+                    entry.get("created_at"),
+                ),
+            )
+            inserted += 1
+    pg_conn.commit()
+    return inserted
+
+
+def import_sql_history(pg_conn, project_root: Path) -> int:
+    path = project_root / "data" / "sql_lab_history.json"
+    if not path.exists():
+        return 0
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, list):
+        return 0
+
+    inserted = 0
+    with pg_conn.cursor() as cur:
+        for entry in payload:
+            if not isinstance(entry, dict):
+                continue
+            cur.execute(
+                """
+                INSERT INTO sql_query_history (occurred_at, action, status, sql_text, preview, raw_payload)
+                VALUES (COALESCE(%s::timestamptz, NOW()), %s, %s, %s, %s, %s::jsonb)
+                """,
+                (
+                    entry.get("timestamp"),
+                    entry.get("action", "execute"),
+                    entry.get("status", "unknown"),
+                    entry.get("sql", ""),
+                    entry.get("preview"),
+                    json.dumps(entry, ensure_ascii=False),
+                ),
+            )
+            inserted += 1
+    pg_conn.commit()
+    return inserted
+
+
+def backfill_city_geometry(pg_conn) -> int:
+    with pg_conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE dim_city
+            SET geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography
+            WHERE latitude IS NOT NULL
+              AND longitude IS NOT NULL
+              AND geom IS NULL
+            """
+        )
+        rowcount = cur.rowcount
+    pg_conn.commit()
+    return rowcount
+
+
+def validate_counts(sqlite_conn: sqlite3.Connection, pg_conn) -> list[str]:
+    mismatches: list[str] = []
+    with pg_conn.cursor() as cur:
+        for spec in TABLE_COPY_ORDER:
+            if not sqlite_table_exists(sqlite_conn, spec.name):
+                continue
+            sqlite_count = sqlite_conn.execute(f"SELECT COUNT(*) FROM {spec.name}").fetchone()[0]
+            cur.execute(f"SELECT COUNT(*) FROM {spec.name}")
+            postgres_count = cur.fetchone()[0]
+            if sqlite_count != postgres_count:
+                mismatches.append(
+                    f"{spec.name}: sqlite={sqlite_count} postgres={postgres_count}"
+                )
+    return mismatches
+
+
+def run(args: argparse.Namespace) -> None:
+    sqlite_conn = connect_sqlite(args.sqlite_path)
+    pg_conn = connect_postgres(args.pg_dsn)
+
+    try:
+        if not args.skip_schema:
+            print(f"[1/5] Applying schema: {args.schema_path}")
+            apply_schema(pg_conn, args.schema_path)
+
+        if args.truncate_target:
+            print("[2/5] Truncating target tables")
+            truncate_target_tables(pg_conn)
+
+        print("[3/5] Copying SQLite tables")
+        for spec in TABLE_COPY_ORDER:
+            copied = copy_table(sqlite_conn, pg_conn, spec)
+            print(f"  - {spec.name}: {copied} rows")
+
+        print("[4/5] Importing filesystem-backed state")
+        if not args.skip_documents:
+            documents = import_raw_documents(pg_conn, args.project_root)
+            settings = import_mammouth_settings(pg_conn, args.project_root)
+            saved_views = import_saved_views(pg_conn, args.project_root)
+            history = import_sql_history(pg_conn, args.project_root)
+            print(f"  - raw_document: {documents}")
+            print(f"  - app_setting: {settings}")
+            print(f"  - sql_saved_view: {saved_views}")
+            print(f"  - sql_query_history: {history}")
+
+        geom_updates = backfill_city_geometry(pg_conn)
+        print(f"  - dim_city geom backfill: {geom_updates}")
+
+        print("[5/5] Validating row counts")
+        mismatches = validate_counts(sqlite_conn, pg_conn)
+        if mismatches:
+            print("Count mismatches detected:")
+            for mismatch in mismatches:
+                print(f"  - {mismatch}")
+        else:
+            print("All copied table counts match.")
+
+        print("")
+        print("Migration skeleton completed.")
+        print("Next recommended steps:")
+        print("  1. Import region/country boundary GeoJSON into boundary_geom.")
+        print("  2. Switch app/db.py to a PostgreSQL connection layer.")
+        print("  3. Move image binaries from local disk to object storage.")
+        print("  4. Migrate SQL Lab and Mammouth settings away from local files entirely.")
+    finally:
+        sqlite_conn.close()
+        pg_conn.close()
+
+
+def main() -> None:
+    args = parse_args()
+    run(args)
+
+
+if __name__ == "__main__":
+    main()

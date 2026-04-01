@@ -737,11 +737,11 @@ SELECT
     COUNT(s.section_id) AS section_count,
     STRING_AGG(s.section_title, ' | ' ORDER BY s.section_order) AS section_list,
     SUM(CASE WHEN s.section_title = 'Population' THEN 1 ELSE 0 END) AS has_population,
-    SUM(CASE WHEN s.section_title = 'Economie' THEN 1 ELSE 0 END) AS has_economie,
-    SUM(CASE WHEN s.section_title = 'Education' THEN 1 ELSE 0 END) AS has_education,
+    SUM(CASE WHEN s.section_title = 'Économie' THEN 1 ELSE 0 END) AS has_economie,
+    SUM(CASE WHEN s.section_title = 'Éducation' THEN 1 ELSE 0 END) AS has_education,
     SUM(CASE WHEN s.section_title = 'Transport' THEN 1 ELSE 0 END) AS has_transport,
     SUM(CASE WHEN s.section_title = 'Climat' THEN 1 ELSE 0 END) AS has_climat,
-    SUM(CASE WHEN s.section_title = 'Sante' THEN 1 ELSE 0 END) AS has_sante,
+    SUM(CASE WHEN s.section_title = 'Santé' THEN 1 ELSE 0 END) AS has_sante,
     SUM(CASE WHEN s.section_title LIKE '%Sport%' THEN 1 ELSE 0 END) AS has_sports,
     SUM(CASE WHEN s.section_title LIKE '%Quartier%' THEN 1 ELSE 0 END) AS has_quartiers
 FROM dim_city dc

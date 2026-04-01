@@ -5,7 +5,6 @@ import io
 import json
 import uuid
 import re
-import sqlite3
 from collections import defaultdict
 from datetime import datetime, UTC
 from functools import lru_cache
@@ -14,7 +13,7 @@ from typing import Any, Iterable, Sequence
 
 from flask import current_app
 
-from app.db import get_db
+from app.db import DatabaseError, get_db
 from app.services.city_photos import get_city_photo
 
 
@@ -1469,6 +1468,14 @@ class AnalyticsService:
         history_path.write_text("[]", encoding="utf-8")
 
     def get_sql_examples(self) -> list[dict[str, str]]:
+        catalog_sql = (
+            "SELECT table_type AS type, table_name AS name, NULL::text AS sql\n"
+            "FROM information_schema.tables\n"
+            "WHERE table_schema = 'public'\n"
+            "ORDER BY table_type, table_name;"
+            if current_app.config.get("DATABASE_BACKEND") == "postgresql"
+            else "SELECT type, name, sql\nFROM sqlite_master\nWHERE type IN ('table','view')\nORDER BY type, name;"
+        )
         return [
             # ── Population ──
             {
@@ -1538,7 +1545,7 @@ class AnalyticsService:
             {
                 "category": "Exploration",
                 "label": "Tables et vues disponibles",
-                "sql": "SELECT type, name, sql\nFROM sqlite_master\nWHERE type IN ('table','view')\nORDER BY type, name;",
+                "sql": catalog_sql,
             },
             {
                 "category": "Exploration",
@@ -1566,7 +1573,7 @@ class AnalyticsService:
             clause_parts.append(self._region_in_clause(filters["region"]))
             params.extend(filters["region"])
         if filters.get("search"):
-            clause_parts.append("AND city_name LIKE ?")
+            clause_parts.append("AND LOWER(city_name) LIKE LOWER(?)")
             params.append(f"%{filters['search']}%")
         return " ".join(clause_parts), params
 
@@ -1584,7 +1591,7 @@ class AnalyticsService:
         if filters.get("region"):
             parts.append(self._region_in_clause(filters["region"], f"{prefix}region"))
         if include_city and filters.get("search"):
-            parts.append(f"AND {prefix}city_name LIKE ?")
+            parts.append(f"AND LOWER({prefix}city_name) LIKE LOWER(?)")
         if filters.get("period"):
             parts.append(f"AND {prefix}period_label = ?")
         return " ".join(parts)
@@ -1614,7 +1621,7 @@ class AnalyticsService:
         if filters.get("region"):
             parts.append(self._region_in_clause(filters["region"], "city.region"))
         if filters.get("search"):
-            parts.append("AND growth.city_name LIKE ?")
+            parts.append("AND LOWER(growth.city_name) LIKE LOWER(?)")
         if filters.get("period"):
             parts.append("AND " + self._period_year_condition("growth.end_year"))
         return " ".join(parts)
@@ -1638,7 +1645,7 @@ class AnalyticsService:
         if filters.get("region"):
             parts.append(self._region_in_clause(filters["region"], "city.region"))
         if filters.get("search"):
-            parts.append("AND decline.city_name LIKE ?")
+            parts.append("AND LOWER(decline.city_name) LIKE LOWER(?)")
         if filters.get("period"):
             parts.append("AND " + self._period_year_condition("decline.current_year"))
         return " ".join(parts)
@@ -1896,9 +1903,10 @@ class AnalyticsService:
 
             try:
                 cursor = connection.execute(statement)
-            except sqlite3.Error as exc:
+            except DatabaseError as exc:
                 connection.rollback()
-                raise SqlExecutionError(f"Erreur SQLite: {exc}") from exc
+                backend = current_app.config.get("DATABASE_BACKEND", "database")
+                raise SqlExecutionError(f"Erreur {backend}: {exc}") from exc
 
             if cursor.description:
                 rows = cursor.fetchmany(row_limit)
