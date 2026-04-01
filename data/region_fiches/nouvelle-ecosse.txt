@@ -1,0 +1,101 @@
+# Nova Scotia — Fiche Complète
+
+## 📍 Informations Générales
+
+| Élément               | Donnée                                  |
+|----------------------|----------------------------------------|
+| Région               | Nova Scotia                            |
+| Pays                 | Canada                                |
+| Capitale régionale   | Halifax                               |
+| Plus grande ville    | Halifax                               |
+| Statut administratif | Province canadienne                   |
+| Superficie           | 55 284 km²                           |
+| Population           | 979 449 hab. (2023)                   |
+| Densité              | 17,7 hab./km²                        |
+| Langues officielles  | Anglais                              |
+| Devise/Symboles      | Devise : "Munit haec et altera vincit" (Elle défend et conquiert) <br> Symbole : Étoile de la Nouvelle-Écosse, épinette noire |
+
+## 👥 Population & Démographie
+
+| Année | Population | Croissance annuelle (%) | Taux de fécondité | Espérance de vie (ans) | Âge médian | Diversité ethnique (%) | Immigration nette | Langues parlées principales (%) |
+|-------|------------|------------------------|-------------------|-----------------------|------------|-----------------------|-------------------|---------------------------------|
+| 2000  | 913 462    | 0,3                    | 1,5               | 78,2                  | 39,5       | Européenne majoritaire | Faible            | Anglais 95%, Français 3%, autres 2% |
+| 2010  | 940 000    | 0,3                    | 1,4               | 80,0                  | 41,0       | Européenne 90%, Autochtones 5%, autres 5% | Modérée           | Anglais 94%, Français 4%, autres 2% |
+| 2023  | 979 449    | 0,4                    | 1,3               | 81,5                  | 44,0       | Européenne 85%, Autochtones 6%, Afro-descendants 4%, autres 5% | Croissante        | Anglais 92%, Français 5%, autres 3% |
+
+- La population de la Nouvelle-Écosse est l'une des plus âgées du Canada, avec un âge médian supérieur à la moyenne nationale (41,6 ans).
+- La province connaît une immigration modérée, principalement en provenance d’Asie et d’Afrique, favorisant une légère diversification ethnique.
+- La langue française est parlée principalement dans la région d’Acadie (Sud-Ouest).
+
+## 📐 Géographie
+
+| Élément             | Donnée                                                                                   |
+|---------------------|-----------------------------------------------------------------------------------------|
+| Superficie          | 55 284 km²                                                                             |
+| Frontières          | Baie de Fundy (ouest), Océan Atlantique (sud et est), Nouveau-Brunswick (nord-ouest)   |
+| Relief              | Collines ondulantes, basses montagnes (Appalaches), plaines côtières                    |
+| Point culminant     | Mont Saddleback, 535 m                                                                   |
+| Principaux cours d'eau | Fleuve Shubenacadie, rivière Mersey, rivière LaHave                                   |
+| Climat              | Climat océanique tempéré, hivers doux et humides, étés frais et pluvieux                |
+| Parcs naturels      | Parc national Kejimkujik, Parc national Cape Breton Highlands, Parc provincial Blomidon  |
+
+- Comparé à d'autres provinces atlantiques (ex. Terre-Neuve-et-Labrador), la Nouvelle-Écosse bénéficie d'un climat plus tempéré et d'un relief moins accidenté.
+
+## 🏛️ Économie
+
+| Élément                  | Donnée                                                                                   |
+|--------------------------|-----------------------------------------------------------------------------------------|
+| PIB régional (2023)      | 48 milliards CAD                                                                         |
+| Principaux secteurs (%)  | Services (55%), Industrie manufacturière (15%), Pêche et agriculture (8%), Tourisme (10%), Énergie (5%), Autres (7%) |
+| Principales industries   | Technologies de l'information, aérospatiale, transformation alimentaire, pêche, tourisme |
+| Entreprises majeures     | IMP Group (aérospatiale), Clearwater Seafoods, Sobeys, Emera Inc. (énergie)              |
+| Défis économiques        | Vieillissement de la population active, dépendance aux industries traditionnelles, fuite des cerveaux |
+| Relations économiques    | Forte intégration avec le reste du Canada via Halifax (port majeur), exportations vers États-Unis et Europe |
+
+- La Nouvelle-Écosse est la province la plus urbanisée des Maritimes, avec Halifax comme moteur économique régional.
+- Le tourisme est un secteur en croissance, notamment grâce aux parcs nationaux et au patrimoine historique.
+
+## 🎓 Éducation & Culture
+
+| Élément                  | Donnée                                                                                   |
+|--------------------------|-----------------------------------------------------------------------------------------|
+| Principales universités  | Université Dalhousie (Halifax), Université Saint Mary’s, Université Acadia (Wolfville)    |
+| Institutions notables    | Nova Scotia Community College, Atlantic School of Theology                             |
+| Faits culturels marquants| Forte tradition acadienne et écossaise, musique folk et celtique, littérature maritime  |
+| Patrimoine               | Sites historiques de la guerre d’Indépendance américaine, fortifications de Louisbourg  |
+| Festivals                | Festival international de jazz d’Halifax, Celtic Colours International Festival, Acadian Festival |
+| Identité régionale       | Mélange unique de cultures autochtones Mi’kmaq, acadienne et écossaise, forte identité maritime |
+
+- La province est reconnue pour sa scène musicale celtique et ses festivals culturels qui attirent des visiteurs internationaux.
+
+## 🏥 Santé & Services
+
+| Élément                  | Donnée                                                                                   |
+|--------------------------|-----------------------------------------------------------------------------------------|
+| Système de santé         | Nova Scotia Health Authority (NSHA) gère les hôpitaux et services de santé publique    |
+| Espérance de vie (2023)  | 81,5 ans (moyenne provinciale)                                                         |
+| Principaux hôpitaux      | QEII Health Sciences Centre (Halifax), IWK Health Centre (pédiatrie), Cape Breton Regional Hospital |
+| Défis sanitaires         | Vieillissement de la population, accès aux soins en zones rurales, taux de maladies chroniques élevés (diabète, maladies cardiovasculaires) |
+
+- La province investit dans la télémédecine pour pallier les difficultés d’accès aux soins dans les zones éloignées.
+
+## 🏙️ Principales Villes
+
+| Ville     | Population (2023) | Rôle économique                    | Note                          |
+|-----------|-------------------|----------------------------------|-------------------------------|
+| Halifax   | 460 000           | Capitale, centre financier, port | Moteur économique régional     |
+| Sydney    | 31 000            | Industrie lourde, port           | Centre industriel de Cape Breton |
+| Dartmouth | 110 000           | Banlieue résidentielle et commerciale d’Halifax | Croissance urbaine notable     |
+| Truro     | 13 500            | Hub agricole et ferroviaire      | Porte d’entrée vers le nord    |
+| New Glasgow | 9 500            | Industrie manufacturière         | Déclin industriel mais diversification en cours |
+
+- Halifax concentre plus de 45% de la population provinciale et domine l’économie régionale.
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** : Vieillissement démographique, déclin des industries traditionnelles (pêche, charbon), nécessité d’attirer et retenir les jeunes et les immigrants.
+- **Projets d'infrastructure** : Modernisation du port de Halifax, développement des énergies renouvelables (éolien offshore), amélioration des réseaux de transport en commun à Halifax.
+- **Tendances démographiques** : Légère croissance grâce à l’immigration, mais vieillissement persistant, urbanisation accrue autour d’Halifax.
+- **Perspectives économiques** : Transition vers une économie axée sur les technologies propres, le tourisme durable et les services à haute valeur ajoutée, renforcement des liens commerciaux internationaux via le port.
+
+Nova Scotia se positionne comme une province dynamique des Maritimes, alliant un riche patrimoine culturel à une économie en mutation, tout en faisant face aux défis démographiques et économiques communs aux régions atlantiques du Canada.

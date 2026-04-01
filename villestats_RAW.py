@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 386
+# Nombre de villes : 388
 #
 
 # ============================================================
@@ -7786,6 +7786,33 @@ annotations = [
 ]
 
 # ============================================================
+# Saint-Bruno-de-Montarville (Canada)
+# ============================================================
+CITY_NAME = "Saint-Bruno-de-Montarville, Québec"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    150, 180, 220, 300, 450, 600, 750, 900, 1100, 1300, 1600, 2000, 2500, 3200, 4000, 
+    5200, 7000, 15000, 30000, 40000, 45000, 48000, 51000
+]
+
+annotations = [
+    (1870, 900, "🚜 Développement agricole — expansion des fermes (1870)", 'green'),
+    (1900, 1600, "🚂 Arrivée du chemin de fer — amélioration des transports (1900)", 'blue'),
+    (1930, 3200, "🏫 Construction d'écoles publiques — développement éducatif (1930)", 'orange'),
+    (1950, 5200, "🏘️ Urbanisation croissante — début des banlieues (1950)", 'purple'),
+    (1970, 15000, "🏢 Croissance industrielle — diversification économique (1970)", 'red'),
+    (1980, 30000, "🚗 Expansion résidentielle — augmentation des banlieues (1980)", 'teal'),
+    (2000, 45000, "🌳 Développement durable — création de parcs et espaces verts (2000)", 'green'),
+    (2010, 48000, "🚇 Projet de transport en commun — amélioration des infrastructures (2010)", 'navy'),
+    (2020, 51000, "🏙️ Modernisation urbaine — croissance démographique continue (2020)", 'gold'),
+]
+
+# ============================================================
 # Saint-Eustache (Canada)
 # ============================================================
 CITY_NAME = "Saint-Eustache, Québec"
@@ -9954,6 +9981,33 @@ annotations = [
     (2000, 125000, "🏟️ Jeux Olympiques de Salt Lake City — impact régional (2000)", 'navy'),
     (2010, 136000, "📈 Stabilisation démographique — maturité urbaine (2010)", 'gray'),
     (2020, 136000, "🏡 Ville résidentielle majeure — population stable (2020)", 'black'),
+]
+
+# ============================================================
+# Whitby (Canada)
+# ============================================================
+CITY_NAME = "Whitby, Ontario"
+CITY_COLOR = '#1f77b4'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    300, 350, 400, 450, 500, 700, 1200, 1500, 1800, 2200, 3000, 4500, 6000, 7500, 9000, 
+    13000, 20000, 35000, 50000, 70000, 90000, 120000, 130000
+]
+
+annotations = [
+    (1870, 1500, "🚂 Arrivée du chemin de fer — développement économique (1871)", 'green'),
+    (1900, 3000, "🏭 Industrialisation locale — croissance démographique (1900)", 'orange'),
+    (1910, 4500, "🎖️ Participation à la Première Guerre mondiale — impact social (1914)", 'red'),
+    (1950, 13000, "🏘️ Expansion résidentielle post-Seconde Guerre mondiale — baby boom (1950)", 'blue'),
+    (1960, 20000, "🚗 Développement des infrastructures routières — modernisation (1960)", 'purple'),
+    (1980, 50000, "🏢 Croissance urbaine et commerciale — diversification économique (1980)", 'teal'),
+    (2000, 90000, "🌐 Intégration dans la région du Grand Toronto — urbanisation accrue (2000)", 'navy'),
+    (2010, 120000, "🏫 Développement des services éducatifs — attractivité (2010)", 'gold'),
+    (2020, 130000, "🌳 Initiatives écologiques et durabilité — qualité de vie (2020)", 'darkred'),
 ]
 
 # ============================================================

@@ -1,0 +1,90 @@
+# Texas — Fiche Complète
+
+## 📍 Informations Générales
+
+| Critère               | Donnée                                      |
+|-----------------------|---------------------------------------------|
+| Région                | Texas                                       |
+| Pays                  | États-Unis d'Amérique                        |
+| Capitale régionale    | Austin                                      |
+| Plus grande ville     | Houston                                     |
+| Statut administratif  | État fédéré (State)                         |
+| Superficie            | 695 662 km² (2ᵉ plus grand État US)        |
+| Population (2024)     | Environ 30,3 millions d’habitants           |
+| Densité              | ~43,5 hab./km²                              |
+| Langues officielles   | Aucune langue officielle au niveau de l'État (anglais majoritaire) |
+| Devise/Symboles       | "Friendship" (surnom : The Lone Star State) |
+
+## 👥 Population & Démographie
+
+| Indicateur               | Donnée / Évolution                          |
+|-------------------------|---------------------------------------------|
+| Population 2000          | 20,8 millions                               |
+| Population 2010          | 25,1 millions                               |
+| Population 2020          | 29 millions                                |
+| Population 2024 (est.)   | 30,3 millions                              |
+| Croissance annuelle      | ~1,5 % (parmi les plus fortes aux USA)     |
+| Taux de fécondité        | 1,8 enfant/femme (2023)                      |
+| Espérance de vie (2023)  | 78,5 ans (moyenne États-Unis : 77,8 ans)    |
+| Âge médian               | 35,3 ans                                   |
+| Diversité ethnique       | Blanc non hispanique 41%, Hispanique 40%, Afro-américain 13%, Asiatique 5%, Autres 1% |
+| Immigration              | Forte immigration latino-américaine et asiatique, 17% de la population née à l’étranger |
+| Langues parlées          | Anglais (~85%), Espagnol (~30%), autres langues (vietnamien, allemand, tagalog) |
+
+## 📐 Géographie
+
+| Critère                 | Donnée                                      |
+|-------------------------|---------------------------------------------|
+| Superficie              | 695 662 km²                                |
+| Frontières              | 4 États US (New Mexico, Oklahoma, Arkansas, Louisiana), frontière internationale avec le Mexique (3 141 km) |
+| Relief                  | Plaines côtières, plateaux du centre, montagnes de l’Ouest (Davis Mountains) |
+| Point culminant         | Guadalupe Peak (2 667 m)                    |
+| Principaux cours d'eau  | Rio Grande, Colorado River, Brazos River, Trinity River |
+| Climat                  | Varié : désertique à l’ouest, subtropical humide à l’est, continental au nord |
+| Parcs naturels          | Big Bend National Park, Guadalupe Mountains National Park, Palo Duro Canyon State Park |
+
+## 🏛️ Économie
+
+| Indicateur              | Donnée                                      |
+|------------------------|---------------------------------------------|
+| PIB régional (2023)     | Environ 2 100 milliards USD (2ᵉ économie US) |
+| Secteurs principaux (%) | Services (finance, santé, éducation) 45%, Industrie manufacturière 20%, Énergie 15%, Agriculture 5%, Technologie 10%, Autres 5% |
+| Principales industries  | Pétrole et gaz (ExxonMobil, ConocoPhillips), Aérospatial (Lockheed Martin, SpaceX), Technologie (Dell, Texas Instruments), Agriculture (coton, bétail) |
+| Défis économiques       | Volatilité des prix du pétrole, inégalités régionales, gestion de l’eau, transition énergétique |
+| Relations économiques   | Premier exportateur US (Mexique, Chine, Canada), hub logistique majeur, forte intégration avec l’économie mexicaine |
+
+## 🎓 Éducation & Culture
+
+| Critère                | Donnée                                      |
+|------------------------|---------------------------------------------|
+| Principales universités| University of Texas at Austin, Texas A&M University, Rice University, University of Houston |
+| Faits culturels marquants | Influence hispanique forte, musique country et blues, festival South by Southwest (SXSW), rodeos, barbecue texan |
+| Patrimoine             | Missions espagnoles (San Antonio), Alamo, architecture moderne à Houston et Dallas |
+| Festivals              | SXSW (musique, cinéma, technologie), Texas State Fair, Houston Livestock Show and Rodeo |
+| Identité régionale     | Forte identité indépendante, culture du cowboy, mélange de traditions mexicaines et américaines |
+
+## 🏥 Santé & Services
+
+| Critère                | Donnée                                      |
+|------------------------|---------------------------------------------|
+| Système de santé       | Réseau hospitalier étendu, mais disparités régionales importantes |
+| Espérance de vie       | 78,5 ans (2023)                             |
+| Principaux hôpitaux    | Texas Medical Center (Houston, plus grand complexe médical du monde), Baylor University Medical Center, UT Southwestern Medical Center |
+| Défis sanitaires       | Accès aux soins en zones rurales, taux d’obésité élevé (35%), maladies chroniques (diabète, hypertension) |
+
+## 🏙️ Principales Villes
+
+| Ville      | Population (2024) | Rôle économique                      | Note                          |
+|------------|-------------------|------------------------------------|-------------------------------|
+| Houston   | ~2,4 millions      | Centre pétrolier, aérospatial, médical | 1ère ville du Texas, 4ᵉ US    |
+| San Antonio | ~1,5 million     | Tourisme, militaire, industrie     | 2ᵉ ville, forte culture hispanique |
+| Dallas     | ~1,3 million      | Finance, technologie, commerce     | 3ᵉ ville, hub commercial majeur |
+| Austin     | ~1,1 million      | Technologie, gouvernement, éducation | Capitale, forte croissance tech |
+| Fort Worth | ~900 000          | Industrie, aviation, culture       | Ville jumelle de Dallas         |
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** : Gestion durable de l’eau face à la sécheresse, réduction des émissions de CO2, lutte contre les inégalités sociales et sanitaires, adaptation aux changements climatiques.
+- **Projets d'infrastructure** : Extension des réseaux de transport (métro à Austin, amélioration des routes), développement des énergies renouvelables (éolien, solaire), modernisation des ports de Houston.
+- **Tendances démographiques** : Croissance rapide, urbanisation intense, diversification ethnique accrue, vieillissement modéré de la population.
+- **Perspectives économiques** : Maintien du leadership dans l’énergie, émergence des technologies vertes, renforcement du secteur technologique à Austin, développement du commerce transfrontalier avec le Mexique.

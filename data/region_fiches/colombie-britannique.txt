@@ -1,0 +1,88 @@
+# British Columbia — Fiche Complète
+
+## 📍 Informations Générales
+
+| Élément               | Donnée                                    |
+|----------------------|-------------------------------------------|
+| Région               | British Columbia (Colombie-Britannique)  |
+| Pays                 | Canada                                    |
+| Capitale régionale   | Victoria                                  |
+| Plus grande ville    | Vancouver                                 |
+| Statut administratif | Province (province canadienne)            |
+| Superficie           | 944 735 km²                              |
+| Population (2024)    | Environ 5,4 millions                      |
+| Densité              | ~5,7 hab./km²                            |
+| Langues officielles  | Anglais (de facto)                        |
+| Devise/Symboles      | "Splendor Sine Occasu" (Splendeur sans déclin), orignal, orque, cèdre rouge |
+
+## 👥 Population & Démographie
+
+| Année | Population | Croissance annuelle (%) | Taux de fécondité | Espérance de vie (ans) | Âge médian | Diversité ethnique (principaux groupes) | Immigration (2023) | Langues parlées (principales)          |
+|--------|------------|------------------------|-------------------|-----------------------|------------|----------------------------------------|-------------------|----------------------------------------|
+| 2000   | 3,7 M      | 1,2                    | 1,5               | 81,7                  | 38,5       | Européens, Asiatiques (Chinois, Indiens), Autochtones | 50 000            | Anglais, chinois (mandarin, cantonais), punjabi, tagalog |
+| 2010   | 4,5 M      | 1,3                    | 1,4               | 82,5                  | 40,2       | Croissance des communautés asiatiques et autochtones | 60 000            | Anglais, chinois, punjabi, tagalog, français |
+| 2024   | 5,4 M      | 1,1                    | 1,3               | 83,2                  | 42,0       | Diversité accrue : 30% de la population née à l’étranger, forte présence asiatique et autochtone | 65 000            | Anglais (95%), chinois (15%), punjabi (5%), français (3%), autochtones |
+
+## 📐 Géographie
+
+| Élément              | Donnée                                                                                  |
+|----------------------|-----------------------------------------------------------------------------------------|
+| Superficie           | 944 735 km²                                                                            |
+| Frontières           | Alberta (est), Yukon (nord), Alaska (nord-ouest), Océan Pacifique (ouest), États-Unis (sud : Washington, Idaho, Montana) |
+| Relief               | Montagnes Rocheuses, Chaînes côtières, Plateaux intérieurs, Vallées fluviales          |
+| Point culminant      | Mont Fairweather (4 663 m)                                                             |
+| Principaux cours d'eau | Fleuve Fraser, Fleuve Columbia, Fleuve Skeena, Fleuve Thompson                        |
+| Climat               | Varié : océanique tempéré sur la côte, continental dans l’intérieur, zones alpines froides |
+| Parcs naturels       | Parc national de Pacific Rim, Parc national de Yoho, Parc provincial Garibaldi, Parc provincial Wells Gray |
+
+## 🏛️ Économie
+
+| Élément                  | Donnée                                                                                          |
+|--------------------------|-------------------------------------------------------------------------------------------------|
+| PIB régional (2023)      | Environ 350 milliards CAD (3e au Canada après Ontario et Québec)                                |
+| Secteurs principaux (%)  | Services (70%), Industrie forestière (8%), Technologie (7%), Tourisme (6%), Ressources naturelles (5%) |
+| Principales industries   | Technologies de l’information, exploitation forestière, pêche, production d’énergie hydroélectrique, cinéma et télévision |
+| Principales entreprises  | Lululemon Athletica, Teck Resources, Canfor, BC Hydro, Telus, Electronic Arts Canada            |
+| Défis économiques        | Logement cher, inégalités régionales, dépendance aux exportations, transition énergétique       |
+| Relations économiques    | Forte intégration avec les États-Unis (commerce transfrontalier), exportations vers Asie (Chine, Japon) |
+
+## 🎓 Éducation & Culture
+
+| Élément                  | Donnée                                                                                          |
+|--------------------------|-------------------------------------------------------------------------------------------------|
+| Principales universités  | University of British Columbia (UBC), Simon Fraser University (SFU), University of Victoria (UVic) |
+| Institutions notables    | Emily Carr University of Art + Design, British Columbia Institute of Technology (BCIT)          |
+| Faits culturels marquants| Centre du cinéma canadien (Hollywood North), foyer des Premières Nations, scène musicale dynamique |
+| Patrimoine               | Sites historiques autochtones, Fort Langley, Bastion de Victoria, musées d’art contemporain     |
+| Festivals                | Vancouver International Film Festival, Celebration of Light (feux d’artifice), Powell Street Festival (culture japonaise) |
+| Identité régionale       | Forte conscience environnementale, multiculturalisme, valorisation des cultures autochtones     |
+
+## 🏥 Santé & Services
+
+| Élément                  | Donnée                                                                                          |
+|--------------------------|-------------------------------------------------------------------------------------------------|
+| Systèmes de santé        | Régime public de santé (Medical Services Plan), réseau de cliniques et hôpitaux publics         |
+| Espérance de vie         | 83,2 ans (moyenne provinciale)                                                                 |
+| Principaux hôpitaux      | Vancouver General Hospital, St. Paul’s Hospital, Royal Jubilee Hospital (Victoria)               |
+| Défis sanitaires         | Accès aux soins en zones rurales, santé mentale, addictions, disparités chez les populations autochtones |
+
+## 🏙️ Principales Villes
+
+| Ville       | Population (2024) | Rôle économique                      | Note                         |
+|-------------|-------------------|------------------------------------|------------------------------|
+| Vancouver   | 675 000           | Centre financier, port majeur, tech| Ville la plus peuplée, moteur économique |
+| Victoria    | 92 000            | Capitale politique, tourisme       | Capitale provinciale, forte attractivité touristique |
+| Surrey      | 650 000           | Croissance démographique rapide, industrie légère | Deuxième ville par population, forte croissance |
+| Burnaby     | 260 000           | Technologie, commerce               | Centre technologique et commercial important |
+| Kelowna     | 150 000           | Agriculture, tourisme, viniculture | Croissance rapide, pôle régional de l’intérieur |
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** : Crise du logement (prix parmi les plus élevés au Canada), inégalités sociales, changement climatique impactant forêts et côtes, tensions sur les infrastructures de transport.
+- **Projets d'infrastructure** : Extension du SkyTrain à Vancouver, développement des énergies renouvelables, amélioration des réseaux routiers et ferroviaires, investissements dans le logement abordable.
+- **Tendances démographiques** : Vieillissement de la population, augmentation de la diversité ethnique, urbanisation croissante, migration interne vers les grandes villes.
+- **Perspectives économiques** : Transition vers une économie verte, croissance du secteur technologique et des services, renforcement des liens commerciaux avec l’Asie-Pacifique, développement du tourisme durable.
+
+---
+
+British Columbia se distingue par son dynamisme économique, sa richesse naturelle et culturelle, mais fait face à des défis majeurs liés à l’urbanisation rapide et à la protection de son environnement unique.

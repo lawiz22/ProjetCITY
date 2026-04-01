@@ -1,0 +1,83 @@
+# Saskatchewan — Fiche Complète
+
+## 📍 Informations Générales
+
+| Région       | Pays       | Capitale régionale | Plus grande ville | Statut administratif | Superficie (km²) | Population (2024) | Densité (hab/km²) | Langues officielles | Devise / Symboles                      |
+|--------------|------------|--------------------|-------------------|----------------------|------------------|------------------|-------------------|---------------------|---------------------------------------|
+| Saskatchewan | Canada     | Regina             | Saskatoon         | Province             | 651 900          | 1 200 000        | 1.84              | Anglais, Français   | Devise : "Multis e gentibus vires" (Force issue de plusieurs peuples)  
+Symbole : Chardon (fleur provinciale), Bison |
+
+## 👥 Population & Démographie
+
+| Année | Population | Croissance annuelle (%) | Taux de fécondité (naissances/femme) | Espérance de vie (ans) | Âge médian (ans) | Diversité ethnique (%) | Immigration nette (2023) | Langues parlées principales (%)          |
+|-------|------------|------------------------|-------------------------------------|-----------------------|------------------|-----------------------|-------------------------|------------------------------------------|
+| 2000  | 978 933    | 1.1                    | 1.7                                 | 78.5                  | 35.0             | Européens majoritaires | +8 000                  | Anglais 90%, Français 5%, Autochtones 3% |
+| 2010  | 1 033 381  | 1.2                    | 1.6                                 | 80.0                  | 36.5             | Croissance diversité   | +10 000                 | Anglais 88%, Français 6%, Autochtones 4% |
+| 2024  | 1 200 000  | 1.5                    | 1.6                                 | 81.2                  | 37.8             | 75% Européens, 15% Autochtones, 10% autres | +12 000                 | Anglais 85%, Français 7%, Autochtones 5%, Autres 3% |
+
+- La population est concentrée dans les zones urbaines (Saskatoon, Regina).
+- Forte présence autochtone (Cris, Dénés, Saulteaux).
+- Immigration principalement d’Asie du Sud et de l’Afrique subsaharienne, contribuant à la diversification culturelle.
+
+## 📐 Géographie
+
+| Caractéristique       | Description                                                                                   |
+|----------------------|-----------------------------------------------------------------------------------------------|
+| Superficie           | 651 900 km² (3e plus grande province canadienne)                                             |
+| Frontières           | Alberta à l'ouest, Manitoba à l'est, États-Unis (Montana, Dakota du Nord) au sud, Nunavut au nord |
+| Relief               | Majoritairement plaines agricoles, prairies, collines douces                                 |
+| Point culminant      | Cypress Hills, 1 392 m                                                                        |
+| Principaux cours d'eau | Fleuve Saskatchewan Sud et Nord, Rivière Churchill, Rivière Assiniboine                      |
+| Climat               | Continental humide à semi-aride, hivers très froids (-20°C en moyenne), étés chauds (25°C)   |
+| Parcs naturels       | Parc provincial Cypress Hills, Parc national Grasslands, Parc provincial Prince Albert        |
+
+## 🏛️ Économie
+
+| Indicateur / Secteur           | Données / Pourcentage                              |
+|-------------------------------|---------------------------------------------------|
+| PIB régional (2023)            | Environ 85 milliards CAD                           |
+| Secteurs principaux            | Agriculture 30%, Énergie et ressources 25%, Industrie manufacturière 15%, Services 30% |
+| Principales industries        | Céréales (blé, canola), potasse, uranium, pétrole, gaz naturel, agroalimentaire          |
+| Entreprises majeures          | Nutrien (potasse), Cameco (uranium), Viterra (agriculture), SaskPower (énergie)          |
+| Défis économiques            | Volatilité des prix des matières premières, dépendance à l’agriculture, diversification limitée |
+| Relations économiques         | Exportations vers USA et Chine, intégration avec Alberta et Manitoba, rôle clé dans l’agroalimentaire canadien |
+
+## 🎓 Éducation & Culture
+
+| Aspect                        | Informations clés                                                                                   |
+|-------------------------------|--------------------------------------------------------------------------------------------------|
+| Universités principales       | University of Saskatchewan (Saskatoon), University of Regina                                    |
+| Institutions notables         | Saskatchewan Polytechnic, First Nations University of Canada                                    |
+| Faits culturels marquants     | Fort influence autochtone, festivals comme le Saskatoon Fringe Festival, Regina Folk Festival  |
+| Patrimoine                   | Sites historiques liés à la colonisation, culture Métis, musées comme Royal Saskatchewan Museum |
+| Festivals                    | Festival du film de Regina, Festival de la culture autochtone, Saskatoon Jazz Festival          |
+| Identité régionale           | Forte identité rurale et autochtone, valorisation des prairies et des ressources naturelles     |
+
+## 🏥 Santé & Services
+
+| Indicateur / Institution       | Données / Informations principales                                                                |
+|-------------------------------|--------------------------------------------------------------------------------------------------|
+| Système de santé régional      | Saskatchewan Health Authority (SHA), gestion centralisée des hôpitaux et cliniques               |
+| Espérance de vie (2024)        | 81.2 ans (hommes 79, femmes 83)                                                                  |
+| Principaux hôpitaux            | Royal University Hospital (Saskatoon), Regina General Hospital, St. Paul’s Hospital (Saskatoon)  |
+| Défis sanitaires               | Accès aux soins en zones rurales, santé mentale, disparités de santé chez les populations autochtones |
+
+## 🏙️ Principales Villes
+
+| Ville     | Population (2024) | Rôle économique                      | Note (importance régionale) |
+|-----------|-------------------|------------------------------------|-----------------------------|
+| Saskatoon | 330 000           | Centre industriel, universitaire, agricole | ⭐⭐⭐⭐⭐                      |
+| Regina    | 260 000           | Capitale provinciale, administration, services | ⭐⭐⭐⭐⭐                      |
+| Prince Albert | 43 000         | Centre régional du nord, foresterie, santé | ⭐⭐⭐                        |
+| Moose Jaw | 35 000            | Industrie manufacturière, transport | ⭐⭐                         |
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** : Diversification économique pour réduire la dépendance aux matières premières, lutte contre le déclin rural, amélioration des infrastructures de santé en zones isolées, réconciliation avec les peuples autochtones.
+- **Projets d'infrastructure** : Expansion des réseaux de transport (routes et chemins de fer), développement des énergies renouvelables (éolien, solaire), modernisation des installations universitaires et hospitalières.
+- **Tendances démographiques** : Croissance urbaine soutenue, vieillissement progressif de la population, augmentation de la diversité ethnique par l’immigration.
+- **Perspectives économiques** : Potentiel de croissance dans les technologies agricoles (agritech), valorisation accrue des ressources minérales, développement du tourisme écologique et culturel.
+
+---
+
+Saskatchewan se distingue par son rôle crucial dans l’agriculture canadienne et ses ressources naturelles abondantes, tout en faisant face à des défis liés à sa faible densité et à la nécessité d’une diversification économique. Sa richesse culturelle, notamment autochtone, et ses institutions éducatives en font une province dynamique au cœur des Prairies.

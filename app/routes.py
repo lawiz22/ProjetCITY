@@ -3716,6 +3716,16 @@ def ai_lab() -> str:
     countries_for_region = [r["country_name"] for r in conn.execute(
         "SELECT country_name FROM dim_country ORDER BY country_name COLLATE NOCASE"
     ).fetchall()]
+    countries_for_event = countries_for_region
+    regions_for_event = [r["region_name"] for r in conn.execute(
+        "SELECT region_name FROM dim_region ORDER BY region_name COLLATE NOCASE"
+    ).fetchall()]
+    from .services.event_service import CATEGORY_LABELS, CATEGORY_EMOJIS
+    prompt_refine_event = load_prompt("event_refine.txt")
+    events_for_refine = [dict(r) for r in conn.execute(
+        "SELECT event_name, event_slug, event_year, event_category "
+        "FROM dim_event ORDER BY event_year DESC, event_name COLLATE NOCASE"
+    ).fetchall()]
     return render_template(
         "web/ai_lab.html",
         page_title="AI Lab",
@@ -3732,6 +3742,12 @@ def ai_lab() -> str:
         prompt_region_details=prompt_region_details,
         prompt_region_fiche=prompt_region_fiche,
         countries_for_region=countries_for_region,
+        countries_for_event=countries_for_event,
+        regions_for_event=regions_for_event,
+        event_category_labels=CATEGORY_LABELS,
+        event_category_emojis=CATEGORY_EMOJIS,
+        prompt_refine_event=prompt_refine_event,
+        events_for_refine=events_for_refine,
     )
 
 
@@ -4376,6 +4392,277 @@ def ai_lab_suggest_region() -> Response:
     if result.get("success"):
         result["tokens_total"] = load_settings().get("tokens_used", 0)
     return jsonify(result)
+
+
+@web.route("/ai-lab/suggest-event", methods=["POST"])
+def ai_lab_suggest_event() -> Response:
+    """Ask Mammouth to suggest a historical event not yet in the DB."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .services.event_service import CATEGORY_LABELS
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    filter_country  = request.form.get("country", "").strip()
+    filter_region   = request.form.get("region", "").strip()
+    filter_category = request.form.get("category", "").strip()
+
+    conn = get_db()
+
+    # Collect existing event names + slugs to exclude
+    existing_rows = conn.execute(
+        "SELECT event_name, event_slug, event_year FROM dim_event ORDER BY event_name"
+    ).fetchall()
+    existing_entries = [
+        f"{r['event_name']} ({r['event_year']})" if r["event_year"] else r["event_name"]
+        for r in existing_rows
+    ]
+
+    # Build context filters description
+    context_parts: list[str] = []
+    if filter_country:
+        context_parts.append(f"lié au pays '{filter_country}'")
+    if filter_region:
+        context_parts.append(f"lié à la région '{filter_region}'")
+    if filter_category:
+        label = CATEGORY_LABELS.get(filter_category, filter_category)
+        context_parts.append(f"dans la catégorie '{label}'")
+    context_str = ", ".join(context_parts) if context_parts else "de n'importe quel pays, région ou catégorie"
+
+    if existing_entries:
+        exclusion_block = (
+            f"Ma base contient déjà ces {len(existing_entries)} événements (nom + année) :\n"
+            f"{chr(10).join('- ' + e for e in existing_entries[:100])}\n"
+            f"{'[… et plus]' if len(existing_entries) > 100 else ''}\n\n"
+            f"RÈGLE ABSOLUE : ne suggère PAS un événement déjà présent dans cette liste, "
+            f"ni un synonyme, ni une variante du même événement "
+            f"(ex: si 'Ouragan Katrina' est listé, ne suggère pas 'Katrina 2005' ou 'Hurricane Katrina').\n\n"
+        )
+    else:
+        exclusion_block = ""
+
+    prompt = (
+        f"{exclusion_block}"
+        f"Suggère UN événement historique important {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
+        f"L'événement doit être réel, documenté, et significatif (guerre, catastrophe, révolution, découverte, traité, etc.).\n"
+        f"Réponds UNIQUEMENT avec le nom court et clair de l'événement (en français ou en anglais selon l'usage courant).\n"
+        f"Aucun autre texte, aucune explication."
+    )
+
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+# ---------------------------------------------------------------------------
+# AI Lab — Raffinement (Event)
+# ---------------------------------------------------------------------------
+
+@web.route("/ai-lab/refine/event/<event_slug>")
+def ai_lab_refine_event_load(event_slug: str) -> Response:
+    """Load an event's current data as JSON for the Raffinement tab."""
+    from .db import get_db
+    from .services.event_service import get_event
+
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"success": False, "error": "Événement introuvable."})
+
+    # Use stored source_text or reconstruct from fields
+    source_text = event.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'EVENT_NAME = "{event["event_name"]}"',
+            f'EVENT_DATE_START = "{event.get("event_date_start") or ""}"',
+            f'EVENT_DATE_END = "{event.get("event_date_end") or ""}"',
+            f'EVENT_YEAR = {event.get("event_year") or ""}',
+            f'EVENT_LEVEL = {event.get("event_level") or 1}',
+            f'EVENT_CATEGORY = "{event.get("event_category") or "autre"}"',
+            "",
+            "=== DESCRIPTION ===",
+            event.get("description") or "",
+            "",
+            "=== IMPACT POPULATION ===",
+            event.get("impact_population") or "",
+            "",
+            "=== IMPACT MIGRATION ===",
+            event.get("impact_migration") or "",
+            "",
+            "=== LOCATIONS ===",
+        ]
+        for loc in event.get("locations", []):
+            if loc.get("city_name"):
+                lines.append(f"{loc['city_name']}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    return jsonify({
+        "success": True,
+        "event_name": event["event_name"],
+        "event_year": event.get("event_year"),
+        "event_category": event.get("event_category"),
+        "event_level": event.get("event_level"),
+        "description": (event.get("description") or "")[:300],
+        "location_count": len(event.get("locations", [])),
+        "source_text": source_text,
+    })
+
+
+@web.route("/ai-lab/refine/event/generate", methods=["POST"])
+def ai_lab_refine_event_generate() -> Response:
+    """Generate a refined version of an event via AI."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+    from .services.event_service import get_event
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    event_slug = request.form.get("event_slug", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not event_slug:
+        return jsonify({"success": False, "error": "Événement non spécifié."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    # Load current event text from DB
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"success": False, "error": "Événement introuvable."})
+
+    source_text = event.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'EVENT_NAME = "{event["event_name"]}"',
+            f'EVENT_DATE_START = "{event.get("event_date_start") or ""}"',
+            f'EVENT_DATE_END = "{event.get("event_date_end") or ""}"',
+            f'EVENT_YEAR = {event.get("event_year") or ""}',
+            f'EVENT_LEVEL = {event.get("event_level") or 1}',
+            f'EVENT_CATEGORY = "{event.get("event_category") or "autre"}"',
+            "",
+            "=== DESCRIPTION ===",
+            event.get("description") or "",
+            "",
+            "=== IMPACT POPULATION ===",
+            event.get("impact_population") or "",
+            "",
+            "=== IMPACT MIGRATION ===",
+            event.get("impact_migration") or "",
+            "",
+            "=== LOCATIONS ===",
+        ]
+        for loc in event.get("locations", []):
+            if loc.get("city_name"):
+                lines.append(f"{loc['city_name']}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    # city_input = source_text so {CITY_INPUT} in prompt gets replaced with event text
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.3)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/event/synthesize", methods=["POST"])
+def ai_lab_refine_event_synthesize() -> Response:
+    """Ask AI to reconcile the original and refined event versions."""
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+    from .db import get_db
+    from .services.event_service import get_event
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    event_slug = request.form.get("event_slug", "").strip()
+    new_text = request.form.get("new_text", "").strip()
+
+    if not event_slug or not new_text:
+        return jsonify({"success": False, "error": "Données manquantes pour la synthèse."})
+
+    # Load original event text
+    conn = get_db()
+    event = get_event(conn, event_slug)
+    if event is None:
+        return jsonify({"success": False, "error": "Événement introuvable."})
+
+    source_text = event.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'EVENT_NAME = "{event["event_name"]}"',
+            f'EVENT_DATE_START = "{event.get("event_date_start") or ""}"',
+            f'EVENT_DATE_END = "{event.get("event_date_end") or ""}"',
+            f'EVENT_YEAR = {event.get("event_year") or ""}',
+            f'EVENT_LEVEL = {event.get("event_level") or 1}',
+            f'EVENT_CATEGORY = "{event.get("event_category") or "autre"}"',
+            "",
+            "=== DESCRIPTION ===",
+            event.get("description") or "",
+            "",
+            "=== IMPACT POPULATION ===",
+            event.get("impact_population") or "",
+            "",
+            "=== IMPACT MIGRATION ===",
+            event.get("impact_migration") or "",
+            "",
+            "=== LOCATIONS ===",
+        ]
+        for loc in event.get("locations", []):
+            if loc.get("city_name"):
+                lines.append(f"{loc['city_name']}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    prompt_text = load_prompt("event_synthesize.txt").replace("{NEW_TEXT}", new_text)
+    # {CITY_INPUT} will be replaced with source_text (original) by generate_city
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.2)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/event/save", methods=["POST"])
+def ai_lab_refine_event_save() -> Response:
+    """Save the (refined or synthesized) event text to the database."""
+    from .db import get_db
+    from .services.event_service import parse_event_text, import_event
+
+    text = request.form.get("event_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+
+    try:
+        data = parse_event_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    event_id = import_event(conn, data)
+    return jsonify({
+        "success": True,
+        "event_name": data["event_name"],
+        "event_slug": data["event_slug"],
+        "event_id": event_id,
+        "redirect": url_for("web.event_detail", event_slug=data["event_slug"]),
+    })
 
 
 # ---------------------------------------------------------------------------

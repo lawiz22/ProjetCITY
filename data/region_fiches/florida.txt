@@ -1,0 +1,105 @@
+# Florida — Fiche Complète
+
+## 📍 Informations Générales
+
+| Critère               | Donnée                                |
+|-----------------------|-------------------------------------|
+| Région                | Florida                             |
+| Pays                  | États-Unis d'Amérique               |
+| Capitale régionale    | Tallahassee                        |
+| Plus grande ville      | Jacksonville                      |
+| Statut administratif  | État fédéré (State)                |
+| Superficie            | 170 312 km²                       |
+| Population (2024)     | Environ 22,3 millions d'habitants  |
+| Densité              | ~131 hab./km²                     |
+| Langues officielles   | Aucune langue officielle au niveau de l'État (anglais majoritaire) |
+| Devise / Symboles     | Devise : "In God We Trust" <br> Symbole : Oranges, Palmier, Everglades |
+
+---
+
+## 👥 Population & Démographie
+
+| Indicateur                  | Valeur / Évolution                   |
+|----------------------------|------------------------------------|
+| Population 1990             | 12,9 millions                      |
+| Population 2000             | 15,9 millions                      |
+| Population 2010             | 18,8 millions                      |
+| Population 2024             | 22,3 millions                      |
+| Croissance annuelle moyenne| ~1,5 % (plus rapide que la moyenne nationale américaine) |
+| Taux de fécondité          | 1,7 enfant/femme                   |
+| Espérance de vie (2023)    | 79,5 ans (USA : 78,8 ans)          |
+| Âge médian                 | 42 ans (plus élevé que la moyenne nationale à 38 ans) |
+| Diversité ethnique         | Blanc non hispanique : 53 % <br> Hispaniques/Latinos : 27 % <br> Afro-américains : 16 % <br> Autres (Asiatiques, natifs, etc.) : 4 % |
+| Immigration                | 20 % de la population née à l’étranger (forte immigration d’Amérique latine et des Caraïbes) |
+| Langues parlées            | Anglais (majoritaire), Espagnol (environ 25 % de la population), Créole haïtien, autres langues immigrées |
+
+---
+
+## 📐 Géographie
+
+| Critère                | Donnée                              |
+|------------------------|-----------------------------------|
+| Superficie             | 170 312 km²                       |
+| Frontières             | Atlantique (Est), Golfe du Mexique (Ouest), Alabama et Géorgie (Nord) |
+| Relief                 | Majoritairement plat, faible altitude <br> Zones marécageuses (Everglades) |
+| Point culminant        | Britton Hill (105 m)               |
+| Principaux cours d'eau | Fleuve St. Johns, Kissimmee River, Caloosahatchee River |
+| Climat                 | Subtropical humide au nord, tropical au sud <br> Saison des ouragans (juin-novembre) |
+| Parcs naturels         | Everglades National Park, Biscayne National Park, Dry Tortugas National Park |
+
+---
+
+## 🏛️ Économie
+
+| Indicateur                  | Donnée / Description                                      |
+|----------------------------|-----------------------------------------------------------|
+| PIB régional (2023)         | Environ 1 200 milliards USD (4e rang aux USA)             |
+| Secteurs principaux         | Services (tourisme, santé, finance) : 70 % <br> Agriculture : 3 % <br> Industrie manufacturière : 10 % <br> Construction : 7 % <br> Technologie : 5 % |
+| Principales industries      | Tourisme (Disney World, Universal Studios), agriculture (oranges, canne à sucre), aérospatiale (Lockheed Martin), finance (Miami) |
+| Principales entreprises     | Publix Super Markets, NextEra Energy, Carnival Corporation, Royal Caribbean Cruises |
+| Défis économiques          | Vulnérabilité aux ouragans, dépendance au tourisme saisonnier, inégalités économiques, hausse du coût de la vie |
+| Relations économiques       | Forte intégration avec le commerce international via Miami (porte d’entrée vers l’Amérique latine), échanges importants avec Géorgie et Alabama |
+
+---
+
+## 🎓 Éducation & Culture
+
+| Critère                  | Donnée / Description                                      |
+|--------------------------|-----------------------------------------------------------|
+| Principales universités  | University of Florida (Gainesville), Florida State University (Tallahassee), University of Miami, University of South Florida |
+| Faits culturels marquants| Influence latino-caribéenne très forte (musique, cuisine, festivals) <br> Patrimoine amérindien (tribus Seminole et Miccosukee) |
+| Patrimoine               | Sites historiques de St. Augustine (plus ancienne ville européenne des USA), architecture Art déco à Miami Beach |
+| Festivals                | Miami Art Basel, Calle Ocho Festival (Miami), Florida Film Festival, Gasparilla Pirate Festival (Tampa) |
+| Identité régionale       | Mix culturel unique entre influence américaine, latino-caribéenne et caribéenne, forte culture de plein air et de plage |
+
+---
+
+## 🏥 Santé & Services
+
+| Critère                  | Donnée / Description                                      |
+|--------------------------|-----------------------------------------------------------|
+| Système de santé régional| Réseau hospitalier étendu avec des centres de référence (Jackson Memorial Hospital, Mayo Clinic Florida) |
+| Espérance de vie         | 79,5 ans (légèrement supérieure à la moyenne nationale)  |
+| Principaux hôpitaux     | Jackson Memorial Hospital (Miami), Tampa General Hospital, UF Health Shands Hospital (Gainesville) |
+| Défis sanitaires        | Gestion des maladies chroniques (diabète, obésité), accès aux soins dans les zones rurales, impact des vagues de chaleur et des ouragans |
+
+---
+
+## 🏙️ Principales Villes
+
+| Ville          | Population (2024) | Rôle économique                  | Note / Particularité                   |
+|----------------|-------------------|---------------------------------|---------------------------------------|
+| Jacksonville   | 950 000           | Port maritime, logistique       | Plus grande ville par population      |
+| Miami          | 470 000           | Tourisme, finance, commerce international | Porte d’entrée vers l’Amérique latine |
+| Tampa          | 410 000           | Industrie, tourisme, santé      | Centre économique de la côte ouest    |
+| Orlando        | 310 000           | Tourisme (parcs à thème)        | Capitale mondiale du tourisme familial |
+| Tallahassee    | 200 000           | Administration publique         | Capitale de l’État                     |
+
+---
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels** : Adaptation au changement climatique (élévation du niveau de la mer, ouragans), gestion de la croissance urbaine rapide, inégalités sociales et économiques, pression sur les ressources en eau douce.
+- **Projets d'infrastructure** : Modernisation des réseaux de transport (extension du métro léger à Miami), renforcement des digues et systèmes anti-inondation, développement des énergies renouvelables (NextEra Energy leader national).
+- **Tendances démographiques** : Vieillissement progressif de la population, augmentation continue de la population hispanique, attractivité forte pour les retraités américains.
+- **Perspectives économiques** : Diversification économique avec un développement accru des technologies vertes et de la santé, renforcement du rôle de Miami comme hub financier international, croissance soutenue du secteur touristique post-pandémie.

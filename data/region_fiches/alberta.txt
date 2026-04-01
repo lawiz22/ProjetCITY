@@ -1,0 +1,119 @@
+# Alberta — Fiche Complète
+
+## 📍 Informations Générales
+
+| Critère               | Donnée                                   |
+|-----------------------|-----------------------------------------|
+| Région                | Alberta                                 |
+| Pays                  | Canada                                  |
+| Capitale régionale    | Edmonton                                |
+| Plus grande ville      | Calgary                                 |
+| Statut administratif  | Province (province canadienne)          |
+| Superficie            | 661 848 km²                            |
+| Population (2024)     | Environ 4,6 millions d’habitants        |
+| Densité              | ~6,95 hab./km²                         |
+| Langues officielles   | Anglais (de facto)                      |
+| Devise/Symboles       | "Fortis et Liber" (Force et liberté) ; emblème : fleur de prairie (pavot de l’Alberta) |
+
+---
+
+## 👥 Population & Démographie
+
+| Année | Population | Taux de croissance annuel | Taux de fécondité | Espérance de vie (2023) | Âge médian | Diversité ethnique | Immigration récente | Langues parlées principales |
+|-------|------------|---------------------------|-------------------|------------------------|------------|--------------------|---------------------|-----------------------------|
+| 2000  | 3,3 M      | 1,8 %                     | 1,6 enfants/femme | 79,5 ans               | 36 ans     | Majoritairement Européens, Autochtones 5 % | Faible (immigration surtout asiatique et moyen-orientale) | Anglais 90 %, Punjabi, Tagalog, Français 3 % |
+| 2010  | 3,7 M      | 2,1 %                     | 1,5               | 81 ans                 | 37 ans     | Diversification accrue, Autochtones 6 %  | Immigration forte (Asie du Sud, Philippines) | Anglais, Punjabi, Tagalog, Français |
+| 2024  | 4,6 M      | 2,0 %                     | 1,4               | 82,3 ans               | 38 ans     | 25 % minorités visibles, Autochtones 7 % | Immigration élevée (Asie, Moyen-Orient, Afrique) | Anglais, Punjabi, Tagalog, Français, Mandarin |
+
+- Alberta est l’une des provinces canadiennes avec la croissance démographique la plus rapide, largement portée par l’immigration et l’économie dynamique.
+- La population autochtone représente environ 7 %, principalement des Premières Nations, Métis et Inuits.
+- La diversité linguistique s’accroît avec la présence de nombreuses communautés immigrantes.
+
+---
+
+## 📐 Géographie
+
+| Critère              | Donnée                                                                                  |
+|----------------------|----------------------------------------------------------------------------------------|
+| Superficie           | 661 848 km²                                                                           |
+| Frontières           | Ouest : Colombie-Britannique, Nord-Ouest : Territoires du Nord-Ouest, Est : Saskatchewan, Sud : Montana (USA) |
+| Relief               | Plaine des prairies à l’est, montagnes Rocheuses à l’ouest                             |
+| Point culminant      | Mont Columbia (3 747 m) dans les Rocheuses                                           |
+| Principaux cours d'eau | Rivière Athabasca, Rivière Bow, Rivière Saskatchewan Sud, Rivière Peace               |
+| Climat               | Continental sec, hivers froids (-15 °C en moyenne), étés chauds (jusqu’à 25-30 °C)    |
+| Parcs naturels       | Parc national de Banff, Parc national Jasper, Parc provincial Elk Island               |
+
+- Alberta est caractérisée par une grande diversité géographique, allant des plaines agricoles aux montagnes spectaculaires.
+- Le climat est marqué par des amplitudes thermiques importantes, avec des hivers rigoureux et des étés chauds, favorisant l’agriculture et le tourisme.
+
+---
+
+## 🏛️ Économie
+
+| Indicateur           | Donnée                                                                                  |
+|----------------------|----------------------------------------------------------------------------------------|
+| PIB régional (2023)  | Environ 400 milliards CAD (4e rang au Canada)                                         |
+| Secteurs principaux  | Énergie (35 %), agriculture (10 %), services (30 %), industrie manufacturière (15 %), technologies (10 %) |
+| Principales industries | Pétrole et gaz (exploitation des sables bitumineux), agriculture céréalière, élevage bovin, technologies propres, tourisme |
+| Grandes entreprises  | Suncor Energy, Canadian Natural Resources, Cenovus Energy, ATB Financial, WestJet     |
+| Défis économiques    | Volatilité des prix du pétrole, transition énergétique, diversification économique     |
+| Relations économiques | Forte interconnexion avec l’Ontario et la Colombie-Britannique, exportations vers les États-Unis (pétrole, agriculture) |
+
+- Alberta est la province la plus riche en ressources énergétiques au Canada, avec une économie largement dépendante du pétrole et du gaz naturel.
+- La diversification économique est un enjeu majeur face à la transition énergétique mondiale.
+- Le secteur des technologies et des services connaît une croissance rapide, notamment à Calgary et Edmonton.
+
+---
+
+## 🎓 Éducation & Culture
+
+| Critère               | Donnée                                                                                  |
+|-----------------------|----------------------------------------------------------------------------------------|
+| Universités principales | Université de l’Alberta (Edmonton), Université de Calgary, Université Mount Royal (Calgary) |
+| Institutions notables | Southern Alberta Institute of Technology (SAIT), Northern Alberta Institute of Technology (NAIT) |
+| Faits culturels       | Fort Calgary (histoire de la colonisation), influence autochtone et métisse, culture cowboy (Calgary Stampede) |
+| Patrimoine            | Sites historiques autochtones, musées des sciences naturelles, architecture de style prairie |
+| Festivals             | Calgary Stampede (plus grand rodéo au monde), Edmonton Folk Music Festival, Heritage Days |
+| Identité régionale    | Forte identité liée à l’énergie, à la nature sauvage, au cowboy et à l’esprit pionnier |
+
+- Alberta est reconnue pour son riche patrimoine culturel mêlant traditions autochtones, héritage européen et culture de la frontière.
+- Le Calgary Stampede est un événement internationalement reconnu, attirant plus d’un million de visiteurs chaque année.
+
+---
+
+## 🏥 Santé & Services
+
+| Critère               | Donnée                                                                                  |
+|-----------------------|----------------------------------------------------------------------------------------|
+| Système de santé      | Alberta Health Services (AHS), système public universel                                |
+| Espérance de vie      | 82,3 ans (2023)                                                                         |
+| Principaux hôpitaux  | Foothills Medical Centre (Calgary), University of Alberta Hospital (Edmonton), Royal Alexandra Hospital (Edmonton) |
+| Défis sanitaires     | Accès aux soins en zones rurales, santé mentale, maladies chroniques liées au mode de vie, impacts environnementaux sur la santé |
+
+- Le système de santé d’Alberta est l’un des plus développés au Canada, mais doit faire face à des défis liés à la dispersion géographique et à la croissance démographique rapide.
+- La santé mentale et la prévention des maladies chroniques sont des priorités croissantes.
+
+---
+
+## 🏙️ Principales Villes
+
+| Ville     | Population (2024) | Rôle économique                         | Note (importance)          |
+|-----------|-------------------|---------------------------------------|---------------------------|
+| Calgary   | 1,4 million       | Centre financier, énergie, commerce   | Ville la plus dynamique   |
+| Edmonton  | 1,1 million       | Capitale provinciale, administration, éducation, pétrole | Capitale politique et culturelle |
+| Red Deer  | 110 000           | Industrie pétrolière, agriculture     | Ville moyenne stratégique |
+| Lethbridge| 100 000           | Agriculture, éducation, santé         | Centre régional important |
+
+- Calgary est la métropole économique de la province, tandis qu’Edmonton concentre les fonctions gouvernementales et universitaires.
+- Les villes moyennes comme Red Deer et Lethbridge jouent un rôle clé dans l’économie régionale agricole et énergétique.
+
+---
+
+## 🔮 Enjeux & Perspectives
+
+- **Défis actuels :** Transition énergétique face à la dépendance au pétrole, gestion de la croissance urbaine, changement climatique impactant l’agriculture et les ressources en eau.
+- **Projets d'infrastructure :** Extension des réseaux de transport public (Calgary Green Line), développement des énergies renouvelables, modernisation des infrastructures routières et hospitalières.
+- **Tendances démographiques :** Croissance continue portée par l’immigration, vieillissement modéré de la population, urbanisation accrue.
+- **Perspectives économiques :** Diversification vers les technologies propres, agriculture durable, tourisme écologique, maintien du leadership dans le secteur énergétique avec une transition progressive vers le gaz naturel et les renouvelables.
+
+Alberta reste une province clé du Canada, à la croisée des enjeux économiques mondiaux et des défis environnementaux, avec un potentiel important pour une croissance durable et innovante.

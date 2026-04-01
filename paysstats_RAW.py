@@ -5,8 +5,35 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de pays : 2
+# Nombre de pays : 3
 #
+
+# ============================================================
+# Brésil
+# ============================================================
+COUNTRY_NAME = "Brésil"
+COUNTRY_COLOR = '#009b3a'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    3000000, 3500000, 4000000, 4500000, 5200000, 6000000, 7000000, 8500000, 11000000, 
+    14000000, 17000000, 21000000, 26000000, 32000000, 40000000, 54000000, 72000000, 
+    95000000, 120000000, 146000000, 174000000, 195000000, 212000000
+]
+
+annotations = [
+    (1800, 3000000, "🌿 Population indigène importante — avant colonisation massive (1800)", 'green'),
+    (1930, 32000000, "🏭 Industrialisation accélérée — début de l'urbanisation (1930)", 'orange'),
+    (1950, 54000000, "🏙️ Urbanisation croissante — plus de la moitié rurale (1950)", 'purple'),
+    (1960, 72000000, "🚀 Croissance démographique rapide — baby boom (1960)", 'gold'),
+    (1980, 120000000, "🌆 Explosion urbaine — Sao Paulo devient mégapole (1980)", 'navy'),
+    (2000, 174000000, "🌍 Brésil dans le top 5 mondial — forte population (2000)", 'teal'),
+    (2010, 195000000, "⚽ Coupe du Monde au Brésil — événement mondial (2010)", 'brown'),
+    (2020, 212000000, "🦠 Pandémie COVID-19 — impact sanitaire majeur (2020)", 'darkred'),
+]
 
 # ============================================================
 # Canada

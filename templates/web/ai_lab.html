@@ -20,31 +20,17 @@
     </div>
 </div>
 
-<!-- AI Lab tabs -->
-<nav class="ailab-tabs">
-    <button class="ailab-tab active" data-ailab-tab="ville">🏙️ Ville</button>
-    <button class="ailab-tab" data-ailab-tab="evenement">📅 Événement</button>
-    <button class="ailab-tab" data-ailab-tab="pays">🌍 Pays</button>
-    <button class="ailab-tab" data-ailab-tab="regions">📍 Régions</button>
-</nav>
-
-<!-- ==================== TAB: Ville ==================== -->
-<div class="ailab-tab-content active" id="ailab-tab-ville">
-
-<!-- Top config bar -->
+<!-- Global configuration (visible from all tabs) -->
 <section class="panel">
-    <div class="panel-head">
-        <h2>Configuration</h2>
-    </div>
-    <div class="options-body ai-lab-body">
-        <div class="ai-lab-top-row">
-            <div class="ai-lab-field">
+    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+        <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;">
+            <div class="ai-lab-field" style="flex:0 0 auto;">
                 <label class="opt-label" for="ai-api-select">API</label>
-                <select id="ai-api-select" class="opt-input opt-input-model" style="max-width:220px;">
+                <select id="ai-api-select" class="opt-input opt-input-model" style="max-width:200px;">
                     <option value="mammouth" selected>🦣 Mammouth AI</option>
                 </select>
             </div>
-            <div class="ai-lab-field ai-lab-model-field">
+            <div class="ai-lab-field ai-lab-model-field" style="flex:0 0 auto;">
                 <label class="opt-label" for="ai-model-select">Modèle</label>
                 <select id="ai-model-select" class="opt-input opt-input-model">
                     {% if models %}
@@ -56,6 +42,29 @@
                     {% endif %}
                 </select>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- AI Lab tabs -->
+<nav class="ailab-tabs">
+    <button class="ailab-tab active" data-ailab-tab="ville">🏙️ Ville</button>
+    <button class="ailab-tab" data-ailab-tab="evenement">📅 Événement</button>
+    <button class="ailab-tab" data-ailab-tab="pays">🌍 Pays</button>
+    <button class="ailab-tab" data-ailab-tab="regions">📍 Régions</button>
+    <button class="ailab-tab" data-ailab-tab="raffinement">🔬 Raffinement</button>
+</nav>
+
+<!-- ==================== TAB: Ville ==================== -->
+<div class="ailab-tab-content active" id="ailab-tab-ville">
+
+<!-- Ville config -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>Configuration</h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-top-row">
             <div class="ai-lab-field" style="flex:2;">
                 <label class="opt-label" for="ai-city-input">Ville à générer</label>
                 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -196,6 +205,48 @@
 
 <!-- ==================== TAB: Événement ==================== -->
 <div class="ailab-tab-content" id="ailab-tab-evenement">
+
+<!-- ===================== Événement — Suggérer ===================== -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>Suggérer un événement</h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-top-row">
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="ev-suggest-country">Pays (optionnel)</label>
+                <select id="ev-suggest-country" class="opt-input">
+                    <option value="">— Tous les pays —</option>
+                    {% for c in countries_for_event %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="ev-suggest-region">Région (optionnel)</label>
+                <select id="ev-suggest-region" class="opt-input">
+                    <option value="">— Toutes les régions —</option>
+                    {% for r in regions_for_event %}
+                    <option value="{{ r }}">{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="ev-suggest-category">Catégorie (optionnel)</label>
+                <select id="ev-suggest-category" class="opt-input">
+                    <option value="">— Toutes les catégories —</option>
+                    {% for key, label in event_category_labels.items() %}
+                    <option value="{{ key }}">{{ event_category_emojis[key] }} {{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="opt-actions" style="margin-top:.5rem;">
+            <button type="button" class="suggest-city-btn" id="ev-suggest-btn">🎲 Suggérer un événement</button>
+        </div>
+        <div class="opt-test-result" id="ev-suggest-result" style="display:none;"></div>
+    </div>
+</section>
 
 <!-- ===================== STEP 4 — Événement historique ===================== -->
 <section class="panel ailab-step" id="step4-panel">
@@ -503,6 +554,140 @@
 
 </div><!-- /ailab-tab-regions -->
 
+<!-- ==================== TAB: Raffinement ==================== -->
+<div class="ailab-tab-content" id="ailab-tab-raffinement">
+
+<!-- Entity type selector -->
+<section class="panel">
+    <h3 class="panel-title">🔍 Type d'entité à raffiner</h3>
+    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+        <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
+                <input type="radio" name="refine-entity-type" value="evenement" checked> 📅 Événement
+            </label>
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
+                <input type="radio" name="refine-entity-type" value="ville" disabled> 🏙️ Ville
+            </label>
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
+                <input type="radio" name="refine-entity-type" value="region" disabled> 📍 Région
+            </label>
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
+                <input type="radio" name="refine-entity-type" value="pays" disabled> 🌍 Pays
+            </label>
+        </div>
+    </div>
+</section>
+
+<!-- EVENT panel -->
+<div id="refine-entity-evenement">
+
+    <!-- Event picker -->
+    <section class="panel">
+        <h3 class="panel-title">📅 Choisir un événement</h3>
+        <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+            <div class="ai-lab-field" style="max-width:520px;">
+                <label class="opt-label" for="refine-event-select">Événement</label>
+                <select id="refine-event-select" class="opt-input">
+                    <option value="">— Choisir un événement —</option>
+                    {% for ev in events_for_refine %}
+                    <option value="{{ ev.event_slug }}">{{ ev.event_year or '?' }} — {{ ev.event_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="refine-event-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
+        </div>
+    </section>
+
+    <!-- Summary card (hidden until event selected) -->
+    <div id="refine-event-card" style="display:none;">
+        <section class="panel">
+            <h3 class="panel-title">📋 Fiche actuelle</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div id="refine-event-card-content" style="font-size:.9rem;line-height:1.7;"></div>
+                <details style="margin-top:.75rem;">
+                    <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">Voir le texte source complet</summary>
+                    <textarea id="refine-event-source-text" class="opt-input opt-textarea" rows="10"
+                        style="width:100%;font-family:monospace;font-size:.78rem;margin-top:.5rem;" readonly></textarea>
+                </details>
+            </div>
+        </section>
+
+        <!-- Refinement type + prompt + button -->
+        <section class="panel">
+            <h3 class="panel-title">🔬 Raffiner</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
+                    <div class="ai-lab-field" style="flex:0 0 auto;">
+                        <label class="opt-label" for="refine-event-type">Type de raffinement</label>
+                        <select id="refine-event-type" class="opt-input opt-input-model">
+                            <option value="enrich">✨ Enrichir et valider</option>
+                            <option value="correct">🔧 Corriger les erreurs</option>
+                            <option value="expand">➕ Ajouter de la nouvelle info</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ai-lab-field" style="margin-bottom:1rem;">
+                    <label class="opt-label" for="refine-event-prompt">Instructions (modifiables)</label>
+                    <textarea id="refine-event-prompt" class="opt-input opt-textarea" rows="8"
+                        style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_event }}</textarea>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-event-btn">🔬 Raffiner avec l'IA</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result panel (hidden until AI responds) -->
+        <div id="refine-event-result-wrap" style="display:none;">
+            <section class="panel">
+                <h3 class="panel-title">🧬 Résultat de l'IA</h3>
+                <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                        <button type="button" class="opt-btn" id="refine-copy-btn">📋 Copier</button>
+                    </div>
+                    <textarea id="refine-event-result" class="opt-input opt-textarea" rows="16"
+                        style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+
+                    <!-- 3 choices -->
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
+                        <span style="font-size:.85rem;color:var(--muted);font-weight:600;">Que faire ?</span>
+                        <button type="button" class="opt-btn" id="refine-keep-btn">↩️ Garder l'original</button>
+                        <button type="button" class="opt-btn opt-btn-success" id="refine-use-btn">✅ Utiliser la version raffinée</button>
+                        <button type="button" class="opt-btn opt-btn-primary" id="refine-synth-btn">⚗️ Synthèse IA des 2 versions</button>
+                    </div>
+
+                    <div id="refine-save-result" style="display:none;" class="opt-test-result"></div>
+                </div>
+            </section>
+
+            <!-- Synthesis result (hidden until synthesis completes) -->
+            <div id="refine-synth-wrap" style="display:none;">
+                <section class="panel">
+                    <h3 class="panel-title">⚗️ Synthèse IA</h3>
+                    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                        <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+                            L'IA a réconcilié les deux versions. Vérifiez le résultat et sauvegardez si satisfait.
+                        </p>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-synth-copy-btn">📋 Copier</button>
+                        </div>
+                        <textarea id="refine-synth-result" class="opt-input opt-textarea" rows="16"
+                            style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;align-items:center;">
+                            <button type="button" class="opt-btn opt-btn-success" id="refine-synth-save-btn">💾 Sauvegarder la synthèse</button>
+                        </div>
+                        <div id="refine-synth-save-result" style="display:none;" class="opt-test-result"></div>
+                    </div>
+                </section>
+            </div><!-- /refine-synth-wrap -->
+        </div><!-- /refine-event-result-wrap -->
+
+    </div><!-- /refine-event-card -->
+
+</div><!-- /refine-entity-evenement -->
+
+</div><!-- /ailab-tab-raffinement -->
+
 <script>
 (function() {
     /* ---- AI Lab Tab switching ---- */
@@ -768,6 +953,58 @@
     var eventResultWrap = document.getElementById('ai4-result-wrap');
     var eventResult = document.getElementById('ai4-result');
     var eventCheck  = document.getElementById('step4-check');
+
+    /* ---- Suggest event button ---- */
+    var evSuggestBtn    = document.getElementById('ev-suggest-btn');
+    var evSuggestResult = document.getElementById('ev-suggest-result');
+    var evSuggestEventUrl = '{{ url_for("web.ai_lab_suggest_event") }}';
+
+    evSuggestBtn.addEventListener('click', function() {
+        evSuggestBtn.disabled = true;
+        evSuggestBtn.textContent = '⏳ Suggestion en cours…';
+        evSuggestResult.style.display = '';
+        evSuggestResult.className = 'opt-test-result opt-test-pending';
+        evSuggestResult.textContent = 'Interrogation de l\'IA…';
+
+        var fd = new FormData();
+        fd.append('model', modelSelect.value);
+        fd.append('country',  document.getElementById('ev-suggest-country').value);
+        fd.append('region',   document.getElementById('ev-suggest-region').value);
+        fd.append('category', document.getElementById('ev-suggest-category').value);
+
+        fetch(evSuggestEventUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                evSuggestBtn.disabled = false;
+                evSuggestBtn.textContent = '🎲 Suggérer un événement';
+                if (data.success) {
+                    var name = data.reply.trim();
+                    evSuggestResult.className = 'opt-test-result opt-test-success';
+                    evSuggestResult.innerHTML = '✅ <strong>' + name.replace(/</g,'&lt;') + '</strong>'
+                        + ' <button type="button" class="opt-btn" style="padding:.2rem .7rem;font-size:.85rem;margin-left:.75rem;" id="ev-use-suggestion">Utiliser →</button>';
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    document.getElementById('ev-use-suggestion').addEventListener('click', function() {
+                        eventInput.value = name;
+                        // Update prompt with the event name
+                        var pt = eventPrompt.value;
+                        if (pt.includes('{CITY_INPUT}')) {
+                            eventPrompt.value = pt.replace('{CITY_INPUT}', name);
+                        }
+                        // Scroll to the generation step
+                        document.getElementById('step4-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                } else {
+                    evSuggestResult.className = 'opt-test-result opt-test-error';
+                    evSuggestResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                evSuggestBtn.disabled = false;
+                evSuggestBtn.textContent = '🎲 Suggérer un événement';
+                evSuggestResult.className = 'opt-test-result opt-test-error';
+                evSuggestResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
 
     eventGenBtn.addEventListener('click', function() {
         var eventName = eventInput.value.trim();
@@ -1585,6 +1822,278 @@
                 addRegionResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
     });
+
+    /* =====================================================================
+     * RAFFINEMENT TAB — Événement
+     * ===================================================================== */
+    var refineEventSelect   = document.getElementById('refine-event-select');
+    var refineEventLoading  = document.getElementById('refine-event-loading');
+    var refineEventCard     = document.getElementById('refine-event-card');
+    var refineEventCardContent = document.getElementById('refine-event-card-content');
+    var refineEventSourceText  = document.getElementById('refine-event-source-text');
+    var refineEventType     = document.getElementById('refine-event-type');
+    var refineEventPrompt   = document.getElementById('refine-event-prompt');
+    var refineEventBtn      = document.getElementById('refine-event-btn');
+    var refineEventResultWrap = document.getElementById('refine-event-result-wrap');
+    var refineEventResult   = document.getElementById('refine-event-result');
+    var refineSaveResult    = document.getElementById('refine-save-result');
+    var refineSynthWrap     = document.getElementById('refine-synth-wrap');
+    var refineSynthResult   = document.getElementById('refine-synth-result');
+    var refineSynthSaveResult = document.getElementById('refine-synth-save-result');
+
+    var refineLoadUrl    = '{{ url_for("web.ai_lab_refine_event_load", event_slug="__SLUG__") }}';
+    var refineGenUrl     = '{{ url_for("web.ai_lab_refine_event_generate") }}';
+    var refineSynthUrl   = '{{ url_for("web.ai_lab_refine_event_synthesize") }}';
+    var refineSaveUrl    = '{{ url_for("web.ai_lab_refine_event_save") }}';
+
+    /* Default prompt instructions per refinement type */
+    var _baseRefinePrompt = {{ prompt_refine_event | tojson }};
+    var refinePrompts = {
+        enrich: _baseRefinePrompt,
+        correct: _baseRefinePrompt.replace(
+            'Enrichis et valide la fiche',
+            'Corrige les erreurs dans la fiche'
+        ).replace(
+            'Ajoute des détails précis manquants : chiffres exacts, dates précises, noms de personnages clés, causes profondes et conséquences documentées.',
+            'Identifie et corrige les informations incorrectes (dates erronées, chiffres faux, lieux inexacts).'
+        ),
+        expand: _baseRefinePrompt.replace(
+            'Enrichis et valide la fiche',
+            'Ajoute de la nouvelle information à la fiche'
+        ).replace(
+            'Corrige les informations incorrectes si nécessaire.',
+            'Ne modifie pas les informations existantes déjà correctes, ajoute seulement de nouvelles informations.'
+        )
+    };
+
+    var currentEventSlug = '';
+    var CATEGORY_LABELS_JS = {{ event_category_labels | tojson }};
+    var CATEGORY_EMOJIS_JS = {{ event_category_emojis | tojson }};
+
+    /* ---- Load event on dropdown change ---- */
+    refineEventSelect.addEventListener('change', function() {
+        var slug = refineEventSelect.value;
+        if (!slug) {
+            refineEventCard.style.display = 'none';
+            refineEventResultWrap.style.display = 'none';
+            refineSynthWrap.style.display = 'none';
+            currentEventSlug = '';
+            return;
+        }
+        refineEventLoading.style.display = '';
+        refineEventCard.style.display = 'none';
+        refineEventResultWrap.style.display = 'none';
+        refineSynthWrap.style.display = 'none';
+
+        var url = refineLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineEventLoading.style.display = 'none';
+                if (!data.success) { alert('Erreur: ' + data.error); return; }
+                currentEventSlug = slug;
+
+                /* Build summary card */
+                var cat = data.event_category || 'autre';
+                var catLabel = (CATEGORY_LABELS_JS[cat] || cat);
+                var catEmoji = (CATEGORY_EMOJIS_JS[cat] || '📌');
+                var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
+                    + '<span class="badge badge-year">' + (data.event_year || '—') + '</span>'
+                    + '<span class="badge badge-category">' + catEmoji + ' ' + catLabel + '</span>'
+                    + (data.event_level === 1 ? '<span class="badge badge-level">🌐 Niveau mondial</span>' : '<span class="badge badge-level">📍 Niveau régional</span>')
+                    + '<span class="badge">' + (data.location_count || 0) + ' lieu(x)</span>'
+                    + '</div>'
+                    + '<p style="color:var(--muted);font-size:.9rem;margin:0;">'
+                    + (data.description ? data.description.substring(0, 280).replace(/</g,'&lt;') + (data.description.length > 280 ? '…' : '') : '<em>Aucune description.</em>')
+                    + '</p>';
+                refineEventCardContent.innerHTML = html;
+                refineEventSourceText.value = data.source_text || '';
+                refineEventCard.style.display = '';
+            })
+            .catch(function(err) {
+                refineEventLoading.style.display = 'none';
+                alert('Erreur réseau: ' + err);
+            });
+    });
+
+    /* ---- Update prompt when refinement type changes ---- */
+    refineEventType.addEventListener('change', function() {
+        refineEventPrompt.value = refinePrompts[refineEventType.value] || refinePrompts.enrich;
+    });
+
+    /* ---- Raffiner button ---- */
+    refineEventBtn.addEventListener('click', function() {
+        if (!currentEventSlug) { alert('Choisissez un événement.'); return; }
+        var promptText = refineEventPrompt.value.trim();
+        if (!promptText) { alert('Le prompt est vide.'); return; }
+
+        refineEventBtn.disabled = true;
+        refineEventBtn.textContent = '⏳ Raffinement en cours…';
+        refineEventResultWrap.style.display = '';
+        refineSynthWrap.style.display = 'none';
+        refineSaveResult.style.display = 'none';
+        refineEventResult.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('event_slug', currentEventSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', promptText);
+
+        fetch(refineGenUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineEventBtn.disabled = false;
+                refineEventBtn.textContent = '🔬 Raffiner avec l\'IA';
+                if (data.success) {
+                    refineEventResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                } else {
+                    refineEventResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                refineEventBtn.disabled = false;
+                refineEventBtn.textContent = '🔬 Raffiner avec l\'IA';
+                refineEventResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Copy refined result ---- */
+    document.getElementById('refine-copy-btn').addEventListener('click', function() {
+        refineEventResult.select();
+        navigator.clipboard.writeText(refineEventResult.value).then(function() {
+            var btn = document.getElementById('refine-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Garder l'original ---- */
+    document.getElementById('refine-keep-btn').addEventListener('click', function() {
+        refineEventResultWrap.style.display = 'none';
+        refineSynthWrap.style.display = 'none';
+    });
+
+    /* ---- Utiliser la version raffinée (save directly) ---- */
+    document.getElementById('refine-use-btn').addEventListener('click', function() {
+        var text = refineEventResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-use-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineSaveResult.style.display = '';
+        refineSaveResult.className = 'opt-test-result opt-test-pending';
+        refineSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('event_text', text);
+
+        fetch(refineSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                if (data.success) {
+                    refineSaveResult.className = 'opt-test-result opt-test-success';
+                    refineSaveResult.innerHTML = '✅ <strong>' + data.event_name.replace(/</g,'&lt;') + '</strong> sauvegardé!'
+                        + ' <a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir l\'événement</a>';
+                } else {
+                    refineSaveResult.className = 'opt-test-result opt-test-error';
+                    refineSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                refineSaveResult.className = 'opt-test-result opt-test-error';
+                refineSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Synthèse IA des 2 versions ---- */
+    document.getElementById('refine-synth-btn').addEventListener('click', function() {
+        var newText = refineEventResult.value.trim();
+        if (!newText || newText.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        if (!currentEventSlug) { alert('Événement non chargé.'); return; }
+
+        var btn = document.getElementById('refine-synth-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Synthèse en cours…';
+        refineSynthWrap.style.display = '';
+        refineSynthResult.value = 'Synthèse IA en cours…';
+        refineSynthSaveResult.style.display = 'none';
+
+        var fd = new FormData();
+        fd.append('event_slug', currentEventSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('new_text', newText);
+
+        fetch(refineSynthUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                if (data.success) {
+                    refineSynthResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    refineSynthWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    refineSynthResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                refineSynthResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Copy synthesis result ---- */
+    document.getElementById('refine-synth-copy-btn').addEventListener('click', function() {
+        refineSynthResult.select();
+        navigator.clipboard.writeText(refineSynthResult.value).then(function() {
+            var btn = document.getElementById('refine-synth-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Save synthesis ---- */
+    document.getElementById('refine-synth-save-btn').addEventListener('click', function() {
+        var text = refineSynthResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-synth-save-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineSynthSaveResult.style.display = '';
+        refineSynthSaveResult.className = 'opt-test-result opt-test-pending';
+        refineSynthSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('event_text', text);
+
+        fetch(refineSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                if (data.success) {
+                    refineSynthSaveResult.className = 'opt-test-result opt-test-success';
+                    refineSynthSaveResult.innerHTML = '✅ <strong>' + data.event_name.replace(/</g,'&lt;') + '</strong> sauvegardé!'
+                        + ' <a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir l\'événement</a>';
+                } else {
+                    refineSynthSaveResult.className = 'opt-test-result opt-test-error';
+                    refineSynthSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                refineSynthSaveResult.className = 'opt-test-result opt-test-error';
+                refineSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
 })();
 </script>
 {% endblock %}

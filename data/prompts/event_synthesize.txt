@@ -1,0 +1,18 @@
+Tu es un historien expert. Tu as deux versions d'une même fiche d'événement historique. Produis une version de synthèse finale, validée et complète.
+
+VERSION ORIGINALE :
+{CITY_INPUT}
+
+VERSION ENRICHIE PAR L'IA :
+{NEW_TEXT}
+
+Instructions :
+1. Compare les deux versions attentivement.
+2. Garde les informations factuellement correctes des deux versions.
+3. Si une version contient une erreur (mauvaise date, chiffre incorrect, lieu inexact), conserve la version correcte.
+4. Si les deux versions contiennent des informations différentes mais cohérentes, combine-les en une seule formulation claire.
+5. Élimine les redondances et les formulations imprécises.
+6. Respecte STRICTEMENT le même format : EVENT_NAME, EVENT_DATE_START, EVENT_DATE_END, EVENT_YEAR, EVENT_LEVEL, EVENT_CATEGORY, suivi des sections === DESCRIPTION ===, === IMPACT POPULATION ===, === IMPACT MIGRATION ===, === LOCATIONS ===.
+7. La version finale doit être la plus complète, précise et cohérente possible.
+
+Retourne uniquement la fiche synthétisée finale dans le même format exact, sans commentaires ni explications supplémentaires.
