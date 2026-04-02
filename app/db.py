@@ -499,6 +499,42 @@ def run_migrations(config: Mapping[str, Any]) -> None:
                     (admin_id,),
                 )
 
+        # --- Reset all SERIAL/BIGSERIAL sequences to avoid PK conflicts ---
+        _seq_resets = [
+            ("dim_annotation",              "annotation_id"),
+            ("dim_time",                     "time_id"),
+            ("dim_city",                     "city_id"),
+            ("dim_city_period_detail",       "period_detail_id"),
+            ("dim_city_period_detail_item",  "period_detail_item_id"),
+            ("fact_city_population",         "population_id"),
+            ("dim_city_fiche",               "fiche_id"),
+            ("dim_city_fiche_section",       "section_id"),
+            ("dim_city_photo",               "photo_id"),
+            ("dim_event",                    "event_id"),
+            ("dim_event_location",           "event_location_id"),
+            ("dim_event_photo",              "event_photo_id"),
+            ("dim_person",                   "person_id"),
+            ("dim_person_location",          "person_location_id"),
+            ("dim_person_photo",             "person_photo_id"),
+            ("dim_monument",                 "monument_id"),
+            ("dim_monument_location",        "monument_location_id"),
+            ("dim_monument_photo",           "monument_photo_id"),
+            ("dim_country",                  "country_id"),
+            ("dim_country_photo",            "photo_id"),
+            ("dim_region",                   "region_id"),
+            ("dim_region_period_detail",     "region_period_id"),
+            ("dim_region_period_detail_item","item_id"),
+            ("dim_region_photo",             "photo_id"),
+        ]
+        for tbl, pk in _seq_resets:
+            try:
+                cur.execute(
+                    f"SELECT setval(pg_get_serial_sequence('{tbl}', '{pk}'), "
+                    f"COALESCE((SELECT MAX({pk}) FROM {tbl}), 0) + 1, false)"
+                )
+            except Exception:
+                pass  # table may not exist yet
+
         conn.commit()
     finally:
         conn.close()

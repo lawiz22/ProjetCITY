@@ -2288,6 +2288,53 @@ _EXPORT_STATE_KEY = "backup_export_state"
 _EXPORT_STATE_FILE = Path(__file__).resolve().parents[1] / "data" / "export_state.json"
 
 
+def _reset_all_sequences(conn) -> None:
+    """Reset all SERIAL/BIGSERIAL sequences to max(pk)+1 after a backup import."""
+    _SEQ_RESETS = [
+        ("dim_annotation",              "annotation_id"),
+        ("dim_time",                     "time_id"),
+        ("ref_population",               "ref_pop_id"),
+        ("ref_city",                     "ref_city_id"),
+        ("dim_city",                     "city_id"),
+        ("dim_city_period_detail",       "period_detail_id"),
+        ("dim_city_period_detail_item",  "period_detail_item_id"),
+        ("fact_city_population",         "population_id"),
+        ("dim_city_fiche",               "fiche_id"),
+        ("dim_city_fiche_section",       "section_id"),
+        ("dim_city_photo",               "photo_id"),
+        ("dim_event",                    "event_id"),
+        ("dim_event_location",           "event_location_id"),
+        ("dim_event_photo",              "event_photo_id"),
+        ("dim_person",                   "person_id"),
+        ("dim_person_location",          "person_location_id"),
+        ("dim_person_photo",             "person_photo_id"),
+        ("dim_monument",                 "monument_id"),
+        ("dim_monument_location",        "monument_location_id"),
+        ("dim_monument_photo",           "monument_photo_id"),
+        ("dim_country",                  "country_id"),
+        ("fact_country_population",      "country_pop_id"),
+        ("dim_country_photo",            "photo_id"),
+        ("dim_region",                   "region_id"),
+        ("fact_region_population",       "region_pop_id"),
+        ("dim_region_period_detail",     "region_period_id"),
+        ("dim_region_period_detail_item","item_id"),
+        ("dim_region_photo",             "photo_id"),
+        ("raw_document",                 "document_id"),
+    ]
+    for table, pk in _SEQ_RESETS:
+        try:
+            conn.execute(
+                f"SELECT setval(pg_get_serial_sequence('{table}', '{pk}'), "
+                f"COALESCE((SELECT MAX({pk}) FROM {table}), 0) + 1, false)"
+            )
+        except Exception:
+            try:
+                conn.execute("ROLLBACK TO SAVEPOINT seq_reset")
+            except Exception:
+                pass
+    conn.commit()
+
+
 def _serialize_value(value: object) -> object:
     """Make a value JSON-serialisable."""
     if value is None or isinstance(value, (int, float, str, bool)):
@@ -2459,6 +2506,9 @@ def sql_lab_backup_import() -> Response:
 
     conn.commit()
 
+    # --- Reset all SERIAL/BIGSERIAL sequences after import ---
+    _reset_all_sequences(conn)
+
     # --- Validate FK relationships ---
     fk_checks = [
         ("fact_city_population", "city_id", "dim_city", "city_id"),
@@ -2618,6 +2668,9 @@ def sql_lab_backup_import_stream() -> Response:
                 total_inserted += inserted
 
             conn.commit()
+
+            # Reset sequences after import
+            _reset_all_sequences(conn)
 
             # FK validation
             yield 'data: ' + _json.dumps({"type": "fk_start"}) + '\n\n'
