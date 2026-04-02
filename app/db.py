@@ -257,17 +257,82 @@ def close_db(_error: Exception | None = None) -> None:
         connection.close()
 
 
-def run_migrations(config: Mapping[str, Any] | str | Path) -> None:
-    """Apply lightweight SQLite-only migrations.
+def _run_pg_migrations(database_url: str) -> None:
+    """Apply lightweight PostgreSQL migrations (add missing columns/tables)."""
+    if psycopg is None:
+        return
+    conn = psycopg.connect(database_url)
+    try:
+        cur = conn.cursor()
 
-    PostgreSQL schema management lives in sql/schema_postgres.sql for now.
-    """
+        # --- app_user + audit_log tables ---
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS app_user (
+                user_id BIGSERIAL PRIMARY KEY,
+                username TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                display_name TEXT,
+                role TEXT NOT NULL DEFAULT 'lecteur',
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                is_approved BOOLEAN NOT NULL DEFAULT FALSE,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS audit_log (
+                log_id BIGSERIAL PRIMARY KEY,
+                user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+                action TEXT NOT NULL,
+                entity_type TEXT,
+                entity_id TEXT,
+                entity_label TEXT,
+                details TEXT,
+                ip_address TEXT,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # --- tracking columns on entity tables ---
+        _tracking_tables = ["dim_city", "dim_country", "dim_region", "dim_event"]
+        for tbl in _tracking_tables:
+            # Check which columns exist
+            cur.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = %s",
+                (tbl,),
+            )
+            cols = {row[0] for row in cur.fetchall()}
+            if not cols:
+                continue  # table does not exist yet
+            if "created_at" not in cols:
+                cur.execute(f"ALTER TABLE {tbl} ADD COLUMN created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP")
+            if "updated_at" not in cols:
+                cur.execute(f"ALTER TABLE {tbl} ADD COLUMN updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP")
+            if "created_by_user_id" not in cols:
+                cur.execute(f"ALTER TABLE {tbl} ADD COLUMN created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL")
+            if "updated_by_user_id" not in cols:
+                cur.execute(f"ALTER TABLE {tbl} ADD COLUMN updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL")
+
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def run_migrations(config: Mapping[str, Any] | str | Path) -> None:
+    """Apply lightweight migrations for both SQLite and PostgreSQL."""
     if isinstance(config, Mapping):
         backend = config.get("DATABASE_BACKEND", "sqlite")
         db_path = config.get("DATABASE_PATH")
+        db_url = config.get("DATABASE_URL")
     else:
         backend = "sqlite"
         db_path = config
+        db_url = None
+
+    if backend == "postgresql" and db_url:
+        _run_pg_migrations(db_url)
+        return
 
     if backend != "sqlite" or not db_path:
         return
