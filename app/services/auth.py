@@ -152,5 +152,6 @@ def role_required(*roles: str):
     return decorator
 
 
-editor_required = role_required("admin", "editeur")
+editor_required = role_required("admin", "editeur", "collaborateur")
+collaborator_required = role_required("admin", "collaborateur")
 admin_required = role_required("admin")

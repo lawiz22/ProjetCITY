@@ -35,7 +35,7 @@ from .services.city_import import (
     upsert_time_dimension,
 )
 from .services.pdf_reports import build_city_pdf, build_dashboard_pdf
-from .services.auth import admin_required, editor_required, login_required
+from .services.auth import admin_required, collaborator_required, editor_required, login_required
 from .services.audit import log_action
 
 web = Blueprint("web", __name__)
@@ -111,6 +111,7 @@ def register():
             flash("Ce nom d'utilisateur ou email est déjà utilisé.", "error")
             return render_template("web/register.html", page_title="Inscription",
                                    username=username, email=email, display_name=display_name)
+        log_action("register", "user", None, f"Nouvel utilisateur inscrit: {username}")
         flash("Compte créé ! Un administrateur doit approuver votre compte avant la connexion.", "success")
         return redirect(url_for("web.login"))
     return render_template("web/register.html", page_title="Inscription",
@@ -118,23 +119,10 @@ def register():
 
 
 # ---------------------------------------------------------------------------
-# Generic write-operation audit hook
+# Generic write-operation audit hook — REMOVED
+# Explicit log_action() calls are placed directly in each write route
+# for precise entity tracking.
 # ---------------------------------------------------------------------------
-_AUDIT_SKIP_PATHS = {"/login", "/logout", "/register"}
-
-@web.after_request
-def _audit_write_operations(response):
-    """Automatically log POST/PUT/DELETE operations that return a success/redirect."""
-    if request.method in ("POST", "PUT", "DELETE") and response.status_code < 400:
-        path = request.path
-        if path not in _AUDIT_SKIP_PATHS:
-            action = {"POST": "create", "PUT": "update", "DELETE": "delete"}.get(request.method, "write")
-            parts = [p for p in path.strip("/").split("/") if p]
-            entity_type = parts[0] if parts else "unknown"
-            entity_id = parts[1] if len(parts) > 1 else None
-            label = "/".join(parts[:3]) if len(parts) >= 3 else path
-            log_action(action, entity_type, entity_id, label)
-    return response
 
 
 # ---------------------------------------------------------------------------
@@ -626,6 +614,7 @@ def country_photo_upload(country_slug: str) -> Response:
         if result["success"]:
             imported += 1
     flash(f"{imported} photo(s) ajoutée(s) à la bibliothèque.", "success")
+    log_action("upload_photo", "country", country_slug, f"{imported} photo(s) uploadée(s) pour le pays {country_slug}")
     return redirect(url_for("web.country_detail", country_slug=country_slug))
 
 
@@ -681,6 +670,8 @@ def country_photo_import_web(country_slug: str) -> Response:
         )
         if save_result["success"]:
             imported += 1
+    if imported:
+        log_action("upload_photo", "country", country_slug, f"{imported} photo(s) importée(s) depuis le web pour le pays {country_slug}")
     return jsonify({"imported": imported})
 
 
@@ -693,6 +684,7 @@ def country_photo_delete(country_slug: str, photo_id: int) -> Response:
     deleted = delete_country_photo_from_library(conn, photo_id, country_slug)
     if deleted:
         flash("Photo supprimée.", "success")
+        log_action("delete_photo", "country", country_slug, f"Photo #{photo_id} supprimée du pays {country_slug}")
     else:
         flash("Photo introuvable.", "error")
     return redirect(url_for("web.country_detail", country_slug=country_slug))
@@ -710,6 +702,7 @@ def country_photo_set_primary(country_slug: str, photo_id: int) -> Response:
         return redirect(url_for("web.country_directory"))
     set_country_photo_primary(conn, photo_id, row["country_id"])
     flash("Photo principale mise à jour.", "success")
+    log_action("update_photo", "country", country_slug, f"Photo #{photo_id} définie comme principale pour le pays {country_slug}")
     return redirect(url_for("web.country_detail", country_slug=country_slug))
 
 
@@ -753,6 +746,9 @@ def country_annotation_photo_save(country_slug: str, annotation_id: int) -> Resp
     result = save_annotation_photo_for_country(
         conn, annotation_id, data["url"], data.get("source_page", ""), country_slug=country_slug
     )
+    if result.get("success"):
+        log_action("upload_photo", "annotation", str(annotation_id),
+                   f"Photo d'annotation sauvegardée pour le pays {country_slug}, annotation #{annotation_id}")
     return jsonify(result)
 
 
@@ -766,6 +762,9 @@ def country_annotation_photo_link(country_slug: str, annotation_id: int) -> Resp
     if not data or not data.get("photo_id"):
         return jsonify({"success": False, "error": "photo_id manquant."})
     result = link_existing_country_photo_to_annotation(conn, annotation_id, country_slug, int(data["photo_id"]))
+    if result.get("success"):
+        log_action("link_photo", "annotation", str(annotation_id),
+                   f"Photo #{data['photo_id']} liée à l'annotation #{annotation_id} du pays {country_slug}")
     return jsonify(result)
 
 
@@ -824,6 +823,8 @@ def country_annotation_create(country_slug: str) -> Response:
         (annotation_id, pop_row["country_pop_id"]),
     )
     conn.commit()
+    log_action("create", "annotation", str(annotation_id),
+               f"Annotation créée pour le pays {country_slug}, année {year}: {label}")
     return jsonify({"success": True, "annotation_id": annotation_id})
 
 
@@ -879,6 +880,8 @@ def country_annotation_update(country_slug: str, annotation_id: int) -> Response
                 conn.execute("UPDATE fact_country_population SET annotation_id = NULL WHERE country_pop_id = ?", (old_pop["country_pop_id"],))
             conn.execute("UPDATE fact_country_population SET annotation_id = ? WHERE country_pop_id = ?", (annotation_id, new_pop["country_pop_id"]))
     conn.commit()
+    log_action("update", "annotation", str(annotation_id),
+               f"Annotation #{annotation_id} mise à jour pour le pays {country_slug}: {label}")
     return jsonify({"success": True})
 
 
@@ -899,6 +902,8 @@ def country_annotation_delete(country_slug: str, annotation_id: int) -> Response
             photo_path.unlink()
     conn.execute("DELETE FROM dim_annotation WHERE annotation_id = ?", (annotation_id,))
     conn.commit()
+    log_action("delete", "annotation", str(annotation_id),
+               f"Annotation #{annotation_id} supprimée du pays {country_slug}")
     return jsonify({"success": True})
 
 
@@ -949,6 +954,7 @@ def country_delete(country_slug: str) -> Response:
         fallback_path=data_root / "country_fiches" / f"{country_slug}.txt",
     )
     conn.commit()
+    log_action("delete", "country", country_slug, f"Pays '{row['country_name']}' supprimé avec toutes ses données")
     if request.is_json:
         return jsonify({"success": True})
     flash(f"Pays '{row['country_name']}' supprimé.", "success")
@@ -1308,6 +1314,7 @@ def region_photo_upload(region_slug: str) -> Response:
         )
         if result["success"]:
             imported += 1
+    log_action("upload_photo", "region", region_slug, f"{imported} photo(s) uploadée(s) pour la région {region_slug}")
     flash(f"{imported} photo(s) ajoutée(s) à la bibliothèque.", "success")
     return redirect(url_for("web.region_detail", region_slug=region_slug))
 
@@ -1364,6 +1371,8 @@ def region_photo_import_web(region_slug: str) -> Response:
         )
         if save_result["success"]:
             imported += 1
+    if imported:
+        log_action("upload_photo", "region", region_slug, f"{imported} photo(s) importée(s) depuis le web pour la région {region_slug}")
     return jsonify({"imported": imported})
 
 
@@ -1375,6 +1384,7 @@ def region_photo_delete(region_slug: str, photo_id: int) -> Response:
     conn = get_db()
     deleted = delete_region_photo_from_library(conn, photo_id, region_slug)
     if deleted:
+        log_action("delete_photo", "region", region_slug, f"Photo #{photo_id} supprimée de la région {region_slug}")
         flash("Photo supprimée.", "success")
     else:
         flash("Photo introuvable.", "error")
@@ -1392,6 +1402,7 @@ def region_photo_set_primary(region_slug: str, photo_id: int) -> Response:
         flash("Région introuvable.", "error")
         return redirect(url_for("web.region_directory"))
     set_region_photo_primary(conn, photo_id, row["region_id"])
+    log_action("update_photo", "region", region_slug, f"Photo #{photo_id} définie comme principale pour la région {region_slug}")
     flash("Photo principale mise à jour.", "success")
     return redirect(url_for("web.region_detail", region_slug=region_slug))
 
@@ -1436,6 +1447,9 @@ def region_annotation_photo_save(region_slug: str, annotation_id: int) -> Respon
     result = save_annotation_photo_for_region(
         conn, annotation_id, data["url"], data.get("source_page", ""), region_slug=region_slug
     )
+    if result.get("success"):
+        log_action("upload_photo", "annotation", str(annotation_id),
+                   f"Photo d'annotation sauvegardée pour la région {region_slug}, annotation #{annotation_id}")
     return jsonify(result)
 
 
@@ -1449,6 +1463,9 @@ def region_annotation_photo_link(region_slug: str, annotation_id: int) -> Respon
     if not data or not data.get("photo_id"):
         return jsonify({"success": False, "error": "photo_id manquant."})
     result = link_existing_region_photo_to_annotation(conn, annotation_id, region_slug, int(data["photo_id"]))
+    if result.get("success"):
+        log_action("link_photo", "annotation", str(annotation_id),
+                   f"Photo #{data['photo_id']} liée à l'annotation #{annotation_id} de la région {region_slug}")
     return jsonify(result)
 
 
@@ -1507,6 +1524,8 @@ def region_annotation_create(region_slug: str) -> Response:
         (annotation_id, pop_row["region_pop_id"]),
     )
     conn.commit()
+    log_action("create", "annotation", str(annotation_id),
+               f"Annotation créée pour la région {region_slug}, année {year}: {label}")
     return jsonify({"success": True, "annotation_id": annotation_id})
 
 
@@ -1562,6 +1581,8 @@ def region_annotation_update(region_slug: str, annotation_id: int) -> Response:
                 conn.execute("UPDATE fact_region_population SET annotation_id = NULL WHERE region_pop_id = ?", (old_pop["region_pop_id"],))
             conn.execute("UPDATE fact_region_population SET annotation_id = ? WHERE region_pop_id = ?", (annotation_id, new_pop["region_pop_id"]))
     conn.commit()
+    log_action("update", "annotation", str(annotation_id),
+               f"Annotation #{annotation_id} mise à jour pour la région {region_slug}: {label}")
     return jsonify({"success": True})
 
 
@@ -1581,6 +1602,8 @@ def region_annotation_delete(region_slug: str, annotation_id: int) -> Response:
             photo_path.unlink()
     conn.execute("DELETE FROM dim_annotation WHERE annotation_id = ?", (annotation_id,))
     conn.commit()
+    log_action("delete", "annotation", str(annotation_id),
+               f"Annotation #{annotation_id} supprimée de la région {region_slug}")
     return jsonify({"success": True})
 
 
@@ -1632,6 +1655,7 @@ def region_delete(region_slug: str) -> Response:
         fallback_path=data_root / "region_fiches" / f"{region_slug}.txt",
     )
     conn.commit()
+    log_action("delete", "region", region_slug, f"Région '{row['region_name']}' supprimée avec toutes ses données")
     if request.is_json:
         return jsonify({"success": True})
     flash(f"Région '{row['region_name']}' supprimée.", "success")
@@ -2097,7 +2121,10 @@ def map_geocode_missing():
             results.append({"city": row["city_name"], "ok": False})
         time.sleep(1)  # respect Nominatim rate limit
 
-    return jsonify({"total": len(rows), "geocoded": sum(1 for r in results if r["ok"]), "results": results})
+    geocoded = sum(1 for r in results if r["ok"])
+    if geocoded:
+        log_action("geocode", "city", None, f"Géocodage: {geocoded}/{len(rows)} villes géocodées")
+    return jsonify({"total": len(rows), "geocoded": geocoded, "results": results})
 
 
 @web.route("/sql-lab", methods=["GET", "POST"])
@@ -2112,6 +2139,7 @@ def sql_lab() -> str:
         try:
             result = service.execute_sql(sql, confirm_write=confirm_write)
             if result["kind"] == "write":
+                log_action("sql_write", "sql_lab", None, f"Requête SQL écriture exécutée", {"sql": sql[:500]})
                 flash("Requête exécutée avec succès.", "success")
         except SqlExecutionError as exc:
             flash(str(exc), "error")
@@ -2150,6 +2178,7 @@ def sql_lab_export() -> Response:
 def sql_lab_history_clear() -> Response:
     service = AnalyticsService()
     service.clear_sql_history()
+    log_action("clear", "sql_lab", None, "Historique SQL effacé")
     flash("Historique SQL effacé.", "success")
     return redirect(url_for("web.sql_lab"))
 
@@ -2167,6 +2196,7 @@ def sql_lab_view_save() -> Response:
     except SqlExecutionError as exc:
         flash(str(exc), "error")
         return redirect(url_for("web.sql_lab"))
+    log_action("create", "sql_view", None, f"Vue analytique sauvegardée: {request.form.get('view_name', '')}")
     flash("Vue analytique sauvegardée.", "success")
     return redirect(url_for("web.sql_lab"))
 
@@ -2176,6 +2206,7 @@ def sql_lab_view_save() -> Response:
 def sql_lab_view_delete(view_id: str) -> Response:
     service = AnalyticsService()
     service.delete_sql_view(view_id)
+    log_action("delete", "sql_view", view_id, f"Vue analytique supprimée: {view_id}")
     flash("Vue analytique supprimée.", "success")
     return redirect(url_for("web.sql_lab"))
 
@@ -2621,6 +2652,12 @@ def sql_lab_backup_import_stream() -> Response:
                 msg += " ✓ Toutes les relations FK sont valides."
 
             yield 'data: ' + _json.dumps({"type": "summary", "message": msg, "inserted": total_inserted}) + '\n\n'
+
+            try:
+                log_action("import", "backup", None,
+                           f"Backup streaming importé: {total_inserted} ligne(s) insérée(s)")
+            except Exception:
+                pass  # logging failure should not break the import
 
         except Exception as exc:
             try:
@@ -3132,6 +3169,8 @@ def add_city_merge_import() -> Response:
         messages.append(f"⚠️ villestats_RAW.py: {exc}")
 
     flash(f"🔀 {stats['city_name']} — Fusion appliquée. " + " | ".join(messages), "success")
+    log_action("import", "city", stats["city_slug"], f"Fusion import: {stats['city_name']} ({stats['country']})",
+               {"pop_action": pop_action, "ann_action": ann_action, "period_action": period_action, "fiche_action": fiche_action})
     return redirect(url_for("web.city_detail", city_slug=stats["city_slug"]))
 
 
@@ -3303,6 +3342,8 @@ def add_city_import() -> Response:
         messages.append(f"⚠️ villestats_RAW.py: {exc}")
 
     flash(f"{stats['city_name']} ({stats['city_slug']}) — " + " | ".join(messages), "success")
+    log_action("import", "city", stats["city_slug"], f"Import: {stats['city_name']} ({stats['country']})",
+               {"skip_pop": skip_pop, "skip_periods": skip_periods, "skip_fiche": skip_fiche, "skip_photo": skip_photo})
     return redirect(url_for("web.city_detail", city_slug=stats["city_slug"]))
 
 
@@ -3331,6 +3372,7 @@ def city_photo_import(city_slug: str) -> Response:
 
     if result["success"]:
         flash(f"Photo importée: {result['filename']}", "success")
+        log_action("upload_photo", "city", city_slug, f"Photo importée pour {city_name}: {result['filename']}")
     else:
         flash(result["error"], "error")
     return redirect(url_for("web.city_detail", city_slug=city_slug))
@@ -3373,6 +3415,7 @@ def city_photo_upload(city_slug: str) -> Response:
             imported += 1
 
     flash(f"{imported} photo(s) ajoutée(s) à la bibliothèque.", "success")
+    log_action("upload_photo", "city", city_slug, f"{imported} photo(s) uploadée(s) pour la ville {city_slug}")
     return redirect(url_for("web.city_detail", city_slug=city_slug))
 
 
@@ -3446,6 +3489,8 @@ def city_photo_import_web(city_slug: str) -> Response:
         if save_result["success"]:
             imported += 1
 
+    if imported:
+        log_action("upload_photo", "city", city_slug, f"{imported} photo(s) importée(s) depuis le web pour la ville {city_slug}")
     return jsonify({"imported": imported})
 
 
@@ -3460,6 +3505,7 @@ def city_photo_delete(city_slug: str, photo_id: int) -> Response:
     deleted = delete_photo_from_library(conn, photo_id, city_slug)
     if deleted:
         flash("Photo supprimée.", "success")
+        log_action("delete_photo", "city", city_slug, f"Photo #{photo_id} supprimée de la ville {city_slug}")
     else:
         flash("Photo introuvable.", "error")
     return redirect(url_for("web.city_detail", city_slug=city_slug))
@@ -3482,6 +3528,7 @@ def city_photo_set_primary(city_slug: str, photo_id: int) -> Response:
 
     set_photo_primary(conn, photo_id, row["city_id"])
     flash("Photo principale mise à jour.", "success")
+    log_action("update_photo", "city", city_slug, f"Photo #{photo_id} définie comme principale pour la ville {city_slug}")
     return redirect(url_for("web.city_detail", city_slug=city_slug))
 
 
@@ -3540,6 +3587,9 @@ def annotation_photo_save(city_slug: str, annotation_id: int) -> Response:
         conn, annotation_id, data["url"], data.get("source_page", ""),
         city_slug=city_slug,
     )
+    if result.get("success"):
+        log_action("upload_photo", "annotation", str(annotation_id),
+                   f"Photo web ajoutée à l'annotation #{annotation_id} de la ville {city_slug}")
     return jsonify(result)
 
 
@@ -3558,6 +3608,9 @@ def annotation_photo_link(city_slug: str, annotation_id: int) -> Response:
     result = link_existing_photo_to_annotation(
         conn, annotation_id, city_slug, int(data["photo_id"]),
     )
+    if result.get("success"):
+        log_action("link_photo", "annotation", str(annotation_id),
+                   f"Photo #{data['photo_id']} liée à l'annotation #{annotation_id} de la ville {city_slug}")
     return jsonify(result)
 
 
@@ -3633,6 +3686,8 @@ def annotation_create(city_slug: str) -> Response:
         (annotation_id, pop_row["population_id"]),
     )
     conn.commit()
+    log_action("create", "annotation", str(annotation_id),
+               f"Annotation créée pour la ville {city_slug}, année {year}: {label}")
     return jsonify({"success": True, "annotation_id": annotation_id})
 
 
@@ -3717,6 +3772,8 @@ def annotation_update(city_slug: str, annotation_id: int) -> Response:
             )
 
     conn.commit()
+    log_action("update", "annotation", str(annotation_id),
+               f"Annotation #{annotation_id} modifiée pour la ville {city_slug}: {label}")
     return jsonify({"success": True})
 
 
@@ -3751,6 +3808,8 @@ def annotation_delete(city_slug: str, annotation_id: int) -> Response:
     # Delete annotation
     conn.execute("DELETE FROM dim_annotation WHERE annotation_id = ?", (annotation_id,))
     conn.commit()
+    log_action("delete", "annotation", str(annotation_id),
+               f"Annotation #{annotation_id} supprimée de la ville {city_slug}")
     return jsonify({"success": True})
 
 
@@ -3783,6 +3842,7 @@ def city_fiche_import(city_slug: str) -> Response:
         import_city_fiche(conn, city_id, city_slug, fiche_text, sections)
         conn.commit()
         flash(f"Fiche complète importée pour {city_name} — {len(sections)} sections.", "success")
+        log_action("import", "fiche", city_slug, f"Fiche importée pour {city_name}: {len(sections)} sections")
     except Exception as exc:
         conn.rollback()
         flash(f"Erreur fiche complète: {exc}", "error")
@@ -3808,6 +3868,7 @@ def city_fiche_delete(city_slug: str) -> Response:
         conn.commit()
         if deleted:
             flash(f"Fiche complète supprimée pour {row['city_name']}.", "success")
+            log_action("delete", "fiche", city_slug, f"Fiche supprimée pour {row['city_name']}")
         else:
             flash("Aucune fiche à supprimer.", "error")
     except Exception as exc:
@@ -4164,6 +4225,9 @@ def geo_coverage_expand_ref():
             pass
     conn.commit()
 
+    if inserted:
+        log_action("import", "ref_city", None,
+                   f"Expansion référence: {inserted} villes ajoutées pour {region} ({country})")
     return jsonify(success=True, inserted=inserted, cities=[c["city_name"] for c in new_cities[:TARGET]])
 
 
@@ -4276,6 +4340,9 @@ def coverage_save_missing_years() -> Response:
 
     conn.commit()
 
+    log_action("import", "coverage", city_slug, f"Couverture: {inserted} année(s) ajoutée(s) pour {city_slug}",
+               {"foundation_saved": foundation_saved})
+
     # Regenerate villestats_RAW.py to stay in sync
     try:
         from scripts.export_villestats_raw import export_all, OUTPUT_PATH
@@ -4330,7 +4397,7 @@ def reference_population() -> str:
 # ------------------------------------------------------------------
 
 @web.route("/options", methods=["GET"])
-@admin_required
+@collaborator_required
 def options() -> str:
     from .services.mammouth_ai import load_settings, fetch_models
 
@@ -4345,7 +4412,7 @@ def options() -> str:
 
 
 @web.route("/ai-lab")
-@admin_required
+@collaborator_required
 def ai_lab() -> str:
     from .services.mammouth_ai import load_settings, fetch_models, load_prompt
 
@@ -4402,7 +4469,7 @@ def ai_lab() -> str:
 
 
 @web.route("/options/save", methods=["POST"])
-@admin_required
+@collaborator_required
 def options_save() -> Response:
     from .services.mammouth_ai import load_settings, save_settings
 
@@ -4410,12 +4477,13 @@ def options_save() -> Response:
     settings["api_key"] = request.form.get("api_key", "").strip()
     settings["model"] = request.form.get("model", "gpt-4.1-mini").strip()
     save_settings(settings)
+    log_action("update", "settings", None, "Paramètres AI sauvegardés")
     flash("Paramètres enregistrés.", "success")
     return redirect(url_for("web.options"))
 
 
 @web.route("/options/test", methods=["POST"])
-@admin_required
+@collaborator_required
 def options_test() -> Response:
     from .services.mammouth_ai import test_connection
 
@@ -4431,15 +4499,16 @@ def options_test() -> Response:
 
 
 @web.route("/options/reset-tokens", methods=["POST"])
-@admin_required
+@collaborator_required
 def options_reset_tokens() -> Response:
     from .services.mammouth_ai import reset_tokens
     reset_tokens()
+    log_action("update", "settings", None, "Compteur de tokens réinitialisé")
     return jsonify({"success": True, "tokens_used": 0})
 
 
 @web.route("/options/generate", methods=["POST"])
-@admin_required
+@collaborator_required
 def options_generate() -> Response:
     from .services.mammouth_ai import load_settings, generate_city
 
@@ -4750,6 +4819,9 @@ def ai_lab_import() -> Response:
     except Exception as exc:
         messages.append(f"⚠️ villestats_RAW.py: {exc}")
 
+    log_action("import", "city", stats["city_slug"],
+               f"AI Lab import: {stats['city_name']} ({stats['region']}, {stats['country']})",
+               {"steps": messages})
     return jsonify({
         "success": True,
         "city_name": stats["city_name"],
@@ -4826,6 +4898,9 @@ def ai_lab_country_import() -> Response:
     except Exception as exc:
         messages.append(f"⚠️ Drapeau: {exc}")
 
+    log_action("import", "country", stats["country_slug"],
+               f"AI Lab import pays: {stats['country_name']}",
+               {"steps": messages})
     return jsonify({
         "success": True,
         "country_name": stats["country_name"],
@@ -5002,6 +5077,9 @@ def ai_lab_region_import() -> Response:
     except Exception as exc:
         messages.append(f"⚠️ Drapeau album: {exc}")
 
+    log_action("import", "region", stats["region_slug"],
+               f"AI Lab import r\u00e9gion: {stats['region_name']}",
+               {"steps": messages})
     return jsonify({
         "success": True,
         "region_name": stats["region_name"],
@@ -5326,6 +5404,8 @@ def ai_lab_refine_event_save() -> Response:
 
     conn = get_db()
     event_id = import_event(conn, data)
+    log_action("import", "event", data["event_slug"],
+               f"Événement raffiné sauvegardé: {data['event_name']}")
     return jsonify({
         "success": True,
         "event_name": data["event_name"],
@@ -5404,6 +5484,7 @@ def event_import() -> Response:
 
     conn = get_db()
     event_id = import_event(conn, data)
+    log_action("import", "event", data["event_slug"], f"Événement importé: {data['event_name']} ({data.get('event_year', '')})")
     return jsonify({
         "success": True,
         "event_name": data["event_name"],
@@ -5425,6 +5506,7 @@ def event_delete(event_slug: str) -> Response:
         flash("Événement introuvable.", "error")
         return redirect(url_for("web.events_list"))
     delete_event(conn, event["event_id"])
+    log_action("delete", "event", event_slug, f"Événement '{event['event_name']}' supprimé")
     flash(f"Événement « {event['event_name']} » supprimé.", "success")
     return redirect(url_for("web.events_list"))
 
@@ -5455,6 +5537,8 @@ def event_photo_upload(event_slug: str) -> Response:
         caption=request.form.get("caption", ""),
         set_primary=request.form.get("set_primary") == "on",
     )
+    if result.get("success"):
+        log_action("upload_photo", "event", event_slug, f"Photo uploadée pour l'événement {event['event_name']}")
     return jsonify(result)
 
 
@@ -5466,6 +5550,7 @@ def event_photo_delete(event_slug: str, photo_id: int) -> Response:
 
     conn = get_db()
     delete_event_photo(conn, photo_id, event_slug)
+    log_action("delete_photo", "event", event_slug, f"Photo #{photo_id} supprimée de l'événement {event_slug}")
     return jsonify({"success": True})
 
 
@@ -5480,6 +5565,7 @@ def event_photo_primary(event_slug: str, photo_id: int) -> Response:
     if event is None:
         return jsonify({"success": False, "error": "Événement introuvable."})
     set_event_photo_primary(conn, photo_id, event["event_id"])
+    log_action("update_photo", "event", event_slug, f"Photo #{photo_id} définie comme principale pour l'événement {event['event_name']}")
     return jsonify({"success": True})
 
 
@@ -5650,7 +5736,8 @@ def event_photo_import_web(event_slug: str) -> Response:
         )
         if save_result.get("success"):
             imported += 1
-
+    if imported:
+        log_action("upload_photo", "event", event_slug, f"{imported} photo(s) importée(s) depuis le web pour l'événement {event['event_name']}")
     return jsonify({"imported": imported})
 
 
@@ -5700,6 +5787,7 @@ def admin_user_create() -> Response:
     try:
         create_user(username=username, email=email, password=password,
                      role=role, display_name=display_name, is_approved=True)
+        log_action("create", "user", None, f"Utilisateur {username} créé avec le rôle {role}")
         flash(f"Utilisateur {username} créé avec le rôle {role}.", "success")
     except Exception:
         flash("Erreur : nom d'utilisateur ou email déjà utilisé.", "error")
@@ -5721,6 +5809,7 @@ def admin_user_update(user_id: int) -> Response:
         is_approved=is_approved == "1" if is_approved is not None else None,
         display_name=display_name if display_name else None,
     )
+    log_action("update", "user", str(user_id), f"Utilisateur #{user_id} mis à jour")
     flash("Utilisateur mis à jour.", "success")
     return redirect(url_for("web.admin_users"))
 
@@ -5734,6 +5823,7 @@ def admin_user_delete(user_id: int) -> Response:
         flash("Impossible de supprimer un administrateur.", "error")
         return redirect(url_for("web.admin_users"))
     delete_user(user_id)
+    log_action("delete", "user", str(user_id), f"Utilisateur #{user_id} supprimé")
     flash("Utilisateur supprimé.", "success")
     return redirect(url_for("web.admin_users"))
 

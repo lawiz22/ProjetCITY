@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 413
+# Nombre de villes : 414
 #
 
 # ============================================================
@@ -1244,32 +1244,6 @@ annotations = [
 ]
 
 # ============================================================
-# Burlington (United States)
-# ============================================================
-CITY_NAME = "Burlington, Vermont"
-CITY_COLOR = '#2E8B57'
-
-years = [
-    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
-    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
-]
-population = [
-    1000, 2111, 3533, 3861, 4271, 6110, 7713, 14387, 11365, 14590, 18640, 20468, 22779, 
-    24789, 27686, 33155, 35531, 38633, 37712, 39127, 38889, 42417, 44743
-]
-
-annotations = [
-    (1800, 1000, "🎓 UVM fondée 1791 — 1ère université du Vermont (1791)", 'green'),
-    (1850, 6110, "🚂 Vermont Central Railroad — hub bois Champlain (1849)", 'brown'),
-    (1870, 14387, "🌲 Sommet industrie bois — plus grand marché Est USA (1860)", 'darkgreen'),
-    (1900, 18640, "🍁 Québécois — Little Canada — franco-américain (1890)", 'blue'),
-    (1950, 33155, "💻 IBM Essex Junction — révolution tech régionale (1957)", 'purple'),
-    (1980, 37712, "🗳️ Bernie Sanders — maire progressiste élu (1981)", 'red'),
-    (1990, 39127, "🚶 Church Street piétonne — renaissance centre-ville (1981)", 'orange'),
-    (2020, 44743, "⚡ 100% renouvelable — 1ère ville USA (2014)", 'teal'),
-]
-
-# ============================================================
 # Burlington (Canada)
 # ============================================================
 CITY_NAME = "Burlington, Ontario"
@@ -1294,6 +1268,32 @@ annotations = [
     (1971, 87000, "📈 Banlieue QEW — population ×20 (1965)", 'green'),
     (2001, 150000, "🚉 GO Train — corridor Toronto-Hamilton (1999)", 'blue'),
     (2021, 200000, "🏆 Top ville Canada — densification (2015)", 'gold'),
+]
+
+# ============================================================
+# Burlington (United States)
+# ============================================================
+CITY_NAME = "Burlington, Vermont"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    1000, 2111, 3533, 3861, 4271, 6110, 7713, 14387, 11365, 14590, 18640, 20468, 22779, 
+    24789, 27686, 33155, 35531, 38633, 37712, 39127, 38889, 42417, 44743
+]
+
+annotations = [
+    (1800, 1000, "🎓 UVM fondée 1791 — 1ère université du Vermont (1791)", 'green'),
+    (1850, 6110, "🚂 Vermont Central Railroad — hub bois Champlain (1849)", 'brown'),
+    (1870, 14387, "🌲 Sommet industrie bois — plus grand marché Est USA (1860)", 'darkgreen'),
+    (1900, 18640, "🍁 Québécois — Little Canada — franco-américain (1890)", 'blue'),
+    (1950, 33155, "💻 IBM Essex Junction — révolution tech régionale (1957)", 'purple'),
+    (1980, 37712, "🗳️ Bernie Sanders — maire progressiste élu (1981)", 'red'),
+    (1990, 39127, "🚶 Church Street piétonne — renaissance centre-ville (1981)", 'orange'),
+    (2020, 44743, "⚡ 100% renouvelable — 1ère ville USA (2014)", 'teal'),
 ]
 
 # ============================================================
@@ -2052,6 +2052,25 @@ annotations = [
 # ============================================================
 # Columbia (United States)
 # ============================================================
+CITY_NAME = "Columbia, Maryland"
+CITY_COLOR = '#0077be'
+
+years = [1967, 1970, 1980, 1990, 2000, 2010, 2020]
+population = [0, 23000, 83000, 90000, 97000, 100000, 104000]
+
+annotations = [
+    (1967, 0, "🏗️ Fondation de Columbia — planification urbaine innovante (1967)", 'blue'),
+    (1970, 23000, "🏘️ Premiers habitants s'installent — début du développement résidentiel (1970)", 'green'),
+    (1980, 83000, "🏢 Expansion économique — développement des zones commerciales (1980)", 'orange'),
+    (1990, 90000, "🌳 Mise en place des espaces verts — priorité à l'environnement (1990)", 'teal'),
+    (2000, 97000, "🚇 Amélioration des transports — meilleure connectivité régionale (2000)", 'navy'),
+    (2010, 100000, "📈 Croissance démographique stable — ville mature (2010)", 'brown'),
+    (2020, 104000, "🏙️ Columbia aujourd'hui — communauté planifiée prospère (2020)", 'black'),
+]
+
+# ============================================================
+# Columbia (United States)
+# ============================================================
 CITY_NAME = "Columbia, South Carolina"
 CITY_COLOR = '#003366'
 
@@ -2073,25 +2092,6 @@ annotations = [
     (1980, 110000, "🏙️ Modernisation du centre-ville — revitalisation (1980)", 'teal'),
     (2000, 120000, "🌆 Croissance démographique stable — 21e siècle (2000)", 'navy'),
     (2020, 136632, "📈 Population record — estimation récente (2020)", 'black'),
-]
-
-# ============================================================
-# Columbia (United States)
-# ============================================================
-CITY_NAME = "Columbia, Maryland"
-CITY_COLOR = '#0077be'
-
-years = [1967, 1970, 1980, 1990, 2000, 2010, 2020]
-population = [0, 23000, 83000, 90000, 97000, 100000, 104000]
-
-annotations = [
-    (1967, 0, "🏗️ Fondation de Columbia — planification urbaine innovante (1967)", 'blue'),
-    (1970, 23000, "🏘️ Premiers habitants s'installent — début du développement résidentiel (1970)", 'green'),
-    (1980, 83000, "🏢 Expansion économique — développement des zones commerciales (1980)", 'orange'),
-    (1990, 90000, "🌳 Mise en place des espaces verts — priorité à l'environnement (1990)", 'teal'),
-    (2000, 97000, "🚇 Amélioration des transports — meilleure connectivité régionale (2000)", 'navy'),
-    (2010, 100000, "📈 Croissance démographique stable — ville mature (2010)", 'brown'),
-    (2020, 104000, "🏙️ Columbia aujourd'hui — communauté planifiée prospère (2020)", 'black'),
 ]
 
 # ============================================================
@@ -3301,33 +3301,6 @@ annotations = [
 ]
 
 # ============================================================
-# Fort Smith (United States)
-# ============================================================
-CITY_NAME = "Fort Smith, Arkansas"
-CITY_COLOR = '#4B5320'
-
-years = [
-    1817, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 
-    1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
-]
-population = [
-    0, 144, 554, 962, 2300, 1363, 9000, 3700, 4943, 12000, 13961, 17000, 26345, 25000, 
-    44449, 35000, 52382, 52000, 61550, 73000, 86000, 88000
-]
-
-annotations = [
-    (1817, 0, "🏰 Fondation du fort militaire — début de Fort Smith (1817)", 'brown'),
-    (1850, 2300, "🏙️ Incorporation de la ville — croissance initiale (1850)", 'green'),
-    (1870, 9000, "🚂 Arrivée du chemin de fer — essor économique (1870)", 'blue'),
-    (1920, 17000, "🎉 Boom démographique — croissance urbaine (1920)", 'purple'),
-    (1940, 25000, "✈️ Base aérienne militaire établie — impact sur la population (1940)", 'gray'),
-    (1960, 35000, "🏢 Expansion urbaine — modernisation (1960)", 'gold'),
-    (1980, 52000, "🏥 Développement des infrastructures — hôpitaux et écoles (1980)", 'teal'),
-    (2000, 73000, "📈 Croissance soutenue — diversification économique (2000)", 'navy'),
-    (2010, 86000, "🌆 Fort Smith aujourd'hui — ville régionale majeure (2010)", 'black'),
-]
-
-# ============================================================
 # Fort Smith (Canada)
 # ============================================================
 CITY_NAME = "Fort Smith, Northwest Territories"
@@ -3357,6 +3330,33 @@ annotations = [
     (2000, 4300, "🏞️ Développement touristique — valorisation du patrimoine (2000)", 'brown'),
     (2010, 4500, "♻️ Initiatives écologiques — durabilité (2010)", 'green'),
     (2020, 4700, "🏙️ Stabilisation démographique — population stable (2020)", 'blue'),
+]
+
+# ============================================================
+# Fort Smith (United States)
+# ============================================================
+CITY_NAME = "Fort Smith, Arkansas"
+CITY_COLOR = '#4B5320'
+
+years = [
+    1817, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 
+    1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 144, 554, 962, 2300, 1363, 9000, 3700, 4943, 12000, 13961, 17000, 26345, 25000, 
+    44449, 35000, 52382, 52000, 61550, 73000, 86000, 88000
+]
+
+annotations = [
+    (1817, 0, "🏰 Fondation du fort militaire — début de Fort Smith (1817)", 'brown'),
+    (1850, 2300, "🏙️ Incorporation de la ville — croissance initiale (1850)", 'green'),
+    (1870, 9000, "🚂 Arrivée du chemin de fer — essor économique (1870)", 'blue'),
+    (1920, 17000, "🎉 Boom démographique — croissance urbaine (1920)", 'purple'),
+    (1940, 25000, "✈️ Base aérienne militaire établie — impact sur la population (1940)", 'gray'),
+    (1960, 35000, "🏢 Expansion urbaine — modernisation (1960)", 'gold'),
+    (1980, 52000, "🏥 Développement des infrastructures — hôpitaux et écoles (1980)", 'teal'),
+    (2000, 73000, "📈 Croissance soutenue — diversification économique (2000)", 'navy'),
+    (2010, 86000, "🌆 Fort Smith aujourd'hui — ville régionale majeure (2010)", 'black'),
 ]
 
 # ============================================================
@@ -7775,6 +7775,32 @@ annotations = [
     (2001, 72000, "🔀 Fusion — Repentigny + Le Gardeur (2002)", 'purple'),
     (2011, 82000, "🌊 Inondations récurrentes — enjeu climatique (2011)", 'navy'),
     (2021, 84285, "🌊 Inondations 2017 & 2019 — résilience urbaine", 'red'),
+]
+
+# ============================================================
+# Richmond (United States)
+# ============================================================
+CITY_NAME = "Richmond, Virginia"
+CITY_COLOR = '#800000'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    3000, 4000, 6000, 10000, 15000, 22000, 37000, 38000, 43000, 61000, 85000, 120000, 
+    140000, 160000, 180000, 220000, 250000, 280000, 290000, 200000, 197000, 204000, 
+    230000
+]
+
+annotations = [
+    (1900, 85000, "🏭 Industrialisation — croissance économique rapide (1900)", 'orange'),
+    (1920, 140000, "🚂 Expansion ferroviaire — développement des infrastructures (1920)", 'green'),
+    (1950, 220000, "🏢 Boom urbain d'après-guerre — croissance démographique (1950)", 'blue'),
+    (1970, 280000, "✊ Mouvement des droits civiques — changements sociaux importants (1970)", 'purple'),
+    (1990, 200000, "🏙️ Déclin démographique — suburbanisation et désindustrialisation (1990)", 'gray'),
+    (2010, 204000, "🌆 Renaissance urbaine — revitalisation du centre-ville (2010)", 'teal'),
+    (2020, 230000, "📈 Croissance récente — développement économique et culturel (2020)", 'navy'),
 ]
 
 # ============================================================
