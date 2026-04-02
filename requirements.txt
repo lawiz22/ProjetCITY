@@ -6,3 +6,4 @@ pandas
 Pillow
 psycopg[binary]
 reportlab
+requests
