@@ -64,15 +64,6 @@ class TestAnalyticsServiceWithApp:
             slugs = [o["city_slug"] for o in options]
             assert "montreal" in slugs
 
-    def test_get_compare_overview(self, app):
-        with app.test_request_context():
-            from app.services.analytics import AnalyticsService
-            svc = AnalyticsService()
-            filters = svc.normalize_filters({})
-            rows = svc.get_compare_overview(["montreal", "calgary"], filters)
-            assert isinstance(rows, list)
-            assert len(rows) >= 1
-
     def test_get_filter_options(self, app):
         with app.test_request_context():
             from app.services.analytics import AnalyticsService

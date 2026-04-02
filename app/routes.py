@@ -1670,22 +1670,6 @@ def region_delete(region_slug: str) -> Response:
     return redirect(url_for("web.region_directory"))
 
 
-@web.route("/compare")
-def compare() -> str:
-    service = AnalyticsService()
-    filters = service.normalize_filters(request.args)
-    selected_slugs = service.normalize_slug_list(request.args.getlist("city"))
-    return render_template(
-        "web/compare.html",
-        page_title="Compare Cities",
-        filters=filters,
-        city_options=service.get_city_options(),
-        selected_slugs=selected_slugs,
-        compare_rows=service.get_compare_overview(selected_slugs, filters),
-        chart_payload=service.get_compare_chart_payload(selected_slugs, filters),
-    )
-
-
 @web.route("/map")
 def city_map() -> str:
     service = AnalyticsService()

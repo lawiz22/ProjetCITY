@@ -194,9 +194,6 @@
             <button type="button" class="opt-btn opt-btn-save" id="add-city-btn" style="font-size:1rem;padding:.7rem 2rem;">
                 🏙️ Ajouter la ville
             </button>
-            <button type="button" id="compare-city-btn" style="display:none;font-size:1rem;padding:.7rem 2rem;background:var(--accent,#4f46e5);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
-                🔀 Comparer et fusionner
-            </button>
         </div>
         <div class="opt-test-result" id="add-city-result" style="display:none;"></div>
     </div>
@@ -996,10 +993,8 @@
                         document.getElementById('existing-banner').style.display = '';
                         document.getElementById('existing-city-name').textContent =
                             data.city_name + ' (' + data.country + ')';
-                        document.getElementById('compare-city-btn').style.display = '';
                     } else {
                         document.getElementById('existing-banner').style.display = 'none';
-                        document.getElementById('compare-city-btn').style.display = 'none';
                     }
                 });
         }
@@ -1417,25 +1412,6 @@
                 importResult.className = 'opt-test-result opt-test-error';
                 importResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
-    });
-
-    /* ---- Compare & merge button ---- */
-    document.getElementById('compare-city-btn').addEventListener('click', function() {
-        var statsText   = document.getElementById('ai1-result').value.trim();
-        var periodsText = document.getElementById('ai2-result').value.trim();
-        var ficheText   = document.getElementById('ai3-result').value.trim();
-        if (!statsText) { alert('Le résultat Step 1 est vide.'); return; }
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ url_for("web.add_city_compare") }}';
-        form.target = '_blank';
-        function addField(n, v) { var i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i); }
-        addField('stats_text', statsText);
-        addField('periods_text', periodsText);
-        addField('fiche_text', ficheText);
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
     });
 
     /* ---- Add city button ---- */
