@@ -30,9 +30,17 @@
 
             <div class="backup-section" style="margin-top:1rem; padding:1rem; border:1px solid var(--border,#ddd); border-radius:8px;">
                 <h3 style="margin:0 0 .5rem">💾 Backup / Restore BD</h3>
-                <div class="button-row" style="gap:.5rem; flex-wrap:wrap;">
-                    <a href="{{ url_for('web.sql_lab_backup_export') }}" class="secondary-button" style="text-decoration:none; display:inline-flex; align-items:center; gap:.3rem;">
-                        📥 Exporter backup JSON
+                <div class="button-row" style="gap:.5rem; flex-wrap:wrap; align-items:center;">
+                    <select id="export-scope" style="padding:.35rem .5rem; border-radius:6px; border:1px solid var(--border,#ccc); font-size:.9em;">
+                        <option value="all">📦 Tout</option>
+                        <option value="vrp">🏙️ Villes / Régions / Pays</option>
+                        <option value="event">📅 Événements</option>
+                        <option value="delta_all">🆕 Derniers ajouts — Tout</option>
+                        <option value="delta_vrp">🆕 Derniers ajouts — V/R/P</option>
+                        <option value="delta_event">🆕 Derniers ajouts — Événements</option>
+                    </select>
+                    <a id="export-link" href="{{ url_for('web.sql_lab_backup_export') }}?scope=all" class="secondary-button" style="text-decoration:none; display:inline-flex; align-items:center; gap:.3rem;">
+                        📥 Exporter
                     </a>
                     <label class="secondary-button" id="import-backup-btn" style="cursor:pointer; display:inline-flex; align-items:center; gap:.3rem;">
                         📤 Importer backup
@@ -40,7 +48,7 @@
                     </label>
                 </div>
                 <p class="helper-text" style="margin-top:.4rem; font-size:.85em;">
-                    L'export télécharge toute la BD en JSON. L'import insère uniquement les lignes manquantes et valide les clés étrangères.
+                    L'export télécharge en JSON selon le scope choisi. « Derniers ajouts » exporte seulement les nouvelles lignes depuis le dernier export. L'import insère uniquement les lignes manquantes.
                 </p>
             </div>
 
@@ -182,6 +190,14 @@
 <script defer src="{{ url_for('static', filename='js/sql_lab.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Export scope dropdown ---
+    const scopeSelect = document.getElementById('export-scope');
+    const exportLink = document.getElementById('export-link');
+    const baseExportUrl = '{{ url_for("web.sql_lab_backup_export") }}';
+    scopeSelect.addEventListener('change', function() {
+        exportLink.href = baseExportUrl + '?scope=' + encodeURIComponent(this.value);
+    });
+
     const fileInput = document.getElementById('import-backup-file');
     const modal = document.getElementById('import-modal');
     const log = document.getElementById('import-log');

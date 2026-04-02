@@ -2049,49 +2049,62 @@ def sql_lab_view_delete(view_id: str) -> Response:
 # Tables in dependency order (parents before children).
 _BACKUP_TABLES: list[dict] = [
     {"name": "dim_annotation", "pk": "annotation_id",
-     "conflict": "(annotation_id)"},
+     "conflict": "(annotation_id)", "group": "shared"},
     {"name": "ref_population", "pk": "ref_pop_id",
-     "conflict": "(country, region, year)"},
+     "conflict": "(country, region, year)", "group": "vrp"},
     {"name": "ref_city", "pk": "ref_city_id",
-     "conflict": "(city_name, region, country)"},
+     "conflict": "(city_name, region, country)", "group": "vrp"},
     {"name": "dim_city", "pk": "city_id",
-     "conflict": "(city_slug)"},
+     "conflict": "(city_slug)", "group": "vrp"},
     {"name": "dim_time", "pk": "time_id",
-     "conflict": "(year)"},
+     "conflict": "(year)", "group": "shared"},
     {"name": "dim_city_period_detail", "pk": "period_detail_id",
-     "conflict": "(city_id, period_order, source_file)"},
+     "conflict": "(city_id, period_order, source_file)", "group": "vrp"},
     {"name": "dim_city_period_detail_item", "pk": "period_detail_item_id",
-     "conflict": "(period_detail_id, item_order)"},
+     "conflict": "(period_detail_id, item_order)", "group": "vrp"},
     {"name": "fact_city_population", "pk": "population_id",
-     "conflict": "(city_id, year)"},
+     "conflict": "(city_id, year)", "group": "vrp"},
     {"name": "dim_city_fiche", "pk": "fiche_id",
-     "conflict": "(city_id)"},
+     "conflict": "(city_id)", "group": "vrp"},
     {"name": "dim_city_fiche_section", "pk": "section_id",
-     "conflict": "(fiche_id, section_order)"},
-    {"name": "dim_city_photo", "pk": "photo_id", "conflict": None},
+     "conflict": "(fiche_id, section_order)", "group": "vrp"},
+    {"name": "dim_city_photo", "pk": "photo_id", "conflict": None, "group": "vrp"},
     {"name": "dim_event", "pk": "event_id",
-     "conflict": "(event_slug)"},
-    {"name": "dim_event_location", "pk": "event_location_id", "conflict": None},
-    {"name": "dim_event_photo", "pk": "event_photo_id", "conflict": None},
+     "conflict": "(event_slug)", "group": "event"},
+    {"name": "dim_event_location", "pk": "event_location_id", "conflict": None, "group": "event"},
+    {"name": "dim_event_photo", "pk": "event_photo_id", "conflict": None, "group": "event"},
     {"name": "dim_country", "pk": "country_id",
-     "conflict": "(country_slug)"},
+     "conflict": "(country_slug)", "group": "vrp"},
     {"name": "fact_country_population", "pk": "country_pop_id",
-     "conflict": "(country_id, year)"},
-    {"name": "dim_country_photo", "pk": "photo_id", "conflict": None},
+     "conflict": "(country_id, year)", "group": "vrp"},
+    {"name": "dim_country_photo", "pk": "photo_id", "conflict": None, "group": "vrp"},
     {"name": "dim_region", "pk": "region_id",
-     "conflict": "(region_slug)"},
+     "conflict": "(region_slug)", "group": "vrp"},
     {"name": "fact_region_population", "pk": "region_pop_id",
-     "conflict": "(region_id, year)"},
+     "conflict": "(region_id, year)", "group": "vrp"},
     {"name": "dim_region_period_detail", "pk": "region_period_id",
-     "conflict": "(region_id, period_order)"},
+     "conflict": "(region_id, period_order)", "group": "vrp"},
     {"name": "dim_region_period_detail_item", "pk": "item_id",
-     "conflict": "(region_period_id, item_order)"},
-    {"name": "dim_region_photo", "pk": "photo_id", "conflict": None},
+     "conflict": "(region_period_id, item_order)", "group": "vrp"},
+    {"name": "dim_region_photo", "pk": "photo_id", "conflict": None, "group": "vrp"},
     {"name": "raw_document", "pk": "document_id",
-     "conflict": "(entity_type, entity_slug, document_kind)"},
+     "conflict": "(entity_type, entity_slug, document_kind)", "group": "shared"},
     {"name": "app_setting", "pk": "setting_key",
-     "conflict": "(setting_key)"},
+     "conflict": "(setting_key)", "group": "shared"},
 ]
+
+# Export scope definitions
+_EXPORT_SCOPES = {
+    "all":       {"label": "Tout", "groups": {"shared", "vrp", "event"}},
+    "vrp":       {"label": "Villes / Régions / Pays", "groups": {"shared", "vrp"}},
+    "event":     {"label": "Événements", "groups": {"shared", "event"}},
+    "delta_all": {"label": "Derniers ajouts — Tout", "groups": {"shared", "vrp", "event"}, "delta": True},
+    "delta_vrp": {"label": "Derniers ajouts — V/R/P", "groups": {"shared", "vrp"}, "delta": True},
+    "delta_event": {"label": "Derniers ajouts — Événements", "groups": {"shared", "event"}, "delta": True},
+}
+
+_EXPORT_STATE_KEY = "backup_export_state"
+_EXPORT_STATE_FILE = Path(__file__).resolve().parents[1] / "data" / "export_state.json"
 
 
 def _serialize_value(value: object) -> object:
@@ -2108,32 +2121,88 @@ def _serialize_value(value: object) -> object:
 
 @web.route("/sql-lab/backup/export")
 def sql_lab_backup_export() -> Response:
-    """Export the entire database as a JSON file for backup."""
+    """Export the database (or a subset / delta) as a JSON file for backup."""
     import json as _json
     from .db import get_db
+    from .services.app_state import load_json_setting, save_json_setting
+
+    scope_key = request.args.get("scope", "all")
+    scope = _EXPORT_SCOPES.get(scope_key, _EXPORT_SCOPES["all"])
+    allowed_groups = scope["groups"]
+    is_delta = scope.get("delta", False)
 
     conn = get_db()
+
+    # Load previous export state for delta calculation
+    export_state: dict = load_json_setting(
+        _EXPORT_STATE_KEY, {}, fallback_path=_EXPORT_STATE_FILE,
+    )
+    # export_state = {"<table_name>": {"max_pk": <int>, "count": <int>}, ...}
+
     backup: dict = {"_meta": {
         "exported_at": datetime.now().isoformat(),
         "backend": current_app.config.get("DATABASE_BACKEND", "unknown"),
-        "version": 1,
+        "scope": scope_key,
+        "scope_label": scope["label"],
+        "is_delta": is_delta,
+        "version": 2,
     }, "tables": {}}
+
+    new_state: dict = dict(export_state)  # carry forward previous state
+    total_rows = 0
 
     for tdef in _BACKUP_TABLES:
         table = tdef["name"]
+        group = tdef.get("group", "shared")
+        pk = tdef["pk"]
+
+        if group not in allowed_groups:
+            continue
+
         try:
-            rows = conn.execute(f"SELECT * FROM {table}").fetchall()
-            backup["tables"][table] = [
+            prev_max = export_state.get(table, {}).get("max_pk", 0)
+            can_delta = is_delta and table in export_state and isinstance(prev_max, (int, float)) and prev_max > 0
+            if can_delta:
+                rows = conn.execute(
+                    f"SELECT * FROM {table} WHERE {pk} > ? ORDER BY {pk}",
+                    (prev_max,),
+                ).fetchall()
+            else:
+                rows = conn.execute(f"SELECT * FROM {table} ORDER BY {pk}").fetchall()
+
+            serialized = [
                 {k: _serialize_value(v) for k, v in dict(r).items()}
                 for r in rows
             ]
+            backup["tables"][table] = serialized
+            total_rows += len(serialized)
+
+            # Update state with max pk seen
+            # Always recompute from DB to get the true max (handles both delta and full)
+            try:
+                full_row = conn.execute(f"SELECT MAX({pk}) AS mx FROM {table}").fetchone()
+                full_max = full_row["mx"] if full_row and full_row["mx"] is not None else 0
+                current_max = full_max if isinstance(full_max, (int, float)) else 0
+            except Exception:
+                current_max = 0
+
+            new_state[table] = {"max_pk": current_max, "count": len(serialized)}
+
         except Exception:
             backup["tables"][table] = []
 
+    backup["_meta"]["total_rows"] = total_rows
+
+    # Persist the export state so future delta exports know where we left off
+    save_json_setting(_EXPORT_STATE_KEY, new_state, fallback_path=_EXPORT_STATE_FILE)
+
+    scope_suffix = scope_key.replace("_", "-")
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     payload = _json.dumps(backup, ensure_ascii=False, indent=1, default=str)
     resp = Response(payload, mimetype="application/json; charset=utf-8")
-    resp.headers["Content-Disposition"] = f"attachment; filename=projetcity-backup-{timestamp}.json"
+    resp.headers["Content-Disposition"] = (
+        f"attachment; filename=projetcity-{scope_suffix}-{timestamp}.json"
+    )
     return resp
 
 
