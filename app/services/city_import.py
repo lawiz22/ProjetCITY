@@ -11,7 +11,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
 
-from flask import current_app, g, has_app_context
+from flask import current_app, g
 
 
 def _current_user_id() -> int | None:
@@ -94,12 +94,6 @@ REGION_ALIASES = {
     "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
     "DC": "District of Columbia",
 }
-
-
-def _should_update_legacy_city_manifest() -> bool:
-    if not has_app_context():
-        return True
-    return current_app.config.get("DATABASE_BACKEND") != "postgresql"
 
 USER_AGENT = "CentralCityScrutinizer/1.0 (city photo cache)"
 SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
@@ -695,22 +689,6 @@ def fetch_and_save_city_photo(city_slug: str, city_name: str, region: str | None
         return {"success": False, "error": f"Téléchargement échoué: {last_error}"}
 
     source_page = summary.get("content_urls", {}).get("desktop", {}).get("page", "")
-    if _should_update_legacy_city_manifest():
-        manifest: dict[str, Any] = {}
-        if CITY_PHOTO_MANIFEST.exists():
-            try:
-                manifest = json.loads(CITY_PHOTO_MANIFEST.read_text(encoding="utf-8"))
-            except Exception:
-                manifest = {}
-
-        manifest[city_slug] = {
-            "filename": filename,
-            "source_page": source_page,
-            "source_image": image_url,
-            "attribution": "Image cachee depuis Wikipedia/Wikimedia, verifier les licences en cas de redistribution.",
-        }
-        CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-        clear_city_photo_manifest_cache()
 
     return {"success": True, "filename": filename, "source_page": source_page}
 
@@ -727,24 +705,6 @@ def save_uploaded_photo(city_slug: str, file_storage: Any) -> dict[str, Any]:
     filename = f"{city_slug}{suffix}"
     destination = CITY_PHOTO_DIR / filename
     file_storage.save(str(destination))
-
-    # Update manifest
-    manifest: dict[str, Any] = {}
-    if _should_update_legacy_city_manifest() and CITY_PHOTO_MANIFEST.exists():
-        try:
-            manifest = json.loads(CITY_PHOTO_MANIFEST.read_text(encoding="utf-8"))
-        except Exception:
-            manifest = {}
-
-    if _should_update_legacy_city_manifest():
-        manifest[city_slug] = {
-            "filename": filename,
-            "source_page": "",
-            "source_image": "upload",
-            "attribution": "Photo uploadée manuellement.",
-        }
-        CITY_PHOTO_MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-        clear_city_photo_manifest_cache()
 
     return {"success": True, "filename": filename}
 

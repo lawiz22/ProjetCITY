@@ -112,9 +112,9 @@ class TestDatabaseSchema:
 
     def test_all_views_exist(self, db_conn):
         rows = db_conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='view' ORDER BY name"
+            "SELECT table_name FROM information_schema.views WHERE table_schema = 'public' ORDER BY table_name"
         ).fetchall()
-        view_names = {row[0] for row in rows}
+        view_names = {row["table_name"] for row in rows}
         expected = {
             "vw_city_population_analysis",
             "vw_city_growth_by_decade",
@@ -131,9 +131,9 @@ class TestDatabaseSchema:
 
     def test_all_tables_exist(self, db_conn):
         rows = db_conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name"
         ).fetchall()
-        table_names = {row[0] for row in rows}
+        table_names = {row["table_name"] for row in rows}
         expected = {
             "dim_annotation",
             "dim_city",
@@ -150,7 +150,7 @@ class TestDatabaseSchema:
         assert not missing, f"Missing tables: {missing}"
 
     def test_sample_data_loaded(self, db_conn):
-        count = db_conn.execute("SELECT COUNT(*) FROM dim_city").fetchone()[0]
+        count = db_conn.execute("SELECT COUNT(*) AS n FROM dim_city").fetchone()["n"]
         assert count == 3
 
     def test_population_view_works(self, db_conn):
@@ -166,9 +166,7 @@ class TestDatabaseSchema:
             "SELECT * FROM vw_city_growth_by_decade WHERE city_id = 1"
         ).fetchall()
         assert len(rows) >= 1
-        # Montreal grew from 1950 to 1960
-        first = dict(rows[0])
-        assert first["growth_pct"] is not None
+        assert rows[0]["growth_pct"] is not None
 
     def test_peak_population_view(self, db_conn):
         row = db_conn.execute(

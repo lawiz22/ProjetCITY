@@ -2311,7 +2311,7 @@ def sql_lab_backup_export() -> Response:
 
     backup: dict = {"_meta": {
         "exported_at": datetime.now().isoformat(),
-        "backend": current_app.config.get("DATABASE_BACKEND", "unknown"),
+        "backend": "postgresql",
         "scope": scope_key,
         "scope_label": scope["label"],
         "is_delta": is_delta,
@@ -2403,7 +2403,6 @@ def sql_lab_backup_import() -> Response:
     conn = get_db()
     report: list[str] = []
     total_inserted = 0
-    is_pg = current_app.config.get("DATABASE_BACKEND") == "postgresql"
 
     for tdef in _BACKUP_TABLES:
         table = tdef["name"]
@@ -2432,16 +2431,13 @@ def sql_lab_backup_import() -> Response:
 
             sp_name = f"sp_{table}_{idx}"
             try:
-                if is_pg:
-                    conn.execute(f"SAVEPOINT {sp_name}")
+                conn.execute(f"SAVEPOINT {sp_name}")
                 cur = conn.execute(sql, list(row.values()))
                 if hasattr(cur, "rowcount") and cur.rowcount > 0:
                     inserted += 1
-                if is_pg:
-                    conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+                conn.execute(f"RELEASE SAVEPOINT {sp_name}")
             except Exception:
-                if is_pg:
-                    conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
+                conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
 
         if inserted:
             report.append(f"{table}: +{inserted}/{len(rows)}")
@@ -2537,10 +2533,7 @@ def sql_lab_backup_import_stream() -> Response:
         return Response(_err3(), mimetype="text/event-stream")
 
     # Capture what we need before the request context disappears
-    db_backend = current_app.config.get("DATABASE_BACKEND", "sqlite")
     db_url = current_app.config.get("DATABASE_URL", "")
-    db_path = current_app.config.get("DATABASE_PATH", "")
-    is_pg = db_backend == "postgresql"
 
     fk_checks = [
         ("fact_city_population", "city_id", "dim_city", "city_id"),
@@ -2565,12 +2558,9 @@ def sql_lab_backup_import_stream() -> Response:
 
     def generate():
         import base64 as _b64
-        from .db import _connect_postgres, _connect_sqlite
+        from .db import _connect_postgres
 
-        if is_pg:
-            conn = _connect_postgres(db_url)
-        else:
-            conn = _connect_sqlite(db_path)
+        conn = _connect_postgres(db_url)
 
         total_inserted = 0
 
@@ -2603,17 +2593,14 @@ def sql_lab_backup_import_stream() -> Response:
 
                     sp_name = f"sp_{table}_{idx}"
                     try:
-                        if is_pg:
-                            conn.execute(f"SAVEPOINT {sp_name}")
+                        conn.execute(f"SAVEPOINT {sp_name}")
                         cur = conn.execute(sql, list(row.values()))
                         rc = cur.rowcount if hasattr(cur, "rowcount") else 0
                         if rc > 0:
                             inserted += 1
-                        if is_pg:
-                            conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+                        conn.execute(f"RELEASE SAVEPOINT {sp_name}")
                     except Exception:
-                        if is_pg:
-                            conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
+                        conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
 
                 yield 'data: ' + _json.dumps({"type": "table_done", "table": table, "inserted": inserted, "row_count": len(rows)}) + '\n\n'
                 total_inserted += inserted
