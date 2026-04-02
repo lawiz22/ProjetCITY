@@ -50,6 +50,7 @@
 <nav class="ailab-tabs">
     <button class="ailab-tab active" data-ailab-tab="ville">🏙️ Ville</button>
     <button class="ailab-tab" data-ailab-tab="evenement">📅 Événement</button>
+    <button class="ailab-tab" data-ailab-tab="personnage">🧑 Personnage</button>
     <button class="ailab-tab" data-ailab-tab="pays">🌍 Pays</button>
     <button class="ailab-tab" data-ailab-tab="regions">📍 Régions</button>
     <button class="ailab-tab" data-ailab-tab="raffinement">🔬 Raffinement</button>
@@ -282,6 +283,85 @@
 </section>
 
 </div><!-- /ailab-tab-evenement -->
+
+<!-- ==================== TAB: Personnage ==================== -->
+<div class="ailab-tab-content" id="ailab-tab-personnage">
+
+<!-- ===================== Personnage — Suggérer ===================== -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>Suggérer un personnage</h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-top-row">
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="per-suggest-country">Pays (optionnel)</label>
+                <select id="per-suggest-country" class="opt-input">
+                    <option value="">— Tous les pays —</option>
+                    {% for c in countries_for_person %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="per-suggest-region">Région (optionnel)</label>
+                <select id="per-suggest-region" class="opt-input">
+                    <option value="">— Toutes les régions —</option>
+                    {% for r in regions_for_person %}
+                    <option value="{{ r }}">{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="per-suggest-category">Catégorie (optionnel)</label>
+                <select id="per-suggest-category" class="opt-input">
+                    <option value="">— Toutes les catégories —</option>
+                    {% for key, label in person_category_labels.items() %}
+                    <option value="{{ key }}">{{ person_category_emojis[key] }} {{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="opt-actions" style="margin-top:.5rem;">
+            <button type="button" class="suggest-city-btn" id="per-suggest-btn">🎲 Suggérer un personnage</button>
+        </div>
+        <div class="opt-test-result" id="per-suggest-result" style="display:none;"></div>
+    </div>
+</section>
+
+<!-- ===================== Personnage — Générer ===================== -->
+<section class="panel ailab-step" id="step-person-panel">
+    <div class="panel-head">
+        <h2>
+            Personnage historique
+            <span class="ailab-check" id="step-person-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai-person-input">Nom du personnage</label>
+            <input type="text" id="ai-person-input" class="opt-input" placeholder="ex: Napoléon Bonaparte, Marie Curie, Martin Luther King" spellcheck="false">
+        </div>
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai-person-prompt">Prompt (modifiable)</label>
+            <textarea id="ai-person-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_person }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="ai-person-generate">🚀 Générer</button>
+        </div>
+        <div class="ai-lab-field" id="ai-person-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="ai-person-result" class="opt-input ai-lab-result" rows="28" readonly></textarea>
+            <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="ai-person-copy">📋 Copier</button>
+                <button type="button" class="opt-btn opt-btn-save" id="ai-person-import">📥 Importer le personnage</button>
+            </div>
+            <div class="opt-test-result" id="ai-person-import-result" style="display:none;"></div>
+        </div>
+    </div>
+</section>
+
+</div><!-- /ailab-tab-personnage -->
 
 <!-- ==================== TAB: Pays ==================== -->
 <div class="ailab-tab-content" id="ailab-tab-pays">
@@ -565,6 +645,9 @@
             <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
                 <input type="radio" name="refine-entity-type" value="evenement" checked> 📅 Événement
             </label>
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
+                <input type="radio" name="refine-entity-type" value="personnage"> 🧑 Personnage
+            </label>
             <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
                 <input type="radio" name="refine-entity-type" value="ville" disabled> 🏙️ Ville
             </label>
@@ -685,6 +768,114 @@
     </div><!-- /refine-event-card -->
 
 </div><!-- /refine-entity-evenement -->
+
+<!-- PERSON panel -->
+<div id="refine-entity-personnage" style="display:none;">
+
+    <!-- Person picker -->
+    <section class="panel">
+        <h3 class="panel-title">🧑 Choisir un personnage</h3>
+        <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+            <div class="ai-lab-field" style="max-width:520px;">
+                <label class="opt-label" for="refine-person-select">Personnage</label>
+                <select id="refine-person-select" class="opt-input">
+                    <option value="">— Choisir un personnage —</option>
+                    {% for p in persons_for_refine %}
+                    <option value="{{ p.person_slug }}">{{ p.birth_year or '?' }} — {{ p.person_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="refine-person-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
+        </div>
+    </section>
+
+    <!-- Summary card (hidden until person selected) -->
+    <div id="refine-person-card" style="display:none;">
+        <section class="panel">
+            <h3 class="panel-title">📋 Fiche actuelle</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div id="refine-person-card-content" style="font-size:.9rem;line-height:1.7;"></div>
+                <details style="margin-top:.75rem;">
+                    <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">Voir le texte source complet</summary>
+                    <textarea id="refine-person-source-text" class="opt-input opt-textarea" rows="10"
+                        style="width:100%;font-family:monospace;font-size:.78rem;margin-top:.5rem;" readonly></textarea>
+                </details>
+            </div>
+        </section>
+
+        <!-- Refinement type + prompt + button -->
+        <section class="panel">
+            <h3 class="panel-title">🔬 Raffiner</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
+                    <div class="ai-lab-field" style="flex:0 0 auto;">
+                        <label class="opt-label" for="refine-person-type">Type de raffinement</label>
+                        <select id="refine-person-type" class="opt-input opt-input-model">
+                            <option value="enrich">✨ Enrichir et valider</option>
+                            <option value="correct">🔧 Corriger les erreurs</option>
+                            <option value="expand">➕ Ajouter de la nouvelle info</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ai-lab-field" style="margin-bottom:1rem;">
+                    <label class="opt-label" for="refine-person-prompt">Instructions (modifiables)</label>
+                    <textarea id="refine-person-prompt" class="opt-input opt-textarea" rows="8"
+                        style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_person }}</textarea>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-person-btn">🔬 Raffiner avec l'IA</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result panel (hidden until AI responds) -->
+        <div id="refine-person-result-wrap" style="display:none;">
+            <section class="panel">
+                <h3 class="panel-title">🧬 Résultat de l'IA</h3>
+                <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                        <button type="button" class="opt-btn" id="refine-person-copy-btn">📋 Copier</button>
+                    </div>
+                    <textarea id="refine-person-result" class="opt-input opt-textarea" rows="16"
+                        style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+
+                    <!-- 3 choices -->
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
+                        <span style="font-size:.85rem;color:var(--muted);font-weight:600;">Que faire ?</span>
+                        <button type="button" class="opt-btn" id="refine-person-keep-btn">↩️ Garder l'original</button>
+                        <button type="button" class="opt-btn opt-btn-success" id="refine-person-use-btn">✅ Utiliser la version raffinée</button>
+                        <button type="button" class="opt-btn opt-btn-primary" id="refine-person-synth-btn">⚗️ Synthèse IA des 2 versions</button>
+                    </div>
+
+                    <div id="refine-person-save-result" style="display:none;" class="opt-test-result"></div>
+                </div>
+            </section>
+
+            <!-- Synthesis result (hidden until synthesis completes) -->
+            <div id="refine-person-synth-wrap" style="display:none;">
+                <section class="panel">
+                    <h3 class="panel-title">⚗️ Synthèse IA</h3>
+                    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                        <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+                            L'IA a réconcilié les deux versions. Vérifiez le résultat et sauvegardez si satisfait.
+                        </p>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-person-synth-copy-btn">📋 Copier</button>
+                        </div>
+                        <textarea id="refine-person-synth-result" class="opt-input opt-textarea" rows="16"
+                            style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;align-items:center;">
+                            <button type="button" class="opt-btn opt-btn-success" id="refine-person-synth-save-btn">💾 Sauvegarder la synthèse</button>
+                        </div>
+                        <div id="refine-person-synth-save-result" style="display:none;" class="opt-test-result"></div>
+                    </div>
+                </section>
+            </div><!-- /refine-person-synth-wrap -->
+        </div><!-- /refine-person-result-wrap -->
+
+    </div><!-- /refine-person-card -->
+
+</div><!-- /refine-entity-personnage -->
 
 </div><!-- /ailab-tab-raffinement -->
 
@@ -1082,6 +1273,147 @@
             .catch(function(err) {
                 importBtn.disabled = false;
                 importBtn.textContent = '📥 Importer l\'événement';
+                importResult.className = 'opt-test-result opt-test-error';
+                importResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ====================================================================
+     * TAB: PERSONNAGE — Suggest + Generate + Import
+     * ==================================================================== */
+    var personGenBtn = document.getElementById('ai-person-generate');
+    var personInput  = document.getElementById('ai-person-input');
+    var personPrompt = document.getElementById('ai-person-prompt');
+    var personResultWrap = document.getElementById('ai-person-result-wrap');
+    var personResult = document.getElementById('ai-person-result');
+    var personCheck  = document.getElementById('step-person-check');
+
+    /* ---- Suggest person button ---- */
+    var perSuggestBtn    = document.getElementById('per-suggest-btn');
+    var perSuggestResult = document.getElementById('per-suggest-result');
+    var perSuggestUrl    = '{{ url_for("web.ai_lab_suggest_person") }}';
+
+    perSuggestBtn.addEventListener('click', function() {
+        perSuggestBtn.disabled = true;
+        perSuggestBtn.textContent = '⏳ Suggestion en cours…';
+        perSuggestResult.style.display = '';
+        perSuggestResult.className = 'opt-test-result opt-test-pending';
+        perSuggestResult.textContent = 'Interrogation de l\'IA…';
+
+        var fd = new FormData();
+        fd.append('model', modelSelect.value);
+        fd.append('country',  document.getElementById('per-suggest-country').value);
+        fd.append('region',   document.getElementById('per-suggest-region').value);
+        fd.append('category', document.getElementById('per-suggest-category').value);
+
+        fetch(perSuggestUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                perSuggestBtn.disabled = false;
+                perSuggestBtn.textContent = '🎲 Suggérer un personnage';
+                if (data.success) {
+                    var name = data.reply.trim();
+                    perSuggestResult.className = 'opt-test-result opt-test-success';
+                    perSuggestResult.innerHTML = '✅ <strong>' + name.replace(/</g,'&lt;') + '</strong>'
+                        + ' <button type="button" class="opt-btn" style="padding:.2rem .7rem;font-size:.85rem;margin-left:.75rem;" id="per-use-suggestion">Utiliser →</button>';
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    document.getElementById('per-use-suggestion').addEventListener('click', function() {
+                        personInput.value = name;
+                        var pt = personPrompt.value;
+                        if (pt.includes('{CITY_INPUT}')) {
+                            personPrompt.value = pt.replace('{CITY_INPUT}', name);
+                        }
+                        document.getElementById('step-person-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                } else {
+                    perSuggestResult.className = 'opt-test-result opt-test-error';
+                    perSuggestResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                perSuggestBtn.disabled = false;
+                perSuggestBtn.textContent = '🎲 Suggérer un personnage';
+                perSuggestResult.className = 'opt-test-result opt-test-error';
+                perSuggestResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    personGenBtn.addEventListener('click', function() {
+        var name = personInput.value.trim();
+        if (!name) { alert('Entrez un nom de personnage.'); return; }
+        personGenBtn.disabled = true;
+        personGenBtn.textContent = '⏳ Génération en cours…';
+        personResultWrap.style.display = '';
+        personResult.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', personPrompt.value);
+        fd.append('max_tokens', '4000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                personGenBtn.disabled = false;
+                personGenBtn.textContent = '🚀 Générer';
+                if (data.success) {
+                    personResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    personCheck.classList.add('visible');
+                } else {
+                    personResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                personGenBtn.disabled = false;
+                personGenBtn.textContent = '🚀 Générer';
+                personResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* Copy button for person */
+    document.getElementById('ai-person-copy').addEventListener('click', function() {
+        personResult.select();
+        navigator.clipboard.writeText(personResult.value).then(function() {
+            var btn = document.getElementById('ai-person-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* Import person button */
+    document.getElementById('ai-person-import').addEventListener('click', function() {
+        var text = personResult.value.trim();
+        if (!text) { alert('Aucun résultat à importer.'); return; }
+        var importBtn = document.getElementById('ai-person-import');
+        var importResult = document.getElementById('ai-person-import-result');
+        importBtn.disabled = true;
+        importBtn.textContent = '⏳ Import…';
+        importResult.style.display = '';
+        importResult.className = 'opt-test-result opt-test-pending';
+        importResult.textContent = 'Importation…';
+
+        var fd = new FormData();
+        fd.append('person_text', text);
+
+        fetch('{{ url_for("web.person_import") }}', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer le personnage';
+                if (data.success) {
+                    importResult.className = 'opt-test-result opt-test-success';
+                    importResult.innerHTML = '✅ <strong>' + data.person_name + '</strong> importé!<br>' +
+                        '<a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir le personnage</a>';
+                } else {
+                    importResult.className = 'opt-test-result opt-test-error';
+                    importResult.innerHTML = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer le personnage';
                 importResult.className = 'opt-test-result opt-test-error';
                 importResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
@@ -2091,6 +2423,282 @@
                 btn.textContent = '💾 Sauvegarder la synthèse';
                 refineSynthSaveResult.className = 'opt-test-result opt-test-error';
                 refineSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* =====================================================================
+     * RAFFINEMENT — Entity type switching
+     * ===================================================================== */
+    document.querySelectorAll('input[name="refine-entity-type"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var val = radio.value;
+            var panelEv  = document.getElementById('refine-entity-evenement');
+            var panelPer = document.getElementById('refine-entity-personnage');
+            if (panelEv) panelEv.style.display = val === 'evenement' ? '' : 'none';
+            if (panelPer) panelPer.style.display = val === 'personnage' ? '' : 'none';
+        });
+    });
+
+    /* =====================================================================
+     * RAFFINEMENT TAB — Personnage
+     * ===================================================================== */
+    var refinePersonSelect      = document.getElementById('refine-person-select');
+    var refinePersonLoading     = document.getElementById('refine-person-loading');
+    var refinePersonCard        = document.getElementById('refine-person-card');
+    var refinePersonCardContent = document.getElementById('refine-person-card-content');
+    var refinePersonSourceText  = document.getElementById('refine-person-source-text');
+    var refinePersonType        = document.getElementById('refine-person-type');
+    var refinePersonPrompt      = document.getElementById('refine-person-prompt');
+    var refinePersonBtn         = document.getElementById('refine-person-btn');
+    var refinePersonResultWrap  = document.getElementById('refine-person-result-wrap');
+    var refinePersonResult      = document.getElementById('refine-person-result');
+    var refinePersonSaveResult  = document.getElementById('refine-person-save-result');
+    var refinePersonSynthWrap   = document.getElementById('refine-person-synth-wrap');
+    var refinePersonSynthResult = document.getElementById('refine-person-synth-result');
+    var refinePersonSynthSaveResult = document.getElementById('refine-person-synth-save-result');
+
+    var refinePersonLoadUrl  = '{{ url_for("web.ai_lab_refine_person_load", person_slug="__SLUG__") }}';
+    var refinePersonGenUrl   = '{{ url_for("web.ai_lab_refine_person_generate") }}';
+    var refinePersonSynthUrl = '{{ url_for("web.ai_lab_refine_person_synthesize") }}';
+    var refinePersonSaveUrl  = '{{ url_for("web.ai_lab_refine_person_save") }}';
+
+    var _baseRefinePersonPrompt = {{ prompt_refine_person | tojson }};
+    var refinePersonPrompts = {
+        enrich: _baseRefinePersonPrompt,
+        correct: _baseRefinePersonPrompt.replace(
+            'Enrichis et valide la fiche',
+            'Corrige les erreurs dans la fiche'
+        ),
+        expand: _baseRefinePersonPrompt.replace(
+            'Enrichis et valide la fiche',
+            'Ajoute de la nouvelle information à la fiche'
+        )
+    };
+
+    var currentPersonSlug = '';
+    var PERSON_CATEGORY_LABELS_JS = {{ person_category_labels | tojson }};
+    var PERSON_CATEGORY_EMOJIS_JS = {{ person_category_emojis | tojson }};
+
+    /* ---- Load person on dropdown change ---- */
+    refinePersonSelect.addEventListener('change', function() {
+        var slug = refinePersonSelect.value;
+        if (!slug) {
+            refinePersonCard.style.display = 'none';
+            refinePersonResultWrap.style.display = 'none';
+            refinePersonSynthWrap.style.display = 'none';
+            currentPersonSlug = '';
+            return;
+        }
+        refinePersonLoading.style.display = '';
+        refinePersonCard.style.display = 'none';
+        refinePersonResultWrap.style.display = 'none';
+        refinePersonSynthWrap.style.display = 'none';
+
+        var url = refinePersonLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refinePersonLoading.style.display = 'none';
+                if (!data.success) { alert('Erreur: ' + data.error); return; }
+                currentPersonSlug = slug;
+
+                var cat = data.person_category || 'autre';
+                var catLabel = (PERSON_CATEGORY_LABELS_JS[cat] || cat);
+                var catEmoji = (PERSON_CATEGORY_EMOJIS_JS[cat] || '📌');
+                var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
+                    + '<span class="badge badge-year">' + (data.birth_year || '—') + (data.death_year ? ' – ' + data.death_year : '') + '</span>'
+                    + '<span class="badge badge-category">' + catEmoji + ' ' + catLabel + '</span>'
+                    + (data.person_level === 1 ? '<span class="badge badge-level">🌐 Niveau mondial</span>' : '<span class="badge badge-level">📍 Niveau régional</span>')
+                    + '<span class="badge">' + (data.location_count || 0) + ' lieu(x)</span>'
+                    + '</div>'
+                    + '<p style="color:var(--muted);font-size:.9rem;margin:0;">'
+                    + (data.summary ? data.summary.substring(0, 280).replace(/</g,'&lt;') + (data.summary.length > 280 ? '…' : '') : '<em>Aucun résumé.</em>')
+                    + '</p>';
+                refinePersonCardContent.innerHTML = html;
+                refinePersonSourceText.value = data.source_text || '';
+                refinePersonCard.style.display = '';
+            })
+            .catch(function(err) {
+                refinePersonLoading.style.display = 'none';
+                alert('Erreur réseau: ' + err);
+            });
+    });
+
+    /* ---- Update prompt when refinement type changes ---- */
+    refinePersonType.addEventListener('change', function() {
+        refinePersonPrompt.value = refinePersonPrompts[refinePersonType.value] || refinePersonPrompts.enrich;
+    });
+
+    /* ---- Raffiner button ---- */
+    refinePersonBtn.addEventListener('click', function() {
+        if (!currentPersonSlug) { alert('Choisissez un personnage.'); return; }
+        var promptText = refinePersonPrompt.value.trim();
+        if (!promptText) { alert('Le prompt est vide.'); return; }
+
+        refinePersonBtn.disabled = true;
+        refinePersonBtn.textContent = '⏳ Raffinement en cours…';
+        refinePersonResultWrap.style.display = '';
+        refinePersonSynthWrap.style.display = 'none';
+        refinePersonSaveResult.style.display = 'none';
+        refinePersonResult.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('person_slug', currentPersonSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', promptText);
+
+        fetch(refinePersonGenUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refinePersonBtn.disabled = false;
+                refinePersonBtn.textContent = '🔬 Raffiner avec l\'IA';
+                if (data.success) {
+                    refinePersonResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                } else {
+                    refinePersonResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                refinePersonBtn.disabled = false;
+                refinePersonBtn.textContent = '🔬 Raffiner avec l\'IA';
+                refinePersonResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Copy refined person result ---- */
+    document.getElementById('refine-person-copy-btn').addEventListener('click', function() {
+        refinePersonResult.select();
+        navigator.clipboard.writeText(refinePersonResult.value).then(function() {
+            var btn = document.getElementById('refine-person-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Garder l'original ---- */
+    document.getElementById('refine-person-keep-btn').addEventListener('click', function() {
+        refinePersonResultWrap.style.display = 'none';
+        refinePersonSynthWrap.style.display = 'none';
+    });
+
+    /* ---- Utiliser la version raffinée (save directly) ---- */
+    document.getElementById('refine-person-use-btn').addEventListener('click', function() {
+        var text = refinePersonResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-person-use-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refinePersonSaveResult.style.display = '';
+        refinePersonSaveResult.className = 'opt-test-result opt-test-pending';
+        refinePersonSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('person_text', text);
+
+        fetch(refinePersonSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                if (data.success) {
+                    refinePersonSaveResult.className = 'opt-test-result opt-test-success';
+                    refinePersonSaveResult.innerHTML = '✅ <strong>' + data.person_name.replace(/</g,'&lt;') + '</strong> sauvegardé!'
+                        + ' <a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir le personnage</a>';
+                } else {
+                    refinePersonSaveResult.className = 'opt-test-result opt-test-error';
+                    refinePersonSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                refinePersonSaveResult.className = 'opt-test-result opt-test-error';
+                refinePersonSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Synthèse IA des 2 versions ---- */
+    document.getElementById('refine-person-synth-btn').addEventListener('click', function() {
+        var newText = refinePersonResult.value.trim();
+        if (!newText || newText.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        if (!currentPersonSlug) { alert('Personnage non chargé.'); return; }
+
+        var btn = document.getElementById('refine-person-synth-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Synthèse en cours…';
+        refinePersonSynthWrap.style.display = '';
+        refinePersonSynthResult.value = 'Synthèse IA en cours…';
+        refinePersonSynthSaveResult.style.display = 'none';
+
+        var fd = new FormData();
+        fd.append('person_slug', currentPersonSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('new_text', newText);
+
+        fetch(refinePersonSynthUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                if (data.success) {
+                    refinePersonSynthResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    refinePersonSynthWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    refinePersonSynthResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                refinePersonSynthResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Copy person synthesis result ---- */
+    document.getElementById('refine-person-synth-copy-btn').addEventListener('click', function() {
+        refinePersonSynthResult.select();
+        navigator.clipboard.writeText(refinePersonSynthResult.value).then(function() {
+            var btn = document.getElementById('refine-person-synth-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Save person synthesis ---- */
+    document.getElementById('refine-person-synth-save-btn').addEventListener('click', function() {
+        var text = refinePersonSynthResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-person-synth-save-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refinePersonSynthSaveResult.style.display = '';
+        refinePersonSynthSaveResult.className = 'opt-test-result opt-test-pending';
+        refinePersonSynthSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('person_text', text);
+
+        fetch(refinePersonSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                if (data.success) {
+                    refinePersonSynthSaveResult.className = 'opt-test-result opt-test-success';
+                    refinePersonSynthSaveResult.innerHTML = '✅ <strong>' + data.person_name.replace(/</g,'&lt;') + '</strong> sauvegardé!'
+                        + ' <a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir le personnage</a>';
+                } else {
+                    refinePersonSynthSaveResult.className = 'opt-test-result opt-test-error';
+                    refinePersonSynthSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                refinePersonSynthSaveResult.className = 'opt-test-result opt-test-error';
+                refinePersonSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
     });
 

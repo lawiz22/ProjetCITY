@@ -328,6 +328,11 @@ def city_detail(city_slug: str) -> str:
     from .services.event_service import get_events_for_city, CATEGORY_LABELS, CATEGORY_EMOJIS
     city_events = get_events_for_city(conn, city["city_id"])
 
+    from .services.person_service import get_persons_for_city
+    from .services.person_service import CATEGORY_LABELS as PERSON_CATEGORY_LABELS
+    from .services.person_service import CATEGORY_EMOJIS as PERSON_CATEGORY_EMOJIS
+    city_persons = get_persons_for_city(conn, city["city_id"])
+
     return render_template(
         "web/city_detail.html",
         page_title=city["city_name"],
@@ -338,6 +343,9 @@ def city_detail(city_slug: str) -> str:
         city_events=city_events,
         event_category_labels=CATEGORY_LABELS,
         event_category_emojis=CATEGORY_EMOJIS,
+        city_persons=city_persons,
+        person_category_labels=PERSON_CATEGORY_LABELS,
+        person_category_emojis=PERSON_CATEGORY_EMOJIS,
         periods=service.get_city_periods(city_slug, filters),
         annotations=service.get_city_annotations(city_slug, filters),
         chart_payload=service.get_city_chart_payload(city_slug, filters),
@@ -4430,6 +4438,16 @@ def ai_lab() -> str:
         "SELECT event_name, event_slug, event_year, event_category "
         "FROM dim_event ORDER BY event_year DESC, LOWER(event_name), event_name"
     ).fetchall()]
+    prompt_person = load_prompt("person_data.txt")
+    prompt_refine_person = load_prompt("person_refine.txt")
+    from .services.person_service import CATEGORY_LABELS as PERSON_CATEGORY_LABELS
+    from .services.person_service import CATEGORY_EMOJIS as PERSON_CATEGORY_EMOJIS
+    persons_for_refine = [dict(r) for r in conn.execute(
+        "SELECT person_name, person_slug, birth_year, person_category "
+        "FROM dim_person ORDER BY birth_year DESC NULLS LAST, LOWER(person_name), person_name"
+    ).fetchall()]
+    countries_for_person = countries_for_region
+    regions_for_person = regions_for_event
     return render_template(
         "web/ai_lab.html",
         page_title="AI Lab",
@@ -4452,6 +4470,13 @@ def ai_lab() -> str:
         event_category_emojis=CATEGORY_EMOJIS,
         prompt_refine_event=prompt_refine_event,
         events_for_refine=events_for_refine,
+        prompt_person=prompt_person,
+        prompt_refine_person=prompt_refine_person,
+        person_category_labels=PERSON_CATEGORY_LABELS,
+        person_category_emojis=PERSON_CATEGORY_EMOJIS,
+        persons_for_refine=persons_for_refine,
+        countries_for_person=countries_for_person,
+        regions_for_person=regions_for_person,
     )
 
 
@@ -5725,6 +5750,580 @@ def event_photo_import_web(event_slug: str) -> Response:
             imported += 1
     if imported:
         log_action("upload_photo", "event", event_slug, f"{imported} photo(s) importée(s) depuis le web pour l'événement {event['event_name']}")
+    return jsonify({"imported": imported})
+
+
+# ---------------------------------------------------------------------------
+# AI Lab — Person (suggest / refine / synthesize / save)
+# ---------------------------------------------------------------------------
+
+@web.route("/ai-lab/suggest-person", methods=["POST"])
+@editor_required
+def ai_lab_suggest_person() -> Response:
+    """Ask Mammouth to suggest a historical figure not yet in the DB."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .services.person_service import CATEGORY_LABELS
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    filter_country  = request.form.get("country", "").strip()
+    filter_region   = request.form.get("region", "").strip()
+    filter_category = request.form.get("category", "").strip()
+
+    conn = get_db()
+    existing_rows = conn.execute(
+        "SELECT person_name, person_slug, birth_year FROM dim_person ORDER BY person_name"
+    ).fetchall()
+    existing_entries = [
+        f"{r['person_name']} ({r['birth_year']})" if r["birth_year"] else r["person_name"]
+        for r in existing_rows
+    ]
+
+    context_parts: list[str] = []
+    if filter_country:
+        context_parts.append(f"lié au pays '{filter_country}'")
+    if filter_region:
+        context_parts.append(f"lié à la région '{filter_region}'")
+    if filter_category:
+        label = CATEGORY_LABELS.get(filter_category, filter_category)
+        context_parts.append(f"dans la catégorie '{label}'")
+    context_str = ", ".join(context_parts) if context_parts else "de n'importe quel pays, région ou catégorie"
+
+    if existing_entries:
+        exclusion_block = (
+            f"Ma base contient déjà ces {len(existing_entries)} personnages (nom + année de naissance) :\n"
+            f"{chr(10).join('- ' + e for e in existing_entries[:100])}\n"
+            f"{'[… et plus]' if len(existing_entries) > 100 else ''}\n\n"
+            f"RÈGLE ABSOLUE : ne suggère PAS un personnage déjà présent dans cette liste, "
+            f"ni un synonyme, ni une variante du même nom.\n\n"
+        )
+    else:
+        exclusion_block = ""
+
+    prompt = (
+        f"{exclusion_block}"
+        f"Suggère UN personnage historique important {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
+        f"Le personnage doit être réel, documenté et historiquement significatif.\n"
+        f"Réponds UNIQUEMENT avec le nom complet du personnage (prénom + nom).\n"
+        f"Aucun autre texte, aucune explication."
+    )
+
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/person/<person_slug>")
+@editor_required
+def ai_lab_refine_person_load(person_slug: str) -> Response:
+    """Load a person's current data as JSON for the Raffinement tab."""
+    from .db import get_db
+    from .services.person_service import get_person
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        return jsonify({"success": False, "error": "Personnage introuvable."})
+
+    source_text = person.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'PERSON_NAME = "{person["person_name"]}"',
+            f'BIRTH_DATE = "{person.get("birth_date") or ""}"',
+            f'DEATH_DATE = "{person.get("death_date") or ""}"',
+            f'BIRTH_YEAR = {person.get("birth_year") or ""}',
+            f'DEATH_YEAR = {person.get("death_year") or ""}',
+            f'BIRTH_CITY = "{person.get("birth_city") or ""}"',
+            f'BIRTH_COUNTRY = "{person.get("birth_country") or ""}"',
+            f'DEATH_CITY = "{person.get("death_city") or ""}"',
+            f'DEATH_COUNTRY = "{person.get("death_country") or ""}"',
+            f'PERSON_LEVEL = {person.get("person_level") or 2}',
+            f'PERSON_CATEGORY = "{person.get("person_category") or "autre"}"',
+            "",
+            "=== RÉSUMÉ ===",
+            person.get("summary") or "",
+            "",
+            "=== BIOGRAPHIE ===",
+            person.get("biography") or "",
+            "",
+            "=== RÉALISATIONS ===",
+            person.get("achievements") or "",
+            "",
+            "=== IMPACT ===",
+            person.get("impact_population") or "",
+            "",
+            "=== LIEUX ===",
+        ]
+        for loc in person.get("locations", []):
+            if loc.get("city_name") or loc.get("matched_city_name"):
+                city_name = loc.get("matched_city_name") or loc.get("city_name") or ""
+                lines.append(f"{city_name}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    return jsonify({
+        "success": True,
+        "person_name": person["person_name"],
+        "birth_year": person.get("birth_year"),
+        "death_year": person.get("death_year"),
+        "person_category": person.get("person_category"),
+        "person_level": person.get("person_level"),
+        "summary": (person.get("summary") or "")[:300],
+        "location_count": len(person.get("locations", [])),
+        "source_text": source_text,
+    })
+
+
+@web.route("/ai-lab/refine/person/generate", methods=["POST"])
+@editor_required
+def ai_lab_refine_person_generate() -> Response:
+    """Generate a refined version of a person via AI."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+    from .services.person_service import get_person
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    person_slug = request.form.get("person_slug", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not person_slug:
+        return jsonify({"success": False, "error": "Personnage non spécifié."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        return jsonify({"success": False, "error": "Personnage introuvable."})
+
+    source_text = person.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'PERSON_NAME = "{person["person_name"]}"',
+            f'BIRTH_DATE = "{person.get("birth_date") or ""}"',
+            f'DEATH_DATE = "{person.get("death_date") or ""}"',
+            f'BIRTH_YEAR = {person.get("birth_year") or ""}',
+            f'DEATH_YEAR = {person.get("death_year") or ""}',
+            f'BIRTH_CITY = "{person.get("birth_city") or ""}"',
+            f'BIRTH_COUNTRY = "{person.get("birth_country") or ""}"',
+            f'DEATH_CITY = "{person.get("death_city") or ""}"',
+            f'DEATH_COUNTRY = "{person.get("death_country") or ""}"',
+            f'PERSON_LEVEL = {person.get("person_level") or 2}',
+            f'PERSON_CATEGORY = "{person.get("person_category") or "autre"}"',
+            "",
+            "=== RÉSUMÉ ===",
+            person.get("summary") or "",
+            "",
+            "=== BIOGRAPHIE ===",
+            person.get("biography") or "",
+            "",
+            "=== RÉALISATIONS ===",
+            person.get("achievements") or "",
+            "",
+            "=== IMPACT ===",
+            person.get("impact_population") or "",
+            "",
+            "=== LIEUX ===",
+        ]
+        for loc in person.get("locations", []):
+            if loc.get("city_name") or loc.get("matched_city_name"):
+                city_name = loc.get("matched_city_name") or loc.get("city_name") or ""
+                lines.append(f"{city_name}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.3)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/person/synthesize", methods=["POST"])
+@editor_required
+def ai_lab_refine_person_synthesize() -> Response:
+    """Ask AI to reconcile the original and refined person versions."""
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+    from .db import get_db
+    from .services.person_service import get_person
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    person_slug = request.form.get("person_slug", "").strip()
+    new_text = request.form.get("new_text", "").strip()
+
+    if not person_slug or not new_text:
+        return jsonify({"success": False, "error": "Données manquantes pour la synthèse."})
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        return jsonify({"success": False, "error": "Personnage introuvable."})
+
+    source_text = person.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'PERSON_NAME = "{person["person_name"]}"',
+            f'BIRTH_DATE = "{person.get("birth_date") or ""}"',
+            f'DEATH_DATE = "{person.get("death_date") or ""}"',
+            f'BIRTH_YEAR = {person.get("birth_year") or ""}',
+            f'DEATH_YEAR = {person.get("death_year") or ""}',
+            f'BIRTH_CITY = "{person.get("birth_city") or ""}"',
+            f'BIRTH_COUNTRY = "{person.get("birth_country") or ""}"',
+            f'DEATH_CITY = "{person.get("death_city") or ""}"',
+            f'DEATH_COUNTRY = "{person.get("death_country") or ""}"',
+            f'PERSON_LEVEL = {person.get("person_level") or 2}',
+            f'PERSON_CATEGORY = "{person.get("person_category") or "autre"}"',
+            "",
+            "=== RÉSUMÉ ===",
+            person.get("summary") or "",
+            "",
+            "=== BIOGRAPHIE ===",
+            person.get("biography") or "",
+            "",
+            "=== RÉALISATIONS ===",
+            person.get("achievements") or "",
+            "",
+            "=== IMPACT ===",
+            person.get("impact_population") or "",
+            "",
+            "=== LIEUX ===",
+        ]
+        for loc in person.get("locations", []):
+            if loc.get("city_name") or loc.get("matched_city_name"):
+                city_name = loc.get("matched_city_name") or loc.get("city_name") or ""
+                lines.append(f"{city_name}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    prompt_text = load_prompt("person_synthesize.txt").replace("{NEW_TEXT}", new_text)
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.2)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/person/save", methods=["POST"])
+@editor_required
+def ai_lab_refine_person_save() -> Response:
+    """Save the (refined or synthesized) person text to the database."""
+    from .db import get_db
+    from .services.person_service import parse_person_text, import_person
+
+    text = request.form.get("person_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+
+    try:
+        data = parse_person_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    person_id = import_person(conn, data)
+    log_action("import", "person", data["person_slug"],
+               f"Personnage raffiné sauvegardé: {data['person_name']}")
+    return jsonify({
+        "success": True,
+        "person_name": data["person_name"],
+        "person_slug": data["person_slug"],
+        "person_id": person_id,
+        "redirect": url_for("web.person_detail", person_slug=data["person_slug"]),
+    })
+
+
+# ---------------------------------------------------------------------------
+# Persons (Historical Figures)
+# ---------------------------------------------------------------------------
+
+@web.route("/persons")
+def persons_list() -> str:
+    from .db import get_db
+    from .services.person_service import get_persons_list, get_person_primary_photo, PERSON_CATEGORIES, CATEGORY_LABELS, CATEGORY_EMOJIS
+
+    conn = get_db()
+    filters = {
+        "category": request.args.get("category", ""),
+        "level": request.args.get("level", ""),
+        "search": request.args.get("search", ""),
+    }
+    view_mode = request.args.get("view", "small").strip().lower()
+    if view_mode not in {"large", "medium", "small", "compact"}:
+        view_mode = "small"
+    persons = get_persons_list(conn, filters)
+    for p in persons:
+        p["primary_photo"] = get_person_primary_photo(conn, p["person_slug"])
+    return render_template(
+        "web/persons.html",
+        page_title="Personnages historiques",
+        persons=persons,
+        filters=filters,
+        view_mode=view_mode,
+        categories=PERSON_CATEGORIES,
+        category_labels=CATEGORY_LABELS,
+        category_emojis=CATEGORY_EMOJIS,
+    )
+
+
+@web.route("/persons/<person_slug>")
+def person_detail(person_slug: str) -> str:
+    from .db import get_db
+    from .services.person_service import get_person, CATEGORY_LABELS, CATEGORY_EMOJIS
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        flash("Personnage introuvable.", "error")
+        return redirect(url_for("web.persons_list"))
+    return render_template(
+        "web/person_detail.html",
+        page_title=person["person_name"],
+        person=person,
+        category_labels=CATEGORY_LABELS,
+        category_emojis=CATEGORY_EMOJIS,
+    )
+
+
+@web.route("/persons/import", methods=["POST"])
+@editor_required
+def person_import() -> Response:
+    from .db import get_db
+    from .services.person_service import parse_person_text, import_person
+
+    text = request.form.get("person_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+    try:
+        data = parse_person_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    person_id = import_person(conn, data)
+    log_action("import", "person", data["person_slug"], f"Personnage importé: {data['person_name']} ({data.get('birth_year', '')})")
+
+    # Auto-search portrait photo from Wikipedia
+    _auto_import_person_photo(conn, person_id, data["person_slug"], data["person_name"])
+
+    return jsonify({
+        "success": True,
+        "person_name": data["person_name"],
+        "person_slug": data["person_slug"],
+        "person_id": person_id,
+        "redirect": url_for("web.person_detail", person_slug=data["person_slug"]),
+    })
+
+
+def _auto_import_person_photo(conn, person_id: int, person_slug: str, person_name: str) -> None:
+    """Try to auto-import a portrait photo from Wikipedia/Commons."""
+    try:
+        from .services.city_photos import search_annotation_images, download_web_image
+        from .services.person_service import save_person_photo
+
+        images = search_annotation_images(person_name, "", None, None)
+        if images:
+            img = images[0]
+            result = download_web_image(img.get("url", ""))
+            if result:
+                file_bytes, ext = result
+                save_person_photo(
+                    conn, person_id, person_slug,
+                    file_bytes, f"auto-portrait{ext}",
+                    source_url=img.get("source_page", ""),
+                    attribution=img.get("title", "Wikipedia/Wikimedia"),
+                    caption=f"Portrait de {person_name}",
+                    set_primary=True,
+                )
+    except Exception:
+        pass  # Non-critical: don't fail import if photo search fails
+
+
+@web.route("/persons/<person_slug>/delete", methods=["POST"])
+@editor_required
+def person_delete(person_slug: str) -> Response:
+    from .db import get_db
+    from .services.person_service import get_person, delete_person
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        flash("Personnage introuvable.", "error")
+        return redirect(url_for("web.persons_list"))
+    delete_person(conn, person["person_id"])
+    log_action("delete", "person", person_slug, f"Personnage '{person['person_name']}' supprimé")
+    flash(f"Personnage « {person['person_name']} » supprimé.", "success")
+    return redirect(url_for("web.persons_list"))
+
+
+@web.route("/persons/<person_slug>/photos/upload", methods=["POST"])
+@editor_required
+def person_photo_upload(person_slug: str) -> Response:
+    from .db import get_db
+    from .services.person_service import get_person, save_person_photo
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        return jsonify({"success": False, "error": "Personnage introuvable."})
+
+    file = request.files.get("photo")
+    if not file or not file.filename:
+        return jsonify({"success": False, "error": "Aucun fichier sélectionné."})
+
+    result = save_person_photo(
+        conn,
+        person["person_id"],
+        person_slug,
+        file.read(),
+        file.filename,
+        source_url=request.form.get("source_url", ""),
+        attribution=request.form.get("attribution", ""),
+        caption=request.form.get("caption", ""),
+        set_primary=request.form.get("set_primary") == "on",
+    )
+    if result.get("success"):
+        log_action("upload_photo", "person", person_slug, f"Photo uploadée pour le personnage {person['person_name']}")
+    return jsonify(result)
+
+
+@web.route("/persons/<person_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+@editor_required
+def person_photo_delete(person_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.person_service import delete_person_photo
+
+    conn = get_db()
+    delete_person_photo(conn, photo_id, person_slug)
+    log_action("delete_photo", "person", person_slug, f"Photo #{photo_id} supprimée du personnage {person_slug}")
+    return jsonify({"success": True})
+
+
+@web.route("/persons/<person_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+@editor_required
+def person_photo_primary(person_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.person_service import get_person, set_person_photo_primary
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        return jsonify({"success": False, "error": "Personnage introuvable."})
+    set_person_photo_primary(conn, photo_id, person["person_id"])
+    log_action("update_photo", "person", person_slug, f"Photo #{photo_id} définie comme principale pour {person['person_name']}")
+    return jsonify({"success": True})
+
+
+@web.route("/persons/<person_slug>/photos/search")
+def person_photo_search(person_slug: str) -> Response:
+    """AJAX: smart search for person photos (Wikipedia + Commons)."""
+    from .db import get_db
+    from .services.person_service import get_person
+    from .services.city_photos import search_annotation_images
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        return jsonify({"error": "Personnage introuvable.", "images": []})
+
+    person_name = person["person_name"]
+    birth_year = person.get("birth_year")
+    label = f"{person_name} ({birth_year})" if birth_year else person_name
+
+    city_name = person.get("birth_city") or ""
+    country = person.get("birth_country")
+    images = search_annotation_images(label, city_name, None, country)
+    return jsonify({"images": images})
+
+
+@web.route("/persons/<person_slug>/photos/manual-search")
+def person_photo_manual_search(person_slug: str) -> Response:
+    """AJAX: manual keyword search on Wikimedia Commons for person photos."""
+    from .services.city_photos import _search_commons_batch
+
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"images": []})
+
+    seen_urls: set[str] = set()
+    images: list[dict] = []
+
+    words = query.split()
+    if len(words) <= 4:
+        images = _search_commons_batch(query, seen_urls, limit=40)
+    else:
+        images.extend(_search_commons_batch(query, seen_urls, limit=20))
+        sub = " ".join(words[:4])
+        images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+        if len(images) < 20:
+            sub = " ".join(words[:3])
+            images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+        if len(images) < 15:
+            sub = " ".join(words[-3:])
+            images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+
+    return jsonify({"images": images[:40]})
+
+
+@web.route("/persons/<person_slug>/photos/import-web", methods=["POST"])
+@editor_required
+def person_photo_import_web(person_slug: str) -> Response:
+    """Import multiple web images into a person's photo library."""
+    from .db import get_db
+    from .services.person_service import get_person, save_person_photo
+    from .services.city_photos import download_web_image
+
+    conn = get_db()
+    person = get_person(conn, person_slug)
+    if person is None:
+        return jsonify({"error": "Personnage introuvable.", "imported": 0})
+
+    data = request.get_json(silent=True)
+    if not data or not isinstance(data.get("images"), list):
+        return jsonify({"error": "Aucune image sélectionnée.", "imported": 0})
+
+    imported = 0
+    for img in data["images"]:
+        url = img.get("url", "")
+        if not url:
+            continue
+        result = download_web_image(url)
+        if not result:
+            continue
+        file_bytes, ext = result
+        save_result = save_person_photo(
+            conn,
+            person["person_id"],
+            person_slug,
+            file_bytes,
+            f"web-import{ext}",
+            source_url=img.get("source_page", ""),
+            attribution=img.get("title", "Wikipedia/Wikimedia"),
+            caption=img.get("caption", ""),
+            set_primary=(imported == 0 and not person.get("photos")),
+        )
+        if save_result.get("success"):
+            imported += 1
+    if imported:
+        log_action("upload_photo", "person", person_slug, f"{imported} photo(s) importée(s) depuis le web pour {person['person_name']}")
     return jsonify({"imported": imported})
 
 

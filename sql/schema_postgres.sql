@@ -251,6 +251,58 @@ CREATE TABLE IF NOT EXISTS dim_event_photo (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS dim_person (
+    person_id BIGSERIAL PRIMARY KEY,
+    person_name TEXT NOT NULL,
+    person_slug TEXT NOT NULL UNIQUE,
+    birth_date TEXT,
+    death_date TEXT,
+    birth_year INTEGER,
+    death_year INTEGER,
+    birth_city TEXT,
+    birth_country TEXT,
+    death_city TEXT,
+    death_country TEXT,
+    person_category TEXT NOT NULL DEFAULT 'autre',
+    person_level INTEGER NOT NULL DEFAULT 2 CHECK (person_level IN (1, 2)),
+    summary TEXT,
+    biography TEXT,
+    achievements TEXT,
+    impact_population TEXT,
+    source_text TEXT,
+    annotation_id BIGINT REFERENCES dim_annotation(annotation_id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS dim_person_location (
+    person_location_id BIGSERIAL PRIMARY KEY,
+    person_id BIGINT NOT NULL REFERENCES dim_person(person_id) ON DELETE CASCADE,
+    city_id BIGINT REFERENCES dim_city(city_id) ON DELETE SET NULL,
+    region TEXT,
+    country TEXT,
+    role TEXT NOT NULL DEFAULT 'residence'
+);
+
+CREATE TABLE IF NOT EXISTS dim_person_photo (
+    person_photo_id BIGSERIAL PRIMARY KEY,
+    person_id BIGINT NOT NULL REFERENCES dim_person(person_id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    object_key TEXT,
+    storage_provider TEXT,
+    mime_type TEXT,
+    file_size BIGINT,
+    checksum_sha256 TEXT,
+    caption TEXT,
+    source_url TEXT,
+    attribution TEXT,
+    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+    photo_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS dim_country (
     country_id BIGSERIAL PRIMARY KEY,
     country_name TEXT NOT NULL,
@@ -878,5 +930,46 @@ GROUP BY
     e.impact_population,
     e.impact_migration,
     e.created_at;
+
+CREATE OR REPLACE VIEW vw_person_summary AS
+SELECT
+    p.person_id,
+    p.person_name,
+    p.person_slug,
+    p.birth_date,
+    p.death_date,
+    p.birth_year,
+    p.death_year,
+    p.birth_city,
+    p.birth_country,
+    p.death_city,
+    p.death_country,
+    p.person_level,
+    p.person_category,
+    p.summary,
+    p.created_at,
+    COUNT(DISTINCT pl.person_location_id) AS location_count,
+    COUNT(DISTINCT pp.person_photo_id) AS photo_count,
+    STRING_AGG(DISTINCT COALESCE(dc.city_name, pl.region), ',') AS location_names
+FROM dim_person p
+LEFT JOIN dim_person_location pl ON pl.person_id = p.person_id
+LEFT JOIN dim_city dc ON dc.city_id = pl.city_id
+LEFT JOIN dim_person_photo pp ON pp.person_id = p.person_id
+GROUP BY
+    p.person_id,
+    p.person_name,
+    p.person_slug,
+    p.birth_date,
+    p.death_date,
+    p.birth_year,
+    p.death_year,
+    p.birth_city,
+    p.birth_country,
+    p.death_city,
+    p.death_country,
+    p.person_level,
+    p.person_category,
+    p.summary,
+    p.created_at;
 
 COMMIT;

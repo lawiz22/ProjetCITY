@@ -1,0 +1,555 @@
+{% extends 'web/base.html' %}
+
+{% block hero_title %}{% endblock %}
+
+{% block content %}
+
+{% set primary_photo = person.photos | selectattr('is_primary') | first %}
+
+<!-- ===== HERO HEADER ===== -->
+<section class="event-hero"{% if primary_photo %} style="--evt-hero-image: url('{{ url_for('static', filename=primary_photo.photo_path) }}')"{% endif %}>
+    <div class="event-hero-overlay"></div>
+    <article class="event-hero-content">
+        <div class="event-hero-top">
+            <p class="eyebrow">
+                <span class="badge badge-{{ person.person_category }}">{{ category_emojis.get(person.person_category, '📌') }} {{ category_labels.get(person.person_category, person.person_category) }}</span>
+                {% if person.person_level == 1 %}<span class="event-level-major" title="Envergure mondiale">⭐</span>{% endif %}
+            </p>
+            <div class="event-hero-actions">
+                <a href="{{ url_for('web.persons_list') }}" class="event-hero-btn">← Retour</a>
+                <form method="post" action="{{ url_for('web.person_delete', person_slug=person.person_slug) }}" onsubmit="return confirm('Supprimer ce personnage ?');" style="margin:0;">
+                    <button type="submit" class="event-hero-btn event-hero-btn-danger">🗑️ Supprimer</button>
+                </form>
+            </div>
+        </div>
+        <h2>{{ person.person_name }}</h2>
+        <div class="event-hero-badges">
+            {% if person.birth_year %}
+            <span class="event-hero-badge">🟢 {{ person.birth_year }}{% if person.birth_date %} ({{ person.birth_date }}){% endif %}</span>
+            {% endif %}
+            {% if person.death_year %}
+            <span class="event-hero-badge">🔴 {{ person.death_year }}{% if person.death_date %} ({{ person.death_date }}){% endif %}</span>
+            {% endif %}
+            {% if person.birth_city %}
+            <span class="event-hero-badge">📍 {{ person.birth_city }}{% if person.birth_country %}, {{ person.birth_country }}{% endif %}</span>
+            {% endif %}
+            {% if person.locations %}
+            <span class="event-hero-badge">📍 {{ person.locations|length }} lieu{% if person.locations|length != 1 %}x{% endif %}</span>
+            {% endif %}
+            {% if person.photos %}
+            <span class="event-hero-badge">📷 {{ person.photos|length }} photo{% if person.photos|length != 1 %}s{% endif %}</span>
+            {% endif %}
+        </div>
+        {% if person.death_city %}
+        <p class="event-hero-locations">
+            Décédé à {{ person.death_city }}{% if person.death_country %}, {{ person.death_country }}{% endif %}
+        </p>
+        {% endif %}
+    </article>
+</section>
+
+<!-- ===== RÉSUMÉ + PHOTO ===== -->
+{% if person.summary %}
+<div class="event-desc-row{% if primary_photo %} event-desc-row-has-photo{% endif %}">
+    <section class="panel">
+        <div class="panel-head">
+            <h2>📝 Résumé</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in person.summary.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% if primary_photo %}
+    <section class="panel event-desc-photo-panel">
+        <img src="{{ url_for('static', filename=primary_photo.photo_path) }}" alt="{{ primary_photo.caption or person.person_name }}" style="cursor:pointer;" onclick="openLightbox(this.src)">
+        {% if primary_photo.caption %}
+        <span class="event-desc-photo-caption">{{ primary_photo.caption }}</span>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Biographie + Réalisations -->
+<div class="event-impacts-grid">
+    {% if person.biography %}
+    <section class="panel">
+        <div class="panel-head">
+            <h2>📖 Biographie</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in person.biography.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if person.achievements %}
+    <section class="panel">
+        <div class="panel-head">
+            <h2>🏆 Réalisations</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in person.achievements.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Impact -->
+{% if person.impact_population %}
+<section class="panel">
+    <div class="panel-head">
+        <h2>👥 Impact sur la population</h2>
+    </div>
+    <div class="options-body event-text-body">
+        {% for para in person.impact_population.split('\n\n') %}
+        <p>{{ para }}</p>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Locations -->
+{% if person.locations %}
+<section class="panel">
+    <div class="panel-head">
+        <h2>📍 Lieux liés</h2>
+        <span>{{ person.locations|length }} lieu{% if person.locations|length != 1 %}x{% endif %}</span>
+    </div>
+    <div class="options-body">
+        <div class="event-locations-list">
+            {% for loc in person.locations %}
+            <div class="event-location-item">
+                <span class="event-location-role role-{{ loc.role }}">
+                    {% if loc.role == 'birth' %}🟢{% elif loc.role == 'death' %}🔴{% elif loc.role == 'residence' %}🔵{% elif loc.role == 'activity' %}🟠{% elif loc.role == 'primary' %}🔴{% elif loc.role == 'secondary' %}🟠{% else %}🟡{% endif %}
+                    {{ loc.role }}
+                </span>
+                {% if loc.matched_city_slug %}
+                <a href="{{ url_for('web.city_detail', city_slug=loc.matched_city_slug) }}">
+                    {{ loc.matched_city_name }}
+                </a>
+                {% elif loc.region or loc.country %}
+                <span>{{ loc.region }}{% if loc.region and loc.country %}, {% endif %}{{ loc.country }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Photos -->
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>📷 Photos</h2>
+            <span>{{ person.photos|length }} photo{% if person.photos|length != 1 %}s{% endif %}</span>
+        </div>
+        <button type="button" class="event-search-web-btn" id="per-photo-search-btn">🔍 Rechercher sur le web</button>
+    </div>
+    <div class="options-body">
+        {% if person.photos %}
+        <div class="event-photos-grid">
+            {% for photo in person.photos %}
+            <div class="event-photo-card{% if photo.is_primary %} event-photo-primary{% endif %}">
+                <img src="{{ url_for('static', filename=photo.photo_path) }}" alt="{{ photo.caption or person.person_name }}" loading="lazy" style="cursor:pointer;" onclick="openLightbox(this.src)">
+                {% if photo.caption %}
+                <div class="event-photo-caption">{{ photo.caption }}</div>
+                {% endif %}
+                {% if photo.source_url %}
+                <a href="{{ photo.source_url }}" target="_blank" class="event-photo-source" title="Source">🔗</a>
+                {% endif %}
+                <div class="event-photo-actions">
+                    {% if not photo.is_primary %}
+                    <button type="button" class="opt-btn opt-btn-save event-photo-btn" onclick="setPhotoPrimary({{ photo.person_photo_id }})" title="Définir comme principale">⭐</button>
+                    {% endif %}
+                    <button type="button" class="opt-btn event-photo-btn" onclick="deletePhoto({{ photo.person_photo_id }})" title="Supprimer" style="background:#c0392b;color:#fff;">🗑️</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="opacity:.6;padding:1rem;">Aucune photo. Cliquez « Rechercher sur le web » pour en trouver.</p>
+        {% endif %}
+
+        <!-- Upload form -->
+        <div class="event-photo-upload" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--panel-border,#333);">
+            <h4>📤 Upload manuel</h4>
+            <form id="per-photo-form" enctype="multipart/form-data">
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0;">
+                    <input type="file" name="photo" accept="image/*" required style="flex:1;min-width:200px;">
+                    <input type="text" name="caption" class="opt-input" placeholder="Légende" style="flex:1;min-width:150px;">
+                </div>
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0;">
+                    <input type="text" name="source_url" class="opt-input" placeholder="URL source" style="flex:1;">
+                    <input type="text" name="attribution" class="opt-input" placeholder="Attribution" style="flex:1;">
+                    <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;"><input type="checkbox" name="set_primary"> Principale</label>
+                </div>
+                <button type="submit" class="opt-btn opt-btn-save">📤 Uploader</button>
+                <span id="per-upload-status" style="margin-left:.5rem;"></span>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Photo Search Modal ===================== -->
+<div class="photo-search-modal" id="per-photo-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content" style="max-width:1100px;">
+        <div class="photo-search-modal-header">
+            <h3>🔍 Recherche de photos — {{ person.person_name }}</h3>
+            <button type="button" class="photo-search-modal-close">&times;</button>
+        </div>
+        <div class="photo-search-tabs">
+            <button type="button" class="photo-search-tab active" data-per-tab="auto">🌐 Recherche auto</button>
+            <button type="button" class="photo-search-tab" data-per-tab="manual">🔎 Recherche manuelle</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <!-- Auto search panel -->
+            <div id="per-auto-panel">
+                <p class="helper-text" id="per-auto-status">Cliquez « Rechercher sur le web » pour lancer la recherche.</p>
+                <div class="photo-search-grid" id="per-auto-grid"></div>
+            </div>
+            <!-- Manual search panel -->
+            <div id="per-manual-panel" style="display:none;">
+                <p class="helper-text" style="margin:0 0 .5rem;">Cliquez ou glissez les mots-clés dans la barre de recherche :</p>
+                <div class="ann-pill-tray" id="per-pill-tray"></div>
+                <div class="ann-search-bar">
+                    <div class="ann-search-input-wrap" id="per-search-input-wrap">
+                        <input type="text" id="per-manual-input" placeholder="Glissez des mots-clés ici ou tapez…" autocomplete="off">
+                    </div>
+                    <button type="button" class="ann-manual-search-btn opt-btn opt-btn-save" id="per-manual-search-btn">🔍 Chercher</button>
+                </div>
+                <p class="helper-text" id="per-manual-status"></p>
+                <div class="photo-search-grid" id="per-manual-grid"></div>
+            </div>
+        </div>
+        <div class="photo-search-modal-footer">
+            <span id="per-photo-count">0 sélectionnée(s)</span>
+            <button type="button" class="opt-btn opt-btn-save" id="per-photo-import-btn" disabled>📥 Importer la sélection</button>
+        </div>
+    </div>
+</div>
+
+<!-- Source text -->
+{% if person.source_text %}
+<section class="panel">
+    <div class="panel-head" style="cursor:pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? '' : 'none';">
+        <h2>📝 Texte source (AI)</h2>
+        <span>Cliquer pour afficher/masquer</span>
+    </div>
+    <div class="options-body" style="display:none;">
+        <pre style="white-space:pre-wrap;font-size:.85rem;opacity:.8;max-height:400px;overflow:auto;">{{ person.source_text }}</pre>
+    </div>
+</section>
+{% endif %}
+
+<script>
+/* Lightbox for person photos */
+function openLightbox(src) {
+    var overlay = document.createElement('div');
+    overlay.className = 'photo-lightbox';
+    overlay.innerHTML = '<img src="' + src + '" alt="Photo">';
+    overlay.addEventListener('click', function() { overlay.remove(); });
+    document.addEventListener('keydown', function handler(e) {
+        if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', handler); }
+    });
+    document.body.appendChild(overlay);
+}
+</script>
+
+<script>
+(function() {
+    var slug = '{{ person.person_slug }}';
+    var personName = {{ person.person_name | tojson }};
+    var birthYear = {{ person.birth_year | tojson }};
+    var personCategory = {{ person.person_category | tojson }};
+    var selectedImages = {};
+
+    /* ---- Basic photo CRUD ---- */
+    document.getElementById('per-photo-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        var status = document.getElementById('per-upload-status');
+        status.textContent = '⏳ Upload…';
+        var fd = new FormData(form);
+        fetch('/persons/' + encodeURIComponent(slug) + '/photos/upload', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) { location.reload(); }
+                else { status.textContent = '❌ ' + d.error; }
+            })
+            .catch(function(err) { status.textContent = '❌ ' + err.message; });
+    });
+
+    window.deletePhoto = function(photoId) {
+        if (!confirm('Supprimer cette photo ?')) return;
+        fetch('/persons/' + encodeURIComponent(slug) + '/photos/' + photoId + '/delete', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { if (d.success) location.reload(); });
+    };
+
+    window.setPhotoPrimary = function(photoId) {
+        fetch('/persons/' + encodeURIComponent(slug) + '/photos/' + photoId + '/primary', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { if (d.success) location.reload(); });
+    };
+
+    /* ---- Photo Search Modal ---- */
+    var modal = document.getElementById('per-photo-modal');
+    var autoGrid = document.getElementById('per-auto-grid');
+    var autoStatus = document.getElementById('per-auto-status');
+    var manualGrid = document.getElementById('per-manual-grid');
+    var manualStatus = document.getElementById('per-manual-status');
+    var manualInput = document.getElementById('per-manual-input');
+    var pillTray = document.getElementById('per-pill-tray');
+    var countEl = document.getElementById('per-photo-count');
+    var importBtn = document.getElementById('per-photo-import-btn');
+    var autoLoaded = false;
+
+    function openModal() {
+        modal.style.display = '';
+        if (!autoLoaded) {
+            autoLoaded = true;
+            autoStatus.textContent = '⏳ Recherche en cours…';
+            autoGrid.innerHTML = '';
+            fetch('/persons/' + encodeURIComponent(slug) + '/photos/search')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.images && d.images.length) {
+                        autoStatus.textContent = d.images.length + ' photos trouvées. Cliquez pour sélectionner.';
+                        renderGrid(autoGrid, d.images);
+                    } else {
+                        autoStatus.textContent = 'Aucune photo trouvée. Essayez la recherche manuelle.';
+                    }
+                })
+                .catch(function(err) {
+                    autoStatus.textContent = '❌ Erreur: ' + err.message;
+                });
+        }
+        buildPills();
+    }
+
+    function closeModal() { modal.style.display = 'none'; }
+
+    document.getElementById('per-photo-search-btn').addEventListener('click', openModal);
+    modal.querySelector('.photo-search-modal-backdrop').addEventListener('click', closeModal);
+    modal.querySelector('.photo-search-modal-close').addEventListener('click', closeModal);
+
+    /* ---- Tabs ---- */
+    modal.querySelectorAll('[data-per-tab]').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            modal.querySelectorAll('[data-per-tab]').forEach(function(t) { t.classList.remove('active'); });
+            tab.classList.add('active');
+            var target = tab.getAttribute('data-per-tab');
+            document.getElementById('per-auto-panel').style.display = target === 'auto' ? '' : 'none';
+            document.getElementById('per-manual-panel').style.display = target === 'manual' ? '' : 'none';
+        });
+    });
+
+    /* ---- Render grid of image results ---- */
+    function renderGrid(container, images) {
+        container.innerHTML = '';
+        images.forEach(function(img) {
+            var div = document.createElement('div');
+            div.className = 'photo-search-card';
+            var key = img.url;
+            if (selectedImages[key]) div.classList.add('photo-search-selected');
+            var imgTitle = (img.title || '').replace('File:', '').replace(/_/g, ' ');
+            var imgDesc = (img.description || '').replace(/</g, '&lt;');
+            var captionText = imgDesc || imgTitle.replace(/</g, '&lt;');
+            var tooltipText = imgDesc ? (imgTitle + '\n' + imgDesc) : imgTitle;
+            div.innerHTML =
+                '<img src="' + escHtml(img.thumb_url || img.url) + '" alt="' + escHtml(imgTitle) + '" title="' + tooltipText.replace(/"/g, '&quot;') + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+                '<span class="photo-search-check">✓</span>' +
+                '<span class="photo-search-caption">' + captionText + '</span>' +
+                '<span class="photo-search-size">' + (img.width || '?') + '×' + (img.height || '?') + '</span>';
+            div.addEventListener('click', function() {
+                if (selectedImages[key]) {
+                    delete selectedImages[key];
+                    div.classList.remove('photo-search-selected');
+                } else {
+                    selectedImages[key] = img;
+                    div.classList.add('photo-search-selected');
+                }
+                updateCount();
+            });
+            container.appendChild(div);
+        });
+    }
+
+    function updateCount() {
+        var n = Object.keys(selectedImages).length;
+        countEl.textContent = n + ' sélectionnée(s)';
+        importBtn.disabled = n === 0;
+    }
+
+    function escHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    /* ---- Person keyword pills ---- */
+    var FR_STOP = new Set(['les','des','une','par','pour','dans','avec','sur','aux','son','ses','est','sont','qui','que','pas','tout','mais','ces','cette','entre','sans','leur','leurs','plus','fait','ils','elle','ont','été','aussi','même','être','nous','vous','comme','après','quand','chez','très','peu','sous','vers']);
+
+    var searchWrap = document.getElementById('per-search-input-wrap');
+
+    function buildPills() {
+        pillTray.innerHTML = '';
+        var cleaned = personName.replace(/[\u{10000}-\u{10FFFF}]/gu, '').trim();
+
+        var words = cleaned.split(/\s+/).filter(function(w) {
+            return w.length >= 3 && !FR_STOP.has(w.toLowerCase());
+        });
+        var seen = new Set();
+        var pills = [];
+        words.forEach(function(w) {
+            var lw = w.toLowerCase();
+            if (!seen.has(lw)) {
+                seen.add(lw);
+                pills.push(w);
+            }
+        });
+        if (birthYear && !seen.has(String(birthYear))) pills.push(String(birthYear));
+        var helpers = ['portrait', 'photograph', 'historical'];
+        helpers.forEach(function(h) { if (!seen.has(h)) pills.push(h); });
+
+        function makePill(text) {
+            var pill = document.createElement('span');
+            pill.className = 'ann-keyword-pill';
+            pill.textContent = text;
+            pill.draggable = true;
+            pill.dataset.keyword = text;
+            pill.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', text);
+                pill.classList.add('dragging');
+            });
+            pill.addEventListener('dragend', function() {
+                pill.classList.remove('dragging');
+            });
+            pill.addEventListener('click', function() {
+                addPillToSearch(text);
+            });
+            return pill;
+        }
+        pills.forEach(function(t) { pillTray.appendChild(makePill(t)); });
+    }
+
+    function addPillToSearch(text) {
+        var existing = searchWrap.querySelectorAll('.ann-search-pill');
+        for (var i = 0; i < existing.length; i++) {
+            if (existing[i].dataset.keyword.toLowerCase() === text.toLowerCase()) return;
+        }
+        var pill = document.createElement('span');
+        pill.className = 'ann-search-pill';
+        pill.dataset.keyword = text;
+        pill.innerHTML = text + '<button type="button">&times;</button>';
+        pill.querySelector('button').addEventListener('click', function(e) {
+            e.stopPropagation();
+            pill.remove();
+        });
+        searchWrap.insertBefore(pill, manualInput);
+        manualInput.value = '';
+        manualInput.focus();
+    }
+
+    function getManualQuery() {
+        var parts = [];
+        searchWrap.querySelectorAll('.ann-search-pill').forEach(function(p) {
+            parts.push(p.dataset.keyword);
+        });
+        var typed = manualInput.value.trim();
+        if (typed) parts.push(typed);
+        return parts.join(' ');
+    }
+
+    /* Drag-and-drop on search bar */
+    searchWrap.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        searchWrap.classList.add('drag-over');
+    });
+    searchWrap.addEventListener('dragleave', function() {
+        searchWrap.classList.remove('drag-over');
+    });
+    searchWrap.addEventListener('drop', function(e) {
+        e.preventDefault();
+        searchWrap.classList.remove('drag-over');
+        var text = e.dataTransfer.getData('text/plain');
+        if (text) addPillToSearch(text);
+    });
+
+    /* Keyboard support */
+    manualInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var typed = manualInput.value.trim();
+            if (typed) addPillToSearch(typed);
+            else doManualSearch();
+        }
+        if (e.key === 'Backspace' && !manualInput.value) {
+            var pills = searchWrap.querySelectorAll('.ann-search-pill');
+            if (pills.length) pills[pills.length - 1].remove();
+        }
+    });
+
+    /* ---- Manual search ---- */
+    document.getElementById('per-manual-search-btn').addEventListener('click', doManualSearch);
+
+    function doManualSearch() {
+        var q = getManualQuery();
+        if (!q.trim()) return;
+        manualStatus.textContent = '⏳ Recherche « ' + q + ' »…';
+        manualGrid.innerHTML = '';
+        fetch('/persons/' + encodeURIComponent(slug) + '/photos/manual-search?q=' + encodeURIComponent(q))
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.images && d.images.length) {
+                    manualStatus.textContent = d.images.length + ' résultats pour « ' + q + ' ».';
+                    renderGrid(manualGrid, d.images);
+                } else {
+                    manualStatus.textContent = 'Aucun résultat pour « ' + q + ' ». Essayez d\'autres mots-clés.';
+                }
+            })
+            .catch(function(err) {
+                manualStatus.textContent = '❌ Erreur: ' + err.message;
+            });
+    }
+
+    /* ---- Import selected ---- */
+    importBtn.addEventListener('click', function() {
+        var images = Object.values(selectedImages);
+        if (!images.length) return;
+        importBtn.disabled = true;
+        importBtn.textContent = '⏳ Import de ' + images.length + ' photo(s)…';
+        fetch('/persons/' + encodeURIComponent(slug) + '/photos/import-web', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ images: images })
+        })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.imported > 0) {
+                    location.reload();
+                } else {
+                    importBtn.disabled = false;
+                    importBtn.textContent = '📥 Importer la sélection';
+                    countEl.textContent = '❌ Aucune photo importée. ' + (d.error || '');
+                }
+            })
+            .catch(function(err) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer la sélection';
+                countEl.textContent = '❌ ' + err.message;
+            });
+    });
+})();
+</script>
+
+{% endblock %}

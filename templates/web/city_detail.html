@@ -17,6 +17,7 @@
             <a href="#city-annotations">Annotations</a>
             <a href="#city-timeline">Timeline</a>
             {% if city_events %}<a href="#city-events">Événements</a>{% endif %}
+            {% if city_persons %}<a href="#city-persons">Personnages</a>{% endif %}
             <a href="#city-fiche">Fiche</a>
         </nav>
         <div class="city-sticky-tools" data-guided-reader>
@@ -480,6 +481,29 @@
                 <span class="city-event-name">{{ ev.event_name }}</span>
                 <span class="city-event-role role-{{ ev.role }}">{{ ev.role }}</span>
                 {% if ev.event_level == 1 %}<span class="event-level-major">⭐</span>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Persons linked to this city -->
+{% if city_persons %}
+<section class="panel" id="city-persons">
+    <div class="panel-head">
+        <h2>🧑 Personnages historiques liés</h2>
+        <span>{{ city_persons|length }} personnage{% if city_persons|length != 1 %}s{% endif %}</span>
+    </div>
+    <div class="options-body">
+        <div class="city-events-list">
+            {% for p in city_persons %}
+            <a href="{{ url_for('web.person_detail', person_slug=p.person_slug) }}" class="city-event-item">
+                <span class="city-event-year">{{ p.birth_year or '?' }}{% if p.death_year %} – {{ p.death_year }}{% endif %}</span>
+                <span class="city-event-cat">{{ person_category_emojis.get(p.person_category, '📌') }}</span>
+                <span class="city-event-name">{{ p.person_name }}</span>
+                <span class="city-event-role role-{{ p.role }}">{{ p.role }}</span>
+                {% if p.person_level == 1 %}<span class="event-level-major">⭐</span>{% endif %}
             </a>
             {% endfor %}
         </div>

@@ -1,0 +1,15 @@
+Tu es un historien et vérificateur de faits. Enrichis et valide la fiche de personnage historique ci-dessous.
+
+Règles :
+1. Conserve toutes les informations déjà présentes et correctes.
+2. Ajoute des détails précis manquants : dates exactes, lieux précis, noms de contemporains, contexte historique, chiffres vérifiables.
+3. Enrichis les sections BIOGRAPHIE, RÉALISATIONS et IMPACT avec des informations factuelles documentées.
+4. Vérifie et complète les LIEUX si des villes importantes liées au personnage manquent (résidences, lieux d'activité, exils, etc.).
+5. Respecte STRICTEMENT le même format exact : PERSON_NAME, BIRTH_DATE, DEATH_DATE, BIRTH_YEAR, DEATH_YEAR, BIRTH_CITY, BIRTH_COUNTRY, DEATH_CITY, DEATH_COUNTRY, PERSON_LEVEL, PERSON_CATEGORY, suivi des sections === RÉSUMÉ ===, === BIOGRAPHIE ===, === RÉALISATIONS ===, === IMPACT ===, === LIEUX ===.
+6. Ne raccourcis aucune section existante : enrichis uniquement, ne supprime pas de contenu.
+7. Le PERSON_LEVEL doit rester 1 (mondial) ou 2 (régional/national) selon l'envergure réelle du personnage.
+
+FICHE À RAFFINER :
+{CITY_INPUT}
+
+Retourne la fiche complète enrichie dans le même format exact, sans commentaires ni explications supplémentaires.
