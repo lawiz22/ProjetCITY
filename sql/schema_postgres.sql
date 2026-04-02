@@ -47,6 +47,33 @@ CREATE TABLE IF NOT EXISTS sql_query_history (
     raw_payload JSONB
 );
 
+CREATE TABLE IF NOT EXISTS app_user (
+    user_id BIGSERIAL PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    display_name TEXT,
+    role TEXT NOT NULL DEFAULT 'lecteur' CHECK (role IN ('admin', 'editeur', 'collaborateur', 'lecteur')),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_approved BOOLEAN NOT NULL DEFAULT FALSE,
+    oauth_provider TEXT,
+    oauth_id TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+    log_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    action TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT,
+    entity_label TEXT,
+    details JSONB,
+    ip_address TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS dim_annotation (
     annotation_id BIGSERIAL PRIMARY KEY,
     annotation_label TEXT NOT NULL,
@@ -327,33 +354,6 @@ CREATE TABLE IF NOT EXISTS dim_region_photo (
     source_url TEXT,
     attribution TEXT,
     is_primary BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS app_user (
-    user_id BIGSERIAL PRIMARY KEY,
-    username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    display_name TEXT,
-    role TEXT NOT NULL DEFAULT 'lecteur' CHECK (role IN ('admin', 'editeur', 'collaborateur', 'lecteur')),
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    is_approved BOOLEAN NOT NULL DEFAULT FALSE,
-    oauth_provider TEXT,
-    oauth_id TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS audit_log (
-    log_id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
-    action TEXT NOT NULL,
-    entity_type TEXT NOT NULL,
-    entity_id TEXT,
-    entity_label TEXT,
-    details JSONB,
-    ip_address TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

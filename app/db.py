@@ -1,35 +1,17 @@
 from __future__ import annotations
 
 import re
-import sqlite3
 from collections.abc import Iterator, Mapping, Sequence
-from pathlib import Path
 from typing import Any
 
+import psycopg
 from flask import current_app, g
 
-try:
-    import psycopg
-except ImportError:  # pragma: no cover - optional until PostgreSQL is enabled
-    psycopg = None
+DatabaseError = psycopg.Error
 
-
-DatabaseError = (sqlite3.Error,) + ((psycopg.Error,) if psycopg is not None else ())
-
-_POSTGRES_PREFIXES = ("postgres://", "postgresql://")
 _AUTO_RETURNING_PK = {
     "dim_annotation": "annotation_id",
 }
-
-
-def is_postgres_url(value: str | None) -> bool:
-    if not value:
-        return False
-    return value.startswith(_POSTGRES_PREFIXES)
-
-
-def build_sqlite_url(path: str | Path) -> str:
-    return f"sqlite:///{Path(path).resolve().as_posix()}"
 
 
 class DbRow:
@@ -229,25 +211,13 @@ class PostgresConnectionWrapper:
         self._connection.close()
 
 
-def _connect_sqlite(db_path: str | Path) -> sqlite3.Connection:
-    connection = sqlite3.connect(db_path)
-    connection.row_factory = sqlite3.Row
-    connection.execute("PRAGMA foreign_keys = ON;")
-    return connection
-
-
 def _connect_postgres(database_url: str) -> PostgresConnectionWrapper:
     return PostgresConnectionWrapper(database_url)
 
 
-def get_db() -> Any:
+def get_db() -> PostgresConnectionWrapper:
     if "db" not in g:
-        backend = current_app.config["DATABASE_BACKEND"]
-        if backend == "postgresql":
-            connection = _connect_postgres(current_app.config["DATABASE_URL"])
-        else:
-            connection = _connect_sqlite(current_app.config["DATABASE_PATH"])
-        g.db = connection
+        g.db = _connect_postgres(current_app.config["DATABASE_URL"])
     return g.db
 
 
@@ -257,11 +227,12 @@ def close_db(_error: Exception | None = None) -> None:
         connection.close()
 
 
-def _run_pg_migrations(database_url: str) -> None:
+def run_migrations(config: Mapping[str, Any]) -> None:
     """Apply lightweight PostgreSQL migrations (add missing columns/tables)."""
-    if psycopg is None:
+    db_url = config.get("DATABASE_URL")
+    if not db_url:
         return
-    conn = psycopg.connect(database_url)
+    conn = psycopg.connect(db_url)
     try:
         cur = conn.cursor()
 
@@ -313,166 +284,6 @@ def _run_pg_migrations(database_url: str) -> None:
                 cur.execute(f"ALTER TABLE {tbl} ADD COLUMN created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL")
             if "updated_by_user_id" not in cols:
                 cur.execute(f"ALTER TABLE {tbl} ADD COLUMN updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL")
-
-        conn.commit()
-    finally:
-        conn.close()
-
-
-def run_migrations(config: Mapping[str, Any] | str | Path) -> None:
-    """Apply lightweight migrations for both SQLite and PostgreSQL."""
-    if isinstance(config, Mapping):
-        backend = config.get("DATABASE_BACKEND", "sqlite")
-        db_path = config.get("DATABASE_PATH")
-        db_url = config.get("DATABASE_URL")
-    else:
-        backend = "sqlite"
-        db_path = config
-        db_url = None
-
-    if backend == "postgresql" and db_url:
-        _run_pg_migrations(db_url)
-        return
-
-    if backend != "sqlite" or not db_path:
-        return
-
-    conn = sqlite3.connect(db_path)
-    try:
-        cols = {row[1] for row in conn.execute("PRAGMA table_info(dim_annotation)")}
-        if "photo_filename" not in cols:
-            conn.execute("ALTER TABLE dim_annotation ADD COLUMN photo_filename TEXT")
-        if "photo_source_url" not in cols:
-            conn.execute("ALTER TABLE dim_annotation ADD COLUMN photo_source_url TEXT")
-
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS dim_region (
-                region_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                region_name TEXT NOT NULL,
-                region_slug TEXT NOT NULL UNIQUE,
-                country_name TEXT NOT NULL,
-                region_color TEXT,
-                source_file TEXT NOT NULL DEFAULT 'manual'
-            )
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS fact_region_population (
-                region_pop_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                region_id INTEGER NOT NULL,
-                time_id INTEGER NOT NULL,
-                year INTEGER NOT NULL,
-                population INTEGER NOT NULL,
-                is_key_year INTEGER NOT NULL DEFAULT 0 CHECK (is_key_year IN (0, 1)),
-                annotation_id INTEGER,
-                source_file TEXT NOT NULL DEFAULT 'manual',
-                UNIQUE(region_id, year),
-                FOREIGN KEY (region_id) REFERENCES dim_region(region_id),
-                FOREIGN KEY (time_id) REFERENCES dim_time(time_id),
-                FOREIGN KEY (annotation_id) REFERENCES dim_annotation(annotation_id)
-            )
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS dim_region_period_detail (
-                region_period_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                region_id INTEGER NOT NULL,
-                period_order INTEGER NOT NULL,
-                period_range_label TEXT NOT NULL,
-                period_title TEXT NOT NULL,
-                start_year INTEGER,
-                end_year INTEGER,
-                start_time_id INTEGER,
-                end_time_id INTEGER,
-                summary_text TEXT NOT NULL,
-                source_file TEXT NOT NULL,
-                UNIQUE(region_id, period_order),
-                FOREIGN KEY (region_id) REFERENCES dim_region(region_id),
-                FOREIGN KEY (start_time_id) REFERENCES dim_time(time_id),
-                FOREIGN KEY (end_time_id) REFERENCES dim_time(time_id)
-            )
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS dim_region_period_detail_item (
-                item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                region_period_id INTEGER NOT NULL,
-                item_order INTEGER NOT NULL,
-                item_text TEXT NOT NULL,
-                FOREIGN KEY (region_period_id) REFERENCES dim_region_period_detail(region_period_id)
-            )
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS dim_region_photo (
-                photo_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-                region_id  INTEGER NOT NULL REFERENCES dim_region(region_id) ON DELETE CASCADE,
-                filename   TEXT NOT NULL,
-                caption    TEXT,
-                source_url TEXT,
-                attribution TEXT,
-                is_primary INTEGER NOT NULL DEFAULT 0,
-                created_at TEXT NOT NULL DEFAULT (datetime('now'))
-            )
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS app_user (
-                user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                email TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL,
-                display_name TEXT,
-                role TEXT NOT NULL DEFAULT 'lecteur'
-                    CHECK (role IN ('admin', 'editeur', 'collaborateur', 'lecteur')),
-                is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
-                is_approved INTEGER NOT NULL DEFAULT 0 CHECK (is_approved IN (0, 1)),
-                oauth_provider TEXT,
-                oauth_id TEXT,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-            )
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS audit_log (
-                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER REFERENCES app_user(user_id) ON DELETE SET NULL,
-                action TEXT NOT NULL,
-                entity_type TEXT NOT NULL,
-                entity_id TEXT,
-                entity_label TEXT,
-                details TEXT,
-                ip_address TEXT,
-                created_at TEXT NOT NULL DEFAULT (datetime('now'))
-            )
-            """
-        )
-
-        # --- tracking columns on entity tables ---
-        _tracking_tables = {
-            "dim_city": "dim_city",
-            "dim_country": "dim_country",
-            "dim_region": "dim_region",
-            "dim_event": "dim_event",
-        }
-        for tbl in _tracking_tables.values():
-            cols = {row[1] for row in conn.execute(f"PRAGMA table_info({tbl})")}
-            if "created_at" not in cols:
-                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN created_at TEXT DEFAULT ''")
-            if "updated_at" not in cols:
-                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN updated_at TEXT DEFAULT ''")
-            if "created_by_user_id" not in cols:
-                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN created_by_user_id INTEGER REFERENCES app_user(user_id) ON DELETE SET NULL")
-            if "updated_by_user_id" not in cols:
-                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN updated_by_user_id INTEGER REFERENCES app_user(user_id) ON DELETE SET NULL")
 
         conn.commit()
     finally:

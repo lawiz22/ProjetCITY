@@ -104,14 +104,9 @@ def _get_city_origin_metadata(city_slug: str) -> dict[str, int | None]:
 
 
 class AnalyticsService:
-    def _uses_database_sql_state(self) -> bool:
-        return current_app.config.get("DATABASE_BACKEND") == "postgresql"
-
     def _annotation_preview_aggregate_sql(self) -> str:
         payload = "CAST(year AS TEXT) || '|' || annotation_label || '|' || annotation_color"
-        if current_app.config.get("DATABASE_BACKEND") == "postgresql":
-            return f"STRING_AGG({payload}, '||' ORDER BY year)"
-        return f"GROUP_CONCAT({payload}, '||')"
+        return f"STRING_AGG({payload}, '||' ORDER BY year)"
 
     def _normalize_narrative_text(self, value: str | None) -> str:
         if not value:
@@ -1433,70 +1428,49 @@ class AnalyticsService:
         return buffer.getvalue(), first_result["statement"]
 
     def get_sql_history(self) -> list[dict[str, str]]:
-        if self._uses_database_sql_state():
-            connection = get_db()
-            rows = connection.execute(
-                """
-                SELECT occurred_at, action, status, sql_text, preview
-                FROM sql_query_history
-                ORDER BY occurred_at DESC, history_id DESC
-                LIMIT ?
-                """,
-                (current_app.config["SQL_HISTORY_LIMIT"],),
-            ).fetchall()
-            return [
-                {
-                    "timestamp": row["occurred_at"].isoformat() if row["occurred_at"] else "",
-                    "action": row["action"],
-                    "status": row["status"],
-                    "sql": row["sql_text"],
-                    "preview": row["preview"] or "",
-                }
-                for row in rows
-            ]
-
-        history_path = self._sql_history_path()
-        if not history_path.exists():
-            return []
-        try:
-            data = json.loads(history_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return []
-        entries = [entry for entry in data if isinstance(entry, dict)]
-        return entries[: current_app.config["SQL_HISTORY_LIMIT"]]
+        connection = get_db()
+        rows = connection.execute(
+            """
+            SELECT occurred_at, action, status, sql_text, preview
+            FROM sql_query_history
+            ORDER BY occurred_at DESC, history_id DESC
+            LIMIT ?
+            """,
+            (current_app.config["SQL_HISTORY_LIMIT"],),
+        ).fetchall()
+        return [
+            {
+                "timestamp": row["occurred_at"].isoformat() if row["occurred_at"] else "",
+                "action": row["action"],
+                "status": row["status"],
+                "sql": row["sql_text"],
+                "preview": row["preview"] or "",
+            }
+            for row in rows
+        ]
 
     def get_saved_views(self) -> list[dict[str, str]]:
-        if self._uses_database_sql_state():
-            connection = get_db()
-            rows = connection.execute(
-                """
-                SELECT view_id, name, description, sql_text, created_at
-                FROM sql_saved_view
-                ORDER BY updated_at DESC, created_at DESC, view_id DESC
-                LIMIT ?
-                """,
-                (current_app.config["SAVED_VIEWS_LIMIT"],),
-            ).fetchall()
-            return [
-                {
-                    "id": row["view_id"],
-                    "name": row["name"],
-                    "description": row["description"] or "",
-                    "sql": row["sql_text"],
-                    "created_at": row["created_at"].isoformat() if row["created_at"] else "",
-                }
-                for row in rows
-            ]
+        connection = get_db()
+        rows = connection.execute(
+            """
+            SELECT view_id, name, description, sql_text, created_at
+            FROM sql_saved_view
+            ORDER BY updated_at DESC, created_at DESC, view_id DESC
+            LIMIT ?
+            """,
+            (current_app.config["SAVED_VIEWS_LIMIT"],),
+        ).fetchall()
+        return [
+            {
+                "id": row["view_id"],
+                "name": row["name"],
+                "description": row["description"] or "",
+                "sql": row["sql_text"],
+                "created_at": row["created_at"].isoformat() if row["created_at"] else "",
+            }
+            for row in rows
+        ]
 
-        views_path = self._saved_views_path()
-        if not views_path.exists():
-            return []
-        try:
-            data = json.loads(views_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return []
-        entries = [entry for entry in data if isinstance(entry, dict)]
-        return entries[: current_app.config["SAVED_VIEWS_LIMIT"]]
     def save_sql_view(self, name: str, description: str, sql: str) -> None:
         cleaned_sql = sql.strip()
         cleaned_name = name.strip()
@@ -1505,81 +1479,51 @@ class AnalyticsService:
         if not cleaned_sql:
             raise SqlExecutionError("RequÃªte SQL vide: rien Ã  sauvegarder.")
 
-        if self._uses_database_sql_state():
-            connection = get_db()
-            existing = connection.execute(
-                "SELECT view_id FROM sql_saved_view WHERE name = ?",
-                (cleaned_name,),
-            ).fetchone()
-            if existing:
-                connection.execute(
-                    """
-                    UPDATE sql_saved_view
-                    SET description = ?, sql_text = ?, updated_at = NOW()
-                    WHERE view_id = ?
-                    """,
-                    (description.strip(), cleaned_sql, existing["view_id"]),
-                )
-            else:
-                connection.execute(
-                    """
-                    INSERT INTO sql_saved_view (view_id, name, description, sql_text)
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (uuid.uuid4().hex[:10], cleaned_name, description.strip(), cleaned_sql),
-                )
+        connection = get_db()
+        existing = connection.execute(
+            "SELECT view_id FROM sql_saved_view WHERE name = ?",
+            (cleaned_name,),
+        ).fetchone()
+        if existing:
             connection.execute(
                 """
-                DELETE FROM sql_saved_view
-                WHERE view_id IN (
-                    SELECT view_id
-                    FROM sql_saved_view
-                    ORDER BY updated_at DESC, created_at DESC, view_id DESC
-                    OFFSET ?
-                )
+                UPDATE sql_saved_view
+                SET description = ?, sql_text = ?, updated_at = NOW()
+                WHERE view_id = ?
                 """,
-                (current_app.config["SAVED_VIEWS_LIMIT"],),
+                (description.strip(), cleaned_sql, existing["view_id"]),
             )
-            connection.commit()
-            return
-
-        views_path = self._saved_views_path()
-        views_path.parent.mkdir(parents=True, exist_ok=True)
-        existing = self.get_saved_views()
-        entry = {
-            "id": uuid.uuid4().hex[:10],
-            "name": cleaned_name,
-            "description": description.strip(),
-            "sql": cleaned_sql,
-            "created_at": datetime.now(UTC).isoformat(),
-        }
-        updated = [entry] + [item for item in existing if item.get("name") != cleaned_name]
-        updated = updated[: current_app.config["SAVED_VIEWS_LIMIT"]]
-        views_path.write_text(json.dumps(updated, ensure_ascii=False, indent=2), encoding="utf-8")
+        else:
+            connection.execute(
+                """
+                INSERT INTO sql_saved_view (view_id, name, description, sql_text)
+                VALUES (?, ?, ?, ?)
+                """,
+                (uuid.uuid4().hex[:10], cleaned_name, description.strip(), cleaned_sql),
+            )
+        connection.execute(
+            """
+            DELETE FROM sql_saved_view
+            WHERE view_id IN (
+                SELECT view_id
+                FROM sql_saved_view
+                ORDER BY updated_at DESC, created_at DESC, view_id DESC
+                OFFSET ?
+            )
+            """,
+            (current_app.config["SAVED_VIEWS_LIMIT"],),
+        )
+        connection.commit()
 
     def delete_sql_view(self, view_id: str) -> None:
-        if self._uses_database_sql_state():
-            connection = get_db()
-            connection.execute("DELETE FROM sql_saved_view WHERE view_id = ?", (view_id,))
-            connection.commit()
-            return
-
-        views_path = self._saved_views_path()
-        existing = self.get_saved_views()
-        filtered = [item for item in existing if item.get("id") != view_id]
-        views_path.parent.mkdir(parents=True, exist_ok=True)
-        views_path.write_text(json.dumps(filtered, ensure_ascii=False, indent=2), encoding="utf-8")
+        connection = get_db()
+        connection.execute("DELETE FROM sql_saved_view WHERE view_id = ?", (view_id,))
+        connection.commit()
 
     def clear_sql_history(self) -> None:
-        if self._uses_database_sql_state():
-            connection = get_db()
-            connection.execute("DELETE FROM sql_query_history")
-            connection.commit()
-            return
-
-        history_path = self._sql_history_path()
-        history_path.parent.mkdir(parents=True, exist_ok=True)
-        history_path.write_text("[]", encoding="utf-8")
+        connection = get_db()
+        connection.execute("DELETE FROM sql_query_history")
+        connection.commit()
 
     def get_sql_examples(self) -> list[dict[str, str]]:
         catalog_sql = (
@@ -1587,8 +1531,6 @@ class AnalyticsService:
             "FROM information_schema.tables\n"
             "WHERE table_schema = 'public'\n"
             "ORDER BY table_type, table_name;"
-            if current_app.config.get("DATABASE_BACKEND") == "postgresql"
-            else "SELECT type, name, sql\nFROM sqlite_master\nWHERE type IN ('table','view')\nORDER BY type, name;"
         )
         return [
             # ── Population ──
@@ -1798,48 +1740,31 @@ class AnalyticsService:
         if not cleaned_sql:
             return
 
-        if self._uses_database_sql_state():
-            connection = get_db()
-            connection.execute(
-                "DELETE FROM sql_query_history WHERE sql_text = ? AND action = ?",
-                (cleaned_sql, action),
+        connection = get_db()
+        connection.execute(
+            "DELETE FROM sql_query_history WHERE sql_text = ? AND action = ?",
+            (cleaned_sql, action),
+        )
+        connection.execute(
+            """
+            INSERT INTO sql_query_history (action, status, sql_text, preview)
+            VALUES (?, ?, ?, ?)
+            """,
+            (action, status, cleaned_sql, cleaned_sql.splitlines()[0][:120]),
+        )
+        connection.execute(
+            """
+            DELETE FROM sql_query_history
+            WHERE history_id IN (
+                SELECT history_id
+                FROM sql_query_history
+                ORDER BY occurred_at DESC, history_id DESC
+                OFFSET ?
             )
-            connection.execute(
-                """
-                INSERT INTO sql_query_history (action, status, sql_text, preview)
-                VALUES (?, ?, ?, ?)
-                """,
-                (action, status, cleaned_sql, cleaned_sql.splitlines()[0][:120]),
-            )
-            connection.execute(
-                """
-                DELETE FROM sql_query_history
-                WHERE history_id IN (
-                    SELECT history_id
-                    FROM sql_query_history
-                    ORDER BY occurred_at DESC, history_id DESC
-                    OFFSET ?
-                )
-                """,
-                (current_app.config["SQL_HISTORY_LIMIT"],),
-            )
-            connection.commit()
-            return
-
-        history_path = self._sql_history_path()
-        history_path.parent.mkdir(parents=True, exist_ok=True)
-        entries = self.get_sql_history()
-        entry = {
-            "timestamp": datetime.now(UTC).isoformat(),
-            "action": action,
-            "status": status,
-            "sql": cleaned_sql,
-            "preview": cleaned_sql.splitlines()[0][:120],
-        }
-        deduped = [item for item in entries if item.get("sql") != cleaned_sql or item.get("action") != action]
-        history = [entry] + deduped
-        history = history[: current_app.config["SQL_HISTORY_LIMIT"]]
-        history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+            """,
+            (current_app.config["SQL_HISTORY_LIMIT"],),
+        )
+        connection.commit()
 
     # ------------------------------------------------------------------
     # Coverage / completeness
@@ -2005,12 +1930,6 @@ class AnalyticsService:
             ])
         return buf.getvalue()
 
-    def _sql_history_path(self) -> Path:
-        return Path(current_app.config["SQL_HISTORY_PATH"])
-
-    def _saved_views_path(self) -> Path:
-        return Path(current_app.config["SAVED_VIEWS_PATH"])
-
     def _run_sql(
         self,
         sql: str,
@@ -2048,8 +1967,7 @@ class AnalyticsService:
                 cursor = connection.execute(statement)
             except DatabaseError as exc:
                 connection.rollback()
-                backend = current_app.config.get("DATABASE_BACKEND", "database")
-                raise SqlExecutionError(f"Erreur {backend}: {exc}") from exc
+                raise SqlExecutionError(f"Erreur PostgreSQL: {exc}") from exc
 
             if cursor.description:
                 rows = cursor.fetchmany(row_limit)
