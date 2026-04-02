@@ -6713,7 +6713,10 @@ def monument_import() -> Response:
         return jsonify({"success": False, "error": str(exc)})
 
     conn = get_db()
-    monument_id = import_monument(conn, data)
+    try:
+        monument_id = import_monument(conn, data)
+    except Exception as exc:
+        return jsonify({"success": False, "error": f"Erreur BD : {exc}"})
     log_action("import", "monument", data["monument_slug"], f"Monument importé: {data['monument_name']} ({data.get('construction_year', '')})")
 
     # Auto-search photo from Wikipedia
