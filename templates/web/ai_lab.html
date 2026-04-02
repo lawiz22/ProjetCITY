@@ -51,6 +51,7 @@
     <button class="ailab-tab active" data-ailab-tab="ville">🏙️ Ville</button>
     <button class="ailab-tab" data-ailab-tab="evenement">📅 Événement</button>
     <button class="ailab-tab" data-ailab-tab="personnage">🧑 Personnage</button>
+    <button class="ailab-tab" data-ailab-tab="monument">🏛️ Monument</button>
     <button class="ailab-tab" data-ailab-tab="pays">🌍 Pays</button>
     <button class="ailab-tab" data-ailab-tab="regions">📍 Régions</button>
     <button class="ailab-tab" data-ailab-tab="raffinement">🔬 Raffinement</button>
@@ -360,6 +361,85 @@
 
 </div><!-- /ailab-tab-personnage -->
 
+<!-- ==================== TAB: Monument ==================== -->
+<div class="ailab-tab-content" id="ailab-tab-monument">
+
+<!-- ===================== Monument — Suggérer ===================== -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>Suggérer un monument</h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-top-row">
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="mon-suggest-country">Pays (optionnel)</label>
+                <select id="mon-suggest-country" class="opt-input">
+                    <option value="">— Tous les pays —</option>
+                    {% for c in countries_for_monument %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="mon-suggest-region">Région (optionnel)</label>
+                <select id="mon-suggest-region" class="opt-input">
+                    <option value="">— Toutes les régions —</option>
+                    {% for r in regions_for_monument %}
+                    <option value="{{ r }}">{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="mon-suggest-category">Catégorie (optionnel)</label>
+                <select id="mon-suggest-category" class="opt-input">
+                    <option value="">— Toutes les catégories —</option>
+                    {% for key, label in monument_category_labels.items() %}
+                    <option value="{{ key }}">{{ monument_category_emojis[key] }} {{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="opt-actions" style="margin-top:.5rem;">
+            <button type="button" class="suggest-city-btn" id="mon-suggest-btn">🎲 Suggérer un monument</button>
+        </div>
+        <div class="opt-test-result" id="mon-suggest-result" style="display:none;"></div>
+    </div>
+</section>
+
+<!-- ===================== Monument — Générer ===================== -->
+<section class="panel ailab-step" id="step-monument-panel">
+    <div class="panel-head">
+        <h2>
+            Monument ou bâtiment remarquable
+            <span class="ailab-check" id="step-monument-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai-monument-input">Nom du monument</label>
+            <input type="text" id="ai-monument-input" class="opt-input" placeholder="ex: Empire State Building, Tour Eiffel, Sagrada Familia" spellcheck="false">
+        </div>
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai-monument-prompt">Prompt (modifiable)</label>
+            <textarea id="ai-monument-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_monument }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="ai-monument-generate">🚀 Générer</button>
+        </div>
+        <div class="ai-lab-field" id="ai-monument-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="ai-monument-result" class="opt-input ai-lab-result" rows="28" readonly></textarea>
+            <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="ai-monument-copy">📋 Copier</button>
+                <button type="button" class="opt-btn opt-btn-save" id="ai-monument-import">📥 Importer le monument</button>
+            </div>
+            <div class="opt-test-result" id="ai-monument-import-result" style="display:none;"></div>
+        </div>
+    </div>
+</section>
+
+</div><!-- /ailab-tab-monument -->
+
 <!-- ==================== TAB: Pays ==================== -->
 <div class="ailab-tab-content" id="ailab-tab-pays">
 
@@ -645,6 +725,9 @@
             <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
                 <input type="radio" name="refine-entity-type" value="personnage"> 🧑 Personnage
             </label>
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
+                <input type="radio" name="refine-entity-type" value="monument"> 🏛️ Monument
+            </label>
             <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
                 <input type="radio" name="refine-entity-type" value="ville" disabled> 🏙️ Ville
             </label>
@@ -873,6 +956,114 @@
     </div><!-- /refine-person-card -->
 
 </div><!-- /refine-entity-personnage -->
+
+<!-- MONUMENT panel -->
+<div id="refine-entity-monument" style="display:none;">
+
+    <!-- Monument picker -->
+    <section class="panel">
+        <h3 class="panel-title">🏛️ Choisir un monument</h3>
+        <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+            <div class="ai-lab-field" style="max-width:520px;">
+                <label class="opt-label" for="refine-monument-select">Monument</label>
+                <select id="refine-monument-select" class="opt-input">
+                    <option value="">— Choisir un monument —</option>
+                    {% for m in monuments_for_refine %}
+                    <option value="{{ m.monument_slug }}">{{ m.construction_year or '?' }} — {{ m.monument_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="refine-monument-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
+        </div>
+    </section>
+
+    <!-- Summary card (hidden until monument selected) -->
+    <div id="refine-monument-card" style="display:none;">
+        <section class="panel">
+            <h3 class="panel-title">📋 Fiche actuelle</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div id="refine-monument-card-content" style="font-size:.9rem;line-height:1.7;"></div>
+                <details style="margin-top:.75rem;">
+                    <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">Voir le texte source complet</summary>
+                    <textarea id="refine-monument-source-text" class="opt-input opt-textarea" rows="10"
+                        style="width:100%;font-family:monospace;font-size:.78rem;margin-top:.5rem;" readonly></textarea>
+                </details>
+            </div>
+        </section>
+
+        <!-- Refinement type + prompt + button -->
+        <section class="panel">
+            <h3 class="panel-title">🔬 Raffiner</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
+                    <div class="ai-lab-field" style="flex:0 0 auto;">
+                        <label class="opt-label" for="refine-monument-type">Type de raffinement</label>
+                        <select id="refine-monument-type" class="opt-input opt-input-model">
+                            <option value="enrich">✨ Enrichir et valider</option>
+                            <option value="correct">🔧 Corriger les erreurs</option>
+                            <option value="expand">➕ Ajouter de la nouvelle info</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ai-lab-field" style="margin-bottom:1rem;">
+                    <label class="opt-label" for="refine-monument-prompt">Instructions (modifiables)</label>
+                    <textarea id="refine-monument-prompt" class="opt-input opt-textarea" rows="8"
+                        style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_monument }}</textarea>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-monument-btn">🔬 Raffiner avec l'IA</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result panel (hidden until AI responds) -->
+        <div id="refine-monument-result-wrap" style="display:none;">
+            <section class="panel">
+                <h3 class="panel-title">🧬 Résultat de l'IA</h3>
+                <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                        <button type="button" class="opt-btn" id="refine-monument-copy-btn">📋 Copier</button>
+                    </div>
+                    <textarea id="refine-monument-result" class="opt-input opt-textarea" rows="16"
+                        style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+
+                    <!-- 3 choices -->
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
+                        <span style="font-size:.85rem;color:var(--muted);font-weight:600;">Que faire ?</span>
+                        <button type="button" class="opt-btn" id="refine-monument-keep-btn">↩️ Garder l'original</button>
+                        <button type="button" class="opt-btn opt-btn-success" id="refine-monument-use-btn">✅ Utiliser la version raffinée</button>
+                        <button type="button" class="opt-btn opt-btn-primary" id="refine-monument-synth-btn">⚗️ Synthèse IA des 2 versions</button>
+                    </div>
+
+                    <div id="refine-monument-save-result" style="display:none;" class="opt-test-result"></div>
+                </div>
+            </section>
+
+            <!-- Synthesis result (hidden until synthesis completes) -->
+            <div id="refine-monument-synth-wrap" style="display:none;">
+                <section class="panel">
+                    <h3 class="panel-title">⚗️ Synthèse IA</h3>
+                    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                        <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+                            L'IA a réconcilié les deux versions. Vérifiez le résultat et sauvegardez si satisfait.
+                        </p>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-monument-synth-copy-btn">📋 Copier</button>
+                        </div>
+                        <textarea id="refine-monument-synth-result" class="opt-input opt-textarea" rows="16"
+                            style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;align-items:center;">
+                            <button type="button" class="opt-btn opt-btn-success" id="refine-monument-synth-save-btn">💾 Sauvegarder la synthèse</button>
+                        </div>
+                        <div id="refine-monument-synth-save-result" style="display:none;" class="opt-test-result"></div>
+                    </div>
+                </section>
+            </div><!-- /refine-monument-synth-wrap -->
+        </div><!-- /refine-monument-result-wrap -->
+
+    </div><!-- /refine-monument-card -->
+
+</div><!-- /refine-entity-monument -->
 
 </div><!-- /ailab-tab-raffinement -->
 
@@ -2410,8 +2601,10 @@
             var val = radio.value;
             var panelEv  = document.getElementById('refine-entity-evenement');
             var panelPer = document.getElementById('refine-entity-personnage');
+            var panelMon = document.getElementById('refine-entity-monument');
             if (panelEv) panelEv.style.display = val === 'evenement' ? '' : 'none';
             if (panelPer) panelPer.style.display = val === 'personnage' ? '' : 'none';
+            if (panelMon) panelMon.style.display = val === 'monument' ? '' : 'none';
         });
     });
 
@@ -2675,6 +2868,410 @@
                 btn.textContent = '💾 Sauvegarder la synthèse';
                 refinePersonSynthSaveResult.className = 'opt-test-result opt-test-error';
                 refinePersonSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ====================================================================
+     * TAB: MONUMENT — Suggest + Generate + Import
+     * ==================================================================== */
+    var monumentGenBtn = document.getElementById('ai-monument-generate');
+    var monumentInput  = document.getElementById('ai-monument-input');
+    var monumentPrompt = document.getElementById('ai-monument-prompt');
+    var monumentResultWrap = document.getElementById('ai-monument-result-wrap');
+    var monumentResult = document.getElementById('ai-monument-result');
+    var monumentCheck  = document.getElementById('step-monument-check');
+
+    /* ---- Suggest monument button ---- */
+    var monSuggestBtn    = document.getElementById('mon-suggest-btn');
+    var monSuggestResult = document.getElementById('mon-suggest-result');
+    var monSuggestUrl    = '{{ url_for("web.ai_lab_suggest_monument") }}';
+
+    monSuggestBtn.addEventListener('click', function() {
+        monSuggestBtn.disabled = true;
+        monSuggestBtn.textContent = '⏳ Suggestion en cours…';
+        monSuggestResult.style.display = '';
+        monSuggestResult.className = 'opt-test-result opt-test-pending';
+        monSuggestResult.textContent = 'Interrogation de l\'IA…';
+
+        var fd = new FormData();
+        fd.append('model', modelSelect.value);
+        fd.append('country',  document.getElementById('mon-suggest-country').value);
+        fd.append('region',   document.getElementById('mon-suggest-region').value);
+        fd.append('category', document.getElementById('mon-suggest-category').value);
+
+        fetch(monSuggestUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                monSuggestBtn.disabled = false;
+                monSuggestBtn.textContent = '🎲 Suggérer un monument';
+                if (data.success) {
+                    var name = data.reply.trim();
+                    monSuggestResult.className = 'opt-test-result opt-test-success';
+                    monSuggestResult.innerHTML = '✅ <strong>' + name.replace(/</g,'&lt;') + '</strong>'
+                        + ' <button type="button" class="opt-btn" style="padding:.2rem .7rem;font-size:.85rem;margin-left:.75rem;" id="mon-use-suggestion">Utiliser →</button>';
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    document.getElementById('mon-use-suggestion').addEventListener('click', function() {
+                        monumentInput.value = name;
+                        var pt = monumentPrompt.value;
+                        if (pt.includes('{CITY_INPUT}')) {
+                            monumentPrompt.value = pt.replace('{CITY_INPUT}', name);
+                        }
+                        document.getElementById('step-monument-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                } else {
+                    monSuggestResult.className = 'opt-test-result opt-test-error';
+                    monSuggestResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                monSuggestBtn.disabled = false;
+                monSuggestBtn.textContent = '🎲 Suggérer un monument';
+                monSuggestResult.className = 'opt-test-result opt-test-error';
+                monSuggestResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    monumentGenBtn.addEventListener('click', function() {
+        var name = monumentInput.value.trim();
+        if (!name) { alert('Entrez un nom de monument.'); return; }
+        monumentGenBtn.disabled = true;
+        monumentGenBtn.textContent = '⏳ Génération en cours…';
+        monumentResultWrap.style.display = '';
+        monumentResult.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', monumentPrompt.value);
+        fd.append('max_tokens', '4000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                monumentGenBtn.disabled = false;
+                monumentGenBtn.textContent = '🚀 Générer';
+                if (data.success) {
+                    monumentResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    monumentCheck.classList.add('visible');
+                } else {
+                    monumentResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                monumentGenBtn.disabled = false;
+                monumentGenBtn.textContent = '🚀 Générer';
+                monumentResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* Copy button for monument */
+    document.getElementById('ai-monument-copy').addEventListener('click', function() {
+        monumentResult.select();
+        navigator.clipboard.writeText(monumentResult.value).then(function() {
+            var btn = document.getElementById('ai-monument-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* Import monument button */
+    document.getElementById('ai-monument-import').addEventListener('click', function() {
+        var text = monumentResult.value.trim();
+        if (!text) { alert('Aucun résultat à importer.'); return; }
+        var importBtn = document.getElementById('ai-monument-import');
+        var importResult = document.getElementById('ai-monument-import-result');
+        importBtn.disabled = true;
+        importBtn.textContent = '⏳ Import…';
+        importResult.style.display = '';
+        importResult.className = 'opt-test-result opt-test-pending';
+        importResult.textContent = 'Importation…';
+
+        var fd = new FormData();
+        fd.append('monument_text', text);
+
+        fetch('{{ url_for("web.monument_import") }}', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer le monument';
+                if (data.success) {
+                    importResult.className = 'opt-test-result opt-test-success';
+                    importResult.innerHTML = '✅ <strong>' + data.monument_name + '</strong> importé!<br>' +
+                        '<a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir le monument</a>';
+                } else {
+                    importResult.className = 'opt-test-result opt-test-error';
+                    importResult.innerHTML = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer le monument';
+                importResult.className = 'opt-test-result opt-test-error';
+                importResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* =====================================================================
+     * RAFFINEMENT TAB — Monument
+     * ===================================================================== */
+    var refineMonumentSelect      = document.getElementById('refine-monument-select');
+    var refineMonumentLoading     = document.getElementById('refine-monument-loading');
+    var refineMonumentCard        = document.getElementById('refine-monument-card');
+    var refineMonumentCardContent = document.getElementById('refine-monument-card-content');
+    var refineMonumentSourceText  = document.getElementById('refine-monument-source-text');
+    var refineMonumentType        = document.getElementById('refine-monument-type');
+    var refineMonumentPrompt      = document.getElementById('refine-monument-prompt');
+    var refineMonumentBtn         = document.getElementById('refine-monument-btn');
+    var refineMonumentResultWrap  = document.getElementById('refine-monument-result-wrap');
+    var refineMonumentResult      = document.getElementById('refine-monument-result');
+    var refineMonumentSaveResult  = document.getElementById('refine-monument-save-result');
+    var refineMonumentSynthWrap   = document.getElementById('refine-monument-synth-wrap');
+    var refineMonumentSynthResult = document.getElementById('refine-monument-synth-result');
+    var refineMonumentSynthSaveResult = document.getElementById('refine-monument-synth-save-result');
+
+    var refineMonumentLoadUrl  = '{{ url_for("web.ai_lab_refine_monument_load", monument_slug="__SLUG__") }}';
+    var refineMonumentGenUrl   = '{{ url_for("web.ai_lab_refine_monument_generate") }}';
+    var refineMonumentSynthUrl = '{{ url_for("web.ai_lab_refine_monument_synthesize") }}';
+    var refineMonumentSaveUrl  = '{{ url_for("web.ai_lab_refine_monument_save") }}';
+
+    var _baseRefineMonumentPrompt = {{ prompt_refine_monument | tojson }};
+    var refineMonumentPrompts = {
+        enrich: _baseRefineMonumentPrompt,
+        correct: _baseRefineMonumentPrompt.replace(
+            'Enrichis et valide la fiche',
+            'Corrige les erreurs dans la fiche'
+        ),
+        expand: _baseRefineMonumentPrompt.replace(
+            'Enrichis et valide la fiche',
+            'Ajoute de la nouvelle information à la fiche'
+        )
+    };
+
+    var currentMonumentSlug = '';
+    var MONUMENT_CATEGORY_LABELS_JS = {{ monument_category_labels | tojson }};
+    var MONUMENT_CATEGORY_EMOJIS_JS = {{ monument_category_emojis | tojson }};
+
+    /* ---- Load monument on dropdown change ---- */
+    refineMonumentSelect.addEventListener('change', function() {
+        var slug = refineMonumentSelect.value;
+        if (!slug) {
+            refineMonumentCard.style.display = 'none';
+            refineMonumentResultWrap.style.display = 'none';
+            refineMonumentSynthWrap.style.display = 'none';
+            currentMonumentSlug = '';
+            return;
+        }
+        refineMonumentLoading.style.display = '';
+        refineMonumentCard.style.display = 'none';
+        refineMonumentResultWrap.style.display = 'none';
+        refineMonumentSynthWrap.style.display = 'none';
+
+        var url = refineMonumentLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineMonumentLoading.style.display = 'none';
+                if (!data.success) { alert('Erreur: ' + data.error); return; }
+                currentMonumentSlug = slug;
+
+                var cat = data.monument_category || 'autre';
+                var catLabel = (MONUMENT_CATEGORY_LABELS_JS[cat] || cat);
+                var catEmoji = (MONUMENT_CATEGORY_EMOJIS_JS[cat] || '📌');
+                var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
+                    + '<span class="badge badge-year">' + (data.construction_year || '—') + (data.demolition_year ? ' – ' + data.demolition_year : '') + '</span>'
+                    + '<span class="badge badge-category">' + catEmoji + ' ' + catLabel + '</span>'
+                    + (data.monument_level === 1 ? '<span class="badge badge-level">🌐 Niveau mondial</span>' : '<span class="badge badge-level">📍 Niveau régional</span>')
+                    + '<span class="badge">' + (data.location_count || 0) + ' lieu(x)</span>'
+                    + '</div>'
+                    + '<p style="color:var(--muted);font-size:.9rem;margin:0;">'
+                    + (data.summary ? data.summary.substring(0, 280).replace(/</g,'&lt;') + (data.summary.length > 280 ? '…' : '') : '<em>Aucun résumé.</em>')
+                    + '</p>';
+                refineMonumentCardContent.innerHTML = html;
+                refineMonumentSourceText.value = data.source_text || '';
+                refineMonumentCard.style.display = '';
+            })
+            .catch(function(err) {
+                refineMonumentLoading.style.display = 'none';
+                alert('Erreur réseau: ' + err);
+            });
+    });
+
+    /* ---- Update prompt when refinement type changes ---- */
+    refineMonumentType.addEventListener('change', function() {
+        refineMonumentPrompt.value = refineMonumentPrompts[refineMonumentType.value] || refineMonumentPrompts.enrich;
+    });
+
+    /* ---- Raffiner button ---- */
+    refineMonumentBtn.addEventListener('click', function() {
+        if (!currentMonumentSlug) { alert('Choisissez un monument.'); return; }
+        var promptText = refineMonumentPrompt.value.trim();
+        if (!promptText) { alert('Le prompt est vide.'); return; }
+
+        refineMonumentBtn.disabled = true;
+        refineMonumentBtn.textContent = '⏳ Raffinement en cours…';
+        refineMonumentResultWrap.style.display = '';
+        refineMonumentSynthWrap.style.display = 'none';
+        refineMonumentSaveResult.style.display = 'none';
+        refineMonumentResult.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('monument_slug', currentMonumentSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', promptText);
+
+        fetch(refineMonumentGenUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineMonumentBtn.disabled = false;
+                refineMonumentBtn.textContent = '🔬 Raffiner avec l\'IA';
+                if (data.success) {
+                    refineMonumentResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                } else {
+                    refineMonumentResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                refineMonumentBtn.disabled = false;
+                refineMonumentBtn.textContent = '🔬 Raffiner avec l\'IA';
+                refineMonumentResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Copy refined monument result ---- */
+    document.getElementById('refine-monument-copy-btn').addEventListener('click', function() {
+        refineMonumentResult.select();
+        navigator.clipboard.writeText(refineMonumentResult.value).then(function() {
+            var btn = document.getElementById('refine-monument-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Garder l'original ---- */
+    document.getElementById('refine-monument-keep-btn').addEventListener('click', function() {
+        refineMonumentResultWrap.style.display = 'none';
+        refineMonumentSynthWrap.style.display = 'none';
+    });
+
+    /* ---- Utiliser la version raffinée (save directly) ---- */
+    document.getElementById('refine-monument-use-btn').addEventListener('click', function() {
+        var text = refineMonumentResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-monument-use-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineMonumentSaveResult.style.display = '';
+        refineMonumentSaveResult.className = 'opt-test-result opt-test-pending';
+        refineMonumentSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('monument_text', text);
+
+        fetch(refineMonumentSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                if (data.success) {
+                    refineMonumentSaveResult.className = 'opt-test-result opt-test-success';
+                    refineMonumentSaveResult.innerHTML = '✅ <strong>' + data.monument_name.replace(/</g,'&lt;') + '</strong> sauvegardé!'
+                        + ' <a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir le monument</a>';
+                } else {
+                    refineMonumentSaveResult.className = 'opt-test-result opt-test-error';
+                    refineMonumentSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                refineMonumentSaveResult.className = 'opt-test-result opt-test-error';
+                refineMonumentSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Synthèse IA des 2 versions ---- */
+    document.getElementById('refine-monument-synth-btn').addEventListener('click', function() {
+        var newText = refineMonumentResult.value.trim();
+        if (!newText || newText.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        if (!currentMonumentSlug) { alert('Monument non chargé.'); return; }
+
+        var btn = document.getElementById('refine-monument-synth-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Synthèse en cours…';
+        refineMonumentSynthWrap.style.display = '';
+        refineMonumentSynthResult.value = 'Synthèse IA en cours…';
+        refineMonumentSynthSaveResult.style.display = 'none';
+
+        var fd = new FormData();
+        fd.append('monument_slug', currentMonumentSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('new_text', newText);
+
+        fetch(refineMonumentSynthUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                if (data.success) {
+                    refineMonumentSynthResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    refineMonumentSynthWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    refineMonumentSynthResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                refineMonumentSynthResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Copy monument synthesis result ---- */
+    document.getElementById('refine-monument-synth-copy-btn').addEventListener('click', function() {
+        refineMonumentSynthResult.select();
+        navigator.clipboard.writeText(refineMonumentSynthResult.value).then(function() {
+            var btn = document.getElementById('refine-monument-synth-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Save monument synthesis ---- */
+    document.getElementById('refine-monument-synth-save-btn').addEventListener('click', function() {
+        var text = refineMonumentSynthResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-monument-synth-save-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineMonumentSynthSaveResult.style.display = '';
+        refineMonumentSynthSaveResult.className = 'opt-test-result opt-test-pending';
+        refineMonumentSynthSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('monument_text', text);
+
+        fetch(refineMonumentSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                if (data.success) {
+                    refineMonumentSynthSaveResult.className = 'opt-test-result opt-test-success';
+                    refineMonumentSynthSaveResult.innerHTML = '✅ <strong>' + data.monument_name.replace(/</g,'&lt;') + '</strong> sauvegardé!'
+                        + ' <a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir le monument</a>';
+                } else {
+                    refineMonumentSynthSaveResult.className = 'opt-test-result opt-test-error';
+                    refineMonumentSynthSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                refineMonumentSynthSaveResult.className = 'opt-test-result opt-test-error';
+                refineMonumentSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
     });
 

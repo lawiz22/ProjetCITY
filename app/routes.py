@@ -333,6 +333,11 @@ def city_detail(city_slug: str) -> str:
     from .services.person_service import CATEGORY_EMOJIS as PERSON_CATEGORY_EMOJIS
     city_persons = get_persons_for_city(conn, city["city_id"])
 
+    from .services.monument_service import get_monuments_for_city
+    from .services.monument_service import CATEGORY_LABELS as MONUMENT_CATEGORY_LABELS
+    from .services.monument_service import CATEGORY_EMOJIS as MONUMENT_CATEGORY_EMOJIS
+    city_monuments = get_monuments_for_city(conn, city["city_id"])
+
     return render_template(
         "web/city_detail.html",
         page_title=city["city_name"],
@@ -346,6 +351,9 @@ def city_detail(city_slug: str) -> str:
         city_persons=city_persons,
         person_category_labels=PERSON_CATEGORY_LABELS,
         person_category_emojis=PERSON_CATEGORY_EMOJIS,
+        city_monuments=city_monuments,
+        monument_category_labels=MONUMENT_CATEGORY_LABELS,
+        monument_category_emojis=MONUMENT_CATEGORY_EMOJIS,
         periods=service.get_city_periods(city_slug, filters),
         annotations=service.get_city_annotations(city_slug, filters),
         chart_payload=service.get_city_chart_payload(city_slug, filters),
@@ -2238,6 +2246,10 @@ _BACKUP_TABLES: list[dict] = [
      "conflict": "(person_slug)", "group": "person"},
     {"name": "dim_person_location", "pk": "person_location_id", "conflict": None, "group": "person"},
     {"name": "dim_person_photo", "pk": "person_photo_id", "conflict": None, "group": "person"},
+    {"name": "dim_monument", "pk": "monument_id",
+     "conflict": "(monument_slug)", "group": "monument"},
+    {"name": "dim_monument_location", "pk": "monument_location_id", "conflict": None, "group": "monument"},
+    {"name": "dim_monument_photo", "pk": "monument_photo_id", "conflict": None, "group": "monument"},
     {"name": "dim_country", "pk": "country_id",
      "conflict": "(country_slug)", "group": "vrp"},
     {"name": "fact_country_population", "pk": "country_pop_id",
@@ -2260,14 +2272,16 @@ _BACKUP_TABLES: list[dict] = [
 
 # Export scope definitions
 _EXPORT_SCOPES = {
-    "all":       {"label": "Tout", "groups": {"shared", "vrp", "event", "person"}},
+    "all":       {"label": "Tout", "groups": {"shared", "vrp", "event", "person", "monument"}},
     "vrp":       {"label": "Villes / Régions / Pays", "groups": {"shared", "vrp"}},
     "event":     {"label": "Événements", "groups": {"shared", "event"}},
     "person":    {"label": "Personnages", "groups": {"shared", "person"}},
-    "delta_all": {"label": "Derniers ajouts — Tout", "groups": {"shared", "vrp", "event", "person"}, "delta": True},
+    "monument":  {"label": "Monuments", "groups": {"shared", "monument"}},
+    "delta_all": {"label": "Derniers ajouts — Tout", "groups": {"shared", "vrp", "event", "person", "monument"}, "delta": True},
     "delta_vrp": {"label": "Derniers ajouts — V/R/P", "groups": {"shared", "vrp"}, "delta": True},
     "delta_event": {"label": "Derniers ajouts — Événements", "groups": {"shared", "event"}, "delta": True},
     "delta_person": {"label": "Derniers ajouts — Personnages", "groups": {"shared", "person"}, "delta": True},
+    "delta_monument": {"label": "Derniers ajouts — Monuments", "groups": {"shared", "monument"}, "delta": True},
 }
 
 _EXPORT_STATE_KEY = "backup_export_state"
@@ -4438,6 +4452,16 @@ def ai_lab() -> str:
     ).fetchall()]
     countries_for_person = countries_for_region
     regions_for_person = regions_for_event
+    prompt_monument = load_prompt("monument_data.txt")
+    prompt_refine_monument = load_prompt("monument_refine.txt")
+    from .services.monument_service import CATEGORY_LABELS as MONUMENT_CATEGORY_LABELS
+    from .services.monument_service import CATEGORY_EMOJIS as MONUMENT_CATEGORY_EMOJIS
+    monuments_for_refine = [dict(r) for r in conn.execute(
+        "SELECT monument_name, monument_slug, construction_year, monument_category "
+        "FROM dim_monument ORDER BY construction_year DESC NULLS LAST, LOWER(monument_name), monument_name"
+    ).fetchall()]
+    countries_for_monument = countries_for_region
+    regions_for_monument = regions_for_event
     return render_template(
         "web/ai_lab.html",
         page_title="AI Lab",
@@ -4467,6 +4491,13 @@ def ai_lab() -> str:
         persons_for_refine=persons_for_refine,
         countries_for_person=countries_for_person,
         regions_for_person=regions_for_person,
+        prompt_monument=prompt_monument,
+        prompt_refine_monument=prompt_refine_monument,
+        monument_category_labels=MONUMENT_CATEGORY_LABELS,
+        monument_category_emojis=MONUMENT_CATEGORY_EMOJIS,
+        monuments_for_refine=monuments_for_refine,
+        countries_for_monument=countries_for_monument,
+        regions_for_monument=regions_for_monument,
     )
 
 
@@ -6314,6 +6345,594 @@ def person_photo_import_web(person_slug: str) -> Response:
             imported += 1
     if imported:
         log_action("upload_photo", "person", person_slug, f"{imported} photo(s) importée(s) depuis le web pour {person['person_name']}")
+    return jsonify({"imported": imported})
+
+
+# ---------------------------------------------------------------------------
+# Monuments – AI Lab routes
+# ---------------------------------------------------------------------------
+
+@web.route("/ai-lab/suggest-monument", methods=["POST"])
+@editor_required
+def ai_lab_suggest_monument() -> Response:
+    """Ask Mammouth to suggest a monument not yet in the DB."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .services.monument_service import CATEGORY_LABELS
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    filter_country  = request.form.get("country", "").strip()
+    filter_region   = request.form.get("region", "").strip()
+    filter_category = request.form.get("category", "").strip()
+
+    conn = get_db()
+    existing_rows = conn.execute(
+        "SELECT monument_name, monument_slug, construction_year FROM dim_monument ORDER BY monument_name"
+    ).fetchall()
+    existing_entries = [
+        f"{r['monument_name']} ({r['construction_year']})" if r["construction_year"] else r["monument_name"]
+        for r in existing_rows
+    ]
+
+    context_parts: list[str] = []
+    if filter_country:
+        context_parts.append(f"situé dans le pays '{filter_country}'")
+    if filter_region:
+        context_parts.append(f"situé dans la région '{filter_region}'")
+    if filter_category:
+        label = CATEGORY_LABELS.get(filter_category, filter_category)
+        context_parts.append(f"dans la catégorie '{label}'")
+    context_str = ", ".join(context_parts) if context_parts else "de n'importe quel pays, région ou catégorie"
+
+    if existing_entries:
+        exclusion_block = (
+            f"Ma base contient déjà ces {len(existing_entries)} monuments (nom + année de construction) :\n"
+            f"{chr(10).join('- ' + e for e in existing_entries[:100])}\n"
+            f"{'[… et plus]' if len(existing_entries) > 100 else ''}\n\n"
+            f"RÈGLE ABSOLUE : ne suggère PAS un monument déjà présent dans cette liste, "
+            f"ni un synonyme, ni une variante du même nom.\n\n"
+        )
+    else:
+        exclusion_block = ""
+
+    prompt = (
+        f"{exclusion_block}"
+        f"Suggère UN monument ou bâtiment remarquable {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
+        f"Le monument doit être réel, documenté et architecturalement ou historiquement significatif.\n"
+        f"Réponds UNIQUEMENT avec le nom complet du monument.\n"
+        f"Aucun autre texte, aucune explication."
+    )
+
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/monument/<monument_slug>")
+@editor_required
+def ai_lab_refine_monument_load(monument_slug: str) -> Response:
+    """Load a monument's current data as JSON for the Raffinement tab."""
+    from .db import get_db
+    from .services.monument_service import get_monument
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        return jsonify({"success": False, "error": "Monument introuvable."})
+
+    source_text = monument.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'MONUMENT_NAME = "{monument["monument_name"]}"',
+            f'CONSTRUCTION_DATE = "{monument.get("construction_date") or ""}"',
+            f'INAUGURATION_DATE = "{monument.get("inauguration_date") or ""}"',
+            f'CONSTRUCTION_YEAR = {monument.get("construction_year") or ""}',
+            f'DEMOLITION_YEAR = {monument.get("demolition_year") or ""}',
+            f'ARCHITECT = "{monument.get("architect") or ""}"',
+            f'ARCHITECTURAL_STYLE = "{monument.get("architectural_style") or ""}"',
+            f'HEIGHT_METERS = {monument.get("height_meters") or ""}',
+            f'FLOORS = {monument.get("floors") or ""}',
+            f'MONUMENT_LEVEL = {monument.get("monument_level") or 2}',
+            f'MONUMENT_CATEGORY = "{monument.get("monument_category") or "autre"}"',
+            "",
+            "=== RÉSUMÉ ===",
+            monument.get("summary") or "",
+            "",
+            "=== DESCRIPTION ===",
+            monument.get("description") or "",
+            "",
+            "=== HISTOIRE ===",
+            monument.get("history") or "",
+            "",
+            "=== SIGNIFICATION ===",
+            monument.get("significance") or "",
+            "",
+            "=== LIEUX ===",
+        ]
+        for loc in monument.get("locations", []):
+            if loc.get("city_name") or loc.get("matched_city_name"):
+                city_name = loc.get("matched_city_name") or loc.get("city_name") or ""
+                lines.append(f"{city_name}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    return jsonify({
+        "success": True,
+        "monument_name": monument["monument_name"],
+        "construction_year": monument.get("construction_year"),
+        "demolition_year": monument.get("demolition_year"),
+        "monument_category": monument.get("monument_category"),
+        "monument_level": monument.get("monument_level"),
+        "summary": (monument.get("summary") or "")[:300],
+        "location_count": len(monument.get("locations", [])),
+        "source_text": source_text,
+    })
+
+
+@web.route("/ai-lab/refine/monument/generate", methods=["POST"])
+@editor_required
+def ai_lab_refine_monument_generate() -> Response:
+    """Generate a refined version of a monument via AI."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+    from .services.monument_service import get_monument
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    monument_slug = request.form.get("monument_slug", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not monument_slug:
+        return jsonify({"success": False, "error": "Monument non spécifié."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        return jsonify({"success": False, "error": "Monument introuvable."})
+
+    source_text = monument.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'MONUMENT_NAME = "{monument["monument_name"]}"',
+            f'CONSTRUCTION_DATE = "{monument.get("construction_date") or ""}"',
+            f'INAUGURATION_DATE = "{monument.get("inauguration_date") or ""}"',
+            f'CONSTRUCTION_YEAR = {monument.get("construction_year") or ""}',
+            f'DEMOLITION_YEAR = {monument.get("demolition_year") or ""}',
+            f'ARCHITECT = "{monument.get("architect") or ""}"',
+            f'ARCHITECTURAL_STYLE = "{monument.get("architectural_style") or ""}"',
+            f'HEIGHT_METERS = {monument.get("height_meters") or ""}',
+            f'FLOORS = {monument.get("floors") or ""}',
+            f'MONUMENT_LEVEL = {monument.get("monument_level") or 2}',
+            f'MONUMENT_CATEGORY = "{monument.get("monument_category") or "autre"}"',
+            "",
+            "=== RÉSUMÉ ===",
+            monument.get("summary") or "",
+            "",
+            "=== DESCRIPTION ===",
+            monument.get("description") or "",
+            "",
+            "=== HISTOIRE ===",
+            monument.get("history") or "",
+            "",
+            "=== SIGNIFICATION ===",
+            monument.get("significance") or "",
+            "",
+            "=== LIEUX ===",
+        ]
+        for loc in monument.get("locations", []):
+            if loc.get("city_name") or loc.get("matched_city_name"):
+                city_name = loc.get("matched_city_name") or loc.get("city_name") or ""
+                lines.append(f"{city_name}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.3)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/monument/synthesize", methods=["POST"])
+@editor_required
+def ai_lab_refine_monument_synthesize() -> Response:
+    """Ask AI to reconcile the original and refined monument versions."""
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+    from .db import get_db
+    from .services.monument_service import get_monument
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    monument_slug = request.form.get("monument_slug", "").strip()
+    new_text = request.form.get("new_text", "").strip()
+
+    if not monument_slug or not new_text:
+        return jsonify({"success": False, "error": "Données manquantes pour la synthèse."})
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        return jsonify({"success": False, "error": "Monument introuvable."})
+
+    source_text = monument.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'MONUMENT_NAME = "{monument["monument_name"]}"',
+            f'CONSTRUCTION_DATE = "{monument.get("construction_date") or ""}"',
+            f'INAUGURATION_DATE = "{monument.get("inauguration_date") or ""}"',
+            f'CONSTRUCTION_YEAR = {monument.get("construction_year") or ""}',
+            f'DEMOLITION_YEAR = {monument.get("demolition_year") or ""}',
+            f'ARCHITECT = "{monument.get("architect") or ""}"',
+            f'ARCHITECTURAL_STYLE = "{monument.get("architectural_style") or ""}"',
+            f'HEIGHT_METERS = {monument.get("height_meters") or ""}',
+            f'FLOORS = {monument.get("floors") or ""}',
+            f'MONUMENT_LEVEL = {monument.get("monument_level") or 2}',
+            f'MONUMENT_CATEGORY = "{monument.get("monument_category") or "autre"}"',
+            "",
+            "=== RÉSUMÉ ===",
+            monument.get("summary") or "",
+            "",
+            "=== DESCRIPTION ===",
+            monument.get("description") or "",
+            "",
+            "=== HISTOIRE ===",
+            monument.get("history") or "",
+            "",
+            "=== SIGNIFICATION ===",
+            monument.get("significance") or "",
+            "",
+            "=== LIEUX ===",
+        ]
+        for loc in monument.get("locations", []):
+            if loc.get("city_name") or loc.get("matched_city_name"):
+                city_name = loc.get("matched_city_name") or loc.get("city_name") or ""
+                lines.append(f"{city_name}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    prompt_text = load_prompt("monument_synthesize.txt").replace("{NEW_TEXT}", new_text)
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.2)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/monument/save", methods=["POST"])
+@editor_required
+def ai_lab_refine_monument_save() -> Response:
+    """Save the (refined or synthesized) monument text to the database."""
+    from .db import get_db
+    from .services.monument_service import parse_monument_text, import_monument
+
+    text = request.form.get("monument_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+
+    try:
+        data = parse_monument_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    monument_id = import_monument(conn, data)
+    log_action("import", "monument", data["monument_slug"],
+               f"Monument raffiné sauvegardé: {data['monument_name']}")
+    return jsonify({
+        "success": True,
+        "monument_name": data["monument_name"],
+        "monument_slug": data["monument_slug"],
+        "monument_id": monument_id,
+        "redirect": url_for("web.monument_detail", monument_slug=data["monument_slug"]),
+    })
+
+
+# ---------------------------------------------------------------------------
+# Monuments (Buildings & Landmarks)
+# ---------------------------------------------------------------------------
+
+@web.route("/monuments")
+def monuments_list() -> str:
+    from .db import get_db
+    from .services.monument_service import get_monuments_list, get_monument_primary_photo, MONUMENT_CATEGORIES, CATEGORY_LABELS, CATEGORY_EMOJIS
+
+    conn = get_db()
+    filters = {
+        "category": request.args.get("category", ""),
+        "level": request.args.get("level", ""),
+        "search": request.args.get("search", ""),
+    }
+    view_mode = request.args.get("view", "small").strip().lower()
+    if view_mode not in {"large", "medium", "small", "compact"}:
+        view_mode = "small"
+    monuments = get_monuments_list(conn, filters)
+    for m in monuments:
+        m["primary_photo"] = get_monument_primary_photo(conn, m["monument_slug"])
+    return render_template(
+        "web/monuments.html",
+        page_title="Monuments et bâtiments",
+        monuments=monuments,
+        filters=filters,
+        view_mode=view_mode,
+        categories=MONUMENT_CATEGORIES,
+        category_labels=CATEGORY_LABELS,
+        category_emojis=CATEGORY_EMOJIS,
+    )
+
+
+@web.route("/monuments/<monument_slug>")
+def monument_detail(monument_slug: str) -> str:
+    from .db import get_db
+    from .services.monument_service import get_monument, CATEGORY_LABELS, CATEGORY_EMOJIS
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        flash("Monument introuvable.", "error")
+        return redirect(url_for("web.monuments_list"))
+    return render_template(
+        "web/monument_detail.html",
+        page_title=monument["monument_name"],
+        monument=monument,
+        category_labels=CATEGORY_LABELS,
+        category_emojis=CATEGORY_EMOJIS,
+    )
+
+
+@web.route("/monuments/import", methods=["POST"])
+@editor_required
+def monument_import() -> Response:
+    from .db import get_db
+    from .services.monument_service import parse_monument_text, import_monument
+
+    text = request.form.get("monument_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+    try:
+        data = parse_monument_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    monument_id = import_monument(conn, data)
+    log_action("import", "monument", data["monument_slug"], f"Monument importé: {data['monument_name']} ({data.get('construction_year', '')})")
+
+    # Auto-search photo from Wikipedia
+    _auto_import_monument_photo(conn, monument_id, data["monument_slug"], data["monument_name"])
+
+    return jsonify({
+        "success": True,
+        "monument_name": data["monument_name"],
+        "monument_slug": data["monument_slug"],
+        "monument_id": monument_id,
+        "redirect": url_for("web.monument_detail", monument_slug=data["monument_slug"]),
+    })
+
+
+def _auto_import_monument_photo(conn, monument_id: int, monument_slug: str, monument_name: str) -> None:
+    """Try to auto-import a photo from Wikipedia/Commons."""
+    try:
+        from .services.city_photos import search_annotation_images, download_web_image
+        from .services.monument_service import save_monument_photo
+
+        images = search_annotation_images(monument_name, "", None, None)
+        if images:
+            img = images[0]
+            result = download_web_image(img.get("url", ""))
+            if result:
+                file_bytes, ext = result
+                save_monument_photo(
+                    conn, monument_id, monument_slug,
+                    file_bytes, f"auto-photo{ext}",
+                    source_url=img.get("source_page", ""),
+                    attribution=img.get("title", "Wikipedia/Wikimedia"),
+                    caption=f"Photo de {monument_name}",
+                    set_primary=True,
+                )
+    except Exception:
+        pass  # Non-critical
+
+
+@web.route("/monuments/<monument_slug>/delete", methods=["POST"])
+@editor_required
+def monument_delete(monument_slug: str) -> Response:
+    from .db import get_db
+    from .services.monument_service import get_monument, delete_monument
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        flash("Monument introuvable.", "error")
+        return redirect(url_for("web.monuments_list"))
+    delete_monument(conn, monument["monument_id"])
+    log_action("delete", "monument", monument_slug, f"Monument '{monument['monument_name']}' supprimé")
+    flash(f"Monument « {monument['monument_name']} » supprimé.", "success")
+    return redirect(url_for("web.monuments_list"))
+
+
+@web.route("/monuments/<monument_slug>/photos/upload", methods=["POST"])
+@editor_required
+def monument_photo_upload(monument_slug: str) -> Response:
+    from .db import get_db
+    from .services.monument_service import get_monument, save_monument_photo
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        return jsonify({"success": False, "error": "Monument introuvable."})
+
+    file = request.files.get("photo")
+    if not file or not file.filename:
+        return jsonify({"success": False, "error": "Aucun fichier sélectionné."})
+
+    result = save_monument_photo(
+        conn,
+        monument["monument_id"],
+        monument_slug,
+        file.read(),
+        file.filename,
+        source_url=request.form.get("source_url", ""),
+        attribution=request.form.get("attribution", ""),
+        caption=request.form.get("caption", ""),
+        set_primary=request.form.get("set_primary") == "on",
+    )
+    if result.get("success"):
+        log_action("upload_photo", "monument", monument_slug, f"Photo uploadée pour le monument {monument['monument_name']}")
+    return jsonify(result)
+
+
+@web.route("/monuments/<monument_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+@editor_required
+def monument_photo_delete(monument_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.monument_service import delete_monument_photo
+
+    conn = get_db()
+    delete_monument_photo(conn, photo_id, monument_slug)
+    log_action("delete_photo", "monument", monument_slug, f"Photo #{photo_id} supprimée du monument {monument_slug}")
+    return jsonify({"success": True})
+
+
+@web.route("/monuments/<monument_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+@editor_required
+def monument_photo_primary(monument_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.monument_service import get_monument, set_monument_photo_primary
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        return jsonify({"success": False, "error": "Monument introuvable."})
+    set_monument_photo_primary(conn, photo_id, monument["monument_id"])
+    log_action("update_photo", "monument", monument_slug, f"Photo #{photo_id} définie comme principale pour {monument['monument_name']}")
+    return jsonify({"success": True})
+
+
+@web.route("/monuments/<monument_slug>/photos/search")
+def monument_photo_search(monument_slug: str) -> Response:
+    """AJAX: smart search for monument photos (Wikipedia + Commons)."""
+    from .db import get_db
+    from .services.monument_service import get_monument
+    from .services.city_photos import search_annotation_images
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        return jsonify({"error": "Monument introuvable.", "images": []})
+
+    monument_name = monument["monument_name"]
+    construction_year = monument.get("construction_year")
+    label = f"{monument_name} ({construction_year})" if construction_year else monument_name
+
+    # Use first linked city for context
+    city_name = ""
+    for loc in monument.get("locations", []):
+        if loc.get("matched_city_name"):
+            city_name = loc["matched_city_name"]
+            break
+        if loc.get("city_name"):
+            city_name = loc["city_name"]
+            break
+
+    country = None
+    for loc in monument.get("locations", []):
+        if loc.get("country"):
+            country = loc["country"]
+            break
+
+    images = search_annotation_images(label, city_name, None, country)
+    return jsonify({"images": images})
+
+
+@web.route("/monuments/<monument_slug>/photos/manual-search")
+def monument_photo_manual_search(monument_slug: str) -> Response:
+    """AJAX: manual keyword search on Wikimedia Commons for monument photos."""
+    from .services.city_photos import _search_commons_batch
+
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"images": []})
+
+    seen_urls: set[str] = set()
+    images: list[dict] = []
+
+    words = query.split()
+    if len(words) <= 4:
+        images = _search_commons_batch(query, seen_urls, limit=40)
+    else:
+        images.extend(_search_commons_batch(query, seen_urls, limit=20))
+        sub = " ".join(words[:4])
+        images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+        if len(images) < 20:
+            sub = " ".join(words[:3])
+            images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+        if len(images) < 15:
+            sub = " ".join(words[-3:])
+            images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+
+    return jsonify({"images": images[:40]})
+
+
+@web.route("/monuments/<monument_slug>/photos/import-web", methods=["POST"])
+@editor_required
+def monument_photo_import_web(monument_slug: str) -> Response:
+    """Import multiple web images into a monument's photo library."""
+    from .db import get_db
+    from .services.monument_service import get_monument, save_monument_photo
+    from .services.city_photos import download_web_image
+
+    conn = get_db()
+    monument = get_monument(conn, monument_slug)
+    if monument is None:
+        return jsonify({"error": "Monument introuvable.", "imported": 0})
+
+    data = request.get_json(silent=True)
+    if not data or not isinstance(data.get("images"), list):
+        return jsonify({"error": "Aucune image sélectionnée.", "imported": 0})
+
+    imported = 0
+    for img in data["images"]:
+        url = img.get("url", "")
+        if not url:
+            continue
+        result = download_web_image(url)
+        if not result:
+            continue
+        file_bytes, ext = result
+        save_result = save_monument_photo(
+            conn,
+            monument["monument_id"],
+            monument_slug,
+            file_bytes,
+            f"web-import{ext}",
+            source_url=img.get("source_page", ""),
+            attribution=img.get("title", "Wikipedia/Wikimedia"),
+            caption=img.get("caption", ""),
+            set_primary=(imported == 0 and not monument.get("photos")),
+        )
+        if save_result.get("success"):
+            imported += 1
+    if imported:
+        log_action("upload_photo", "monument", monument_slug, f"{imported} photo(s) importée(s) depuis le web pour {monument['monument_name']}")
     return jsonify({"imported": imported})
 
 

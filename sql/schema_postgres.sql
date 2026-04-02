@@ -972,4 +972,99 @@ GROUP BY
     p.summary,
     p.created_at;
 
+-- ===== MONUMENTS =====
+
+CREATE TABLE IF NOT EXISTS dim_monument (
+    monument_id BIGSERIAL PRIMARY KEY,
+    monument_name TEXT NOT NULL,
+    monument_slug TEXT NOT NULL UNIQUE,
+    construction_date TEXT,
+    inauguration_date TEXT,
+    construction_year INTEGER,
+    demolition_year INTEGER,
+    architect TEXT,
+    architectural_style TEXT,
+    height_meters NUMERIC,
+    floors INTEGER,
+    monument_category TEXT NOT NULL DEFAULT 'autre',
+    monument_level INTEGER NOT NULL DEFAULT 2 CHECK (monument_level IN (1, 2)),
+    summary TEXT,
+    description TEXT,
+    history TEXT,
+    significance TEXT,
+    source_text TEXT,
+    annotation_id BIGINT REFERENCES dim_annotation(annotation_id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS dim_monument_location (
+    monument_location_id BIGSERIAL PRIMARY KEY,
+    monument_id BIGINT NOT NULL REFERENCES dim_monument(monument_id) ON DELETE CASCADE,
+    city_id BIGINT REFERENCES dim_city(city_id) ON DELETE SET NULL,
+    region TEXT,
+    country TEXT,
+    role TEXT NOT NULL DEFAULT 'primary'
+);
+
+CREATE TABLE IF NOT EXISTS dim_monument_photo (
+    monument_photo_id BIGSERIAL PRIMARY KEY,
+    monument_id BIGINT NOT NULL REFERENCES dim_monument(monument_id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    object_key TEXT,
+    storage_provider TEXT,
+    mime_type TEXT,
+    file_size BIGINT,
+    checksum_sha256 TEXT,
+    caption TEXT,
+    source_url TEXT,
+    attribution TEXT,
+    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+    photo_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE OR REPLACE VIEW vw_monument_summary AS
+SELECT
+    m.monument_id,
+    m.monument_name,
+    m.monument_slug,
+    m.construction_date,
+    m.inauguration_date,
+    m.construction_year,
+    m.demolition_year,
+    m.architect,
+    m.architectural_style,
+    m.height_meters,
+    m.floors,
+    m.monument_level,
+    m.monument_category,
+    m.summary,
+    m.created_at,
+    COUNT(DISTINCT ml.monument_location_id) AS location_count,
+    COUNT(DISTINCT mp.monument_photo_id) AS photo_count,
+    STRING_AGG(DISTINCT COALESCE(dc.city_name, ml.region), ',') AS location_names
+FROM dim_monument m
+LEFT JOIN dim_monument_location ml ON ml.monument_id = m.monument_id
+LEFT JOIN dim_city dc ON dc.city_id = ml.city_id
+LEFT JOIN dim_monument_photo mp ON mp.monument_id = m.monument_id
+GROUP BY
+    m.monument_id,
+    m.monument_name,
+    m.monument_slug,
+    m.construction_date,
+    m.inauguration_date,
+    m.construction_year,
+    m.demolition_year,
+    m.architect,
+    m.architectural_style,
+    m.height_meters,
+    m.floors,
+    m.monument_level,
+    m.monument_category,
+    m.summary,
+    m.created_at;
+
 COMMIT;

@@ -1,0 +1,305 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>🏛️ Monuments et bâtiments</h2>
+            <span id="mon-dir-count">{{ monuments|length }} monument{% if monuments|length != 1 %}s{% endif %}</span>
+        </div>
+        <div class="dir-controls">
+            <!-- Category filter -->
+            <div class="dir-filter">
+                <select id="mon-filter-category">
+                    <option value="">Toutes catégories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>
+                        {{ category_emojis[cat] }} {{ category_labels[cat] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Level filter -->
+            <div class="dir-filter">
+                <select id="mon-filter-level">
+                    <option value="">Tous niveaux</option>
+                    <option value="1" {% if filters.level == '1' %}selected{% endif %}>⭐ Mondial</option>
+                    <option value="2" {% if filters.level == '2' %}selected{% endif %}>📌 Régional</option>
+                </select>
+            </div>
+            <!-- Search -->
+            <div class="dir-filter">
+                <input type="text" id="mon-filter-search" placeholder="Rechercher un monument…" value="{{ filters.search }}">
+            </div>
+            <!-- Sort -->
+            <div class="dir-sort">
+                <label for="mon-sort-select">Trier par</label>
+                <select id="mon-sort-select">
+                    <option value="name-asc">Nom A → Z</option>
+                    <option value="name-desc">Nom Z → A</option>
+                    <option value="year-desc">Construction ↓ (récent)</option>
+                    <option value="year-asc">Construction ↑ (ancien)</option>
+                </select>
+            </div>
+            <!-- View switcher -->
+            <div class="view-switcher" role="group" aria-label="Mode d'affichage">
+                <a class="secondary-button inline-button view-mode-button view-mode-button-large {% if view_mode == 'large' %}is-active{% endif %}" href="{{ url_for('web.monuments_list', view='large') }}" aria-label="Vue gros bloc" title="Vue gros bloc">
+                    <span class="view-mode-icon view-mode-large" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-medium {% if view_mode == 'medium' %}is-active{% endif %}" href="{{ url_for('web.monuments_list', view='medium') }}" aria-label="Vue moyen bloc" title="Vue moyen bloc">
+                    <span class="view-mode-icon view-mode-medium" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-small {% if view_mode == 'small' %}is-active{% endif %}" href="{{ url_for('web.monuments_list', view='small') }}" aria-label="Vue petit bloc" title="Vue petit bloc">
+                    <span class="view-mode-icon view-mode-small" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-compact {% if view_mode == 'compact' %}is-active{% endif %}" href="{{ url_for('web.monuments_list', view='compact') }}" aria-label="Vue liste" title="Vue liste">
+                    <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination top -->
+    <div class="dir-pager" id="mon-pager-top">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Monuments par page:</span>
+            <select id="mon-per-page-select">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Tous</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="mon-pager-info-top"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    <div class="event-grid event-grid-{{ view_mode }}" id="mon-dir-grid">
+        {% for m in monuments %}
+        <a class="event-card event-card-{{ view_mode }}{% if m.primary_photo %} event-card-has-photo{% endif %}"
+           href="{{ url_for('web.monument_detail', monument_slug=m.monument_slug) }}"
+           data-mon-name="{{ m.monument_name }}"
+           data-mon-year="{{ m.construction_year or 0 }}"
+           data-mon-category="{{ m.monument_category }}"
+           data-mon-level="{{ m.monument_level }}">
+            {% if m.primary_photo %}
+            <div class="event-card-thumb">
+                <img src="{{ url_for('static', filename=m.primary_photo) }}" alt="" loading="lazy">
+            </div>
+            {% endif %}
+            <div class="event-card-body">
+                <div class="event-card-header">
+                    <span class="event-card-year">{{ m.construction_year or '?' }}{% if m.demolition_year %} – {{ m.demolition_year }}{% endif %}</span>
+                    <span class="event-card-cat badge badge-{{ m.monument_category }}">
+                        {{ category_emojis.get(m.monument_category, '📌') }} {{ category_labels.get(m.monument_category, m.monument_category) }}
+                    </span>
+                    {% if m.monument_level == 1 %}
+                    <span class="event-card-level event-level-major" title="Envergure mondiale">⭐</span>
+                    {% endif %}
+                </div>
+                <h3 class="event-card-title">{{ m.monument_name }}</h3>
+                {% if m.architect %}
+                <div class="event-card-dates">🏗️ {{ m.architect }}</div>
+                {% endif %}
+                <div class="event-card-meta">
+                    {% if m.location_count %}
+                    <span>📍 {{ m.location_count }} lieu{% if m.location_count > 1 %}x{% endif %}</span>
+                    {% endif %}
+                    {% if m.photo_count %}
+                    <span>📷 {{ m.photo_count }}</span>
+                    {% endif %}
+                </div>
+                {% if m.location_names %}
+                <div class="event-card-locations">{{ m.location_names }}</div>
+                {% endif %}
+                {% if m.summary %}
+                <div class="event-card-desc">{{ m.summary[:180] }}{% if m.summary|length > 180 %}…{% endif %}</div>
+                {% endif %}
+                {% if m.created_by_name %}
+                <div class="city-card-meta-creator">
+                    Ajouté par {{ m.created_by_name }}
+                    {% if m.entity_created_at %} le {{ (m.entity_created_at|string)[:10] }}{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination bottom -->
+    <div class="dir-pager" id="mon-pager-bottom">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Monuments par page:</span>
+            <select class="mon-per-page-mirror">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Tous</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="mon-pager-info-bottom"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    {% if not monuments %}
+    <div class="empty-state" style="padding:2rem;">
+        <p>Aucun monument trouvé.</p>
+        <p>Utilisez l'<a href="{{ url_for('web.ai_lab') }}">AI Lab</a> pour générer des monuments.</p>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Monuments directory sort, filter & pagination JS -->
+<script>
+(function() {
+    var grid = document.getElementById('mon-dir-grid');
+    var sortSelect = document.getElementById('mon-sort-select');
+    var perPageSelect = document.getElementById('mon-per-page-select');
+    var countSpan = document.getElementById('mon-dir-count');
+    var categorySelect = document.getElementById('mon-filter-category');
+    var levelSelect = document.getElementById('mon-filter-level');
+    var searchInput = document.getElementById('mon-filter-search');
+    if (!grid || !sortSelect || !perPageSelect) return;
+
+    var mirrors = document.querySelectorAll('.mon-per-page-mirror');
+    mirrors.forEach(function(m) {
+        m.value = perPageSelect.value;
+        m.addEventListener('change', function() {
+            perPageSelect.value = m.value;
+            currentPage = 1;
+            render();
+        });
+    });
+
+    var allCards = Array.prototype.slice.call(grid.querySelectorAll('.event-card'));
+    var filtered = allCards.slice();
+    var sorted = allCards.slice();
+    var currentPage = 1;
+
+    function applyFilters() {
+        var category = categorySelect.value;
+        var level = levelSelect.value;
+        var search = searchInput.value.trim().toLowerCase();
+
+        filtered = allCards.filter(function(c) {
+            if (category && c.dataset.monCategory !== category) return false;
+            if (level && String(c.dataset.monLevel) !== level) return false;
+            if (search) {
+                var name = (c.dataset.monName || '').toLowerCase();
+                if (name.indexOf(search) === -1) return false;
+            }
+            return true;
+        });
+        doSort(true);
+    }
+
+    categorySelect.addEventListener('change', applyFilters);
+    levelSelect.addEventListener('change', applyFilters);
+    var searchTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilters, 200);
+    });
+
+    function getPerPage() {
+        var v = perPageSelect.value;
+        return v === 'all' ? sorted.length || 1 : parseInt(v, 10);
+    }
+
+    function tp() {
+        return Math.max(1, Math.ceil(sorted.length / getPerPage()));
+    }
+
+    function doSort(resetPage) {
+        var val = sortSelect.value;
+        var parts = val.split('-');
+        var field = parts[0];
+        var dir = parts[1];
+        sorted = filtered.slice();
+        sorted.sort(function(a, b) {
+            if (field === 'name') {
+                var va = (a.dataset.monName || '').toLowerCase();
+                var vb = (b.dataset.monName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else {
+                var va = parseInt(a.dataset.monYear, 10) || 0;
+                var vb = parseInt(b.dataset.monYear, 10) || 0;
+                return dir === 'asc' ? va - vb : vb - va;
+            }
+        });
+        if (resetPage) currentPage = 1;
+        render();
+    }
+
+    function render() {
+        var pp = getPerPage();
+        var total = tp();
+        if (currentPage > total) currentPage = total;
+        var start = (currentPage - 1) * pp;
+        var end = start + pp;
+
+        allCards.forEach(function(c) { c.style.display = 'none'; });
+        sorted.slice(start, end).forEach(function(c) { c.style.display = ''; });
+        sorted.forEach(function(c) { grid.appendChild(c); });
+
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+
+        var n = sorted.length;
+        countSpan.textContent = n + ' monument' + (n !== 1 ? 's' : '');
+
+        var infoText = 'Page ' + currentPage + ' de ' + total;
+        document.querySelectorAll('#mon-pager-top .dir-pager-info, #mon-pager-bottom .dir-pager-info').forEach(function(el) { el.textContent = infoText; });
+
+        var isFirst = currentPage <= 1;
+        var isLast = currentPage >= total;
+        var showPager = total > 1;
+
+        [document.getElementById('mon-pager-top'), document.getElementById('mon-pager-bottom')].forEach(function(pager) {
+            if (!pager) return;
+            pager.style.display = showPager ? '' : 'none';
+            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+                var d = btn.dataset.dir;
+                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
+            });
+        });
+    }
+
+    document.querySelectorAll('#mon-pager-top .dir-pager-arrow, #mon-pager-bottom .dir-pager-arrow').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var total = tp();
+            switch (btn.dataset.dir) {
+                case 'first': currentPage = 1; break;
+                case 'prev':  if (currentPage > 1) currentPage--; break;
+                case 'next':  if (currentPage < total) currentPage++; break;
+                case 'last':  currentPage = total; break;
+            }
+            render();
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    sortSelect.addEventListener('change', function() { doSort(true); });
+    perPageSelect.addEventListener('change', function() {
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+        currentPage = 1;
+        render();
+    });
+
+    doSort(false);
+})();
+</script>
+
+{% endblock %}

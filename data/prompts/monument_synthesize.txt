@@ -1,0 +1,18 @@
+Tu es un expert en architecture et en histoire des monuments. Tu as deux versions d'une même fiche de monument. Produis une version de synthèse finale, validée et complète.
+
+VERSION ORIGINALE :
+{CITY_INPUT}
+
+VERSION ENRICHIE PAR L'IA :
+{NEW_TEXT}
+
+Instructions :
+1. Compare les deux versions attentivement.
+2. Garde les informations factuellement correctes des deux versions.
+3. Si une version contient une erreur (mauvaise date, dimensions inexactes, attribution incorrecte), conserve la version correcte.
+4. Si les deux versions contiennent des informations différentes mais cohérentes, combine-les en une seule formulation claire.
+5. Élimine les redondances et les formulations imprécises.
+6. Respecte STRICTEMENT le même format : MONUMENT_NAME, CONSTRUCTION_DATE, INAUGURATION_DATE, CONSTRUCTION_YEAR, DEMOLITION_YEAR, ARCHITECT, ARCHITECTURAL_STYLE, HEIGHT_METERS, FLOORS, MONUMENT_LEVEL, MONUMENT_CATEGORY, suivi des sections === RÉSUMÉ ===, === DESCRIPTION ===, === HISTOIRE ===, === SIGNIFICATION ===, === LIEUX ===.
+7. La version finale doit être la plus complète, précise et cohérente possible.
+
+Retourne uniquement la fiche synthétisée finale dans le même format exact, sans commentaires ni explications supplémentaires.

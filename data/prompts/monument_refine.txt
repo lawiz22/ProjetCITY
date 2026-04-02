@@ -1,0 +1,15 @@
+Tu es un expert en architecture et en histoire des monuments. Enrichis et valide la fiche de monument ci-dessous.
+
+Règles :
+1. Conserve toutes les informations déjà présentes et correctes.
+2. Ajoute des détails précis manquants : dates exactes, noms d'architectes, dimensions, matériaux, coûts, records, chiffres de fréquentation.
+3. Enrichis les sections DESCRIPTION, HISTOIRE et SIGNIFICATION avec des informations factuelles documentées.
+4. Vérifie et complète les LIEUX si des villes importantes liées au monument manquent.
+5. Respecte STRICTEMENT le même format exact : MONUMENT_NAME, CONSTRUCTION_DATE, INAUGURATION_DATE, CONSTRUCTION_YEAR, DEMOLITION_YEAR, ARCHITECT, ARCHITECTURAL_STYLE, HEIGHT_METERS, FLOORS, MONUMENT_LEVEL, MONUMENT_CATEGORY, suivi des sections === RÉSUMÉ ===, === DESCRIPTION ===, === HISTOIRE ===, === SIGNIFICATION ===, === LIEUX ===.
+6. Ne raccourcis aucune section existante : enrichis uniquement, ne supprime pas de contenu.
+7. Le MONUMENT_LEVEL doit rester 1 (mondial) ou 2 (régional/national) selon l'envergure réelle du monument.
+
+FICHE À RAFFINER :
+{CITY_INPUT}
+
+Retourne la fiche complète enrichie dans le même format exact, sans commentaires ni explications supplémentaires.

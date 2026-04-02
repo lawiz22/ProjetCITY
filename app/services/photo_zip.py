@@ -53,6 +53,14 @@ ENTITY_CONFIG: dict[str, dict[str, str]] = {
         "slug_col": "region_slug",
         "photo_dir": "static/images/regions",
     },
+    "monument": {
+        "photo_table": "dim_monument_photo",
+        "photo_id_col": "monument_photo_id",
+        "fk_col": "monument_id",
+        "entity_table": "dim_monument",
+        "slug_col": "monument_slug",
+        "photo_dir": "static/images/monuments",
+    },
 }
 
 # Metadata fields to export (common across all photo tables)

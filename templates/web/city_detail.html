@@ -18,6 +18,7 @@
             <a href="#city-timeline">Timeline</a>
             {% if city_events %}<a href="#city-events">Événements</a>{% endif %}
             {% if city_persons %}<a href="#city-persons">Personnages</a>{% endif %}
+            {% if city_monuments %}<a href="#city-monuments">Monuments</a>{% endif %}
             <a href="#city-fiche">Fiche</a>
         </nav>
         <div class="city-sticky-tools" data-guided-reader>
@@ -506,6 +507,29 @@
                 <span class="city-event-name">{{ p.person_name }}</span>
                 <span class="city-event-role role-{{ p.role }}">{{ p.role }}</span>
                 {% if p.person_level == 1 %}<span class="event-level-major">⭐</span>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Monuments linked to this city -->
+{% if city_monuments %}
+<section class="panel" id="city-monuments">
+    <div class="panel-head">
+        <h2>🏛️ Monuments et bâtiments liés</h2>
+        <span>{{ city_monuments|length }} monument{% if city_monuments|length != 1 %}s{% endif %}</span>
+    </div>
+    <div class="options-body">
+        <div class="city-events-list">
+            {% for m in city_monuments %}
+            <a href="{{ url_for('web.monument_detail', monument_slug=m.monument_slug) }}" class="city-event-item">
+                <span class="city-event-year">{{ m.construction_year or '?' }}{% if m.demolition_year %} – {{ m.demolition_year }}{% endif %}</span>
+                <span class="city-event-cat">{{ monument_category_emojis.get(m.monument_category, '📌') }}</span>
+                <span class="city-event-name">{{ m.monument_name }}</span>
+                <span class="city-event-role role-{{ m.role }}">{{ m.role }}</span>
+                {% if m.monument_level == 1 %}<span class="event-level-major">⭐</span>{% endif %}
             </a>
             {% endfor %}
         </div>
