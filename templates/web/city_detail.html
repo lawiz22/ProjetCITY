@@ -151,6 +151,8 @@
                     <button type="submit" class="secondary-button">Uploader</button>
                 </form>
                 <button type="button" class="secondary-button" id="photo-web-search-btn" data-city-slug="{{ city.city_slug }}">🔍 Rechercher sur le web</button>
+                <a href="{{ url_for('web.photo_export_zip', entity_type='city', entity_slug=city.city_slug) }}" class="secondary-button" title="Exporter les photos en ZIP">📦 Export ZIP</a>
+                <button type="button" class="secondary-button" id="photo-import-zip-btn" title="Importer des photos depuis un ZIP">📥 Import ZIP</button>
             </div>
         </div>
 
@@ -1436,6 +1438,34 @@
 
     // Expose for CRUD form photo search integration
     window._openAnnPhotoModal = openAnnModal;
+})();
+</script>
+
+<script>
+(function() {
+    var importBtn = document.getElementById('photo-import-zip-btn');
+    if (!importBtn) return;
+    var importUrl = '{{ url_for("web.photo_import_zip", entity_type="city", entity_slug=city.city_slug) }}';
+    importBtn.addEventListener('click', function() {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.zip';
+        input.addEventListener('change', function() {
+            if (!input.files.length) return;
+            importBtn.disabled = true;
+            importBtn.textContent = '⏳ Import en cours…';
+            var fd = new FormData();
+            fd.append('zip_file', input.files[0]);
+            fetch(importUrl, { method: 'POST', body: fd })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.success) { location.reload(); }
+                    else { alert('❌ ' + d.error); importBtn.disabled = false; importBtn.textContent = '📥 Import ZIP'; }
+                })
+                .catch(function(err) { alert('❌ ' + err.message); importBtn.disabled = false; importBtn.textContent = '📥 Import ZIP'; });
+        });
+        input.click();
+    });
 })();
 </script>
 

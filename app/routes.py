@@ -2250,6 +2250,10 @@ _BACKUP_TABLES: list[dict] = [
      "conflict": "(event_slug)", "group": "event"},
     {"name": "dim_event_location", "pk": "event_location_id", "conflict": None, "group": "event"},
     {"name": "dim_event_photo", "pk": "event_photo_id", "conflict": None, "group": "event"},
+    {"name": "dim_person", "pk": "person_id",
+     "conflict": "(person_slug)", "group": "person"},
+    {"name": "dim_person_location", "pk": "person_location_id", "conflict": None, "group": "person"},
+    {"name": "dim_person_photo", "pk": "person_photo_id", "conflict": None, "group": "person"},
     {"name": "dim_country", "pk": "country_id",
      "conflict": "(country_slug)", "group": "vrp"},
     {"name": "fact_country_population", "pk": "country_pop_id",
@@ -2272,12 +2276,14 @@ _BACKUP_TABLES: list[dict] = [
 
 # Export scope definitions
 _EXPORT_SCOPES = {
-    "all":       {"label": "Tout", "groups": {"shared", "vrp", "event"}},
+    "all":       {"label": "Tout", "groups": {"shared", "vrp", "event", "person"}},
     "vrp":       {"label": "Villes / Régions / Pays", "groups": {"shared", "vrp"}},
     "event":     {"label": "Événements", "groups": {"shared", "event"}},
-    "delta_all": {"label": "Derniers ajouts — Tout", "groups": {"shared", "vrp", "event"}, "delta": True},
+    "person":    {"label": "Personnages", "groups": {"shared", "person"}},
+    "delta_all": {"label": "Derniers ajouts — Tout", "groups": {"shared", "vrp", "event", "person"}, "delta": True},
     "delta_vrp": {"label": "Derniers ajouts — V/R/P", "groups": {"shared", "vrp"}, "delta": True},
     "delta_event": {"label": "Derniers ajouts — Événements", "groups": {"shared", "event"}, "delta": True},
+    "delta_person": {"label": "Derniers ajouts — Personnages", "groups": {"shared", "person"}, "delta": True},
 }
 
 _EXPORT_STATE_KEY = "backup_export_state"
@@ -6325,6 +6331,62 @@ def person_photo_import_web(person_slug: str) -> Response:
     if imported:
         log_action("upload_photo", "person", person_slug, f"{imported} photo(s) importée(s) depuis le web pour {person['person_name']}")
     return jsonify({"imported": imported})
+
+
+# ---------------------------------------------------------------------------
+# Photo ZIP export / import  (generic for all entity types)
+# ---------------------------------------------------------------------------
+
+@web.route("/photos/export/<entity_type>/<entity_slug>")
+@editor_required
+def photo_export_zip(entity_type: str, entity_slug: str) -> Response:
+    from .db import get_db
+    from .services.photo_zip import export_photos_zip, ENTITY_CONFIG
+
+    if entity_type not in ENTITY_CONFIG:
+        flash("Type d'entité inconnu.", "error")
+        return redirect(request.referrer or url_for("web.dashboard"))
+
+    conn = get_db()
+    buf = export_photos_zip(conn, entity_type, entity_slug)
+    if buf is None:
+        flash("Aucune photo à exporter.", "warning")
+        return redirect(request.referrer or url_for("web.dashboard"))
+
+    zip_filename = f"photos-{entity_type}-{entity_slug}.zip"
+    return Response(
+        buf.getvalue(),
+        mimetype="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'},
+    )
+
+
+@web.route("/photos/import/<entity_type>/<entity_slug>", methods=["POST"])
+@editor_required
+def photo_import_zip(entity_type: str, entity_slug: str) -> Response:
+    from .db import get_db
+    from .services.photo_zip import import_photos_zip, ENTITY_CONFIG
+
+    if entity_type not in ENTITY_CONFIG:
+        return jsonify({"success": False, "error": "Type d'entité inconnu."})
+
+    file = request.files.get("zip_file")
+    if not file or not file.filename:
+        return jsonify({"success": False, "error": "Aucun fichier ZIP sélectionné."})
+
+    if not file.filename.lower().endswith(".zip"):
+        return jsonify({"success": False, "error": "Le fichier doit être un .zip."})
+
+    conn = get_db()
+    result = import_photos_zip(conn, entity_type, entity_slug, file.read())
+    if result.get("success"):
+        log_action(
+            "import_photos_zip",
+            entity_type,
+            entity_slug,
+            f"{result['imported']} photo(s) importée(s) depuis ZIP",
+        )
+    return jsonify(result)
 
 
 # ---------------------------------------------------------------------------

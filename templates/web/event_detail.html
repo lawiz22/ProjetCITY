@@ -140,7 +140,11 @@
             <h2>📷 Photos</h2>
             <span>{{ event.photos|length }} photo{% if event.photos|length != 1 %}s{% endif %}</span>
         </div>
-        <button type="button" class="event-search-web-btn" id="event-photo-search-btn">🔍 Rechercher sur le web</button>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+            <button type="button" class="event-search-web-btn" id="event-photo-search-btn">🔍 Rechercher sur le web</button>
+            <a href="{{ url_for('web.photo_export_zip', entity_type='event', entity_slug=event.event_slug) }}" class="event-search-web-btn" title="Exporter les photos en ZIP">📦 Export ZIP</a>
+            <button type="button" class="event-search-web-btn" id="photo-import-zip-btn">📥 Import ZIP</button>
+        </div>
     </div>
     <div class="options-body">
         {% if event.photos %}
@@ -551,6 +555,34 @@ function openLightbox(src) {
                 importBtn.textContent = '📥 Importer la sélection';
                 countEl.textContent = '❌ ' + err.message;
             });
+    });
+})();
+</script>
+
+<script>
+(function() {
+    var importBtn = document.getElementById('photo-import-zip-btn');
+    if (!importBtn) return;
+    var importUrl = '{{ url_for("web.photo_import_zip", entity_type="event", entity_slug=event.event_slug) }}';
+    importBtn.addEventListener('click', function() {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.zip';
+        input.addEventListener('change', function() {
+            if (!input.files.length) return;
+            importBtn.disabled = true;
+            importBtn.textContent = '⏳ Import en cours…';
+            var fd = new FormData();
+            fd.append('zip_file', input.files[0]);
+            fetch(importUrl, { method: 'POST', body: fd })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.success) { location.reload(); }
+                    else { alert('❌ ' + d.error); importBtn.disabled = false; importBtn.textContent = '📥 Import ZIP'; }
+                })
+                .catch(function(err) { alert('❌ ' + err.message); importBtn.disabled = false; importBtn.textContent = '📥 Import ZIP'; });
+        });
+        input.click();
     });
 })();
 </script>

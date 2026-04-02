@@ -262,6 +262,52 @@ TABLE_COPY_ORDER: tuple[TableCopySpec, ...] = (
         ),
         "event_photo_id",
     ),
+    TableCopySpec(
+        "dim_person",
+        (
+            "person_id",
+            "person_name",
+            "person_slug",
+            "birth_date",
+            "death_date",
+            "birth_year",
+            "death_year",
+            "birth_city",
+            "birth_country",
+            "death_city",
+            "death_country",
+            "person_level",
+            "person_category",
+            "summary",
+            "biography",
+            "achievements",
+            "impact_population",
+            "source_text",
+            "annotation_id",
+            "created_at",
+        ),
+        "person_id",
+    ),
+    TableCopySpec(
+        "dim_person_location",
+        ("person_location_id", "person_id", "city_id", "region", "country", "role"),
+        "person_location_id",
+    ),
+    TableCopySpec(
+        "dim_person_photo",
+        (
+            "person_photo_id",
+            "person_id",
+            "filename",
+            "caption",
+            "source_url",
+            "attribution",
+            "is_primary",
+            "photo_order",
+            "created_at",
+        ),
+        "person_photo_id",
+    ),
 )
 
 
@@ -283,6 +329,7 @@ BOOLEAN_COLUMNS: dict[str, set[str]] = {
     "dim_country_photo": {"is_primary"},
     "dim_region_photo": {"is_primary"},
     "dim_event_photo": {"is_primary"},
+    "dim_person_photo": {"is_primary"},
 }
 
 
