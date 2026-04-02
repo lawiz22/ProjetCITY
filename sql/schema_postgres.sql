@@ -90,7 +90,11 @@ CREATE TABLE IF NOT EXISTS dim_city (
     area_km2 DOUBLE PRECISION,
     density DOUBLE PRECISION,
     foundation_year INTEGER,
-    source_file TEXT NOT NULL
+    source_file TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS dim_time (
@@ -188,7 +192,10 @@ CREATE TABLE IF NOT EXISTS dim_event (
     impact_population TEXT,
     impact_migration TEXT,
     source_text TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS dim_event_location (
@@ -223,7 +230,11 @@ CREATE TABLE IF NOT EXISTS dim_country (
     country_slug TEXT NOT NULL UNIQUE,
     country_color TEXT,
     boundary_geom GEOMETRY(MULTIPOLYGON, 4326),
-    source_file TEXT NOT NULL DEFAULT 'manual'
+    source_file TEXT NOT NULL DEFAULT 'manual',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS fact_country_population (
@@ -261,7 +272,11 @@ CREATE TABLE IF NOT EXISTS dim_region (
     country_name TEXT NOT NULL,
     region_color TEXT,
     boundary_geom GEOMETRY(MULTIPOLYGON, 4326),
-    source_file TEXT NOT NULL DEFAULT 'manual'
+    source_file TEXT NOT NULL DEFAULT 'manual',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS fact_region_population (
@@ -315,6 +330,33 @@ CREATE TABLE IF NOT EXISTS dim_region_photo (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS app_user (
+    user_id BIGSERIAL PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    display_name TEXT,
+    role TEXT NOT NULL DEFAULT 'lecteur' CHECK (role IN ('admin', 'editeur', 'collaborateur', 'lecteur')),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_approved BOOLEAN NOT NULL DEFAULT FALSE,
+    oauth_provider TEXT,
+    oauth_id TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+    log_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    action TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT,
+    entity_label TEXT,
+    details JSONB,
+    ip_address TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_raw_document_lookup
     ON raw_document (entity_type, entity_slug, document_kind);
 CREATE INDEX IF NOT EXISTS idx_sql_query_history_occurred_at
@@ -353,6 +395,11 @@ CREATE INDEX IF NOT EXISTS idx_region_period_item ON dim_region_period_detail_it
 CREATE INDEX IF NOT EXISTS idx_region_boundary_geom ON dim_region USING GIST (boundary_geom);
 CREATE INDEX IF NOT EXISTS idx_region_photo_region ON dim_region_photo (region_id);
 CREATE INDEX IF NOT EXISTS idx_ref_city_region_country ON ref_city (region, country, rank);
+CREATE INDEX IF NOT EXISTS idx_user_email ON app_user (email);
+CREATE INDEX IF NOT EXISTS idx_user_role ON app_user (role);
+CREATE INDEX IF NOT EXISTS idx_audit_log_user ON audit_log (user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_log_entity ON audit_log (entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_audit_log_created ON audit_log (created_at DESC);
 
 -- Analytical views translated from SQLite to PostgreSQL.
 -- GROUP_CONCAT becomes string_agg.

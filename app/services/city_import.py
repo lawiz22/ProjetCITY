@@ -11,7 +11,13 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
 
-from flask import current_app, has_app_context
+from flask import current_app, g, has_app_context
+
+
+def _current_user_id() -> int | None:
+    """Return the logged-in user's id, or None."""
+    user = getattr(g, "user", None)
+    return user["user_id"] if user else None
 
 from .app_state import delete_raw_document, save_raw_document
 from .city_photos import CITY_PHOTO_DIR, CITY_PHOTO_MANIFEST, clear_city_photo_manifest_cache
@@ -458,21 +464,26 @@ def import_city_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
     time_cache = _build_time_cache(conn)
 
     # Upsert dim_city
+    uid = _current_user_id()
     cursor = conn.execute(
         """
-        INSERT INTO dim_city (city_name, city_slug, region, country, city_color, foundation_year, source_file)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO dim_city (city_name, city_slug, region, country, city_color, foundation_year, source_file,
+                              created_by_user_id, updated_by_user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(city_slug) DO UPDATE SET
             city_name = excluded.city_name,
             region = excluded.region,
             country = excluded.country,
             city_color = excluded.city_color,
             foundation_year = COALESCE(excluded.foundation_year, dim_city.foundation_year),
-            source_file = excluded.source_file
+            source_file = excluded.source_file,
+            updated_by_user_id = excluded.updated_by_user_id,
+            updated_at = CURRENT_TIMESTAMP
         RETURNING city_id
         """,
         (stats["city_name"], stats["city_slug"], stats["region"],
-         stats["country"], stats["city_color"], stats.get("foundation_year"), "web-import"),
+         stats["country"], stats["city_color"], stats.get("foundation_year"), "web-import",
+         uid, uid),
     )
     city_id = cursor.fetchone()[0]
 
@@ -1182,17 +1193,22 @@ def import_country_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
     time_cache = _build_time_cache(conn)
 
     # Upsert dim_country
+    uid = _current_user_id()
     cursor = conn.execute(
         """
-        INSERT INTO dim_country (country_name, country_slug, country_color, source_file)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO dim_country (country_name, country_slug, country_color, source_file,
+                                 created_by_user_id, updated_by_user_id)
+        VALUES (?, ?, ?, ?, ?, ?)
         ON CONFLICT(country_slug) DO UPDATE SET
             country_name = excluded.country_name,
             country_color = excluded.country_color,
-            source_file = excluded.source_file
+            source_file = excluded.source_file,
+            updated_by_user_id = excluded.updated_by_user_id,
+            updated_at = CURRENT_TIMESTAMP
         RETURNING country_id
         """,
-        (stats["country_name"], stats["country_slug"], stats["country_color"], "web-import"),
+        (stats["country_name"], stats["country_slug"], stats["country_color"], "web-import",
+         uid, uid),
     )
     country_id = cursor.fetchone()[0]
 
@@ -1448,19 +1464,24 @@ def import_region_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
     time_cache = _build_time_cache(conn)
 
     # Upsert dim_region
+    uid = _current_user_id()
     cursor = conn.execute(
         """
-        INSERT INTO dim_region (region_name, region_slug, country_name, region_color, source_file)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO dim_region (region_name, region_slug, country_name, region_color, source_file,
+                                created_by_user_id, updated_by_user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(region_slug) DO UPDATE SET
             region_name = excluded.region_name,
             country_name = excluded.country_name,
             region_color = excluded.region_color,
-            source_file = excluded.source_file
+            source_file = excluded.source_file,
+            updated_by_user_id = excluded.updated_by_user_id,
+            updated_at = CURRENT_TIMESTAMP
         RETURNING region_id
         """,
         (stats["region_name"], stats["region_slug"], stats["region_country"],
-         stats["region_color"], "web-import"),
+         stats["region_color"], "web-import",
+         uid, uid),
     )
     region_id = cursor.fetchone()[0]
 

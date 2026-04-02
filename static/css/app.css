@@ -459,6 +459,36 @@ button:hover,
     width: 100%;
 }
 
+.sidebar-user-info {
+    padding: 8px 12px;
+    font-size: .82rem;
+    border-top: 1px solid var(--line, #dee2e6);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.sidebar-user-info .user-badge {
+    font-weight: 600;
+    color: var(--text-primary, #212529);
+}
+.sidebar-user-info .user-badge small {
+    font-weight: 400;
+    color: var(--text-secondary, #868e96);
+}
+.sidebar-user-info .logout-link {
+    color: var(--accent, #228be6);
+    text-decoration: none;
+    font-size: .8rem;
+}
+
+.city-card-meta-creator {
+    font-size: .72rem;
+    color: var(--text-muted, #888);
+    padding: 4px 0 0;
+    border-top: 1px solid var(--border-subtle, rgba(128,128,128,.15));
+    margin-top: 6px;
+}
+
 .filter-card h2 {
     margin: 0 0 4px;
     font-size: 1rem;

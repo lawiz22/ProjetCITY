@@ -123,6 +123,12 @@
                 {% if ev.description %}
                 <div class="event-card-desc">{{ ev.description[:180] }}{% if ev.description|length > 180 %}…{% endif %}</div>
                 {% endif %}
+                {% if ev.created_by_name %}
+                <div class="city-card-meta-creator">
+                    Ajouté par {{ ev.created_by_name }}
+                    {% if ev.entity_created_at %} le {{ (ev.entity_created_at|string)[:10] }}{% endif %}
+                </div>
+                {% endif %}
             </div>
         </a>
         {% endfor %}

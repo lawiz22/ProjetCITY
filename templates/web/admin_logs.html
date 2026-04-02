@@ -1,0 +1,81 @@
+{% extends "web/base.html" %}
+
+{% block content %}
+<div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+    <form method="get" action="{{ url_for('web.admin_logs') }}" style="display:flex; gap:.75rem; align-items:end; flex-wrap:wrap;">
+        <div>
+            <label for="user_id" style="font-size:.82rem;">Utilisateur</label>
+            <select id="user_id" name="user_id" style="padding:.35rem .5rem; border:1px solid var(--border-color,#dee2e6); border-radius:4px;">
+                <option value="">Tous</option>
+                {% for u in users %}
+                <option value="{{ u.user_id }}" {{ 'selected' if filter_user_id == u.user_id else '' }}>{{ u.display_name or u.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="action" style="font-size:.82rem;">Action</label>
+            <select id="action" name="action" style="padding:.35rem .5rem; border:1px solid var(--border-color,#dee2e6); border-radius:4px;">
+                <option value="">Toutes</option>
+                {% for a in ['create', 'update', 'delete', 'login', 'logout', 'write'] %}
+                <option value="{{ a }}" {{ 'selected' if filter_action == a else '' }}>{{ a }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="entity_type" style="font-size:.82rem;">Type d'entité</label>
+            <input type="text" id="entity_type" name="entity_type" value="{{ filter_entity_type or '' }}" placeholder="ex: cities, events..." style="padding:.35rem .5rem; border:1px solid var(--border-color,#dee2e6); border-radius:4px;">
+        </div>
+        <button type="submit" style="padding:.4rem .8rem; background:var(--accent,#228be6); color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600;">Filtrer</button>
+        <a href="{{ url_for('web.admin_logs') }}" style="font-size:.82rem;">Réinitialiser</a>
+        <a href="{{ url_for('web.admin_logs_export') }}" style="font-size:.82rem; margin-left:auto;">Exporter CSV</a>
+    </form>
+</div>
+
+<div class="card" style="padding: 1.5rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 style="margin:0; font-size:1.1rem;">Logs ({{ total }})</h2>
+        <span style="font-size:.82rem; color:var(--text-secondary,#868e96);">Page {{ page }}/{{ total_pages }}</span>
+    </div>
+    {% if logs %}
+    <table class="data-table" style="width:100%; font-size:.85rem;">
+        <thead>
+            <tr><th>Date</th><th>Utilisateur</th><th>Action</th><th>Type</th><th>ID</th><th>Label</th><th>IP</th></tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td style="white-space:nowrap; font-size:.8rem;">{{ (log.created_at|string)[:19] if log.created_at else '' }}</td>
+                <td>{{ log.display_name or log.username or '—' }}</td>
+                <td><span class="badge badge-{{ log.action }}">{{ log.action }}</span></td>
+                <td>{{ log.entity_type }}</td>
+                <td>{{ log.entity_id or '' }}</td>
+                <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ log.entity_label or '' }}</td>
+                <td style="font-size:.75rem;">{{ log.ip_address or '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:1rem; font-size:.85rem;">
+        {% if page > 1 %}
+        <a href="{{ url_for('web.admin_logs', page=page-1, user_id=filter_user_id or '', action=filter_action or '', entity_type=filter_entity_type or '') }}">&larr; Précédent</a>
+        {% endif %}
+        {% if page < total_pages %}
+        <a href="{{ url_for('web.admin_logs', page=page+1, user_id=filter_user_id or '', action=filter_action or '', entity_type=filter_entity_type or '') }}">Suivant &rarr;</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-secondary,#868e96);">Aucun log trouvé.</p>
+    {% endif %}
+</div>
+
+<style>
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-create { background:#d3f9d8; color:#2b8a3e; }
+.badge-update { background:#d0ebff; color:#1864ab; }
+.badge-delete { background:#ffe3e3; color:#c92a2a; }
+.badge-login { background:#e5dbff; color:#5f3dc4; }
+.badge-logout { background:#f1f3f5; color:#495057; }
+.badge-write { background:#fff3bf; color:#e67700; }
+</style>
+{% endblock %}

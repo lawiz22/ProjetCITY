@@ -108,6 +108,12 @@
                         <strong>{{ country.first_year or '—' }}</strong>
                     </li>
                 </ul>
+                {% if country.created_by_name %}
+                <div class="city-card-meta-creator">
+                    Ajouté par {{ country.created_by_name }}
+                    {% if country.entity_created_at %} le {{ (country.entity_created_at|string)[:10] }}{% endif %}
+                </div>
+                {% endif %}
             </div>
         </a>
         {% endfor %}

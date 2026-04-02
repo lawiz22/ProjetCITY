@@ -67,3 +67,7 @@ class Config:
         "PROJETCITY_REQUIRE_USER_KEY",
         "1" if os.environ.get("RAILWAY_ENVIRONMENT") else "0",
     ) == "1"
+
+    ADMIN_PASSWORD = os.environ.get("PROJETCITY_ADMIN_PASSWORD", "")
+    ADMIN_EMAIL = os.environ.get("PROJETCITY_ADMIN_EMAIL", "lawiz2222@gmail.com")
+    ADMIN_USERNAME = os.environ.get("PROJETCITY_ADMIN_USERNAME", "admin")

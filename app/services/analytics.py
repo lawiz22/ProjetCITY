@@ -1030,7 +1030,11 @@ class AnalyticsService:
                 decline.decline_count,
                 decline.latest_decline_year,
                 rebound.rebound_count,
-                rebound.latest_rebound_year
+                rebound.latest_rebound_year,
+                dc_track.created_at AS entity_created_at,
+                dc_track.updated_at AS entity_updated_at,
+                COALESCE(au_c.display_name, au_c.username) AS created_by_name,
+                COALESCE(au_u.display_name, au_u.username) AS updated_by_name
             FROM filtered_analysis v
             INNER JOIN latest_year ly
                 ON ly.city_slug = v.city_slug
@@ -1043,6 +1047,12 @@ class AnalyticsService:
                 ON decline.city_id = v.city_id
             LEFT JOIN rebound_rollup rebound
                 ON rebound.city_id = v.city_id
+            LEFT JOIN dim_city dc_track
+                ON dc_track.city_id = v.city_id
+            LEFT JOIN app_user au_c
+                ON au_c.user_id = dc_track.created_by_user_id
+            LEFT JOIN app_user au_u
+                ON au_u.user_id = dc_track.updated_by_user_id
             ORDER BY v.city_name
             """,
             self._analysis_filter_params(filters),

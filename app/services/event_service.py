@@ -8,6 +8,14 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from flask import g
+
+
+def _current_user_id() -> int | None:
+    """Return the logged-in user's id, or None."""
+    user = getattr(g, "user", None)
+    return user["user_id"] if user else None
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 EVENT_PHOTO_DIR = PROJECT_ROOT / "static" / "images" / "events"
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
@@ -193,12 +201,14 @@ def parse_event_text(text: str) -> dict[str, Any]:
 
 def import_event(conn: Any, data: dict[str, Any]) -> int:
     """Upsert an event into dim_event and its locations. Returns event_id."""
+    uid = _current_user_id()
     cursor = conn.execute(
         """INSERT INTO dim_event
            (event_name, event_slug, event_date_start, event_date_end,
             event_year, event_level, event_category,
-            description, impact_population, impact_migration, source_text)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            description, impact_population, impact_migration, source_text,
+            created_by_user_id, updated_by_user_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(event_slug) DO UPDATE SET
                event_name = excluded.event_name,
                event_date_start = excluded.event_date_start,
@@ -209,7 +219,9 @@ def import_event(conn: Any, data: dict[str, Any]) -> int:
                description = excluded.description,
                impact_population = excluded.impact_population,
                impact_migration = excluded.impact_migration,
-               source_text = excluded.source_text
+               source_text = excluded.source_text,
+               updated_by_user_id = excluded.updated_by_user_id,
+               updated_at = CURRENT_TIMESTAMP
            RETURNING event_id""",
         (
             data["event_name"], data["event_slug"],
@@ -218,6 +230,7 @@ def import_event(conn: Any, data: dict[str, Any]) -> int:
             data.get("event_category", "autre"),
             data.get("description", ""), data.get("impact_population", ""),
             data.get("impact_migration", ""), data.get("source_text", ""),
+            uid, uid,
         ),
     )
     event_id = cursor.fetchone()[0]
@@ -281,7 +294,16 @@ def get_event(conn: Any, event_slug: str) -> dict[str, Any] | None:
 
 def get_events_list(conn: Any, filters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     """List events with optional filters (category, level, country, search)."""
-    sql = "SELECT * FROM vw_event_summary WHERE 1=1"
+    sql = (
+        "SELECT vs.*, de.created_at AS entity_created_at, de.updated_at AS entity_updated_at,"
+        " COALESCE(au_c.display_name, au_c.username) AS created_by_name,"
+        " COALESCE(au_u.display_name, au_u.username) AS updated_by_name"
+        " FROM vw_event_summary vs"
+        " LEFT JOIN dim_event de ON de.event_id = vs.event_id"
+        " LEFT JOIN app_user au_c ON au_c.user_id = de.created_by_user_id"
+        " LEFT JOIN app_user au_u ON au_u.user_id = de.updated_by_user_id"
+        " WHERE 1=1"
+    )
     params: list[Any] = []
     if filters:
         if filters.get("category"):

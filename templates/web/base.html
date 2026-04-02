@@ -35,16 +35,33 @@
                     <a href="{{ url_for('web.region_directory') }}">Régions</a>
                     <a href="{{ url_for('web.compare') }}">Comparaison</a>
                     <a href="{{ url_for('web.city_map') }}">Carte</a>
+                    {% if current_user and current_user.role in ('admin', 'editeur') %}
                     <a href="{{ url_for('web.sql_lab') }}">SQL Lab</a>
                     <a href="{{ url_for('web.city_coverage') }}">Couverture</a>
                     <a href="{{ url_for('web.geo_coverage') }}">Géo-couverture</a>
+                    {% endif %}
                     <a href="{{ url_for('web.events_list') }}">Événements</a>
                     <a href="{{ url_for('web.reference_population') }}">Réf. pop.</a>
+                    {% if current_user and current_user.role in ('admin', 'editeur') %}
                     <a href="{{ url_for('web.add_city') }}">Ajout villes</a>
+                    {% endif %}
+                    {% if current_user and current_user.role == 'admin' %}
                     <a href="{{ url_for('web.ai_lab') }}">AI Lab</a>
                     <a href="{{ url_for('web.options') }}">Options</a>
+                    <a href="{{ url_for('web.admin_dashboard') }}">Admin</a>
+                    {% endif %}
                 </nav>
             </div>
+            {% if current_user %}
+            <div class="sidebar-user-info">
+                <span class="user-badge">{{ current_user.display_name or current_user.username }} <small>({{ current_user.role }})</small></span>
+                <a href="{{ url_for('web.logout') }}" class="logout-link">Déconnexion</a>
+            </div>
+            {% else %}
+            <div class="sidebar-user-info">
+                <a href="{{ url_for('web.login') }}" class="logout-link">Connexion</a>
+            </div>
+            {% endif %}
             <button type="button" class="theme-toggle-button" data-theme-toggle aria-label="Changer le thème">Mode sombre</button>
         </aside>
 

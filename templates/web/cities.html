@@ -159,6 +159,12 @@
                         <strong>{{ '{:,.0f}'.format(city.density).replace(',', ' ') if city.density else 'n.d.' }} hab./km²</strong>
                     </li>
                 </ul>
+                {% if city.created_by_name %}
+                <div class="city-card-meta-creator">
+                    Ajouté par {{ city.created_by_name }}
+                    {% if city.entity_created_at %} le {{ (city.entity_created_at|string)[:10] }}{% endif %}
+                </div>
+                {% endif %}
             </div>
         </a>
         {% endfor %}

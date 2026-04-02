@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 
-from flask import Blueprint, Response, current_app, flash, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, Response, current_app, flash, g, jsonify, redirect, render_template, request, session, url_for
 
 from .services.analytics import AnalyticsService, SqlExecutionError
 from .services.app_state import delete_raw_document, load_raw_document
@@ -35,8 +35,106 @@ from .services.city_import import (
     upsert_time_dimension,
 )
 from .services.pdf_reports import build_city_pdf, build_dashboard_pdf
+from .services.auth import admin_required, editor_required, login_required
+from .services.audit import log_action
 
 web = Blueprint("web", __name__)
+
+
+# ---------------------------------------------------------------------------
+# Auth routes
+# ---------------------------------------------------------------------------
+
+@web.route("/login", methods=["GET", "POST"])
+def login():
+    if g.get("user"):
+        return redirect(url_for("web.dashboard"))
+    if request.method == "POST":
+        from .services.auth import authenticate
+        login_val = request.form.get("login", "").strip()
+        password = request.form.get("password", "")
+        user = authenticate(login_val, password)
+        if user is None:
+            flash("Identifiants invalides.", "error")
+            return render_template("web/login.html", page_title="Connexion", login=login_val)
+        if not user.get("is_approved"):
+            flash("Votre compte est en attente d'approbation par un administrateur.", "warning")
+            return render_template("web/login.html", page_title="Connexion", login=login_val)
+        session.clear()
+        session["user_id"] = user["user_id"]
+        session.permanent = True
+        g.user = user
+        log_action("login", "user", user["user_id"], user["username"])
+        flash(f"Bienvenue, {user['display_name'] or user['username']} !", "success")
+        next_url = request.form.get("next") or url_for("web.dashboard")
+        return redirect(next_url)
+    return render_template("web/login.html", page_title="Connexion", login="")
+
+
+@web.route("/logout")
+def logout():
+    log_action("logout", "user", g.user["user_id"] if g.get("user") else None, g.user["username"] if g.get("user") else None)
+    session.clear()
+    flash("Déconnecté.", "info")
+    return redirect(url_for("web.dashboard"))
+
+
+@web.route("/register", methods=["GET", "POST"])
+def register():
+    if g.get("user"):
+        return redirect(url_for("web.dashboard"))
+    if request.method == "POST":
+        from .services.auth import create_user, get_db
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        password2 = request.form.get("password2", "")
+        display_name = request.form.get("display_name", "").strip() or username
+        errors = []
+        if not username or len(username) < 3:
+            errors.append("Le nom d'utilisateur doit contenir au moins 3 caractères.")
+        if not email or "@" not in email:
+            errors.append("Adresse email invalide.")
+        if len(password) < 6:
+            errors.append("Le mot de passe doit contenir au moins 6 caractères.")
+        if password != password2:
+            errors.append("Les mots de passe ne correspondent pas.")
+        if errors:
+            for e in errors:
+                flash(e, "error")
+            return render_template("web/register.html", page_title="Inscription",
+                                   username=username, email=email, display_name=display_name)
+        try:
+            create_user(username=username, email=email, password=password,
+                        role="lecteur", display_name=display_name, is_approved=False)
+        except Exception:
+            flash("Ce nom d'utilisateur ou email est déjà utilisé.", "error")
+            return render_template("web/register.html", page_title="Inscription",
+                                   username=username, email=email, display_name=display_name)
+        flash("Compte créé ! Un administrateur doit approuver votre compte avant la connexion.", "success")
+        return redirect(url_for("web.login"))
+    return render_template("web/register.html", page_title="Inscription",
+                           username="", email="", display_name="")
+
+
+# ---------------------------------------------------------------------------
+# Generic write-operation audit hook
+# ---------------------------------------------------------------------------
+_AUDIT_SKIP_PATHS = {"/login", "/logout", "/register"}
+
+@web.after_request
+def _audit_write_operations(response):
+    """Automatically log POST/PUT/DELETE operations that return a success/redirect."""
+    if request.method in ("POST", "PUT", "DELETE") and response.status_code < 400:
+        path = request.path
+        if path not in _AUDIT_SKIP_PATHS:
+            action = {"POST": "create", "PUT": "update", "DELETE": "delete"}.get(request.method, "write")
+            parts = [p for p in path.strip("/").split("/") if p]
+            entity_type = parts[0] if parts else "unknown"
+            entity_id = parts[1] if len(parts) > 1 else None
+            label = "/".join(parts[:3]) if len(parts) >= 3 else path
+            log_action(action, entity_type, entity_id, label)
+    return response
 
 
 # ---------------------------------------------------------------------------
@@ -188,6 +286,7 @@ def dashboard() -> str:
 
 
 @web.route("/export/dashboard.pdf")
+@editor_required
 def dashboard_pdf() -> Response:
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
@@ -258,6 +357,7 @@ def city_detail(city_slug: str) -> str:
 
 
 @web.route("/cities/<city_slug>/export/pdf")
+@editor_required
 def city_detail_pdf(city_slug: str) -> Response:
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
@@ -319,13 +419,19 @@ def country_directory() -> str:
             latest.year AS latest_year,
             peak.peak_population,
             peak.peak_year,
-            first_row.first_year
+            first_row.first_year,
+            dc.created_at AS entity_created_at,
+            dc.updated_at AS entity_updated_at,
+            COALESCE(au_c.display_name, au_c.username) AS created_by_name,
+            COALESCE(au_u.display_name, au_u.username) AS updated_by_name
         FROM dim_country dc
         LEFT JOIN latest ON latest.country_id = dc.country_id
         LEFT JOIN fact_country_population fcp
             ON fcp.country_id = dc.country_id AND fcp.year = latest.year
         LEFT JOIN peak ON peak.country_id = dc.country_id
         LEFT JOIN first_row ON first_row.country_id = dc.country_id
+        LEFT JOIN app_user au_c ON au_c.user_id = dc.created_by_user_id
+        LEFT JOIN app_user au_u ON au_u.user_id = dc.updated_by_user_id
         ORDER BY dc.country_name
         """
     ).fetchall()
@@ -496,6 +602,7 @@ def country_detail(country_slug: str) -> str:
 # ------------------------------------------------------------------
 
 @web.route("/countries/<country_slug>/photos/upload", methods=["POST"])
+@editor_required
 def country_photo_upload(country_slug: str) -> Response:
     from .db import get_db
     from .services.city_photos import save_country_photo_to_library
@@ -547,6 +654,7 @@ def country_photo_search_commons(country_slug: str) -> Response:
 
 
 @web.route("/countries/<country_slug>/photos/import-web", methods=["POST"])
+@editor_required
 def country_photo_import_web(country_slug: str) -> Response:
     from .db import get_db
     from .services.city_photos import download_web_image, save_country_photo_to_library
@@ -577,6 +685,7 @@ def country_photo_import_web(country_slug: str) -> Response:
 
 
 @web.route("/countries/<country_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+@editor_required
 def country_photo_delete(country_slug: str, photo_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import delete_country_photo_from_library
@@ -590,6 +699,7 @@ def country_photo_delete(country_slug: str, photo_id: int) -> Response:
 
 
 @web.route("/countries/<country_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+@editor_required
 def country_photo_set_primary(country_slug: str, photo_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import set_country_photo_primary
@@ -632,6 +742,7 @@ def country_annotation_photo_search(country_slug: str, annotation_id: int) -> Re
 
 
 @web.route("/countries/<country_slug>/annotations/<int:annotation_id>/photo/save", methods=["POST"])
+@editor_required
 def country_annotation_photo_save(country_slug: str, annotation_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import save_annotation_photo_for_country
@@ -646,6 +757,7 @@ def country_annotation_photo_save(country_slug: str, annotation_id: int) -> Resp
 
 
 @web.route("/countries/<country_slug>/annotations/<int:annotation_id>/photo/link", methods=["POST"])
+@editor_required
 def country_annotation_photo_link(country_slug: str, annotation_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import link_existing_country_photo_to_annotation
@@ -674,6 +786,7 @@ def country_annotation_years(country_slug: str) -> Response:
 
 
 @web.route("/countries/<country_slug>/annotations", methods=["POST"])
+@editor_required
 def country_annotation_create(country_slug: str) -> Response:
     from .db import get_db
     conn = get_db()
@@ -715,6 +828,7 @@ def country_annotation_create(country_slug: str) -> Response:
 
 
 @web.route("/countries/<country_slug>/annotations/<int:annotation_id>", methods=["PUT"])
+@editor_required
 def country_annotation_update(country_slug: str, annotation_id: int) -> Response:
     from .db import get_db
     conn = get_db()
@@ -769,6 +883,7 @@ def country_annotation_update(country_slug: str, annotation_id: int) -> Response
 
 
 @web.route("/countries/<country_slug>/annotations/<int:annotation_id>", methods=["DELETE"])
+@editor_required
 def country_annotation_delete(country_slug: str, annotation_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import ANNOTATION_PHOTO_DIR
@@ -788,6 +903,7 @@ def country_annotation_delete(country_slug: str, annotation_id: int) -> Response
 
 
 @web.route("/countries/<country_slug>/delete", methods=["POST"])
+@editor_required
 def country_delete(country_slug: str) -> Response:
     """Delete a country and all its related data from the DB and filesystem."""
     import shutil as _shutil
@@ -976,13 +1092,19 @@ def region_directory() -> str:
             latest.year AS latest_year,
             peak.peak_population,
             peak.peak_year,
-            first_row.first_year
+            first_row.first_year,
+            dr.created_at AS entity_created_at,
+            dr.updated_at AS entity_updated_at,
+            COALESCE(au_c.display_name, au_c.username) AS created_by_name,
+            COALESCE(au_u.display_name, au_u.username) AS updated_by_name
         FROM dim_region dr
         LEFT JOIN latest ON latest.region_id = dr.region_id
         LEFT JOIN fact_region_population frp
             ON frp.region_id = dr.region_id AND frp.year = latest.year
         LEFT JOIN peak ON peak.region_id = dr.region_id
         LEFT JOIN first_row ON first_row.region_id = dr.region_id
+        LEFT JOIN app_user au_c ON au_c.user_id = dr.created_by_user_id
+        LEFT JOIN app_user au_u ON au_u.user_id = dr.updated_by_user_id
         ORDER BY dr.country_name, dr.region_name
         """
     ).fetchall()
@@ -1163,6 +1285,7 @@ def region_detail(region_slug: str) -> str:
 # ------------------------------------------------------------------
 
 @web.route("/regions/<region_slug>/photos/upload", methods=["POST"])
+@editor_required
 def region_photo_upload(region_slug: str) -> Response:
     from .db import get_db
     from .services.city_photos import save_region_photo_to_library
@@ -1214,6 +1337,7 @@ def region_photo_search_commons(region_slug: str) -> Response:
 
 
 @web.route("/regions/<region_slug>/photos/import-web", methods=["POST"])
+@editor_required
 def region_photo_import_web(region_slug: str) -> Response:
     from .db import get_db
     from .services.city_photos import download_web_image, save_region_photo_to_library
@@ -1244,6 +1368,7 @@ def region_photo_import_web(region_slug: str) -> Response:
 
 
 @web.route("/regions/<region_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+@editor_required
 def region_photo_delete(region_slug: str, photo_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import delete_region_photo_from_library
@@ -1257,6 +1382,7 @@ def region_photo_delete(region_slug: str, photo_id: int) -> Response:
 
 
 @web.route("/regions/<region_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+@editor_required
 def region_photo_set_primary(region_slug: str, photo_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import set_region_photo_primary
@@ -1299,6 +1425,7 @@ def region_annotation_photo_search(region_slug: str, annotation_id: int) -> Resp
 
 
 @web.route("/regions/<region_slug>/annotations/<int:annotation_id>/photo/save", methods=["POST"])
+@editor_required
 def region_annotation_photo_save(region_slug: str, annotation_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import save_annotation_photo_for_region
@@ -1313,6 +1440,7 @@ def region_annotation_photo_save(region_slug: str, annotation_id: int) -> Respon
 
 
 @web.route("/regions/<region_slug>/annotations/<int:annotation_id>/photo/link", methods=["POST"])
+@editor_required
 def region_annotation_photo_link(region_slug: str, annotation_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import link_existing_region_photo_to_annotation
@@ -1341,6 +1469,7 @@ def region_annotation_years(region_slug: str) -> Response:
 
 
 @web.route("/regions/<region_slug>/annotations", methods=["POST"])
+@editor_required
 def region_annotation_create(region_slug: str) -> Response:
     from .db import get_db
     conn = get_db()
@@ -1382,6 +1511,7 @@ def region_annotation_create(region_slug: str) -> Response:
 
 
 @web.route("/regions/<region_slug>/annotations/<int:annotation_id>", methods=["PUT"])
+@editor_required
 def region_annotation_update(region_slug: str, annotation_id: int) -> Response:
     from .db import get_db
     conn = get_db()
@@ -1436,6 +1566,7 @@ def region_annotation_update(region_slug: str, annotation_id: int) -> Response:
 
 
 @web.route("/regions/<region_slug>/annotations/<int:annotation_id>", methods=["DELETE"])
+@editor_required
 def region_annotation_delete(region_slug: str, annotation_id: int) -> Response:
     from .db import get_db
     from .services.city_photos import ANNOTATION_PHOTO_DIR
@@ -1454,6 +1585,7 @@ def region_annotation_delete(region_slug: str, annotation_id: int) -> Response:
 
 
 @web.route("/regions/<region_slug>/delete", methods=["POST"])
+@editor_required
 def region_delete(region_slug: str) -> Response:
     """Delete a region and all its related data from the DB and filesystem."""
     import shutil as _shutil
@@ -1938,6 +2070,7 @@ def map_city_spotlight(city_slug: str):
 
 
 @web.route("/map/geocode-missing", methods=["POST"])
+@editor_required
 def map_geocode_missing():
     """Geocode all cities that have no latitude/longitude."""
     import time
@@ -1968,6 +2101,7 @@ def map_geocode_missing():
 
 
 @web.route("/sql-lab", methods=["GET", "POST"])
+@editor_required
 def sql_lab() -> str:
     service = AnalyticsService()
     sql = request.form.get("sql", "").strip()
@@ -1995,6 +2129,7 @@ def sql_lab() -> str:
 
 
 @web.route("/sql-lab/export", methods=["POST"])
+@editor_required
 def sql_lab_export() -> Response:
     service = AnalyticsService()
     sql = request.form.get("sql", "").strip()
@@ -2011,6 +2146,7 @@ def sql_lab_export() -> Response:
 
 
 @web.route("/sql-lab/history/clear", methods=["POST"])
+@editor_required
 def sql_lab_history_clear() -> Response:
     service = AnalyticsService()
     service.clear_sql_history()
@@ -2019,6 +2155,7 @@ def sql_lab_history_clear() -> Response:
 
 
 @web.route("/sql-lab/views/save", methods=["POST"])
+@editor_required
 def sql_lab_view_save() -> Response:
     service = AnalyticsService()
     try:
@@ -2035,6 +2172,7 @@ def sql_lab_view_save() -> Response:
 
 
 @web.route("/sql-lab/views/<view_id>/delete", methods=["POST"])
+@editor_required
 def sql_lab_view_delete(view_id: str) -> Response:
     service = AnalyticsService()
     service.delete_sql_view(view_id)
@@ -2120,6 +2258,7 @@ def _serialize_value(value: object) -> object:
 
 
 @web.route("/sql-lab/backup/export")
+@editor_required
 def sql_lab_backup_export() -> Response:
     """Export the database (or a subset / delta) as a JSON file for backup."""
     import json as _json
@@ -2207,6 +2346,7 @@ def sql_lab_backup_export() -> Response:
 
 
 @web.route("/sql-lab/backup/import", methods=["POST"])
+@editor_required
 def sql_lab_backup_import() -> Response:
     """Import a JSON backup, inserting only missing rows (ON CONFLICT DO NOTHING).
     Then validate FK relationships and report issues."""
@@ -2341,6 +2481,7 @@ def sql_lab_backup_import() -> Response:
 
 
 @web.route("/sql-lab/backup/import-stream", methods=["POST"])
+@editor_required
 def sql_lab_backup_import_stream() -> Response:
     """Streaming import: sends SSE events so the frontend shows live progress."""
     import json as _json
@@ -2498,11 +2639,13 @@ def sql_lab_backup_import_stream() -> Response:
 # ---------------------------------------------------------------------------
 
 @web.route("/add-city")
+@editor_required
 def add_city() -> str:
     return render_template("web/add_city.html", page_title="Ajout / mise à jour de ville")
 
 
 @web.route("/add-city/check-slug")
+@editor_required
 def add_city_check_slug() -> Response:
     """AJAX: return existing city info for a given slug."""
     from .db import get_db
@@ -2552,6 +2695,7 @@ def add_city_check_slug() -> Response:
 
 
 @web.route("/add-city/compare", methods=["POST"])
+@editor_required
 def add_city_compare() -> str | Response:
     """Show side-by-side comparison when importing a city that already exists."""
     stats_text = request.form.get("stats_text", "").strip()
@@ -2742,6 +2886,7 @@ def add_city_compare() -> str | Response:
 
 
 @web.route("/add-city/merge-import", methods=["POST"])
+@editor_required
 def add_city_merge_import() -> Response:
     """Process the merge form decisions and apply selective import."""
     stats_text = request.form.get("stats_text", "").strip()
@@ -2770,16 +2915,21 @@ def add_city_merge_import() -> Response:
     _resolve_duplicate_slug(conn, stats)
 
     # --- Upsert dim_city to get city_id ---
+    uid = g.user["user_id"] if hasattr(g, "user") and g.user else None
     cursor = conn.execute(
-        """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
-           VALUES (?, ?, ?, ?, ?, ?)
+        """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file,
+                                 created_by_user_id, updated_by_user_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(city_slug) DO UPDATE SET
                city_name = excluded.city_name, region = excluded.region,
                country = excluded.country, city_color = excluded.city_color,
-               source_file = excluded.source_file
+               source_file = excluded.source_file,
+               updated_by_user_id = excluded.updated_by_user_id,
+               updated_at = CURRENT_TIMESTAMP
            RETURNING city_id""",
         (stats["city_name"], stats["city_slug"], stats["region"],
-         stats["country"], stats["city_color"], "web-import"),
+         stats["country"], stats["city_color"], "web-import",
+         uid, uid),
     )
     city_id = cursor.fetchone()[0]
     conn.commit()
@@ -2986,6 +3136,7 @@ def add_city_merge_import() -> Response:
 
 
 @web.route("/add-city/import", methods=["POST"])
+@editor_required
 def add_city_import() -> Response:
     """Single button: import stats + periods + auto-fetch photo."""
     stats_text = request.form.get("stats_text", "").strip()
@@ -3030,16 +3181,21 @@ def add_city_import() -> Response:
     if skip_pop:
         # Still need city_id — upsert dim_city only, skip population
         _resolve_duplicate_slug(conn, stats)
+        uid = g.user["user_id"] if hasattr(g, "user") and g.user else None
         cursor = conn.execute(
-            """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file)
-               VALUES (?, ?, ?, ?, ?, ?)
+            """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, source_file,
+                                     created_by_user_id, updated_by_user_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT(city_slug) DO UPDATE SET
                    city_name = excluded.city_name, region = excluded.region,
                    country = excluded.country, city_color = excluded.city_color,
-                   source_file = excluded.source_file
+                   source_file = excluded.source_file,
+                   updated_by_user_id = excluded.updated_by_user_id,
+                   updated_at = CURRENT_TIMESTAMP
                RETURNING city_id""",
             (stats["city_name"], stats["city_slug"], stats["region"],
-             stats["country"], stats["city_color"], "web-import"),
+             stats["country"], stats["city_color"], "web-import",
+             uid, uid),
         )
         city_id = cursor.fetchone()[0]
         conn.commit()
@@ -3151,6 +3307,7 @@ def add_city_import() -> Response:
 
 
 @web.route("/cities/<city_slug>/photo", methods=["POST"])
+@editor_required
 def city_photo_import(city_slug: str) -> Response:
     """Fetch or upload a photo for an existing city."""
     from .db import get_db
@@ -3184,6 +3341,7 @@ def city_photo_import(city_slug: str) -> Response:
 # ------------------------------------------------------------------
 
 @web.route("/cities/<city_slug>/photos/upload", methods=["POST"])
+@editor_required
 def city_photo_upload(city_slug: str) -> Response:
     """Upload one or more photos to the city library."""
     from .db import get_db
@@ -3253,6 +3411,7 @@ def city_photo_search_commons(city_slug: str) -> Response:
 
 
 @web.route("/cities/<city_slug>/photos/import-web", methods=["POST"])
+@editor_required
 def city_photo_import_web(city_slug: str) -> Response:
     """Import selected web images into the city library."""
     from .db import get_db
@@ -3291,6 +3450,7 @@ def city_photo_import_web(city_slug: str) -> Response:
 
 
 @web.route("/cities/<city_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+@editor_required
 def city_photo_delete(city_slug: str, photo_id: int) -> Response:
     """Delete a photo from the library."""
     from .db import get_db
@@ -3306,6 +3466,7 @@ def city_photo_delete(city_slug: str, photo_id: int) -> Response:
 
 
 @web.route("/cities/<city_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+@editor_required
 def city_photo_set_primary(city_slug: str, photo_id: int) -> Response:
     """Set a photo as the primary for the city."""
     from .db import get_db
@@ -3364,6 +3525,7 @@ def annotation_photo_search(city_slug: str, annotation_id: int) -> Response:
 
 
 @web.route("/cities/<city_slug>/annotations/<int:annotation_id>/photo/save", methods=["POST"])
+@editor_required
 def annotation_photo_save(city_slug: str, annotation_id: int) -> Response:
     """Save a web image as the annotation photo."""
     from .db import get_db
@@ -3382,6 +3544,7 @@ def annotation_photo_save(city_slug: str, annotation_id: int) -> Response:
 
 
 @web.route("/cities/<city_slug>/annotations/<int:annotation_id>/photo/link", methods=["POST"])
+@editor_required
 def annotation_photo_link(city_slug: str, annotation_id: int) -> Response:
     """Link an existing city photo to an annotation."""
     from .db import get_db
@@ -3420,6 +3583,7 @@ def annotation_available_years(city_slug: str) -> Response:
 
 
 @web.route("/cities/<city_slug>/annotations", methods=["POST"])
+@editor_required
 def annotation_create(city_slug: str) -> Response:
     """AJAX: create a new annotation and link it to a year."""
     from .db import get_db
@@ -3473,6 +3637,7 @@ def annotation_create(city_slug: str) -> Response:
 
 
 @web.route("/cities/<city_slug>/annotations/<int:annotation_id>", methods=["PUT"])
+@editor_required
 def annotation_update(city_slug: str, annotation_id: int) -> Response:
     """AJAX: update an existing annotation."""
     from .db import get_db
@@ -3556,6 +3721,7 @@ def annotation_update(city_slug: str, annotation_id: int) -> Response:
 
 
 @web.route("/cities/<city_slug>/annotations/<int:annotation_id>", methods=["DELETE"])
+@editor_required
 def annotation_delete(city_slug: str, annotation_id: int) -> Response:
     """AJAX: delete an annotation and unlink it from its year."""
     from .db import get_db
@@ -3589,6 +3755,7 @@ def annotation_delete(city_slug: str, annotation_id: int) -> Response:
 
 
 @web.route("/cities/<city_slug>/fiche", methods=["POST"])
+@editor_required
 def city_fiche_import(city_slug: str) -> Response:
     """Import a fiche complète for an existing city."""
     from .db import get_db
@@ -3624,6 +3791,7 @@ def city_fiche_import(city_slug: str) -> Response:
 
 
 @web.route("/cities/<city_slug>/fiche/delete", methods=["POST"])
+@editor_required
 def city_fiche_delete(city_slug: str) -> Response:
     """Delete the fiche complète for a city."""
     from .db import get_db
@@ -3655,6 +3823,7 @@ def city_fiche_delete(city_slug: str) -> Response:
 # ------------------------------------------------------------------
 
 @web.route("/geo-coverage")
+@editor_required
 def geo_coverage() -> str:
     """Geographic coverage: which regions/states are in the DB vs total."""
     from .db import get_db
@@ -3848,6 +4017,7 @@ def geo_coverage() -> str:
 
 
 @web.route("/geo-coverage/expand-ref", methods=["POST"])
+@editor_required
 def geo_coverage_expand_ref():
     """Add 20 more reference cities for a region via Mammouth AI."""
     import json as _json
@@ -4002,6 +4172,7 @@ def geo_coverage_expand_ref():
 # ------------------------------------------------------------------
 
 @web.route("/coverage")
+@editor_required
 def city_coverage() -> str:
     from .services.mammouth_ai import load_settings, fetch_models
 
@@ -4036,6 +4207,7 @@ def city_coverage() -> str:
 
 
 @web.route("/coverage/save-missing-years", methods=["POST"])
+@editor_required
 def coverage_save_missing_years() -> Response:
     """Save AI-found missing-year populations for an existing city."""
     from .db import get_db
@@ -4116,6 +4288,7 @@ def coverage_save_missing_years() -> Response:
 
 
 @web.route("/coverage/export/coverage.csv")
+@editor_required
 def coverage_export_csv() -> Response:
     service = AnalyticsService()
     csv_content = service.export_coverage_csv()
@@ -4126,6 +4299,7 @@ def coverage_export_csv() -> Response:
 
 
 @web.route("/coverage/export/missing-decades.csv")
+@editor_required
 def coverage_export_missing_csv() -> Response:
     service = AnalyticsService()
     csv_content = service.export_missing_decades_csv()
@@ -4140,6 +4314,7 @@ def coverage_export_missing_csv() -> Response:
 # ------------------------------------------------------------------
 
 @web.route("/reference-population")
+@editor_required
 def reference_population() -> str:
     service = AnalyticsService()
     data = service.get_reference_population_overview()
@@ -4155,6 +4330,7 @@ def reference_population() -> str:
 # ------------------------------------------------------------------
 
 @web.route("/options", methods=["GET"])
+@admin_required
 def options() -> str:
     from .services.mammouth_ai import load_settings, fetch_models
 
@@ -4169,6 +4345,7 @@ def options() -> str:
 
 
 @web.route("/ai-lab")
+@admin_required
 def ai_lab() -> str:
     from .services.mammouth_ai import load_settings, fetch_models, load_prompt
 
@@ -4225,6 +4402,7 @@ def ai_lab() -> str:
 
 
 @web.route("/options/save", methods=["POST"])
+@admin_required
 def options_save() -> Response:
     from .services.mammouth_ai import load_settings, save_settings
 
@@ -4237,6 +4415,7 @@ def options_save() -> Response:
 
 
 @web.route("/options/test", methods=["POST"])
+@admin_required
 def options_test() -> Response:
     from .services.mammouth_ai import test_connection
 
@@ -4252,6 +4431,7 @@ def options_test() -> Response:
 
 
 @web.route("/options/reset-tokens", methods=["POST"])
+@admin_required
 def options_reset_tokens() -> Response:
     from .services.mammouth_ai import reset_tokens
     reset_tokens()
@@ -4259,6 +4439,7 @@ def options_reset_tokens() -> Response:
 
 
 @web.route("/options/generate", methods=["POST"])
+@admin_required
 def options_generate() -> Response:
     from .services.mammouth_ai import load_settings, generate_city
 
@@ -4284,6 +4465,7 @@ def options_generate() -> Response:
 
 
 @web.route("/ai-lab/suggest-city", methods=["POST"])
+@editor_required
 def ai_lab_suggest_city() -> Response:
     """Ask Mammouth to suggest a city not yet in the DB, prioritizing missing regions."""
     from .services.mammouth_ai import load_settings, generate_city
@@ -4432,6 +4614,7 @@ def ai_lab_suggest_city() -> Response:
 
 
 @web.route("/ai-lab/import", methods=["POST"])
+@editor_required
 def ai_lab_import() -> Response:
     """AJAX import from AI Lab — returns JSON instead of redirect."""
     stats_text = request.form.get("stats_text", "").strip()
@@ -4455,17 +4638,22 @@ def ai_lab_import() -> Response:
     messages = []
 
     if skip_pop:
+        uid = g.user["user_id"] if hasattr(g, "user") and g.user else None
         cursor = conn.execute(
-            """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, foundation_year, source_file)
-               VALUES (?, ?, ?, ?, ?, ?, ?)
+            """INSERT INTO dim_city (city_name, city_slug, region, country, city_color, foundation_year, source_file,
+                                     created_by_user_id, updated_by_user_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT(city_slug) DO UPDATE SET
                    city_name = excluded.city_name, region = excluded.region,
                    country = excluded.country, city_color = excluded.city_color,
                    foundation_year = COALESCE(excluded.foundation_year, dim_city.foundation_year),
-                   source_file = excluded.source_file
+                   source_file = excluded.source_file,
+                   updated_by_user_id = excluded.updated_by_user_id,
+                   updated_at = CURRENT_TIMESTAMP
                RETURNING city_id""",
             (stats["city_name"], stats["city_slug"], stats["region"],
-             stats["country"], stats["city_color"], stats.get("foundation_year"), "ai-lab-import"),
+             stats["country"], stats["city_color"], stats.get("foundation_year"), "ai-lab-import",
+             uid, uid),
         )
         city_id = cursor.fetchone()[0]
         conn.commit()
@@ -4572,6 +4760,7 @@ def ai_lab_import() -> Response:
 
 
 @web.route("/ai-lab/country-import", methods=["POST"])
+@editor_required
 def ai_lab_country_import() -> Response:
     """AJAX import for country population + details — returns JSON."""
     stats_text = request.form.get("stats_text", "").strip()
@@ -4646,6 +4835,7 @@ def ai_lab_country_import() -> Response:
 
 
 @web.route("/ai-lab/suggest-country", methods=["POST"])
+@editor_required
 def ai_lab_suggest_country() -> Response:
     """Ask Mammouth to suggest a random country not yet in the DB."""
     from .services.mammouth_ai import load_settings, generate_city
@@ -4688,6 +4878,7 @@ def ai_lab_suggest_country() -> Response:
 
 
 @web.route("/ai-lab/region-import", methods=["POST"])
+@editor_required
 def ai_lab_region_import() -> Response:
     """AJAX import for region population + period details + fiche — returns JSON."""
     stats_text = request.form.get("stats_text", "").strip()
@@ -4820,6 +5011,7 @@ def ai_lab_region_import() -> Response:
 
 
 @web.route("/ai-lab/suggest-region", methods=["POST"])
+@editor_required
 def ai_lab_suggest_region() -> Response:
     """Ask Mammouth to suggest a region/province not yet in the DB for a given country."""
     from .services.mammouth_ai import load_settings, generate_city
@@ -4868,6 +5060,7 @@ def ai_lab_suggest_region() -> Response:
 
 
 @web.route("/ai-lab/suggest-event", methods=["POST"])
+@editor_required
 def ai_lab_suggest_event() -> Response:
     """Ask Mammouth to suggest a historical event not yet in the DB."""
     from .services.mammouth_ai import load_settings, generate_city
@@ -4937,6 +5130,7 @@ def ai_lab_suggest_event() -> Response:
 # ---------------------------------------------------------------------------
 
 @web.route("/ai-lab/refine/event/<event_slug>")
+@editor_required
 def ai_lab_refine_event_load(event_slug: str) -> Response:
     """Load an event's current data as JSON for the Raffinement tab."""
     from .db import get_db
@@ -4989,6 +5183,7 @@ def ai_lab_refine_event_load(event_slug: str) -> Response:
 
 
 @web.route("/ai-lab/refine/event/generate", methods=["POST"])
+@editor_required
 def ai_lab_refine_event_generate() -> Response:
     """Generate a refined version of an event via AI."""
     from .services.mammouth_ai import load_settings, generate_city
@@ -5051,6 +5246,7 @@ def ai_lab_refine_event_generate() -> Response:
 
 
 @web.route("/ai-lab/refine/event/synthesize", methods=["POST"])
+@editor_required
 def ai_lab_refine_event_synthesize() -> Response:
     """Ask AI to reconcile the original and refined event versions."""
     from .services.mammouth_ai import load_settings, generate_city, load_prompt
@@ -5112,6 +5308,7 @@ def ai_lab_refine_event_synthesize() -> Response:
 
 
 @web.route("/ai-lab/refine/event/save", methods=["POST"])
+@editor_required
 def ai_lab_refine_event_save() -> Response:
     """Save the (refined or synthesized) event text to the database."""
     from .db import get_db
@@ -5191,6 +5388,7 @@ def event_detail(event_slug: str) -> str:
 
 
 @web.route("/events/import", methods=["POST"])
+@editor_required
 def event_import() -> Response:
     from .db import get_db
     from .services.event_service import parse_event_text, import_event
@@ -5216,6 +5414,7 @@ def event_import() -> Response:
 
 
 @web.route("/events/<event_slug>/delete", methods=["POST"])
+@editor_required
 def event_delete(event_slug: str) -> Response:
     from .db import get_db
     from .services.event_service import get_event, delete_event
@@ -5231,6 +5430,7 @@ def event_delete(event_slug: str) -> Response:
 
 
 @web.route("/events/<event_slug>/photos/upload", methods=["POST"])
+@editor_required
 def event_photo_upload(event_slug: str) -> Response:
     from .db import get_db
     from .services.event_service import get_event, save_event_photo
@@ -5259,6 +5459,7 @@ def event_photo_upload(event_slug: str) -> Response:
 
 
 @web.route("/events/<event_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+@editor_required
 def event_photo_delete(event_slug: str, photo_id: int) -> Response:
     from .db import get_db
     from .services.event_service import delete_event_photo
@@ -5269,6 +5470,7 @@ def event_photo_delete(event_slug: str, photo_id: int) -> Response:
 
 
 @web.route("/events/<event_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+@editor_required
 def event_photo_primary(event_slug: str, photo_id: int) -> Response:
     from .db import get_db
     from .services.event_service import get_event, set_event_photo_primary
@@ -5410,6 +5612,7 @@ def event_photo_manual_search(event_slug: str) -> Response:
 
 
 @web.route("/events/<event_slug>/photos/import-web", methods=["POST"])
+@editor_required
 def event_photo_import_web(event_slug: str) -> Response:
     """Import multiple web images into an event's photo library."""
     from .db import get_db
@@ -5449,3 +5652,142 @@ def event_photo_import_web(event_slug: str) -> Response:
             imported += 1
 
     return jsonify({"imported": imported})
+
+
+# ---------------------------------------------------------------------------
+# Admin panel
+# ---------------------------------------------------------------------------
+
+@web.route("/admin")
+@admin_required
+def admin_dashboard() -> str:
+    from .services.auth import get_all_users
+    from .services.audit import count_audit_logs, get_audit_logs
+    users = get_all_users()
+    recent_logs = get_audit_logs(limit=20)
+    total_logs = count_audit_logs()
+    return render_template(
+        "web/admin_dashboard.html",
+        page_title="Administration",
+        users=users,
+        recent_logs=recent_logs,
+        total_logs=total_logs,
+    )
+
+
+@web.route("/admin/users")
+@admin_required
+def admin_users() -> str:
+    from .services.auth import get_all_users
+    users = get_all_users()
+    return render_template("web/admin_users.html", page_title="Gestion des utilisateurs", users=users)
+
+
+@web.route("/admin/users/create", methods=["POST"])
+@admin_required
+def admin_user_create() -> Response:
+    from .services.auth import create_user
+    username = request.form.get("username", "").strip()
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "")
+    role = request.form.get("role", "lecteur")
+    display_name = request.form.get("display_name", "").strip() or username
+    if not username or not email or not password:
+        flash("Tous les champs sont obligatoires.", "error")
+        return redirect(url_for("web.admin_users"))
+    if role not in ("admin", "editeur", "collaborateur", "lecteur"):
+        role = "lecteur"
+    try:
+        create_user(username=username, email=email, password=password,
+                     role=role, display_name=display_name, is_approved=True)
+        flash(f"Utilisateur {username} créé avec le rôle {role}.", "success")
+    except Exception:
+        flash("Erreur : nom d'utilisateur ou email déjà utilisé.", "error")
+    return redirect(url_for("web.admin_users"))
+
+
+@web.route("/admin/users/<int:user_id>/update", methods=["POST"])
+@admin_required
+def admin_user_update(user_id: int) -> Response:
+    from .services.auth import update_user
+    role = request.form.get("role")
+    is_active = request.form.get("is_active")
+    is_approved = request.form.get("is_approved")
+    display_name = request.form.get("display_name")
+    update_user(
+        user_id,
+        role=role if role in ("admin", "editeur", "collaborateur", "lecteur") else None,
+        is_active=is_active == "1" if is_active is not None else None,
+        is_approved=is_approved == "1" if is_approved is not None else None,
+        display_name=display_name if display_name else None,
+    )
+    flash("Utilisateur mis à jour.", "success")
+    return redirect(url_for("web.admin_users"))
+
+
+@web.route("/admin/users/<int:user_id>/delete", methods=["POST"])
+@admin_required
+def admin_user_delete(user_id: int) -> Response:
+    from .services.auth import delete_user, get_user_by_id
+    user = get_user_by_id(user_id)
+    if user and user["role"] == "admin":
+        flash("Impossible de supprimer un administrateur.", "error")
+        return redirect(url_for("web.admin_users"))
+    delete_user(user_id)
+    flash("Utilisateur supprimé.", "success")
+    return redirect(url_for("web.admin_users"))
+
+
+@web.route("/admin/logs")
+@admin_required
+def admin_logs() -> str:
+    from .services.audit import count_audit_logs, get_audit_logs
+    from .services.auth import get_all_users
+    page = max(1, request.args.get("page", 1, type=int))
+    per_page = 50
+    user_id = request.args.get("user_id", type=int)
+    action = request.args.get("action", "").strip() or None
+    entity_type = request.args.get("entity_type", "").strip() or None
+    total = count_audit_logs(user_id=user_id, action=action, entity_type=entity_type)
+    logs = get_audit_logs(limit=per_page, offset=(page - 1) * per_page,
+                          user_id=user_id, action=action, entity_type=entity_type)
+    users = get_all_users()
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    return render_template(
+        "web/admin_logs.html",
+        page_title="Journal d'audit",
+        logs=logs,
+        users=users,
+        total=total,
+        page=page,
+        total_pages=total_pages,
+        filter_user_id=user_id,
+        filter_action=action,
+        filter_entity_type=entity_type,
+    )
+
+
+@web.route("/admin/logs/export")
+@admin_required
+def admin_logs_export() -> Response:
+    import csv
+    import io
+    from .services.audit import get_audit_logs
+    logs = get_audit_logs(limit=10000)
+    si = io.StringIO()
+    writer = csv.writer(si)
+    writer.writerow(["date", "user", "action", "entity_type", "entity_id", "entity_label", "ip", "details"])
+    for log in logs:
+        writer.writerow([
+            log.get("created_at", ""),
+            log.get("username", ""),
+            log.get("action", ""),
+            log.get("entity_type", ""),
+            log.get("entity_id", ""),
+            log.get("entity_label", ""),
+            log.get("ip_address", ""),
+            log.get("details", ""),
+        ])
+    output = si.getvalue()
+    return Response(output, mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment; filename=audit_logs.csv"})

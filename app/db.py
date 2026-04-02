@@ -356,6 +356,59 @@ def run_migrations(config: Mapping[str, Any] | str | Path) -> None:
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS app_user (
+                user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                display_name TEXT,
+                role TEXT NOT NULL DEFAULT 'lecteur'
+                    CHECK (role IN ('admin', 'editeur', 'collaborateur', 'lecteur')),
+                is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+                is_approved INTEGER NOT NULL DEFAULT 0 CHECK (is_approved IN (0, 1)),
+                oauth_provider TEXT,
+                oauth_id TEXT,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS audit_log (
+                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER REFERENCES app_user(user_id) ON DELETE SET NULL,
+                action TEXT NOT NULL,
+                entity_type TEXT NOT NULL,
+                entity_id TEXT,
+                entity_label TEXT,
+                details TEXT,
+                ip_address TEXT,
+                created_at TEXT NOT NULL DEFAULT (datetime('now'))
+            )
+            """
+        )
+
+        # --- tracking columns on entity tables ---
+        _tracking_tables = {
+            "dim_city": "dim_city",
+            "dim_country": "dim_country",
+            "dim_region": "dim_region",
+            "dim_event": "dim_event",
+        }
+        for tbl in _tracking_tables.values():
+            cols = {row[1] for row in conn.execute(f"PRAGMA table_info({tbl})")}
+            if "created_at" not in cols:
+                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN created_at TEXT DEFAULT ''")
+            if "updated_at" not in cols:
+                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN updated_at TEXT DEFAULT ''")
+            if "created_by_user_id" not in cols:
+                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN created_by_user_id INTEGER REFERENCES app_user(user_id) ON DELETE SET NULL")
+            if "updated_by_user_id" not in cols:
+                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN updated_by_user_id INTEGER REFERENCES app_user(user_id) ON DELETE SET NULL")
+
         conn.commit()
     finally:
         conn.close()

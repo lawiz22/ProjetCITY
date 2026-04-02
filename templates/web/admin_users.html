@@ -1,0 +1,99 @@
+{% extends "web/base.html" %}
+
+{% block content %}
+<div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+    <h2 style="margin:0 0 1rem; font-size: 1.1rem;">Créer un utilisateur</h2>
+    <form method="post" action="{{ url_for('web.admin_user_create') }}" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:.75rem; align-items:end;">
+        <div>
+            <label for="username" style="font-size:.82rem;">Nom d'utilisateur</label>
+            <input type="text" id="username" name="username" required minlength="3" style="width:100%; padding:.4rem .5rem; border:1px solid var(--border-color,#dee2e6); border-radius:4px;">
+        </div>
+        <div>
+            <label for="email" style="font-size:.82rem;">Email</label>
+            <input type="email" id="email" name="email" required style="width:100%; padding:.4rem .5rem; border:1px solid var(--border-color,#dee2e6); border-radius:4px;">
+        </div>
+        <div>
+            <label for="password" style="font-size:.82rem;">Mot de passe</label>
+            <input type="password" id="password" name="password" required minlength="6" style="width:100%; padding:.4rem .5rem; border:1px solid var(--border-color,#dee2e6); border-radius:4px;">
+        </div>
+        <div>
+            <label for="display_name" style="font-size:.82rem;">Nom affiché</label>
+            <input type="text" id="display_name" name="display_name" style="width:100%; padding:.4rem .5rem; border:1px solid var(--border-color,#dee2e6); border-radius:4px;">
+        </div>
+        <div>
+            <label for="role" style="font-size:.82rem;">Rôle</label>
+            <select id="role" name="role" style="width:100%; padding:.4rem .5rem; border:1px solid var(--border-color,#dee2e6); border-radius:4px;">
+                <option value="lecteur">Lecteur</option>
+                <option value="collaborateur">Collaborateur</option>
+                <option value="editeur">Éditeur</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" style="padding:.5rem 1rem; background:var(--accent,#228be6); color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600;">Créer</button>
+        </div>
+    </form>
+</div>
+
+<div class="card" style="padding: 1.5rem;">
+    <h2 style="margin:0 0 1rem; font-size: 1.1rem;">Utilisateurs ({{ users|length }})</h2>
+    <table class="data-table" style="width:100%; font-size:.85rem;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Utilisateur</th>
+                <th>Email</th>
+                <th>Nom affiché</th>
+                <th>Rôle</th>
+                <th>Actif</th>
+                <th>Approuvé</th>
+                <th>Créé le</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.user_id }}</td>
+                <td><strong>{{ user.username }}</strong></td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.display_name or '' }}</td>
+                <td>
+                    <form method="post" action="{{ url_for('web.admin_user_update', user_id=user.user_id) }}" style="display:inline;">
+                        <select name="role" onchange="this.form.submit()" style="padding:2px 4px; font-size:.82rem; border:1px solid var(--border-color,#dee2e6); border-radius:3px;">
+                            {% for r in ['admin', 'editeur', 'collaborateur', 'lecteur'] %}
+                            <option value="{{ r }}" {{ 'selected' if user.role == r else '' }}>{{ r }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="{{ url_for('web.admin_user_update', user_id=user.user_id) }}" style="display:inline;">
+                        <input type="hidden" name="is_active" value="{{ '0' if user.is_active else '1' }}">
+                        <button type="submit" style="background:none; border:none; cursor:pointer; font-size:.9rem;" title="{{ 'Désactiver' if user.is_active else 'Activer' }}">
+                            {{ '✅' if user.is_active else '❌' }}
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="{{ url_for('web.admin_user_update', user_id=user.user_id) }}" style="display:inline;">
+                        <input type="hidden" name="is_approved" value="{{ '0' if user.is_approved else '1' }}">
+                        <button type="submit" style="background:none; border:none; cursor:pointer; font-size:.9rem;" title="{{ 'Retirer approbation' if user.is_approved else 'Approuver' }}">
+                            {{ '✅' if user.is_approved else '⏳' }}
+                        </button>
+                    </form>
+                </td>
+                <td style="white-space:nowrap; font-size:.8rem;">{{ (user.created_at|string)[:10] if user.created_at else '' }}</td>
+                <td>
+                    {% if user.role != 'admin' %}
+                    <form method="post" action="{{ url_for('web.admin_user_delete', user_id=user.user_id) }}" style="display:inline;" onsubmit="return confirm('Supprimer cet utilisateur ?')">
+                        <button type="submit" style="background:#ffe3e3; color:#c92a2a; border:none; border-radius:3px; padding:2px 8px; font-size:.8rem; cursor:pointer;">Supprimer</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

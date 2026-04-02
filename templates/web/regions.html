@@ -109,6 +109,12 @@
                         <strong>{{ region.first_year or '—' }}</strong>
                     </li>
                 </ul>
+                {% if region.created_by_name %}
+                <div class="city-card-meta-creator">
+                    Ajouté par {{ region.created_by_name }}
+                    {% if region.entity_created_at %} le {{ (region.entity_created_at|string)[:10] }}{% endif %}
+                </div>
+                {% endif %}
             </div>
         </a>
         <button type="button" class="region-card-delete-btn"
