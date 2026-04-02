@@ -386,6 +386,18 @@ def run_migrations(config: Mapping[str, Any]) -> None:
             if "updated_by_user_id" not in cols:
                 cur.execute(f"ALTER TABLE {tbl} ADD COLUMN updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL")
 
+        # Backfill created_by_user_id with the first admin user where NULL
+        admin_row = cur.execute(
+            "SELECT user_id FROM app_user WHERE role = 'admin' ORDER BY user_id LIMIT 1"
+        ).fetchone()
+        if admin_row:
+            admin_id = admin_row[0]
+            for tbl in _tracking_tables:
+                cur.execute(
+                    f"UPDATE {tbl} SET created_by_user_id = %s WHERE created_by_user_id IS NULL",
+                    (admin_id,),
+                )
+
         conn.commit()
     finally:
         conn.close()
