@@ -108,6 +108,27 @@
     {% endif %}
 </div>
 
+<!-- Carte de localisation -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>🗺️ Localisation</h2>
+        {% if monument.latitude and monument.longitude %}
+        <span id="mon-coords-display">📌 {{ monument.latitude }}, {{ monument.longitude }}</span>
+        {% else %}
+        <span id="mon-coords-display" style="opacity:.5">📌 Non géolocalisé</span>
+        {% endif %}
+    </div>
+    <div class="options-body" style="padding:0;position:relative;">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}">
+        <div id="monument-map" style="height:400px;width:100%;border-radius:0 0 12px 12px;"></div>
+        <div style="position:absolute;top:10px;right:10px;z-index:1000;display:flex;gap:.5rem;">
+            <button type="button" class="secondary-button" id="mon-map-edit-btn" style="font-size:.85rem;padding:.35rem .7rem;">✏️ Placer manuellement</button>
+            <button type="button" class="secondary-button" id="mon-map-save-btn" style="font-size:.85rem;padding:.35rem .7rem;display:none;background:#27ae60;color:#fff;">💾 Sauvegarder</button>
+            <button type="button" class="secondary-button" id="mon-map-cancel-btn" style="font-size:.85rem;padding:.35rem .7rem;display:none;">✖ Annuler</button>
+        </div>
+    </div>
+</section>
+
 <!-- Signification -->
 {% if monument.significance %}
 <section class="panel">
@@ -587,6 +608,115 @@ function openLightbox(src) {
                 .catch(function(err) { alert('❌ ' + err.message); importBtn.disabled = false; importBtn.textContent = '📥 Import ZIP'; });
         });
         input.click();
+    });
+})();
+</script>
+
+<script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
+<script>
+(function() {
+    var hasCoords = {{ 'true' if monument.latitude and monument.longitude else 'false' }};
+    var lat = {{ monument.latitude if monument.latitude else 48.8566 }};
+    var lng = {{ monument.longitude if monument.longitude else 2.3522 }};
+    var zoom = hasCoords ? 15 : 3;
+
+    var map = L.map('monument-map').setView([lat, lng], zoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19
+    }).addTo(map);
+
+    var marker = null;
+    if (hasCoords) {
+        marker = L.marker([lat, lng]).addTo(map)
+            .bindPopup('<strong>{{ monument.monument_name | e }}</strong>');
+    }
+
+    var editing = false;
+    var editBtn = document.getElementById('mon-map-edit-btn');
+    var saveBtn = document.getElementById('mon-map-save-btn');
+    var cancelBtn = document.getElementById('mon-map-cancel-btn');
+    var coordsDisplay = document.getElementById('mon-coords-display');
+    var origLat = lat, origLng = lng, origMarker = marker;
+
+    editBtn.addEventListener('click', function() {
+        editing = true;
+        editBtn.style.display = 'none';
+        saveBtn.style.display = '';
+        cancelBtn.style.display = '';
+        map.getContainer().style.cursor = 'crosshair';
+        if (!marker) {
+            map.setView([lat, lng], zoom < 5 ? 5 : zoom);
+        }
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        editing = false;
+        editBtn.style.display = '';
+        saveBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+        map.getContainer().style.cursor = '';
+        if (hasCoords) {
+            if (marker) { marker.setLatLng([origLat, origLng]); }
+            else { marker = L.marker([origLat, origLng]).addTo(map); }
+            map.setView([origLat, origLng], 15);
+            coordsDisplay.textContent = '📌 ' + origLat + ', ' + origLng;
+            coordsDisplay.style.opacity = '';
+        } else {
+            if (marker) { map.removeLayer(marker); marker = null; }
+            coordsDisplay.textContent = '📌 Non géolocalisé';
+            coordsDisplay.style.opacity = '.5';
+        }
+    });
+
+    map.on('click', function(e) {
+        if (!editing) return;
+        var newLat = Math.round(e.latlng.lat * 10000) / 10000;
+        var newLng = Math.round(e.latlng.lng * 10000) / 10000;
+        if (marker) {
+            marker.setLatLng([newLat, newLng]);
+        } else {
+            marker = L.marker([newLat, newLng]).addTo(map);
+        }
+        coordsDisplay.textContent = '📌 ' + newLat + ', ' + newLng;
+        coordsDisplay.style.opacity = '';
+        lat = newLat;
+        lng = newLng;
+    });
+
+    saveBtn.addEventListener('click', function() {
+        if (!marker) { alert('Cliquez sur la carte pour placer le monument.'); return; }
+        var pos = marker.getLatLng();
+        saveBtn.disabled = true;
+        saveBtn.textContent = '⏳…';
+        fetch('{{ url_for("web.monument_save_coordinates", monument_slug=monument.monument_slug) }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ latitude: pos.lat, longitude: pos.lng })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.success) {
+                hasCoords = true;
+                origLat = d.latitude; origLng = d.longitude;
+                editing = false;
+                editBtn.style.display = '';
+                saveBtn.style.display = 'none';
+                cancelBtn.style.display = 'none';
+                map.getContainer().style.cursor = '';
+                coordsDisplay.textContent = '📌 ' + d.latitude + ', ' + d.longitude;
+                marker.bindPopup('<strong>{{ monument.monument_name | e }}</strong>');
+            } else {
+                alert('❌ ' + d.error);
+            }
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Sauvegarder';
+        })
+        .catch(function(err) {
+            alert('❌ ' + err.message);
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Sauvegarder';
+        });
     });
 })();
 </script>

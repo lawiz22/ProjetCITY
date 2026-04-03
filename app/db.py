@@ -380,6 +380,8 @@ def run_migrations(config: Mapping[str, Any]) -> None:
                 architectural_style TEXT,
                 height_meters NUMERIC,
                 floors INTEGER,
+                latitude NUMERIC,
+                longitude NUMERIC,
                 monument_category TEXT NOT NULL DEFAULT 'autre',
                 monument_level INTEGER NOT NULL DEFAULT 2 CHECK (monument_level IN (1, 2)),
                 summary TEXT,
@@ -461,11 +463,23 @@ def run_migrations(config: Mapping[str, Any]) -> None:
                 m.architectural_style,
                 m.height_meters,
                 m.floors,
+                m.latitude,
+                m.longitude,
                 m.monument_level,
                 m.monument_category,
                 m.summary,
                 m.created_at
         """)
+
+        # --- dim_monument latitude/longitude columns ---
+        cur.execute(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_monument'",
+        )
+        _mon_cols = {row[0] for row in cur.fetchall()}
+        if _mon_cols and "latitude" not in _mon_cols:
+            cur.execute("ALTER TABLE dim_monument ADD COLUMN latitude NUMERIC")
+        if _mon_cols and "longitude" not in _mon_cols:
+            cur.execute("ALTER TABLE dim_monument ADD COLUMN longitude NUMERIC")
 
         # --- tracking columns on entity tables ---
         _tracking_tables = ["dim_city", "dim_country", "dim_region", "dim_event", "dim_person", "dim_monument"]

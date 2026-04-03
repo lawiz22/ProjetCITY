@@ -57,6 +57,7 @@
                     <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
                 </a>
             </div>
+            <button type="button" class="secondary-button inline-button" id="mon-geocode-btn" title="Géocoder les monuments sans coordonnées">📍 Géocoder</button>
         </div>
     </div>
 
@@ -114,6 +115,11 @@
                     {% endif %}
                     {% if m.photo_count %}
                     <span>📷 {{ m.photo_count }}</span>
+                    {% endif %}
+                    {% if m.latitude and m.longitude %}
+                    <span title="Géolocalisé">📌</span>
+                    {% else %}
+                    <span title="Non géolocalisé" style="opacity:.4">📌</span>
                     {% endif %}
                 </div>
                 {% if m.location_names %}
@@ -299,6 +305,28 @@
     });
 
     doSort(false);
+
+    // Geocode missing monuments
+    var geocodeBtn = document.getElementById('mon-geocode-btn');
+    if (geocodeBtn) {
+        geocodeBtn.addEventListener('click', function() {
+            geocodeBtn.disabled = true;
+            geocodeBtn.textContent = '⏳ Géocodage…';
+            fetch('{{ url_for("web.monuments_geocode_missing") }}', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    geocodeBtn.disabled = false;
+                    geocodeBtn.textContent = '📍 Géocoder';
+                    if (d.total === 0) { alert('Tous les monuments sont déjà géocodés.'); }
+                    else { alert('Géocodage terminé : ' + d.geocoded + '/' + d.total + ' monuments géocodés.'); }
+                })
+                .catch(function(err) {
+                    geocodeBtn.disabled = false;
+                    geocodeBtn.textContent = '📍 Géocoder';
+                    alert('❌ ' + err.message);
+                });
+        });
+    }
 })();
 </script>
 

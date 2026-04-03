@@ -120,3 +120,96 @@ def geocode_city(city_name: str, region: str | None, country: str) -> dict[str, 
     except Exception as exc:
         logger.warning("Geocoding failed for %r: %s", query, exc)
     return None
+
+
+def _nominatim_search(query: str) -> dict[str, float] | None:
+    """Single Nominatim search. Returns {lat, lng} or None."""
+    params = urllib.parse.urlencode({"q": query, "format": "json", "limit": "1"})
+    url = f"https://nominatim.openstreetmap.org/search?{params}"
+    req = urllib.request.Request(url, headers={"User-Agent": "CentralCityScrutinizer/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        if data:
+            return {"lat": round(float(data[0]["lat"]), 4), "lng": round(float(data[0]["lon"]), 4)}
+    except Exception as exc:
+        logger.warning("Nominatim search failed for %r: %s", query, exc)
+    return None
+
+
+# Common French→English translations for monument names in Nominatim
+_FR_EN_REPLACEMENTS = {
+    "Statue de la Liberté": "Statue of Liberty",
+    "Tour Eiffel": "Eiffel Tower",
+    "Notre-Dame de Paris": "Notre-Dame de Paris",
+    "Palais de Buckingham": "Buckingham Palace",
+    "Tour de Londres": "Tower of London",
+    "Pont du Golden Gate": "Golden Gate Bridge",
+    "Maison-Blanche": "White House",
+    "Empire State": "Empire State Building",
+    "Colisée": "Colosseum",
+    "Grande Muraille": "Great Wall of China",
+}
+
+
+def _english_variant(name: str) -> str | None:
+    """Return an English variant of the monument name if known."""
+    for fr, en in _FR_EN_REPLACEMENTS.items():
+        if fr.lower() in name.lower():
+            return en
+    return None
+
+
+def geocode_monument(monument_name: str, city_name: str | None = None,
+                     region: str | None = None, country: str | None = None) -> dict[str, float] | None:
+    """Geocode a monument using Nominatim with multiple fallback strategies.
+
+    Tries in order:
+    1. Full query: "monument, city, region, country"
+    2. Without region: "monument, city, country"
+    3. Monument name alone
+    4. English variant of the name (if available)
+    Returns {"lat": float, "lng": float} or None.
+    """
+    import time
+
+    queries: list[str] = []
+
+    # Strategy 1: full query
+    parts = [monument_name]
+    if city_name:
+        parts.append(city_name)
+    if region:
+        parts.append(region)
+    if country:
+        parts.append(country)
+    queries.append(", ".join(parts))
+
+    # Strategy 2: without region
+    if region and city_name and country:
+        queries.append(", ".join([monument_name, city_name, country]))
+
+    # Strategy 3: monument name alone
+    if monument_name not in queries:
+        queries.append(monument_name)
+
+    # Strategy 4: English variant
+    en = _english_variant(monument_name)
+    if en:
+        queries.append(en)
+        if city_name and country:
+            queries.insert(-1, f"{en}, {city_name}, {country}")
+
+    seen: set[str] = set()
+    for q in queries:
+        q_lower = q.lower()
+        if q_lower in seen:
+            continue
+        seen.add(q_lower)
+        result = _nominatim_search(q)
+        if result:
+            return result
+        time.sleep(1)  # respect Nominatim rate limit
+
+    logger.warning("Geocoding monument exhausted all strategies for %r", monument_name)
+    return None

@@ -1,11 +1,17 @@
 param(
     [switch]$ResetData,
     [switch]$SkipMigration,
+    [switch]$ForceMigration,
     [switch]$StartApp
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+# Par defaut, -StartApp seul saute la migration pour ne pas ecraser les donnees
+if ($StartApp -and -not $ForceMigration -and -not $ResetData) {
+    $SkipMigration = $true
+}
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $envFile = Join-Path $projectRoot ".env.postgres"
@@ -104,13 +110,16 @@ Wait-ForDockerContainer -DockerExe $dockerExe -ContainerName "projetcity-postgre
 $pythonExe = Get-PythonExe
 
 if (-not $SkipMigration) {
-    Write-Step "Migration SQLite -> PostgreSQL"
+    Write-Step "Migration SQLite -> PostgreSQL (ceci ECRASERA les donnees PostgreSQL!)"
+    Write-Host "  Ajoutez -SkipMigration pour conserver vos donnees PostgreSQL." -ForegroundColor Yellow
     & $pythonExe (Join-Path $projectRoot "scripts\migrate_sqlite_to_postgres.py") `
         --pg-dsn $env:PROJETCITY_DATABASE_URL `
         --truncate-target
     if ($LASTEXITCODE -ne 0) {
         throw "La migration a echoue."
     }
+} else {
+    Write-Step "Migration SQLite ignoree (-SkipMigration)"
 }
 
 Write-Step "Base PostgreSQL locale prete"

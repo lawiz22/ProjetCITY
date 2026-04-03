@@ -6772,6 +6772,23 @@ def monument_import() -> Response:
         return jsonify({"success": False, "error": f"Erreur BD : {exc}"})
     log_action("import", "monument", data["monument_slug"], f"Monument importé: {data['monument_name']} ({data.get('construction_year', '')})")
 
+    # Auto-geocode if no coordinates provided by the AI
+    if data.get("latitude") is None or data.get("longitude") is None:
+        from .services.city_coordinates import geocode_monument
+        primary_loc = next((l for l in data.get("locations", []) if l.get("role") == "primary"), None)
+        coords = geocode_monument(
+            data["monument_name"],
+            city_name=primary_loc["city_name"] if primary_loc else None,
+            region=primary_loc.get("region") if primary_loc else None,
+            country=primary_loc.get("country") if primary_loc else None,
+        )
+        if coords:
+            conn.execute(
+                "UPDATE dim_monument SET latitude = ?, longitude = ? WHERE monument_id = ?",
+                (coords["lat"], coords["lng"], monument_id),
+            )
+            conn.commit()
+
     # Auto-search photo from Wikipedia
     _auto_import_monument_photo(conn, monument_id, data["monument_slug"], data["monument_name"])
 
@@ -6806,6 +6823,84 @@ def _auto_import_monument_photo(conn, monument_id: int, monument_slug: str, monu
                 )
     except Exception:
         pass  # Non-critical
+
+
+@web.route("/monuments/geocode-missing", methods=["POST"])
+@editor_required
+def monuments_geocode_missing() -> Response:
+    """Geocode all monuments that have no latitude/longitude."""
+    import time
+    from .db import get_db
+    from .services.city_coordinates import geocode_monument
+
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT m.monument_id, m.monument_name,
+                  ml.region, ml.country,
+                  dc.city_name
+           FROM dim_monument m
+           LEFT JOIN dim_monument_location ml ON ml.monument_id = m.monument_id AND ml.role = 'primary'
+           LEFT JOIN dim_city dc ON dc.city_id = ml.city_id
+           WHERE m.latitude IS NULL OR m.longitude IS NULL"""
+    ).fetchall()
+
+    results = []
+    for row in rows:
+        coords = geocode_monument(
+            row["monument_name"],
+            city_name=row["city_name"],
+            region=row["region"],
+            country=row["country"],
+        )
+        if coords:
+            conn.execute(
+                "UPDATE dim_monument SET latitude = ?, longitude = ? WHERE monument_id = ?",
+                (coords["lat"], coords["lng"], row["monument_id"]),
+            )
+            conn.commit()
+            results.append({"monument": row["monument_name"], "lat": coords["lat"], "lng": coords["lng"], "ok": True})
+        else:
+            results.append({"monument": row["monument_name"], "ok": False})
+        time.sleep(1)  # respect Nominatim rate limit
+
+    geocoded = sum(1 for r in results if r["ok"])
+    if geocoded:
+        log_action("geocode", "monument", None, f"Géocodage: {geocoded}/{len(rows)} monuments géocodés")
+    return jsonify({"total": len(rows), "geocoded": geocoded, "results": results})
+
+
+@web.route("/monuments/<monument_slug>/coordinates", methods=["POST"])
+@editor_required
+def monument_save_coordinates(monument_slug: str) -> Response:
+    """Save manually placed coordinates for a monument."""
+    from .db import get_db
+
+    data = request.get_json(silent=True) or {}
+    lat = data.get("latitude")
+    lng = data.get("longitude")
+    if lat is None or lng is None:
+        return jsonify({"success": False, "error": "latitude et longitude requis."})
+    try:
+        lat = round(float(lat), 4)
+        lng = round(float(lng), 4)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Coordonnées invalides."})
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT monument_id FROM dim_monument WHERE monument_slug = ?", (monument_slug,)
+    ).fetchone()
+    if not row:
+        return jsonify({"success": False, "error": "Monument introuvable."})
+
+    conn.execute(
+        "UPDATE dim_monument SET latitude = ?, longitude = ? WHERE monument_slug = ?",
+        (lat, lng, monument_slug),
+    )
+    conn.commit()
+    log_action("geocode_manual", "monument", monument_slug,
+               f"Coordonnées manuelles: {lat}, {lng}")
+    return jsonify({"success": True, "latitude": lat, "longitude": lng})
 
 
 @web.route("/monuments/<monument_slug>/delete", methods=["POST"])

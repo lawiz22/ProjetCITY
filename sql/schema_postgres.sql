@@ -986,6 +986,8 @@ CREATE TABLE IF NOT EXISTS dim_monument (
     architectural_style TEXT,
     height_meters NUMERIC,
     floors INTEGER,
+    latitude NUMERIC,
+    longitude NUMERIC,
     monument_category TEXT NOT NULL DEFAULT 'autre',
     monument_level INTEGER NOT NULL DEFAULT 2 CHECK (monument_level IN (1, 2)),
     summary TEXT,

@@ -10,8 +10,10 @@ Règles :
 7. ARCHITECTURAL_STYLE = style architectural principal (Art déco, Gothique, Néoclassique, Moderne, Brutaliste, etc.)
 8. HEIGHT_METERS = hauteur en mètres (nombre décimal, ou vide si non applicable)
 9. FLOORS = nombre d'étages (nombre entier, ou vide si non applicable)
-10. MONUMENT_LEVEL = 1 pour monument d'envergure mondiale (merveille du monde, icône architecturale mondiale, site UNESCO majeur) ou 2 pour monument d'importance régionale/nationale
-11. MONUMENT_CATEGORY = une de ces catégories EXACTES : gratte_ciel, hotel, eglise, mairie, musee, stade, pont, monument_historique, gare, theatre, parc, autre
+10. LATITUDE = latitude du monument en degrés décimaux (nombre décimal, ex: 48.8584)
+11. LONGITUDE = longitude du monument en degrés décimaux (nombre décimal, ex: 2.2945)
+12. MONUMENT_LEVEL = 1 pour monument d'envergure mondiale (merveille du monde, icône architecturale mondiale, site UNESCO majeur) ou 2 pour monument d'importance régionale/nationale
+13. MONUMENT_CATEGORY = une de ces catégories EXACTES : gratte_ciel, hotel, eglise, mairie, musee, stade, pont, monument_historique, gare, theatre, parc, autre
 
 Pour les sections textuelles :
 - RÉSUMÉ : 2-3 phrases résumant ce qu'est ce monument et pourquoi il est remarquable
@@ -34,6 +36,8 @@ ARCHITECT = "Nom de l'architecte"
 ARCHITECTURAL_STYLE = "Style architectural"
 HEIGHT_METERS = 123.4
 FLOORS = 10
+LATITUDE = 48.8584
+LONGITUDE = 2.2945
 MONUMENT_LEVEL = 1
 MONUMENT_CATEGORY = "categorie"
 

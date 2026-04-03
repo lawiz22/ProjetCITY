@@ -122,6 +122,8 @@ def parse_monument_text(text: str) -> dict[str, Any]:
         "floors": None,
         "monument_level": 2,
         "monument_category": "autre",
+        "latitude": None,
+        "longitude": None,
         "summary": "",
         "description": "",
         "history": "",
@@ -187,6 +189,20 @@ def parse_monument_text(text: str) -> dict[str, Any]:
             cat = m.group(1).strip().lower()
             if cat in MONUMENT_CATEGORIES:
                 result["monument_category"] = cat
+            continue
+        m = re.match(r'^LATITUDE\s*=\s*([\-\d.]+)', line)
+        if m:
+            try:
+                result["latitude"] = float(m.group(1))
+            except ValueError:
+                pass
+            continue
+        m = re.match(r'^LONGITUDE\s*=\s*([\-\d.]+)', line)
+        if m:
+            try:
+                result["longitude"] = float(m.group(1))
+            except ValueError:
+                pass
             continue
 
     # Extract sections
@@ -257,11 +273,12 @@ def import_monument(conn: Any, data: dict[str, Any]) -> int:
            (monument_name, monument_slug,
             construction_date, inauguration_date, construction_year, demolition_year,
             architect, architectural_style, height_meters, floors,
+            latitude, longitude,
             monument_level, monument_category,
             summary, description, history, significance,
             source_text,
             created_by_user_id, updated_by_user_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(monument_slug) DO UPDATE SET
                monument_name = excluded.monument_name,
                construction_date = excluded.construction_date,
@@ -272,6 +289,8 @@ def import_monument(conn: Any, data: dict[str, Any]) -> int:
                architectural_style = excluded.architectural_style,
                height_meters = excluded.height_meters,
                floors = excluded.floors,
+               latitude = excluded.latitude,
+               longitude = excluded.longitude,
                monument_level = excluded.monument_level,
                monument_category = excluded.monument_category,
                summary = excluded.summary,
@@ -288,6 +307,7 @@ def import_monument(conn: Any, data: dict[str, Any]) -> int:
             data.get("construction_year"), data.get("demolition_year"),
             data.get("architect"), data.get("architectural_style"),
             data.get("height_meters"), data.get("floors"),
+            data.get("latitude"), data.get("longitude"),
             data.get("monument_level", 2),
             data.get("monument_category", "autre"),
             data.get("summary", ""), data.get("description", ""),
@@ -356,7 +376,8 @@ def get_monument(conn: Any, monument_slug: str) -> dict[str, Any] | None:
 def get_monuments_list(conn: Any, filters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     """List monuments with optional filters (category, level, search)."""
     sql = (
-        "SELECT vs.*, dm.created_at AS entity_created_at, dm.updated_at AS entity_updated_at,"
+        "SELECT vs.*, dm.latitude, dm.longitude,"
+        " dm.created_at AS entity_created_at, dm.updated_at AS entity_updated_at,"
         " COALESCE(au_c.display_name, au_c.username) AS created_by_name,"
         " COALESCE(au_u.display_name, au_u.username) AS updated_by_name"
         " FROM vw_monument_summary vs"
