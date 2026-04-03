@@ -2799,11 +2799,12 @@ def backup_import_full() -> Response:
     db_url = current_app.config.get("DATABASE_URL", "")
 
     def generate():
+        import json as _json
         from .db import _connect_postgres
         conn = _connect_postgres(db_url)
         try:
             for evt in import_full_backup(conn, zip_bytes, _BACKUP_TABLES, _reset_all_sequences):
-                yield f"data: {json.dumps(evt, ensure_ascii=False)}\n\n"
+                yield f"data: {_json.dumps(evt, ensure_ascii=False)}\n\n"
         except Exception as exc:
             yield f'data: {{"type":"error","message":"{exc}"}}\n\n'
         finally:
