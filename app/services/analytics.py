@@ -239,14 +239,32 @@ class AnalyticsService:
             "SELECT COUNT(*) AS cnt FROM dim_event"
         ).fetchone()
 
+        # Person count
+        person_count_row = connection.execute(
+            "SELECT COUNT(*) AS cnt FROM dim_person"
+        ).fetchone()
+
+        # Monument count
+        monument_count_row = connection.execute(
+            "SELECT COUNT(*) AS cnt FROM dim_monument"
+        ).fetchone()
+
+        # Region count
+        region_count_row = connection.execute(
+            "SELECT COUNT(*) AS cnt FROM dim_region"
+        ).fetchone()
+
         return {
             "city_count": counts["city_count"] or 0,
             "country_count": counts["country_count"] or 0,
+            "region_count": region_count_row["cnt"] if region_count_row else 0,
             "latest_city_count": summary["latest_city_count"] or 0,
             "total_population": summary["total_population"] or 0,
             "avg_population": round(summary["avg_population"] or 0),
             "latest_year": summary["latest_year"] or "n/a",
             "event_count": event_count_row["cnt"] if event_count_row else 0,
+            "person_count": person_count_row["cnt"] if person_count_row else 0,
+            "monument_count": monument_count_row["cnt"] if monument_count_row else 0,
         }
 
     def get_growth_leaders(self, filters: dict[str, str | None]) -> list[dict[str, Any]]:

@@ -47,6 +47,11 @@
         <small>source analytique couverte</small>
     </article>
     <article class="metric-card">
+        <span>Régions</span>
+        <strong>{{ metrics.region_count }}</strong>
+        <small>dans la base de données</small>
+    </article>
+    <article class="metric-card">
         <span>Année la plus récente</span>
         <strong>{{ metrics.latest_year }}</strong>
         <small>moyenne {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</small>
@@ -59,6 +64,16 @@
     <article class="metric-card">
         <span>Événements historiques</span>
         <strong>{{ metrics.event_count }}</strong>
+        <small>dans la base de données</small>
+    </article>
+    <article class="metric-card">
+        <span>🧑 Personnages</span>
+        <strong>{{ metrics.person_count }}</strong>
+        <small>dans la base de données</small>
+    </article>
+    <article class="metric-card">
+        <span>🏛️ Monuments</span>
+        <strong>{{ metrics.monument_count }}</strong>
         <small>dans la base de données</small>
     </article>
 </section>
