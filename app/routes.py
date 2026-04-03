@@ -2731,16 +2731,23 @@ def sql_lab_backup_import_stream() -> Response:
 @editor_required
 def backup_export_full() -> Response:
     """Download a single ZIP containing the full DB backup + all photos."""
-    from .db import get_db
+    from .db import _connect_postgres
     from .services.full_backup import export_full_backup_streaming
 
-    conn = get_db()
+    db_url = current_app.config.get("DATABASE_URL", "")
     scope_groups = {"shared", "vrp", "event", "person", "monument"}
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     filename = f"projetcity-full-backup-{timestamp}.zip"
 
+    def generate():
+        conn = _connect_postgres(db_url)
+        try:
+            yield from export_full_backup_streaming(conn, _BACKUP_TABLES, scope_groups)
+        finally:
+            conn.close()
+
     return Response(
-        export_full_backup_streaming(conn, _BACKUP_TABLES, scope_groups),
+        generate(),
         mimetype="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
