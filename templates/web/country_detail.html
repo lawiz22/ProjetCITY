@@ -1,4 +1,5 @@
 {% extends 'web/base.html' %}
+{% from 'web/_refetch_photos.html' import refetch_button, refetch_script %}
 
 {% block content %}
 <section class="city-sticky-header">
@@ -150,6 +151,7 @@
                 <button type="button" class="secondary-button" id="photo-web-search-btn" data-country-slug="{{ country.country_slug }}">🔍 Rechercher sur le web</button>
                 <a href="{{ url_for('web.photo_export_zip', entity_type='country', entity_slug=country.country_slug) }}" class="secondary-button" title="Exporter les photos en ZIP">📦 Export ZIP</a>
                 <button type="button" class="secondary-button" id="photo-import-zip-btn" title="Importer des photos depuis un ZIP">📥 Import ZIP</button>
+                {{ refetch_button('country', country.country_slug, missing_photos_count, 'secondary-button') }}
             </div>
         </div>
         {% if country_photos %}
@@ -1103,4 +1105,5 @@
     });
 })();
 </script>
+{{ refetch_script() }}
 {% endblock %}

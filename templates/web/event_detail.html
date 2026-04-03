@@ -1,4 +1,5 @@
 {% extends 'web/base.html' %}
+{% from 'web/_refetch_photos.html' import refetch_button, refetch_script %}
 
 {% block hero_title %}{% endblock %}
 
@@ -144,6 +145,7 @@
             <button type="button" class="event-search-web-btn" id="event-photo-search-btn">🔍 Rechercher sur le web</button>
             <a href="{{ url_for('web.photo_export_zip', entity_type='event', entity_slug=event.event_slug) }}" class="event-search-web-btn" title="Exporter les photos en ZIP">📦 Export ZIP</a>
             <button type="button" class="event-search-web-btn" id="photo-import-zip-btn">📥 Import ZIP</button>
+            {{ refetch_button('event', event.event_slug, missing_photos_count, 'event-search-web-btn') }}
         </div>
     </div>
     <div class="options-body">
@@ -587,4 +589,5 @@ function openLightbox(src) {
 })();
 </script>
 
+{{ refetch_script() }}
 {% endblock %}

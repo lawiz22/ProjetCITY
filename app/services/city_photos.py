@@ -469,6 +469,32 @@ def search_wikipedia_images(city_name: str, region: str | None, country: str | N
     return images[:20]
 
 
+def count_missing_photos(conn: Any, entity_type: str, entity_slug: str) -> int:
+    """Count photos that exist in DB (with source_url) but are missing from disk."""
+    from .photo_zip import ENTITY_CONFIG
+    cfg = ENTITY_CONFIG.get(entity_type)
+    if cfg is None:
+        return 0
+    photo_tbl = cfg["photo_table"]
+    fk_col = cfg["fk_col"]
+    slug_col = cfg["slug_col"]
+    entity_tbl = cfg["entity_table"]
+    photo_dir = PROJECT_ROOT / cfg["photo_dir"]
+
+    rows = conn.execute(
+        f"SELECT p.filename FROM {photo_tbl} p "
+        f"JOIN {entity_tbl} e ON e.{fk_col} = p.{fk_col} "
+        f"WHERE e.{slug_col} = ?",
+        (entity_slug,),
+    ).fetchall()
+    count = 0
+    for r in rows:
+        file_path = photo_dir / entity_slug / r["filename"]
+        if not file_path.is_file():
+            count += 1
+    return count
+
+
 def download_web_image(url: str) -> tuple[bytes, str] | None:
     """Download an image from a URL. Returns (bytes, extension) or None."""
     req = Request(url, headers={"User-Agent": USER_AGENT})

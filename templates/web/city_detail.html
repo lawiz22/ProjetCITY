@@ -1,4 +1,5 @@
 {% extends 'web/base.html' %}
+{% from 'web/_refetch_photos.html' import refetch_button, refetch_script %}
 
 {% block filter_hidden_fields %}
 <input type="hidden" name="city_slug" value="{{ city.city_slug }}">
@@ -154,6 +155,7 @@
                 <button type="button" class="secondary-button" id="photo-web-search-btn" data-city-slug="{{ city.city_slug }}">🔍 Rechercher sur le web</button>
                 <a href="{{ url_for('web.photo_export_zip', entity_type='city', entity_slug=city.city_slug) }}" class="secondary-button" title="Exporter les photos en ZIP">📦 Export ZIP</a>
                 <button type="button" class="secondary-button" id="photo-import-zip-btn" title="Importer des photos depuis un ZIP">📥 Import ZIP</button>
+                {{ refetch_button('city', city.city_slug, missing_photos_count, 'secondary-button') }}
             </div>
         </div>
 
@@ -1493,4 +1495,5 @@
 })();
 </script>
 
+{{ refetch_script() }}
 {% endblock %}

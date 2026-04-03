@@ -321,9 +321,10 @@ def city_detail(city_slug: str) -> str:
     from .db import get_db
     fiche = get_city_fiche(get_db(), city["city_id"])
 
-    from .services.city_photos import get_city_photos
+    from .services.city_photos import get_city_photos, count_missing_photos
     conn = get_db()
     city_photos = get_city_photos(conn, city_slug)
+    missing_photos_count = count_missing_photos(conn, "city", city_slug)
 
     from .services.event_service import get_events_for_city, CATEGORY_LABELS, CATEGORY_EMOJIS
     city_events = get_events_for_city(conn, city["city_id"])
@@ -345,6 +346,7 @@ def city_detail(city_slug: str) -> str:
         city=city,
         fiche=fiche,
         city_photos=city_photos,
+        missing_photos_count=missing_photos_count,
         city_events=city_events,
         event_category_labels=CATEGORY_LABELS,
         event_category_emojis=CATEGORY_EMOJIS,
@@ -585,8 +587,9 @@ def country_detail(country_slug: str) -> str:
     ).fetchall()
     annotations = [dict(r) for r in ann_rows_tpl]
     # Country photos
-    from .services.city_photos import get_country_photos
+    from .services.city_photos import get_country_photos, count_missing_photos
     country_photos = get_country_photos(conn, country_slug)
+    missing_photos_count = count_missing_photos(conn, "country", country_slug)
     return render_template(
         "web/country_detail.html",
         page_title=country["country_name"],
@@ -598,6 +601,7 @@ def country_detail(country_slug: str) -> str:
         details=details,
         annotations=annotations,
         country_photos=country_photos,
+        missing_photos_count=missing_photos_count,
     )
 
 
@@ -1287,8 +1291,9 @@ def region_detail(region_slug: str) -> str:
     ).fetchall()
     annotations = [dict(r) for r in ann_rows]
     # Region photos
-    from .services.city_photos import get_region_photos
+    from .services.city_photos import get_region_photos, count_missing_photos
     region_photos = get_region_photos(conn, region_slug)
+    missing_photos_count = count_missing_photos(conn, "region", region_slug)
     return render_template(
         "web/region_detail.html",
         page_title=region["region_name"],
@@ -1299,6 +1304,7 @@ def region_detail(region_slug: str) -> str:
         fiche=fiche,
         annotations=annotations,
         region_photos=region_photos,
+        missing_photos_count=missing_photos_count,
     )
 
 
@@ -5628,6 +5634,7 @@ def events_list() -> str:
 def event_detail(event_slug: str) -> str:
     from .db import get_db
     from .services.event_service import get_event, CATEGORY_LABELS, CATEGORY_EMOJIS
+    from .services.city_photos import count_missing_photos
 
     conn = get_db()
     event = get_event(conn, event_slug)
@@ -5640,6 +5647,7 @@ def event_detail(event_slug: str) -> str:
         event=event,
         category_labels=CATEGORY_LABELS,
         category_emojis=CATEGORY_EMOJIS,
+        missing_photos_count=count_missing_photos(conn, "event", event_slug),
     )
 
 
@@ -6251,6 +6259,7 @@ def persons_list() -> str:
 def person_detail(person_slug: str) -> str:
     from .db import get_db
     from .services.person_service import get_person, CATEGORY_LABELS, CATEGORY_EMOJIS
+    from .services.city_photos import count_missing_photos
 
     conn = get_db()
     person = get_person(conn, person_slug)
@@ -6263,6 +6272,7 @@ def person_detail(person_slug: str) -> str:
         person=person,
         category_labels=CATEGORY_LABELS,
         category_emojis=CATEGORY_EMOJIS,
+        missing_photos_count=count_missing_photos(conn, "person", person_slug),
     )
 
 
@@ -6825,6 +6835,7 @@ def monuments_list() -> str:
 def monument_detail(monument_slug: str) -> str:
     from .db import get_db
     from .services.monument_service import get_monument, CATEGORY_LABELS, CATEGORY_EMOJIS
+    from .services.city_photos import count_missing_photos
 
     conn = get_db()
     monument = get_monument(conn, monument_slug)
@@ -6837,6 +6848,7 @@ def monument_detail(monument_slug: str) -> str:
         monument=monument,
         category_labels=CATEGORY_LABELS,
         category_emojis=CATEGORY_EMOJIS,
+        missing_photos_count=count_missing_photos(conn, "monument", monument_slug),
     )
 
 
@@ -7231,6 +7243,65 @@ def photo_import_zip(entity_type: str, entity_slug: str) -> Response:
             f"{result['imported']} photo(s) importée(s) depuis ZIP",
         )
     return jsonify(result)
+
+
+@web.route("/photos/refetch-missing/<entity_type>/<entity_slug>", methods=["POST"])
+@editor_required
+def photo_refetch_missing(entity_type: str, entity_slug: str) -> Response:
+    """Re-download photos that exist in the DB (with source_url) but are missing from disk."""
+    from .db import get_db
+    from .services.photo_zip import ENTITY_CONFIG
+    from .services.city_photos import download_web_image
+
+    cfg = ENTITY_CONFIG.get(entity_type)
+    if cfg is None:
+        return jsonify({"success": False, "error": "Type d'entité inconnu."})
+
+    conn = get_db()
+    photo_tbl = cfg["photo_table"]
+    fk_col = cfg["fk_col"]
+    slug_col = cfg["slug_col"]
+    entity_tbl = cfg["entity_table"]
+    photo_dir = Path(current_app.root_path).parent / cfg["photo_dir"]
+
+    rows = conn.execute(
+        f"SELECT p.filename, p.source_url "
+        f"FROM {photo_tbl} p "
+        f"JOIN {entity_tbl} e ON e.{fk_col} = p.{fk_col} "
+        f"WHERE e.{slug_col} = ? AND p.source_url IS NOT NULL AND p.source_url != ''",
+        (entity_slug,),
+    ).fetchall()
+
+    missing = []
+    for r in rows:
+        file_path = photo_dir / entity_slug / r["filename"]
+        if not file_path.is_file():
+            missing.append({"filename": r["filename"], "source_url": r["source_url"]})
+
+    if not missing:
+        return jsonify({"success": True, "fetched": 0, "failed": 0, "message": "Aucune photo manquante."})
+
+    fetched = 0
+    failed = 0
+    for item in missing:
+        result = download_web_image(item["source_url"])
+        if result is None:
+            failed += 1
+            continue
+        data, _ext = result
+        dest_dir = photo_dir / entity_slug
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest = dest_dir / item["filename"]
+        dest.write_bytes(data)
+        fetched += 1
+
+    return jsonify({
+        "success": True,
+        "fetched": fetched,
+        "failed": failed,
+        "total_missing": len(missing),
+        "message": f"{fetched} photo(s) récupérée(s), {failed} échouée(s).",
+    })
 
 
 # ---------------------------------------------------------------------------
