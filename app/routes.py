@@ -2779,7 +2779,6 @@ def backup_export_entity_photos(entity_type: str) -> Response:
 @editor_required
 def backup_import_full() -> Response:
     """Import a full backup ZIP (DB + Photos) with streaming progress."""
-    import psycopg
     from .services.full_backup import import_full_backup
 
     uploaded = request.files.get("backup_file")
@@ -2790,10 +2789,11 @@ def backup_import_full() -> Response:
         )
 
     zip_bytes = uploaded.read()
-    db_url = current_app.config["SQLALCHEMY_DATABASE_URI"]
+    db_url = current_app.config.get("DATABASE_URL", "")
 
     def generate():
-        conn = psycopg.connect(db_url, row_factory=psycopg.rows.dict_row)
+        from .db import _connect_postgres
+        conn = _connect_postgres(db_url)
         try:
             for evt in import_full_backup(conn, zip_bytes, _BACKUP_TABLES, _reset_all_sequences):
                 yield f"data: {json.dumps(evt, ensure_ascii=False)}\n\n"

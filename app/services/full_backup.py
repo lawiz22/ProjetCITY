@@ -212,7 +212,7 @@ def import_full_backup(conn: Any, zip_data: bytes, backup_tables: list[dict],
             conflict_clause = f" ON CONFLICT {tdef['conflict']} DO NOTHING"
 
         inserted = 0
-        for row in rows:
+        for idx, row in enumerate(rows):
             # Deserialize __bytes__
             for k, v in row.items():
                 if isinstance(v, dict) and "__bytes__" in v:
@@ -220,15 +220,22 @@ def import_full_backup(conn: Any, zip_data: bytes, backup_tables: list[dict],
                     row[k] = base64.b64decode(v["__bytes__"])
 
             cols = list(row.keys())
-            placeholders = ", ".join(["%s"] * len(cols))
+            placeholders = ", ".join("?" for _ in cols)
             col_list = ", ".join(cols)
             sql = f"INSERT INTO {tbl} ({col_list}) VALUES ({placeholders}){conflict_clause}"
+
+            sp_name = f"sp_{tbl}_{idx}"
             try:
-                cur = conn.execute(sql, tuple(row.values()))
+                conn.execute(f"SAVEPOINT {sp_name}")
+                cur = conn.execute(sql, list(row.values()))
                 if hasattr(cur, "rowcount") and cur.rowcount > 0:
                     inserted += 1
-            except Exception as exc:
-                yield {"type": "row_error", "table": tbl, "error": str(exc)}
+                conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+            except Exception:
+                try:
+                    conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
+                except Exception:
+                    pass
 
         total_inserted += inserted
         yield {"type": "table_done", "table": tbl, "inserted": inserted, "row_count": len(rows)}
