@@ -626,9 +626,25 @@ function openLightbox(src) {
         maxZoom: 19
     }).addTo(map);
 
+    // Custom icon — no external image dependency
+    var pinIcon = L.divIcon({
+        className: '',
+        html: '<div style="width:30px;height:30px;position:relative;">'
+            + '<div style="width:20px;height:20px;background:#e74c3c;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.4);position:absolute;top:0;left:5px;"></div>'
+            + '<div style="width:8px;height:8px;background:rgba(0,0,0,.25);border-radius:50%;position:absolute;bottom:0;left:11px;"></div>'
+            + '</div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -28]
+    });
+
+    function makeMarker(lt, ln) {
+        return L.marker([lt, ln], { icon: pinIcon });
+    }
+
     var marker = null;
     if (hasCoords) {
-        marker = L.marker([lat, lng]).addTo(map)
+        marker = makeMarker(lat, lng).addTo(map)
             .bindPopup('<strong>{{ monument.monument_name | e }}</strong>');
     }
 
@@ -658,7 +674,7 @@ function openLightbox(src) {
         map.getContainer().style.cursor = '';
         if (hasCoords) {
             if (marker) { marker.setLatLng([origLat, origLng]); }
-            else { marker = L.marker([origLat, origLng]).addTo(map); }
+            else { marker = makeMarker(origLat, origLng).addTo(map); }
             map.setView([origLat, origLng], 15);
             coordsDisplay.textContent = '📌 ' + origLat + ', ' + origLng;
             coordsDisplay.style.opacity = '';
@@ -676,7 +692,7 @@ function openLightbox(src) {
         if (marker) {
             marker.setLatLng([newLat, newLng]);
         } else {
-            marker = L.marker([newLat, newLng]).addTo(map);
+            marker = makeMarker(newLat, newLng).addTo(map);
         }
         coordsDisplay.textContent = '📌 ' + newLat + ', ' + newLng;
         coordsDisplay.style.opacity = '';

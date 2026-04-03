@@ -2724,6 +2724,88 @@ def sql_lab_backup_import_stream() -> Response:
 
 
 # ---------------------------------------------------------------------------
+# Full Backup (BD + Photos)
+# ---------------------------------------------------------------------------
+
+@web.route("/backup/export-full")
+@editor_required
+def backup_export_full() -> Response:
+    """Download a single ZIP containing the full DB backup + all photos."""
+    from .db import get_db
+    from .services.full_backup import export_full_backup_streaming
+
+    conn = get_db()
+    scope_groups = {"shared", "vrp", "event", "person", "monument"}
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    filename = f"projetcity-full-backup-{timestamp}.zip"
+
+    return Response(
+        export_full_backup_streaming(conn, _BACKUP_TABLES, scope_groups),
+        mimetype="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@web.route("/backup/export-photos/<entity_type>")
+@editor_required
+def backup_export_entity_photos(entity_type: str) -> Response:
+    """Download a ZIP with all photos for a given entity type."""
+    from .db import get_db
+    from .services.full_backup import export_entity_photos_zip
+
+    valid_types = ("city", "event", "person", "monument", "country", "region")
+    if entity_type not in valid_types:
+        return jsonify({"success": False, "error": f"Type inconnu: {entity_type}"}), 400
+
+    conn = get_db()
+    buf = export_entity_photos_zip(conn, entity_type)
+    if buf is None:
+        flash("Aucune photo à exporter.", "info")
+        return redirect(url_for("web.sql_lab"))
+
+    labels = {"city": "villes", "event": "evenements", "person": "personnages",
+              "monument": "monuments", "country": "pays", "region": "regions"}
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    filename = f"photos-{labels.get(entity_type, entity_type)}-{timestamp}.zip"
+
+    return Response(
+        buf.read(),
+        mimetype="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@web.route("/backup/import-full", methods=["POST"])
+@editor_required
+def backup_import_full() -> Response:
+    """Import a full backup ZIP (DB + Photos) with streaming progress."""
+    import psycopg
+    from .services.full_backup import import_full_backup
+
+    uploaded = request.files.get("backup_file")
+    if not uploaded:
+        return Response(
+            'data: {"type":"error","message":"Aucun fichier envoyé."}\n\n',
+            mimetype="text/event-stream",
+        )
+
+    zip_bytes = uploaded.read()
+    db_url = current_app.config["SQLALCHEMY_DATABASE_URI"]
+
+    def generate():
+        conn = psycopg.connect(db_url, row_factory=psycopg.rows.dict_row)
+        try:
+            for evt in import_full_backup(conn, zip_bytes, _BACKUP_TABLES, _reset_all_sequences):
+                yield f"data: {json.dumps(evt, ensure_ascii=False)}\n\n"
+        except Exception as exc:
+            yield f'data: {{"type":"error","message":"{exc}"}}\n\n'
+        finally:
+            conn.close()
+
+    return Response(generate(), mimetype="text/event-stream")
+
+
+# ---------------------------------------------------------------------------
 # Add City
 # ---------------------------------------------------------------------------
 

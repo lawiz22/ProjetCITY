@@ -425,6 +425,16 @@ def run_migrations(config: Mapping[str, Any]) -> None:
             )
         """)
 
+        # --- dim_monument latitude/longitude columns (must be before view) ---
+        cur.execute(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_monument'",
+        )
+        _mon_cols = {row[0] for row in cur.fetchall()}
+        if _mon_cols and "latitude" not in _mon_cols:
+            cur.execute("ALTER TABLE dim_monument ADD COLUMN latitude NUMERIC")
+        if _mon_cols and "longitude" not in _mon_cols:
+            cur.execute("ALTER TABLE dim_monument ADD COLUMN longitude NUMERIC")
+
         # --- vw_monument_summary view ---
         cur.execute("""
             CREATE OR REPLACE VIEW vw_monument_summary AS
@@ -471,15 +481,6 @@ def run_migrations(config: Mapping[str, Any]) -> None:
                 m.created_at
         """)
 
-        # --- dim_monument latitude/longitude columns ---
-        cur.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_monument'",
-        )
-        _mon_cols = {row[0] for row in cur.fetchall()}
-        if _mon_cols and "latitude" not in _mon_cols:
-            cur.execute("ALTER TABLE dim_monument ADD COLUMN latitude NUMERIC")
-        if _mon_cols and "longitude" not in _mon_cols:
-            cur.execute("ALTER TABLE dim_monument ADD COLUMN longitude NUMERIC")
 
         # --- tracking columns on entity tables ---
         _tracking_tables = ["dim_city", "dim_country", "dim_region", "dim_event", "dim_person", "dim_monument"]

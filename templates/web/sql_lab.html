@@ -56,6 +56,34 @@
                 </p>
             </div>
 
+            <div class="backup-section" style="margin-top:1rem; padding:1rem; border:1px solid var(--border,#ddd); border-radius:8px;">
+                <h3 style="margin:0 0 .5rem">📦 Backup complet (BD + Photos)</h3>
+                <div class="button-row" style="gap:.5rem; flex-wrap:wrap; align-items:center;">
+                    <a href="{{ url_for('web.backup_export_full') }}" class="secondary-button" style="text-decoration:none; display:inline-flex; align-items:center; gap:.3rem;">
+                        📥 Exporter TOUT (BD + Photos)
+                    </a>
+                    <label class="secondary-button" style="cursor:pointer; display:inline-flex; align-items:center; gap:.3rem;">
+                        📤 Importer TOUT
+                        <input type="file" id="import-full-file" accept=".zip" style="display:none;">
+                    </label>
+                </div>
+                <div style="margin-top:.75rem;">
+                    <h4 style="margin:0 0 .4rem; font-size:.9em;">📷 Export photos par catégorie</h4>
+                    <div class="button-row" style="gap:.4rem; flex-wrap:wrap;">
+                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='city') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🏙️ Villes</a>
+                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='country') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🌍 Pays</a>
+                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='region') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🗺️ Régions</a>
+                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='event') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">📅 Événements</a>
+                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='person') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🧑 Personnages</a>
+                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='monument') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🏛️ Monuments</a>
+                    </div>
+                </div>
+                <p class="helper-text" style="margin-top:.4rem; font-size:.85em;">
+                    Le backup complet inclut toute la BD + toutes les photos dans un seul ZIP. Les noms de fichiers sont conservés pour la réimportation.
+                    L'import n'écrase jamais les données existantes — seules les lignes et photos manquantes sont ajoutées.
+                </p>
+            </div>
+
             <!-- Import progress modal -->
             <div id="import-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.55); justify-content:center; align-items:center;">
                 <div style="background:var(--panel-bg,#fff); border-radius:12px; padding:1.5rem 2rem; max-width:560px; width:90%; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,.3);">
@@ -285,6 +313,82 @@ document.addEventListener('DOMContentLoaded', function() {
         spinner.style.display = 'none';
         closeBtn.style.display = 'inline-flex';
     });
+
+    // --- Full backup import (ZIP with DB + Photos) ---
+    const fullFileInput = document.getElementById('import-full-file');
+    if (fullFileInput) {
+        fullFileInput.addEventListener('change', async function() {
+            const file = this.files[0];
+            if (!file) return;
+            this.value = '';
+
+            modal.style.display = 'flex';
+            log.textContent = '';
+            title.textContent = 'Import complet en cours…';
+            spinner.style.display = 'inline-block';
+            closeBtn.style.display = 'none';
+
+            function addLine(text, type) {
+                const line = document.createElement('div');
+                line.textContent = text;
+                if (type === 'ok') line.style.color = '#27ae60';
+                else if (type === 'warn') line.style.color = '#e67e22';
+                else if (type === 'err') line.style.color = '#e74c3c';
+                else if (type === 'done') { line.style.color = '#2f6fed'; line.style.fontWeight = 'bold'; }
+                log.appendChild(line);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            addLine('📦 Lecture du fichier ' + file.name + ' (' + (file.size / 1048576).toFixed(1) + ' Mo)…', 'info');
+
+            const form = new FormData();
+            form.append('backup_file', file);
+
+            try {
+                const resp = await fetch('{{ url_for("web.backup_import_full") }}', {
+                    method: 'POST',
+                    body: form,
+                });
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    for (const raw of lines) {
+                        if (!raw.startsWith('data: ')) continue;
+                        try {
+                            const evt = JSON.parse(raw.slice(6));
+                            if (evt.type === 'table_start') addLine('📋 ' + evt.table + ' — ' + evt.row_count + ' ligne(s)…', 'info');
+                            else if (evt.type === 'table_done') {
+                                if (evt.inserted > 0) addLine('   ✅ +' + evt.inserted + '/' + evt.row_count + ' insérée(s)', 'ok');
+                                else addLine('   ⏭️  0/' + evt.row_count + ' (déjà présent)', 'info');
+                            }
+                            else if (evt.type === 'table_skip') addLine('   ⬜ ' + evt.table + ' — vide', 'info');
+                            else if (evt.type === 'photos_start') addLine('\n📷 Import de ' + evt.count + ' photo(s)…', 'info');
+                            else if (evt.type === 'photos_done') addLine('   ✅ ' + evt.imported + '/' + evt.total + ' photo(s) importée(s)', 'ok');
+                            else if (evt.type === 'summary') {
+                                addLine('\n' + evt.message, 'done');
+                                title.textContent = '✅ Import complet terminé';
+                            }
+                            else if (evt.type === 'error') { addLine('❌ ' + evt.message, 'err'); title.textContent = '❌ Erreur'; }
+                        } catch(e) {}
+                    }
+                }
+            } catch(e) {
+                addLine('❌ Erreur réseau: ' + e.message, 'err');
+                title.textContent = '❌ Erreur';
+            }
+
+            spinner.style.display = 'none';
+            closeBtn.style.display = 'inline-flex';
+        });
+    }
 });
 </script>
 {% endblock %}
