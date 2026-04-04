@@ -1603,6 +1603,366 @@
             });
         }
 
+        /* ═══════════════════════════════════════════════════════
+           Monument Time-Travel
+           ═══════════════════════════════════════════════════════ */
+        var mtData = null;
+        var mtLoading = false;
+        var mtActive = false;
+        var mtPlayInterval = null;
+        var mtMarkerLayer = L.layerGroup();
+        var mtPanel = document.getElementById('mt-tt-panel');
+        var mtSlider = document.getElementById('mt-slider');
+        var mtYearDisplay = document.getElementById('mt-year-display');
+        var mtMonumentCount = document.getElementById('mt-monument-count');
+        var mtMinYear = document.getElementById('mt-min-year');
+        var mtMaxYear = document.getElementById('mt-max-year');
+        var mtPlayBtn = document.getElementById('mt-play-btn');
+        var mtSpeed = document.getElementById('mt-speed');
+        var mtDetailsRow = document.getElementById('mt-details-row');
+        var mtMonumentsList = document.getElementById('mt-monuments-list');
+        var mtDetailCard = document.getElementById('mt-detail-card');
+        var mtPreviousTileKey = null;
+        var mtSelectedSlug = null;
+
+        var mtCatColors = {
+            gratte_ciel: '#3498db', hotel: '#e67e22', eglise: '#9b59b6',
+            mairie: '#1abc9c', musee: '#e91e63', stade: '#2ecc71',
+            pont: '#f1c40f', monument_historique: '#e74c3c', gare: '#00bcd4',
+            theatre: '#ff5722', parc: '#4caf50', autre: '#95a5a6'
+        };
+
+        function fetchMonumentTTData(cb) {
+            if (mtData) return cb(mtData);
+            if (mtLoading) return;
+            mtLoading = true;
+            if (mtYearDisplay) mtYearDisplay.textContent = 'Chargement…';
+            fetch('/map/monument-time-travel')
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    mtData = d;
+                    mtLoading = false;
+                    cb(d);
+                })
+                .catch(function () {
+                    mtLoading = false;
+                    if (mtYearDisplay) mtYearDisplay.textContent = 'Erreur';
+                });
+        }
+
+        function enterMonumentTravel() {
+            mtActive = true;
+            markerLayer.clearLayers();
+            markerLayer.remove();
+            mtMarkerLayer.addTo(map);
+            if (mtPanel) mtPanel.style.display = '';
+
+            mtPreviousTileKey = currentTileKey;
+            if (currentTileKey !== 'ohm-historical') {
+                setTileLayer('ohm-historical');
+                if (tileSelect) tileSelect.value = 'ohm-historical';
+            }
+            syncOhmStyleDropdown();
+
+            var mp = document.querySelector('.map-panel-full');
+            if (mp) mp.classList.add('timetravel-active');
+            setTimeout(function(){ map.invalidateSize(); }, 50);
+
+            var readingStrip = document.querySelector('.map-reading-strip');
+            if (readingStrip) readingStrip.style.display = 'none';
+            var densityLeg = document.getElementById('density-legend');
+            if (densityLeg) densityLeg.style.display = 'none';
+
+            fetchMonumentTTData(function (d) {
+                if (!d.years.length) return;
+                mtSlider.min = 0;
+                mtSlider.max = d.years.length - 1;
+                mtSlider.value = d.years.length - 1;
+                mtMinYear.textContent = d.years[0];
+                mtMaxYear.textContent = d.years[d.years.length - 1];
+                renderMonumentTravelYear(d.years[d.years.length - 1]);
+            });
+        }
+
+        function exitMonumentTravel() {
+            mtActive = false;
+            stopMTPlay();
+            mtMarkerLayer.clearLayers();
+            mtMarkerLayer.remove();
+            markerLayer.addTo(map);
+            if (mtPanel) mtPanel.style.display = 'none';
+            if (mtDetailsRow) mtDetailsRow.style.display = 'none';
+
+            if (mtPreviousTileKey && mtPreviousTileKey !== 'ohm-historical') {
+                setTileLayer(mtPreviousTileKey);
+                if (tileSelect) tileSelect.value = mtPreviousTileKey;
+            }
+            mtPreviousTileKey = null;
+            syncOhmStyleDropdown();
+
+            var mp = document.querySelector('.map-panel-full');
+            if (mp) mp.classList.remove('timetravel-active');
+            setTimeout(function(){ map.invalidateSize(); }, 50);
+
+            var readingStrip = document.querySelector('.map-reading-strip');
+            if (readingStrip) readingStrip.style.display = '';
+
+            render();
+        }
+
+        function renderMonumentTravelYear(year) {
+            if (!mtData) return;
+            mtMarkerLayer.clearLayers();
+            updateOhmDate(year);
+
+            var monuments = mtData.monuments;
+            var slugs = Object.keys(monuments);
+            var activeMonuments = [];
+
+            /* Cumulative: monument visible if construction_year <= year AND (no demolition or demolition_year > year) */
+            slugs.forEach(function (slug) {
+                var mon = monuments[slug];
+                if (mon.construction_year <= year) {
+                    if (!mon.demolition_year || mon.demolition_year > year) {
+                        activeMonuments.push({ slug: slug, mon: mon });
+                    }
+                }
+            });
+
+            var markerBounds = [];
+
+            activeMonuments.forEach(function (item) {
+                var mon = item.mon;
+                var lat = mon.lat;
+                var lng = mon.lng;
+
+                /* Fallback: use first location with city coords if monument has no direct coords */
+                if (!lat || !lng) return;
+
+                var catColor = mtCatColors[mon.category] || '#95a5a6';
+                var m = L.circleMarker([lat, lng], {
+                    radius: mon.level === 1 ? 9 : 6,
+                    color: '#fff',
+                    fillColor: catColor,
+                    fillOpacity: 0.9,
+                    weight: 2
+                });
+                m.bindPopup(
+                    '<div class="map-popup">' +
+                    '<h3>' + mon.category_emoji + ' ' + mon.name + '</h3>' +
+                    '<p>' + mon.category_label + ' · ' + mon.construction_year +
+                    (mon.demolition_year ? ' – ' + mon.demolition_year : '') + '</p>' +
+                    (mon.architect ? '<p>🏗️ ' + mon.architect + '</p>' : '') +
+                    (mon.summary ? '<p style="font-size:.85em;opacity:.8;">' + mon.summary.substring(0, 150) + '…</p>' : '') +
+                    '<a href="/monuments/' + item.slug + '" target="_blank">Voir le monument</a>' +
+                    '</div>'
+                );
+                m.on('click', function () {
+                    mtSelectedSlug = item.slug;
+                    updateMTDetailCard(item);
+                    highlightMTListItem(item.slug);
+                });
+                m.addTo(mtMarkerLayer);
+                markerBounds.push([lat, lng]);
+            });
+
+            if (mtYearDisplay) mtYearDisplay.textContent = year;
+            if (mtMonumentCount) mtMonumentCount.textContent = activeMonuments.length + ' monument' + (activeMonuments.length !== 1 ? 's' : '');
+            if (ctrls.summary) {
+                ctrls.summary.textContent = activeMonuments.length + ' monument(s) en ' + year + '. Couche active\u00a0: Monuments dans le temps.';
+            }
+            if (ctrls.visibleCount) {
+                ctrls.visibleCount.textContent = activeMonuments.length + ' monuments';
+            }
+            var mtBlock1Count = document.getElementById('mt-block1-count');
+            if (mtBlock1Count) {
+                mtBlock1Count.textContent = '— ' + activeMonuments.length + ' en ' + year;
+            }
+
+            updateMTMonumentsList(activeMonuments, year);
+
+            var mtAutoZoom = document.getElementById('mt-autozoom');
+            if (mtAutoZoom && mtAutoZoom.checked && markerBounds.length) {
+                var bounds = L.latLngBounds(markerBounds);
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+            }
+        }
+
+        function updateMTMonumentsList(activeMonuments, year) {
+            if (!mtDetailsRow) return;
+            mtDetailsRow.style.display = activeMonuments.length ? '' : 'none';
+
+            if (mtMonumentsList) {
+                var html = '';
+                activeMonuments.sort(function (a, b) {
+                    return a.mon.construction_year - b.mon.construction_year;
+                });
+                activeMonuments.forEach(function (item) {
+                    var mon = item.mon;
+                    var catColor = mtCatColors[mon.category] || '#95a5a6';
+                    var locNames = mon.locations.map(function (l) { return l.city_name || l.region; }).filter(Boolean);
+                    var isSelected = mtSelectedSlug === item.slug;
+                    html += '<div class="et-event-card' + (isSelected ? ' mt-card-selected' : '') + '" data-mt-slug="' + item.slug + '" style="cursor:pointer;">' +
+                        '<div class="et-event-card-header">' +
+                        '<span class="et-event-dot" style="background:' + catColor + '"></span>' +
+                        '<strong><a href="/monuments/' + item.slug + '" target="_blank">' + mon.category_emoji + ' ' + mon.name + '</a></strong>' +
+                        '<span class="et-event-badge">' + mon.construction_year +
+                        (mon.demolition_year ? ' – ' + mon.demolition_year : '') + '</span>' +
+                        '</div>' +
+                        '<div class="et-event-card-body">' +
+                        '<div class="et-event-card-meta">' +
+                        '<span class="et-event-badge">' + mon.category_label + '</span>' +
+                        (mon.level === 1 ? ' <span class="et-event-badge et-event-badge-major">⭐ Majeur</span>' : '') +
+                        (locNames.length ? '<p class="et-event-locs">📍 ' + locNames.join(', ') + '</p>' : '') +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+                if (!activeMonuments.length) {
+                    html = '<p class="tt-no-data">Aucun monument visible pour cette année.</p>';
+                }
+                mtMonumentsList.innerHTML = html;
+
+                /* Bind click on list items */
+                mtMonumentsList.querySelectorAll('.et-event-card[data-mt-slug]').forEach(function (card) {
+                    card.addEventListener('click', function (e) {
+                        if (e.target.tagName === 'A') return;
+                        var slug = card.getAttribute('data-mt-slug');
+                        mtSelectedSlug = slug;
+                        var mon = mtData.monuments[slug];
+                        if (mon) {
+                            updateMTDetailCard({ slug: slug, mon: mon });
+                            highlightMTListItem(slug);
+                        }
+                    });
+                });
+            }
+
+            /* Keep detail card if previously selected monument is still visible */
+            if (mtSelectedSlug && mtData && mtData.monuments[mtSelectedSlug]) {
+                var mon = mtData.monuments[mtSelectedSlug];
+                var stillVisible = mon.construction_year <= year && (!mon.demolition_year || mon.demolition_year > year);
+                if (stillVisible) {
+                    updateMTDetailCard({ slug: mtSelectedSlug, mon: mon });
+                } else {
+                    mtSelectedSlug = null;
+                    if (mtDetailCard) mtDetailCard.innerHTML = '<p class="tt-no-data">Cliquez sur un monument pour voir ses détails.</p>';
+                }
+            }
+        }
+
+        function updateMTDetailCard(item) {
+            if (!mtDetailCard) return;
+            var mon = item.mon;
+            var catColor = mtCatColors[mon.category] || '#95a5a6';
+            var locNames = mon.locations.map(function (l) { return l.city_name || l.region; }).filter(Boolean);
+            var photoHtml = '';
+            if (mon.primary_photo) {
+                photoHtml = '<img class="et-card-thumb" src="/static/' + mon.primary_photo + '" alt="" style="max-width:100%;border-radius:6px;margin-bottom:8px;">';
+            }
+            var html = '<div class="et-event-card">' +
+                '<div class="et-event-card-header">' +
+                '<span class="et-event-dot" style="background:' + catColor + '"></span>' +
+                '<strong><a href="/monuments/' + item.slug + '" target="_blank">' + mon.category_emoji + ' ' + mon.name + '</a></strong>' +
+                '</div>' +
+                photoHtml +
+                '<div class="et-event-card-body">' +
+                '<div class="et-event-card-meta">' +
+                '<span class="et-event-badge">' + mon.category_label + '</span>' +
+                (mon.level === 1 ? ' <span class="et-event-badge et-event-badge-major">⭐ Majeur</span>' : '') +
+                '</div>' +
+                '</div>' +
+                '<table class="mt-detail-table" style="width:100%;font-size:.85em;margin-top:6px;">' +
+                '<tr><td style="opacity:.6;">Construction</td><td>' + mon.construction_year + '</td></tr>' +
+                (mon.demolition_year ? '<tr><td style="opacity:.6;">Démolition</td><td>' + mon.demolition_year + '</td></tr>' : '') +
+                (mon.architect ? '<tr><td style="opacity:.6;">Architecte</td><td>' + mon.architect + '</td></tr>' : '') +
+                (mon.architectural_style ? '<tr><td style="opacity:.6;">Style</td><td>' + mon.architectural_style + '</td></tr>' : '') +
+                (mon.height_meters ? '<tr><td style="opacity:.6;">Hauteur</td><td>' + mon.height_meters + ' m</td></tr>' : '') +
+                (mon.floors ? '<tr><td style="opacity:.6;">Étages</td><td>' + mon.floors + '</td></tr>' : '') +
+                (locNames.length ? '<tr><td style="opacity:.6;">Lieu</td><td>📍 ' + locNames.join(', ') + '</td></tr>' : '') +
+                '</table>' +
+                (mon.summary ? '<p class="et-event-desc" style="margin-top:8px;">' + mon.summary + '</p>' : '') +
+                '</div>';
+            mtDetailCard.innerHTML = html;
+        }
+
+        function highlightMTListItem(slug) {
+            if (!mtMonumentsList) return;
+            mtMonumentsList.querySelectorAll('.et-event-card').forEach(function (card) {
+                card.classList.toggle('mt-card-selected', card.getAttribute('data-mt-slug') === slug);
+            });
+        }
+
+        /* MT Slider */
+        if (mtSlider) {
+            mtSlider.addEventListener('input', function () {
+                if (!mtData) return;
+                var idx = Number(mtSlider.value);
+                var year = mtData.years[idx];
+                renderMonumentTravelYear(year);
+            });
+        }
+
+        /* MT Step navigation */
+        function mtStepYears(delta) {
+            if (!mtData || !mtData.years.length) return;
+            var curIdx = Number(mtSlider.value);
+            var curYear = mtData.years[curIdx];
+            var targetYear = curYear + delta;
+            var bestIdx = curIdx;
+            var bestDist = Infinity;
+            for (var i = 0; i < mtData.years.length; i++) {
+                var d = Math.abs(mtData.years[i] - targetYear);
+                if (d < bestDist) { bestDist = d; bestIdx = i; }
+            }
+            if (bestIdx === curIdx && delta > 0 && curIdx < mtData.years.length - 1) bestIdx = curIdx + 1;
+            if (bestIdx === curIdx && delta < 0 && curIdx > 0) bestIdx = curIdx - 1;
+            mtSlider.value = bestIdx;
+            renderMonumentTravelYear(mtData.years[bestIdx]);
+        }
+
+        ['mt-back10','mt-back1','mt-fwd1','mt-fwd10'].forEach(function (id) {
+            var btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', function () {
+                var deltas = {'mt-back10': -10, 'mt-back1': -1, 'mt-fwd1': 1, 'mt-fwd10': 10};
+                mtStepYears(deltas[id]);
+            });
+        });
+
+        /* MT Play / Pause */
+        function stopMTPlay() {
+            if (mtPlayInterval) {
+                clearInterval(mtPlayInterval);
+                mtPlayInterval = null;
+            }
+            if (mtPlayBtn) mtPlayBtn.textContent = '▶️ Lecture';
+        }
+
+        if (mtPlayBtn) {
+            mtPlayBtn.addEventListener('click', function () {
+                if (mtPlayInterval) { stopMTPlay(); return; }
+                if (!mtData || !mtData.years.length) return;
+                mtPlayBtn.textContent = '⏸️ Pause';
+                var speed = Number(mtSpeed.value) || 800;
+                mtPlayInterval = setInterval(function () {
+                    var idx = Number(mtSlider.value);
+                    if (idx >= mtData.years.length - 1) {
+                        mtSlider.value = 0;
+                        idx = 0;
+                    } else {
+                        idx++;
+                        mtSlider.value = idx;
+                    }
+                    renderMonumentTravelYear(mtData.years[idx]);
+                }, speed);
+            });
+        }
+        if (mtSpeed) {
+            mtSpeed.addEventListener('change', function () {
+                if (mtPlayInterval) { stopMTPlay(); mtPlayBtn.click(); }
+            });
+        }
+
         /* Layer pills */
         ctrls.themePills.forEach(function (pill) {
             pill.addEventListener('click', function () {
@@ -1616,13 +1976,20 @@
 
                 if (theme === 'timetravel') {
                     if (etActive) exitEventTravel();
+                    if (mtActive) exitMonumentTravel();
                     enterTimeTravel();
                 } else if (theme === 'eventtravel') {
                     if (ttActive) exitTimeTravel();
+                    if (mtActive) exitMonumentTravel();
                     enterEventTravel();
+                } else if (theme === 'monumenttravel') {
+                    if (ttActive) exitTimeTravel();
+                    if (etActive) exitEventTravel();
+                    enterMonumentTravel();
                 } else {
                     if (ttActive) exitTimeTravel();
                     if (etActive) exitEventTravel();
+                    if (mtActive) exitMonumentTravel();
                     else render();
                 }
             });
@@ -1637,6 +2004,9 @@
                     } else if (etActive && etData) {
                         var idx = Number(etSlider.value);
                         renderEventTravelYear(etData.years[idx]);
+                    } else if (mtActive && mtData) {
+                        var idx = Number(mtSlider.value);
+                        renderMonumentTravelYear(mtData.years[idx]);
                     } else { render(); }
                 });
                 el.addEventListener('change', function () {
@@ -1646,6 +2016,9 @@
                     } else if (etActive && etData) {
                         var idx = Number(etSlider.value);
                         renderEventTravelYear(etData.years[idx]);
+                    } else if (mtActive && mtData) {
+                        var idx = Number(mtSlider.value);
+                        renderMonumentTravelYear(mtData.years[idx]);
                     } else { render(); }
                 });
             }
@@ -1655,6 +2028,7 @@
             ctrls.reset.addEventListener('click', function () {
                 if (ttActive) exitTimeTravel();
                 if (etActive) exitEventTravel();
+                if (mtActive) exitMonumentTravel();
                 ctrls.activeTheme = 'population';
                 ctrls.themePills.forEach(function (p) {
                     p.classList.toggle('is-active', p.getAttribute('data-theme') === 'population');

@@ -19,6 +19,7 @@
                 <button type="button" class="map-layer-pill" data-theme="density">Densité</button>
                 <button type="button" class="map-layer-pill map-layer-pill--time" data-theme="timetravel">⏳ Voyage dans le temps</button>
                 <button type="button" class="map-layer-pill map-layer-pill--time" data-theme="eventtravel">📜 Événements dans le temps</button>
+                <button type="button" class="map-layer-pill map-layer-pill--time" data-theme="monumenttravel">🏛️ Monuments dans le temps</button>
             </div>
         </div>
         <div class="map-toolbar-right">
@@ -262,6 +263,54 @@
             <div class="tt-annotations-scroll" id="et-annotations-list"></div>
         </div>
     </div>
+
+    <!-- ═══════════ Monument Time-Travel slider panel (hidden by default) ═══════════ -->
+    <div class="map-timetravel-panel" id="mt-tt-panel" style="display:none">
+        <div class="map-tt-header">
+            <span class="map-tt-icon">🏛️</span>
+            <span class="map-tt-title">Monuments dans le temps</span>
+            <span class="map-tt-year-display" id="mt-year-display">—</span>
+            <span class="map-tt-city-count" id="mt-monument-count"></span>
+        </div>
+        <div class="map-tt-slider-wrap">
+            <span class="map-tt-bound" id="mt-min-year">—</span>
+            <input type="range" id="mt-slider" class="map-tt-slider" min="0" max="100" value="50" step="1">
+            <span class="map-tt-bound" id="mt-max-year">—</span>
+        </div>
+        <div class="map-tt-controls">
+            <button type="button" class="tt-nav-btn" id="mt-back10" title="−10 ans">⏪</button>
+            <button type="button" class="tt-nav-btn" id="mt-back1" title="−1 an">◀</button>
+            <button type="button" id="mt-play-btn" class="map-tt-play" title="Lecture automatique">▶️ Lecture</button>
+            <button type="button" class="tt-nav-btn" id="mt-fwd1" title="+1 an">▶</button>
+            <button type="button" class="tt-nav-btn" id="mt-fwd10" title="+10 ans">⏩</button>
+            <select id="mt-speed" class="map-tt-speed" title="Vitesse">
+                <option value="3000">Très lent</option>
+                <option value="1500">Lent</option>
+                <option value="800" selected>Normal</option>
+                <option value="350">Rapide</option>
+                <option value="120">Très rapide</option>
+            </select>
+            <label class="tt-autozoom-label" title="Recentrer automatiquement la carte">
+                <input type="checkbox" id="mt-autozoom"> Auto-zoom
+            </label>
+        </div>
+    </div>
+
+    <!-- Monument time-travel detail panels -->
+    <div class="tt-details-row" id="mt-details-row" style="display:none">
+        <!-- Block 1: Active monuments list -->
+        <div class="tt-detail-block tt-cities-block">
+            <h3 class="tt-detail-title">🏛️ Monuments visibles <span id="mt-block1-count" class="tt-block1-count"></span></h3>
+            <div class="tt-table-scroll" id="mt-monuments-list"></div>
+        </div>
+        <!-- Block 2: Monument detail card -->
+        <div class="tt-detail-block tt-annotations-block">
+            <h3 class="tt-detail-title">📋 Détail du monument</h3>
+            <div class="tt-annotations-scroll" id="mt-detail-card">
+                <p class="tt-no-data">Cliquez sur un monument pour voir ses détails.</p>
+            </div>
+        </div>
+    </div>
 </section>
 {% endblock %}
 
@@ -270,5 +319,5 @@
 <script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
-<script src="{{ url_for('static', filename='js/map.js') }}?v=39"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}?v=40"></script>
 {% endblock %}

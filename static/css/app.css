@@ -3830,6 +3830,10 @@ dt {
     padding: .8rem;
     margin-bottom: .6rem;
 }
+.et-event-card.mt-card-selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
 .et-event-card-header {
     display: flex;
     align-items: center;

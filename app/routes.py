@@ -2023,6 +2023,121 @@ def map_event_time_travel_data():
     })
 
 
+@web.route("/map/monument-time-travel")
+def map_monument_time_travel_data():
+    """Return monuments with temporal data for monument time-travel mode.
+
+    Response: {
+        years: [sorted unique years spanning all construction/demolition],
+        monuments: {monument_slug: {name, slug, construction_year, demolition_year,
+                                     lat, lng, category, category_label, category_emoji,
+                                     level, summary, architect, architectural_style,
+                                     height_meters, floors,
+                                     locations: [{region, country, role, city_name, city_slug}],
+                                     primary_photo}}
+    }
+    """
+    from .db import get_db
+    from .services.monument_service import CATEGORY_LABELS, CATEGORY_EMOJIS, get_monument_primary_photo
+
+    conn = get_db()
+
+    # ── 1. Load all monuments with construction_year ──
+    mon_rows = conn.execute(
+        """
+        SELECT m.monument_id, m.monument_name, m.monument_slug,
+               m.construction_year, m.demolition_year,
+               m.latitude, m.longitude,
+               m.monument_category, m.monument_level,
+               m.summary, m.architect, m.architectural_style,
+               m.height_meters, m.floors
+        FROM dim_monument m
+        WHERE m.construction_year IS NOT NULL
+        ORDER BY m.construction_year
+        """
+    ).fetchall()
+
+    monuments: dict[str, dict] = {}
+    year_set: set[int] = set()
+    monument_ids: list[int] = []
+
+    for r in mon_rows:
+        slug = r["monument_slug"]
+        cy = int(r["construction_year"])
+        dy = int(r["demolition_year"]) if r["demolition_year"] else None
+        year_set.add(cy)
+        if dy:
+            year_set.add(dy)
+        monument_ids.append(r["monument_id"])
+        cat = r["monument_category"] or "autre"
+        monuments[slug] = {
+            "name": r["monument_name"],
+            "slug": slug,
+            "construction_year": cy,
+            "demolition_year": dy,
+            "lat": float(r["latitude"]) if r["latitude"] else None,
+            "lng": float(r["longitude"]) if r["longitude"] else None,
+            "category": cat,
+            "category_label": CATEGORY_LABELS.get(cat, cat),
+            "category_emoji": CATEGORY_EMOJIS.get(cat, "📌"),
+            "level": r["monument_level"],
+            "summary": (r["summary"] or "")[:300],
+            "architect": r["architect"] or "",
+            "architectural_style": r["architectural_style"] or "",
+            "height_meters": float(r["height_meters"]) if r["height_meters"] else None,
+            "floors": r["floors"],
+            "locations": [],
+            "primary_photo": None,
+        }
+
+    # ── 2. Load locations for all monuments ──
+    if monument_ids:
+        loc_rows = conn.execute(
+            """
+            SELECT ml.monument_id, ml.region, ml.country, ml.role,
+                   dc.city_name, dc.city_slug
+            FROM dim_monument_location ml
+            LEFT JOIN dim_city dc ON dc.city_id = ml.city_id
+            WHERE ml.monument_id IN ({})
+            ORDER BY ml.monument_id, ml.role
+            """.format(",".join("?" for _ in monument_ids)),
+            monument_ids,
+        ).fetchall()
+
+        mid_to_slug: dict[int, str] = {}
+        for r in mon_rows:
+            mid_to_slug[r["monument_id"]] = r["monument_slug"]
+
+        for lr in loc_rows:
+            slug = mid_to_slug.get(lr["monument_id"])
+            if not slug or slug not in monuments:
+                continue
+            monuments[slug]["locations"].append({
+                "region": lr["region"],
+                "country": lr["country"],
+                "role": lr["role"],
+                "city_name": lr["city_name"],
+                "city_slug": lr["city_slug"],
+            })
+
+    # ── 3. Get primary photo for each monument ──
+    for slug in monuments:
+        photo = get_monument_primary_photo(conn, slug)
+        if photo:
+            monuments[slug]["primary_photo"] = photo
+
+    # ── 4. Build continuous year range ──
+    if year_set:
+        all_years = list(range(min(year_set), max(year_set) + 1))
+    else:
+        all_years = []
+
+    return jsonify({
+        "years": all_years,
+        "monuments": monuments,
+    })
+
+
 @web.route("/map/city-spotlight/<city_slug>")
 def map_city_spotlight(city_slug: str):
     """Return rich city data for the annotation spotlight panel."""
