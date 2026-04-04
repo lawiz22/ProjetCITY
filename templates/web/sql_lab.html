@@ -412,6 +412,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 else addLine('   ⏭️  0/' + evt.row_count + ' (déjà présent)', 'info');
                             }
                             else if (evt.type === 'table_skip') addLine('   ⬜ ' + evt.table + ' — vide', 'info');
+                            else if (evt.type === 'photos_diag') {
+                                addLine('\n🔧 Diagnostic photos:', 'info');
+                                addLine('   Chemin: ' + evt.images_root, 'info');
+                                addLine('   Symlink: ' + (evt.is_symlink ? '✅ OUI → ' + evt.resolved_to : '❌ NON (filesystem éphémère!)'), evt.is_symlink ? 'ok' : 'err');
+                            }
                             else if (evt.type === 'photos_start') addLine('\n📷 Import de ' + evt.count + ' photo(s)…', 'info');
                             else if (evt.type === 'photo_progress') {
                                 var pct = Math.round(evt.current / evt.total * 100);
@@ -512,6 +517,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 else addLine('   ⏭️  0/' + evt.row_count + ' (déjà présent)', 'info');
                             }
                             else if (evt.type === 'table_skip') {} // skip silently for category import
+                            else if (evt.type === 'photos_diag') {
+                                addLine('\n🔧 Diagnostic: ' + (evt.is_symlink ? '✅ Symlink → ' + evt.resolved_to : '❌ PAS de symlink!'), evt.is_symlink ? 'ok' : 'err');
+                            }
                             else if (evt.type === 'photos_start') addLine('\n📷 ' + evt.count + ' photo(s)…', 'info');
                             else if (evt.type === 'photo_progress') {
                                 var pct = Math.round(evt.current / evt.total * 100);

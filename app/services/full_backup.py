@@ -289,6 +289,12 @@ def import_full_backup(conn: Any, zip_data: bytes, backup_tables: list[dict],
     # 4. Import photos from ZIP
     photo_count = 0
     photo_names = [n for n in zf.namelist() if n.startswith("photos/") and not n.endswith("/")]
+
+    # Diagnostic: check if IMAGES_ROOT is a symlink to the volume
+    is_symlink = IMAGES_ROOT.is_symlink()
+    resolved = str(IMAGES_ROOT.resolve())
+    yield {"type": "photos_diag", "images_root": str(IMAGES_ROOT), "is_symlink": is_symlink, "resolved_to": resolved}
+
     if photo_names:
         yield {"type": "photos_start", "count": len(photo_names)}
         for i, arcname in enumerate(photo_names, 1):
@@ -296,26 +302,24 @@ def import_full_backup(conn: Any, zip_data: bytes, backup_tables: list[dict],
             parts = arcname.split("/")
             if len(parts) < 4:
                 continue
-            # parts = ["photos", "cities", "montreal-quebec", "abc123.jpg"]
             subdir = parts[1]
             slug = parts[2]
-            fname = "/".join(parts[3:])  # handle nested just in case
+            fname = "/".join(parts[3:])
 
             dest_dir = IMAGES_ROOT / subdir / slug
             dest_dir.mkdir(parents=True, exist_ok=True)
             dest = dest_dir / os.path.basename(fname)
-            written = False
-            if not dest.exists():
-                dest.write_bytes(zf.read(arcname))
-                photo_count += 1
-                written = True
+            # Always write (overwrite) — previous imports may have written
+            # to ephemeral container disk instead of the persistent volume
+            dest.write_bytes(zf.read(arcname))
+            photo_count += 1
 
             yield {
                 "type": "photo_progress",
                 "current": i,
                 "total": len(photo_names),
                 "file": f"{subdir}/{slug}/{os.path.basename(fname)}",
-                "written": written,
+                "written": True,
             }
 
         yield {"type": "photos_done", "imported": photo_count, "total": len(photo_names)}
