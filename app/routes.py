@@ -7304,6 +7304,76 @@ def photo_refetch_missing(entity_type: str, entity_slug: str) -> Response:
     })
 
 
+@web.route("/photos/refetch-all", methods=["POST"])
+@editor_required
+def photo_refetch_all() -> Response:
+    """Re-download ALL missing photos across every entity type. Streams SSE progress."""
+    import json as _json
+    from .services.photo_zip import ENTITY_CONFIG
+    from .services.city_photos import download_web_image
+
+    db_url = current_app.config.get("DATABASE_URL", "")
+
+    def generate():
+        from .db import _connect_postgres
+        conn = _connect_postgres(db_url)
+        grand_fetched = 0
+        grand_failed = 0
+
+        try:
+            for etype, cfg in ENTITY_CONFIG.items():
+                photo_tbl = cfg["photo_table"]
+                fk_col = cfg["fk_col"]
+                slug_col = cfg["slug_col"]
+                entity_tbl = cfg["entity_table"]
+                photo_base = Path(__file__).resolve().parent.parent / cfg["photo_dir"]
+
+                rows = conn.execute(
+                    f"SELECT e.{slug_col} AS slug, p.filename, p.source_url "
+                    f"FROM {photo_tbl} p "
+                    f"JOIN {entity_tbl} e ON e.{fk_col} = p.{fk_col} "
+                    f"WHERE p.source_url IS NOT NULL AND p.source_url != ''"
+                ).fetchall()
+
+                missing = []
+                for r in rows:
+                    fp = photo_base / r["slug"] / r["filename"]
+                    if not fp.is_file():
+                        missing.append({"slug": r["slug"], "filename": r["filename"], "source_url": r["source_url"]})
+
+                if not missing:
+                    yield f"data: {_json.dumps({'type': 'entity_skip', 'entity_type': etype, 'total_db': len(rows)})}\n\n"
+                    continue
+
+                yield f"data: {_json.dumps({'type': 'entity_start', 'entity_type': etype, 'missing': len(missing), 'total_db': len(rows)})}\n\n"
+
+                for i, item in enumerate(missing, 1):
+                    result = download_web_image(item["source_url"])
+                    if result is None:
+                        grand_failed += 1
+                        status = "failed"
+                    else:
+                        img_data, _ext = result
+                        dest_dir = photo_base / item["slug"]
+                        dest_dir.mkdir(parents=True, exist_ok=True)
+                        (dest_dir / item["filename"]).write_bytes(img_data)
+                        grand_fetched += 1
+                        status = "ok"
+
+                    yield f"data: {_json.dumps({'type': 'photo_progress', 'entity_type': etype, 'current': i, 'total': len(missing), 'file': item['slug'] + '/' + item['filename'], 'status': status})}\n\n"
+
+                yield f"data: {_json.dumps({'type': 'entity_done', 'entity_type': etype})}\n\n"
+
+        except Exception as exc:
+            yield f"data: {_json.dumps({'type': 'error', 'message': str(exc)})}\n\n"
+        finally:
+            conn.close()
+
+        yield f"data: {_json.dumps({'type': 'summary', 'fetched': grand_fetched, 'failed': grand_failed, 'message': str(grand_fetched) + ' photo(s) récupérée(s), ' + str(grand_failed) + ' échouée(s).'})}\n\n"
+
+    return Response(generate(), mimetype="text/event-stream")
+
+
 # ---------------------------------------------------------------------------
 # Admin panel
 # ---------------------------------------------------------------------------

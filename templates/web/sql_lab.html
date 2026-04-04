@@ -78,6 +78,15 @@
                         <a href="{{ url_for('web.backup_export_entity_photos', entity_type='monument') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🏛️ Monuments</a>
                     </div>
                 </div>
+                <div style="margin-top:.75rem;">
+                    <h4 style="margin:0 0 .4rem; font-size:.9em;">🔄 Re-télécharger les photos manquantes</h4>
+                    <p class="helper-text" style="margin:0 0 .4rem; font-size:.85em;">
+                        Parcourt toutes les entités et re-télécharge les photos qui existent en BD (avec source_url) mais dont le fichier est absent du disque.
+                    </p>
+                    <button type="button" class="secondary-button" id="refetch-all-btn" style="display:inline-flex; align-items:center; gap:.3rem;">
+                        🔄 Récupérer TOUTES les photos manquantes
+                    </button>
+                </div>
                 <p class="helper-text" style="margin-top:.4rem; font-size:.85em;">
                     Le backup complet inclut toute la BD + toutes les photos dans un seul ZIP. Les noms de fichiers sont conservés pour la réimportation.
                     L'import n'écrase jamais les données existantes — seules les lignes et photos manquantes sont ajoutées.
@@ -386,6 +395,82 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             else if (evt.type === 'error') { addLine('❌ ' + evt.message, 'err'); title.textContent = '❌ Erreur'; }
                         } catch(e) {}
+                    }
+                }
+            } catch(e) {
+                addLine('❌ Erreur réseau: ' + e.message, 'err');
+                title.textContent = '❌ Erreur';
+            }
+
+            spinner.style.display = 'none';
+            closeBtn.style.display = 'inline-flex';
+        });
+    }
+
+    // --- Refetch ALL missing photos ---
+    var refetchBtn = document.getElementById('refetch-all-btn');
+    if (refetchBtn) {
+        refetchBtn.addEventListener('click', async function() {
+            if (!confirm('Voulez-vous re-télécharger toutes les photos manquantes depuis leurs URLs source ?')) return;
+
+            var modal = document.getElementById('import-modal');
+            var log = document.getElementById('import-log');
+            var title = document.getElementById('import-title');
+            var spinner = document.getElementById('import-spinner');
+            var closeBtn = document.getElementById('import-close-btn');
+
+            modal.style.display = 'flex';
+            log.innerHTML = '';
+            title.textContent = '🔄 Récupération des photos manquantes…';
+            spinner.style.display = 'inline-block';
+            closeBtn.style.display = 'none';
+
+            function addLine(text, cls) {
+                var span = document.createElement('span');
+                span.className = cls || '';
+                span.textContent = text + '\n';
+                log.appendChild(span);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            try {
+                var resp = await fetch('{{ url_for("web.photo_refetch_all") }}', { method: 'POST' });
+                var reader = resp.body.getReader();
+                var decoder = new TextDecoder();
+                var buffer = '';
+
+                while (true) {
+                    var result = await reader.read();
+                    if (result.done) break;
+                    buffer += decoder.decode(result.value, { stream: true });
+                    var lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    for (var k = 0; k < lines.length; k++) {
+                        var raw = lines[k];
+                        if (!raw.startsWith('data: ')) continue;
+                        try {
+                            var evt = JSON.parse(raw.slice(6));
+                            if (evt.type === 'entity_start') {
+                                addLine('\n📂 ' + evt.entity_type + ' — ' + evt.missing + ' photo(s) manquante(s) sur ' + evt.total_db, 'info');
+                            } else if (evt.type === 'entity_skip') {
+                                addLine('⏭️  ' + evt.entity_type + ' — aucune photo manquante', 'info');
+                            } else if (evt.type === 'photo_progress') {
+                                var pct = Math.round(evt.current / evt.total * 100);
+                                var icon = evt.status === 'ok' ? '✅' : '❌';
+                                title.textContent = '📷 ' + evt.entity_type + ' ' + evt.current + '/' + evt.total + ' (' + pct + '%)';
+                                if (evt.current % 10 === 0 || evt.current === evt.total || evt.status === 'failed') {
+                                    addLine('   ' + icon + ' ' + evt.current + '/' + evt.total + ' — ' + evt.file, evt.status === 'ok' ? 'ok' : 'err');
+                                }
+                            } else if (evt.type === 'entity_done') {
+                                addLine('   ✅ ' + evt.entity_type + ' terminé', 'ok');
+                            } else if (evt.type === 'summary') {
+                                addLine('\n' + evt.message, 'done');
+                                title.textContent = '✅ Récupération terminée';
+                            } else if (evt.type === 'error') {
+                                addLine('❌ ' + evt.message, 'err');
+                                title.textContent = '❌ Erreur';
+                            }
+                        } catch(e2) {}
                     }
                 }
             } catch(e) {
