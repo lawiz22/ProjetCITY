@@ -68,14 +68,18 @@
                     </label>
                 </div>
                 <div style="margin-top:.75rem;">
-                    <h4 style="margin:0 0 .4rem; font-size:.9em;">📷 Export photos par catégorie</h4>
+                    <h4 style="margin:0 0 .4rem; font-size:.9em;">📷 Export / Import photos par catégorie</h4>
+                    <p class="helper-text" style="margin:0 0 .4rem; font-size:.85em;">Chaque ZIP contient les photos + les entrées BD correspondantes.</p>
                     <div class="button-row" style="gap:.4rem; flex-wrap:wrap;">
-                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='city') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🏙️ Villes</a>
-                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='country') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🌍 Pays</a>
-                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='region') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🗺️ Régions</a>
-                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='event') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">📅 Événements</a>
-                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='person') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🧑 Personnages</a>
-                        <a href="{{ url_for('web.backup_export_entity_photos', entity_type='monument') }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem;">🏛️ Monuments</a>
+                        {% for etype, emoji, label in [('city','🏙️','Villes'),('country','🌍','Pays'),('region','🗺️','Régions'),('event','📅','Événements'),('person','🧑','Personnages'),('monument','🏛️','Monuments')] %}
+                        <div style="display:inline-flex; flex-direction:column; gap:.2rem; align-items:stretch;">
+                            <a href="{{ url_for('web.backup_export_entity_photos', entity_type=etype) }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem; text-align:center;">📥 {{ emoji }} {{ label }}</a>
+                            <label class="secondary-button" style="cursor:pointer; font-size:.85em; padding:.3rem .6rem; text-align:center;">
+                                📤 {{ emoji }} Import
+                                <input type="file" class="import-category-file" data-entity-type="{{ etype }}" accept=".zip" style="display:none;">
+                            </label>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 <div style="margin-top:.75rem;">
@@ -435,6 +439,101 @@ document.addEventListener('DOMContentLoaded', function() {
             closeBtn.style.display = 'inline-flex';
         });
     }
+
+    // --- Import photos par catégorie (2-phase: upload → process) ---
+    document.querySelectorAll('.import-category-file').forEach(function(input) {
+        input.addEventListener('change', async function() {
+            var file = this.files[0];
+            if (!file) return;
+            var etype = this.getAttribute('data-entity-type');
+            this.value = '';
+
+            modal.style.display = 'flex';
+            log.textContent = '';
+            title.textContent = '📤 Upload ' + etype + '…';
+            spinner.style.display = 'inline-block';
+            closeBtn.style.display = 'none';
+
+            function addLine(text, type) {
+                var line = document.createElement('div');
+                line.textContent = text;
+                if (type === 'ok') line.style.color = '#27ae60';
+                else if (type === 'err') line.style.color = '#e74c3c';
+                else if (type === 'done') { line.style.color = '#2f6fed'; line.style.fontWeight = 'bold'; }
+                log.appendChild(line);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            addLine('📤 Upload ' + file.name + ' (' + (file.size / 1048576).toFixed(1) + ' Mo)…', 'info');
+
+            var form = new FormData();
+            form.append('backup_file', file);
+
+            var uploadResult;
+            try {
+                var uploadResp = await fetch('{{ url_for("web.backup_import_full") }}', { method: 'POST', body: form });
+                uploadResult = await uploadResp.json();
+            } catch(e) {
+                addLine('❌ Échec upload: ' + e.message, 'err');
+                spinner.style.display = 'none'; closeBtn.style.display = 'inline-flex';
+                return;
+            }
+            if (!uploadResult.success) {
+                addLine('❌ ' + (uploadResult.error || 'Erreur'), 'err');
+                spinner.style.display = 'none'; closeBtn.style.display = 'inline-flex';
+                return;
+            }
+
+            addLine('✅ Fichier uploadé (' + uploadResult.size_mb + ' Mo). Traitement…', 'ok');
+            title.textContent = 'Import ' + etype + ' en cours…';
+
+            try {
+                var resp = await fetch('{{ url_for("web.backup_process_full") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: uploadResult.path }),
+                });
+                var reader = resp.body.getReader();
+                var decoder = new TextDecoder();
+                var buffer = '';
+                while (true) {
+                    var result = await reader.read();
+                    if (result.done) break;
+                    buffer += decoder.decode(result.value, { stream: true });
+                    var lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    for (var k = 0; k < lines.length; k++) {
+                        if (!lines[k].startsWith('data: ')) continue;
+                        try {
+                            var evt = JSON.parse(lines[k].slice(6));
+                            if (evt.type === 'table_start') addLine('📋 ' + evt.table + ' — ' + evt.row_count + ' ligne(s)…', 'info');
+                            else if (evt.type === 'table_done') {
+                                if (evt.inserted > 0) addLine('   ✅ +' + evt.inserted + '/' + evt.row_count, 'ok');
+                                else addLine('   ⏭️  0/' + evt.row_count + ' (déjà présent)', 'info');
+                            }
+                            else if (evt.type === 'table_skip') {} // skip silently for category import
+                            else if (evt.type === 'photos_start') addLine('\n📷 ' + evt.count + ' photo(s)…', 'info');
+                            else if (evt.type === 'photo_progress') {
+                                var pct = Math.round(evt.current / evt.total * 100);
+                                title.textContent = '📷 ' + etype + ' ' + evt.current + '/' + evt.total + ' (' + pct + '%)';
+                                if (evt.current % 20 === 0 || evt.current === evt.total) {
+                                    addLine('   ' + (evt.written ? '📥' : '⏭️') + ' ' + evt.current + '/' + evt.total + ' — ' + evt.file, 'info');
+                                }
+                            }
+                            else if (evt.type === 'photos_done') addLine('   ✅ ' + evt.imported + '/' + evt.total + ' photo(s)', 'ok');
+                            else if (evt.type === 'summary') { addLine('\n' + evt.message, 'done'); title.textContent = '✅ Import ' + etype + ' terminé'; }
+                            else if (evt.type === 'error') { addLine('❌ ' + evt.message, 'err'); title.textContent = '❌ Erreur'; }
+                        } catch(e2) {}
+                    }
+                }
+            } catch(e) {
+                addLine('❌ Erreur réseau: ' + e.message, 'err');
+                title.textContent = '❌ Erreur';
+            }
+            spinner.style.display = 'none';
+            closeBtn.style.display = 'inline-flex';
+        });
+    });
 
     // --- Refetch ALL missing photos ---
     var refetchBtn = document.getElementById('refetch-all-btn');

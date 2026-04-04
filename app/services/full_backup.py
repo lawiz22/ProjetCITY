@@ -116,9 +116,12 @@ def export_full_backup_streaming(conn: Any, backup_tables: list[dict], scope_gro
 
 
 def export_entity_photos_zip(conn: Any, entity_type: str) -> io.BytesIO | None:
-    """Export ALL photos for a given entity type (e.g. all city photos) in one ZIP.
+    """Export ALL photos for a given entity type in one ZIP.
 
-    ZIP structure: {slug}/filename.jpg  with a manifest.json per slug.
+    ZIP structure:
+      - db.json          → entity rows + photo rows (for re-import)
+      - {slug}/file.jpg  → actual photo files
+      - manifest.json    → legacy metadata index
     """
     cfg = _PHOTO_ENTITIES.get(entity_type)
     if cfg is None:
@@ -126,6 +129,7 @@ def export_entity_photos_zip(conn: Any, entity_type: str) -> io.BytesIO | None:
 
     photo_tbl, fk_col, slug_col, entity_tbl, subdir = cfg
 
+    # Fetch photo rows joined with entity slug
     rows = conn.execute(
         f"SELECT e.{slug_col} AS slug, p.* "
         f"FROM {photo_tbl} p "
@@ -136,20 +140,53 @@ def export_entity_photos_zip(conn: Any, entity_type: str) -> io.BytesIO | None:
     if not rows:
         return None
 
+    # Fetch entity dimension rows (only those that have photos)
+    entity_ids = list({dict(r)[fk_col] for r in rows})
+    placeholders = ",".join("?" for _ in entity_ids)
+    entity_rows = conn.execute(
+        f"SELECT * FROM {entity_tbl} WHERE {fk_col} IN ({placeholders})",
+        entity_ids,
+    ).fetchall()
+
     buf = io.BytesIO()
-    manifest: dict[str, list[dict]] = {}  # slug → list of metadata entries
+    manifest: dict[str, list[dict]] = {}
 
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Build db.json with entity + photo table data
+        db_data = {
+            "_meta": {
+                "exported_at": datetime.utcnow().isoformat(),
+                "entity_type": entity_type,
+                "scope": f"photos-{entity_type}",
+                "version": 2,
+                "includes_photos": True,
+            },
+            "tables": {
+                entity_tbl: [
+                    {col: _serialize_value(val) for col, val in dict(er).items()}
+                    for er in entity_rows
+                ],
+                photo_tbl: [],
+            },
+        }
+
         for row in rows:
             rec = dict(row)
-            slug = rec["slug"]
+            slug = rec.pop("slug", "")
             fname = rec.get("filename", "")
-            file_path = IMAGES_ROOT / subdir / slug / fname
-            if not file_path.is_file():
-                continue
-            arcname = f"{slug}/{fname}"
-            zf.write(str(file_path), arcname)
 
+            # Add photo DB row (without the extra 'slug' column)
+            db_data["tables"][photo_tbl].append(
+                {col: _serialize_value(val) for col, val in rec.items()}
+            )
+
+            # Add photo file to ZIP
+            file_path = IMAGES_ROOT / subdir / slug / fname
+            if file_path.is_file():
+                arcname = f"photos/{subdir}/{slug}/{fname}"
+                zf.write(str(file_path), arcname)
+
+            # Legacy manifest
             meta = {
                 "filename": fname,
                 "caption": rec.get("caption", "") or "",
@@ -161,6 +198,7 @@ def export_entity_photos_zip(conn: Any, entity_type: str) -> io.BytesIO | None:
                 meta["photo_order"] = rec["photo_order"]
             manifest.setdefault(slug, []).append(meta)
 
+        zf.writestr("db.json", json.dumps(db_data, ensure_ascii=False, indent=1))
         zf.writestr("manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2))
 
     buf.seek(0)
