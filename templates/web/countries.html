@@ -37,6 +37,11 @@
                     <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
                 </a>
             </div>
+            {% if g.user and g.user.role in ('admin', 'editeur', 'collaborateur') %}
+            <button type="button" class="secondary-button inline-button" id="download-flags-btn" title="Télécharger les drapeaux manquants depuis flagcdn.com" style="margin-left:.5rem;">
+                🏳️ Drapeaux manquants
+            </button>
+            {% endif %}
         </div>
     </div>
 
@@ -272,6 +277,36 @@
     });
 
     doSort(false);
+})();
+</script>
+<script>
+(function(){
+    var btn = document.getElementById('download-flags-btn');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+        btn.disabled = true;
+        btn.textContent = '⏳ Téléchargement…';
+        fetch('{{ url_for("web.download_missing_country_flags") }}', { method: 'POST' })
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                if (data.downloaded > 0) {
+                    btn.textContent = '✅ ' + data.downloaded + ' drapeau(x)';
+                    btn.style.background = '#27ae60';
+                    btn.style.color = '#fff';
+                    setTimeout(function(){ location.reload(); }, 1500);
+                } else if (data.failed > 0) {
+                    btn.textContent = '❌ ' + data.failed + ' échec(s)';
+                    btn.disabled = false;
+                } else {
+                    btn.textContent = '✅ Tous les drapeaux OK';
+                }
+            })
+            .catch(function(err){
+                btn.textContent = '❌ Erreur réseau';
+                btn.disabled = false;
+                console.error(err);
+            });
+    });
 })();
 </script>
 {% endblock %}

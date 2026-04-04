@@ -982,6 +982,37 @@ def country_delete(country_slug: str) -> Response:
     return redirect(url_for("web.country_directory"))
 
 
+@web.route("/countries/flags/download-missing", methods=["POST"])
+@editor_required
+def download_missing_country_flags() -> Response:
+    """Download flags for all countries that don't have one yet."""
+    from .db import get_db
+    from .services.city_import import download_country_flag
+
+    conn = get_db()
+    rows = conn.execute("SELECT country_name, country_slug FROM dim_country").fetchall()
+
+    downloaded = 0
+    failed = 0
+    for r in rows:
+        slug = r["country_slug"]
+        flag_file = Path(current_app.static_folder) / "images" / "flags" / "countries" / f"{slug}.png"
+        if flag_file.exists():
+            continue
+        result = download_country_flag(r["country_name"], slug)
+        if result:
+            downloaded += 1
+        else:
+            failed += 1
+
+    return jsonify({
+        "success": True,
+        "downloaded": downloaded,
+        "failed": failed,
+        "message": f"{downloaded} drapeau(x) téléchargé(s), {failed} échoué(s).",
+    })
+
+
 def _build_region_periods_from_db(conn, region_id: int, pop_data: list[dict]) -> list[dict]:
     """Build timeline period dicts from dim_region_period_detail (same format as _parse_country_periods)."""
     import re as _re
