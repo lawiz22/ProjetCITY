@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         closeBtn.style.display = 'inline-flex';
     });
 
-    // --- Full backup import (ZIP with DB + Photos) ---
+    // --- Full backup import (ZIP with DB + Photos) — 2-phase ---
     const fullFileInput = document.getElementById('import-full-file');
     if (fullFileInput) {
         fullFileInput.addEventListener('change', async function() {
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             modal.style.display = 'flex';
             log.textContent = '';
-            title.textContent = 'Import complet en cours…';
+            title.textContent = '📤 Upload du fichier…';
             spinner.style.display = 'inline-block';
             closeBtn.style.display = 'none';
 
@@ -348,15 +348,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 log.scrollTop = log.scrollHeight;
             }
 
-            addLine('📦 Lecture du fichier ' + file.name + ' (' + (file.size / 1048576).toFixed(1) + ' Mo)…', 'info');
+            addLine('📤 Upload du fichier ' + file.name + ' (' + (file.size / 1048576).toFixed(1) + ' Mo)…', 'info');
 
+            // Phase 1: Upload the ZIP to server disk
             const form = new FormData();
             form.append('backup_file', file);
 
+            var uploadResult;
             try {
-                const resp = await fetch('{{ url_for("web.backup_import_full") }}', {
+                var uploadResp = await fetch('{{ url_for("web.backup_import_full") }}', {
                     method: 'POST',
                     body: form,
+                });
+                uploadResult = await uploadResp.json();
+            } catch(e) {
+                addLine('❌ Échec upload: ' + e.message, 'err');
+                title.textContent = '❌ Erreur upload';
+                spinner.style.display = 'none';
+                closeBtn.style.display = 'inline-flex';
+                return;
+            }
+
+            if (!uploadResult.success) {
+                addLine('❌ ' + (uploadResult.error || 'Erreur inconnue'), 'err');
+                title.textContent = '❌ Erreur';
+                spinner.style.display = 'none';
+                closeBtn.style.display = 'inline-flex';
+                return;
+            }
+
+            addLine('✅ Fichier uploadé (' + uploadResult.size_mb + ' Mo). Traitement en cours…', 'ok');
+            title.textContent = 'Import complet en cours…';
+
+            // Phase 2: Process the uploaded ZIP with SSE streaming
+            try {
+                const resp = await fetch('{{ url_for("web.backup_process_full") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: uploadResult.path }),
                 });
 
                 const reader = resp.body.getReader();
@@ -398,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } catch(e) {
-                addLine('❌ Erreur réseau: ' + e.message, 'err');
+                addLine('❌ Erreur réseau (traitement): ' + e.message, 'err');
                 title.textContent = '❌ Erreur';
             }
 

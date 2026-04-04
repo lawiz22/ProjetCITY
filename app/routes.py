@@ -2791,30 +2791,56 @@ def backup_export_entity_photos(entity_type: str) -> Response:
 @web.route("/backup/import-full", methods=["POST"])
 @editor_required
 def backup_import_full() -> Response:
-    """Import a full backup ZIP (DB + Photos) with streaming progress."""
-    from .services.full_backup import import_full_backup
-
+    """Phase 1: Upload the ZIP to a temp file on the volume, return JSON."""
     uploaded = request.files.get("backup_file")
     if not uploaded:
-        return Response(
-            'data: {"type":"error","message":"Aucun fichier envoyé."}\n\n',
-            mimetype="text/event-stream",
-        )
+        return jsonify({"success": False, "error": "Aucun fichier envoyé."})
 
-    zip_bytes = uploaded.read()
+    # Save to a temp path (on the persistent volume if available)
+    import tempfile, os
+    volume = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH", "").strip()
+    tmp_dir = volume if volume else tempfile.gettempdir()
+    tmp_path = os.path.join(tmp_dir, "_pending_backup.zip")
+    uploaded.save(tmp_path)
+    size_mb = os.path.getsize(tmp_path) / (1024 * 1024)
+
+    return jsonify({"success": True, "path": tmp_path, "size_mb": round(size_mb, 1)})
+
+
+@web.route("/backup/process-full", methods=["POST"])
+@editor_required
+def backup_process_full() -> Response:
+    """Phase 2: Read the uploaded ZIP from disk and process with SSE streaming."""
+    import json as _json
+    from .services.full_backup import import_full_backup
+
+    tmp_path = request.json.get("path", "") if request.is_json else ""
     db_url = current_app.config.get("DATABASE_URL", "")
 
     def generate():
-        import json as _json
         from .db import _connect_postgres
+        import os
+
+        if not tmp_path or not os.path.isfile(tmp_path):
+            yield f'data: {_json.dumps({"type":"error","message":"Fichier temporaire introuvable."})}\n\n'
+            return
+
+        with open(tmp_path, "rb") as f:
+            zip_bytes = f.read()
+
         conn = _connect_postgres(db_url)
         try:
             for evt in import_full_backup(conn, zip_bytes, _BACKUP_TABLES, _reset_all_sequences):
                 yield f"data: {_json.dumps(evt, ensure_ascii=False)}\n\n"
         except Exception as exc:
-            yield f'data: {{"type":"error","message":"{exc}"}}\n\n'
+            yield f'data: {_json.dumps({"type":"error","message":str(exc)})}\n\n'
         finally:
             conn.close()
+            # Clean up temp file
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
 
     return Response(generate(), mimetype="text/event-stream")
 
