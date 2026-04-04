@@ -4,3 +4,12 @@ __pycache__/
 *.sqlite3
 .env
 .env.postgres
+
+# Photos (stockées sur volume Railway, pas dans git)
+static/images/cities/
+static/images/countries/
+static/images/regions/
+static/images/events/
+static/images/persons/
+static/images/monuments/
+static/images/annotations/

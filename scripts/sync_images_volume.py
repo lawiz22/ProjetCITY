@@ -1,14 +1,9 @@
-"""Sync static/images with a persistent Railway volume.
+"""Ensure static/images points to the persistent Railway volume.
 
-When RAILWAY_VOLUME_MOUNT_PATH is set, this script:
-  1. Copies any NEW files from the baked-in static/images/ to the volume
-     (files already in the volume are NOT overwritten — production wins).
-  2. Replaces static/images/ with a symlink to the volume.
+When RAILWAY_VOLUME_MOUNT_PATH is set, this script replaces
+static/images/ with a symlink to the volume so photos survive redeploys.
 
-This ensures photos uploaded in production survive redeploys, while
-new photos committed to git are also carried over.
-
-Run BEFORE gunicorn starts (add to deploy.startCommand in railway.json).
+Run BEFORE gunicorn starts (deploy.startCommand in railway.json).
 """
 from __future__ import annotations
 
@@ -30,39 +25,28 @@ def main() -> None:
     volume_images = Path(mount_path)
     volume_images.mkdir(parents=True, exist_ok=True)
 
-    # If static/images is already a symlink pointing to the volume, skip copy
+    # Already symlinked correctly — nothing to do
     if IMAGES_DIR.is_symlink():
         target = IMAGES_DIR.resolve()
         if target == volume_images.resolve():
             print(f"[sync_images] Symlink already in place → {volume_images}")
             return
-        # Symlink points elsewhere — remove it and redo
         IMAGES_DIR.unlink()
 
-    # Step 1: Copy new files from baked-in images to volume (don't overwrite)
+    # Ensure essential subdirectories exist on the volume
+    for subdir in ("cities", "countries", "regions", "events", "persons", "monuments", "flags", "annotations"):
+        (volume_images / subdir).mkdir(parents=True, exist_ok=True)
+
+    # Copy non-photo static assets (logos, SVGs) if they exist baked-in
     if IMAGES_DIR.is_dir() and not IMAGES_DIR.is_symlink():
-        copied = 0
-        skipped = 0
-        for src_file in IMAGES_DIR.rglob("*"):
-            if not src_file.is_file():
-                continue
-            rel = src_file.relative_to(IMAGES_DIR)
-            dest = volume_images / rel
-            if dest.exists():
-                skipped += 1
-                continue
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(str(src_file), str(dest))
-            copied += 1
-
-        print(f"[sync_images] Synced {copied} new file(s) to volume, {skipped} already present.")
-
-        # Remove the baked-in directory so we can symlink
+        for item in IMAGES_DIR.iterdir():
+            if item.is_file():
+                dest = volume_images / item.name
+                if not dest.exists():
+                    shutil.copy2(str(item), str(dest))
         shutil.rmtree(str(IMAGES_DIR))
-    elif not IMAGES_DIR.exists():
-        print("[sync_images] No baked-in static/images/ found — using volume as-is.")
 
-    # Step 2: Create symlink  static/images → volume
+    # Create symlink: static/images → volume
     IMAGES_DIR.symlink_to(volume_images)
     print(f"[sync_images] Symlink created: static/images → {volume_images}")
 
