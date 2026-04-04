@@ -240,6 +240,7 @@ def save_photo_to_library(
     attribution: str = "",
     caption: str = "",
     set_primary: bool = False,
+    image_url: str = "",
 ) -> dict[str, Any]:
     """Save a photo file into the per-city directory and register in DB."""
     suffix = Path(original_filename).suffix.lower()
@@ -270,12 +271,12 @@ def save_photo_to_library(
     cursor = conn.execute(
         """INSERT INTO dim_city_photo
            (city_id, filename, caption, source_url, attribution, is_primary,
-            exif_lat, exif_lon, exif_date, exif_camera)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            exif_lat, exif_lon, exif_date, exif_camera, image_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            RETURNING photo_id""",
         (city_id, unique_name, caption, source_url, attribution,
          bool(set_primary),
-         exif["lat"], exif["lon"], exif["date"], exif["camera"]),
+         exif["lat"], exif["lon"], exif["date"], exif["camera"], image_url),
     )
     photo_id = cursor.fetchone()[0]
     conn.commit()
@@ -470,7 +471,7 @@ def search_wikipedia_images(city_name: str, region: str | None, country: str | N
 
 
 def count_missing_photos(conn: Any, entity_type: str, entity_slug: str) -> int:
-    """Count photos that exist in DB (with source_url) but are missing from disk."""
+    """Count photos that have an image_url but are missing from disk (recoverable)."""
     from .photo_zip import ENTITY_CONFIG
     cfg = ENTITY_CONFIG.get(entity_type)
     if cfg is None:
@@ -484,7 +485,7 @@ def count_missing_photos(conn: Any, entity_type: str, entity_slug: str) -> int:
     rows = conn.execute(
         f"SELECT p.filename FROM {photo_tbl} p "
         f"JOIN {entity_tbl} e ON e.{fk_col} = p.{fk_col} "
-        f"WHERE e.{slug_col} = ?",
+        f"WHERE e.{slug_col} = ? AND p.image_url IS NOT NULL AND p.image_url != ''",
         (entity_slug,),
     ).fetchall()
     count = 0
@@ -1305,6 +1306,7 @@ def save_region_photo_to_library(
     attribution: str = "",
     caption: str = "",
     set_primary: bool = False,
+    image_url: str = "",
 ) -> dict[str, Any]:
     """Save a photo into the per-region directory and register in dim_region_photo."""
     suffix = Path(original_filename).suffix.lower()
@@ -1328,9 +1330,9 @@ def save_region_photo_to_library(
 
     cursor = conn.execute(
         """INSERT INTO dim_region_photo
-           (region_id, filename, caption, source_url, attribution, is_primary)
-           VALUES (?, ?, ?, ?, ?, ?) RETURNING photo_id""",
-        (region_id, unique_name, caption, source_url, attribution, bool(set_primary)),
+           (region_id, filename, caption, source_url, attribution, is_primary, image_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING photo_id""",
+        (region_id, unique_name, caption, source_url, attribution, bool(set_primary), image_url),
     )
     photo_id = cursor.fetchone()[0]
     conn.commit()
@@ -1518,6 +1520,7 @@ def save_country_photo_to_library(
     attribution: str = "",
     caption: str = "",
     set_primary: bool = False,
+    image_url: str = "",
 ) -> dict[str, Any]:
     """Save a photo into the per-country directory and register in dim_country_photo."""
     suffix = Path(original_filename).suffix.lower()
@@ -1541,9 +1544,9 @@ def save_country_photo_to_library(
 
     cursor = conn.execute(
         """INSERT INTO dim_country_photo
-           (country_id, filename, caption, source_url, attribution, is_primary)
-           VALUES (?, ?, ?, ?, ?, ?) RETURNING photo_id""",
-        (country_id, unique_name, caption, source_url, attribution, bool(set_primary)),
+           (country_id, filename, caption, source_url, attribution, is_primary, image_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING photo_id""",
+        (country_id, unique_name, caption, source_url, attribution, bool(set_primary), image_url),
     )
     photo_id = cursor.fetchone()[0]
     conn.commit()

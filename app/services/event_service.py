@@ -376,6 +376,7 @@ def save_event_photo(
     attribution: str = "",
     caption: str = "",
     set_primary: bool = False,
+    image_url: str = "",
 ) -> dict[str, Any]:
     suffix = Path(original_filename).suffix.lower()
     if suffix not in ALLOWED_EXTENSIONS:
@@ -396,10 +397,10 @@ def save_event_photo(
 
     conn.execute(
         """INSERT INTO dim_event_photo
-           (event_id, filename, caption, source_url, attribution, is_primary, photo_order)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+           (event_id, filename, caption, source_url, attribution, is_primary, photo_order, image_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         (event_id, unique_name, caption, source_url, attribution,
-         bool(set_primary), max_order + 1),
+         bool(set_primary), max_order + 1, image_url),
     )
     conn.commit()
     return {"success": True, "filename": unique_name}

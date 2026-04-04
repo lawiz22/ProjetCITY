@@ -4,7 +4,7 @@
 {% if missing_count and missing_count > 0 %}
 <button type="button" class="{{ btn_class }}" id="refetch-missing-btn"
         data-url="{{ url_for('web.photo_refetch_missing', entity_type=entity_type, entity_slug=entity_slug) }}"
-        title="Re-télécharger {{ missing_count }} photo(s) manquante(s) depuis leur URL source">
+        title="Re-télécharger {{ missing_count }} photo(s) manquante(s) depuis leur URL d'image">
     🔄 {{ missing_count }} photo{{ 's' if missing_count != 1 else '' }} manquante{{ 's' if missing_count != 1 else '' }}
 </button>
 {% endif %}

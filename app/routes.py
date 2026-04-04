@@ -687,6 +687,7 @@ def country_photo_import_web(country_slug: str) -> Response:
             conn, row["country_id"], country_slug, file_bytes, f"web-import{ext}",
             source_url=img.get("source_page", ""),
             attribution="Wikipedia/Wikimedia — vérifier les licences.",
+            image_url=url,
         )
         if save_result["success"]:
             imported += 1
@@ -1390,6 +1391,7 @@ def region_photo_import_web(region_slug: str) -> Response:
             conn, row["region_id"], region_slug, file_bytes, f"web-import{ext}",
             source_url=img.get("source_page", ""),
             attribution="Wikipedia/Wikimedia — vérifier les licences.",
+            image_url=url,
         )
         if save_result["success"]:
             imported += 1
@@ -3659,6 +3661,7 @@ def city_photo_import_web(city_slug: str) -> Response:
             file_bytes, f"web-import{ext}",
             source_url=img.get("source_page", ""),
             attribution="Wikipedia/Wikimedia — vérifier les licences.",
+            image_url=url,
         )
         if save_result["success"]:
             imported += 1
@@ -5943,6 +5946,7 @@ def event_photo_import_web(event_slug: str) -> Response:
             attribution=img.get("title", "Wikipedia/Wikimedia"),
             caption=img.get("caption", ""),
             set_primary=(imported == 0 and not event.get("photos")),
+            image_url=url,
         )
         if save_result.get("success"):
             imported += 1
@@ -6352,6 +6356,7 @@ def _auto_import_person_photo(conn, person_id: int, person_slug: str, person_nam
                     attribution=img.get("title", "Wikipedia/Wikimedia"),
                     caption=f"Portrait de {person_name}",
                     set_primary=True,
+                    image_url=img.get("url", ""),
                 )
     except Exception:
         pass  # Non-critical: don't fail import if photo search fails
@@ -6519,6 +6524,7 @@ def person_photo_import_web(person_slug: str) -> Response:
             attribution=img.get("title", "Wikipedia/Wikimedia"),
             caption=img.get("caption", ""),
             set_primary=(imported == 0 and not person.get("photos")),
+            image_url=url,
         )
         if save_result.get("success"):
             imported += 1
@@ -6948,6 +6954,7 @@ def _auto_import_monument_photo(conn, monument_id: int, monument_slug: str, monu
                     attribution=img.get("title", "Wikipedia/Wikimedia"),
                     caption=f"Photo de {monument_name}",
                     set_primary=True,
+                    image_url=img.get("url", ""),
                 )
     except Exception:
         pass  # Non-critical
@@ -7207,6 +7214,7 @@ def monument_photo_import_web(monument_slug: str) -> Response:
             attribution=img.get("title", "Wikipedia/Wikimedia"),
             caption=img.get("caption", ""),
             set_primary=(imported == 0 and not monument.get("photos")),
+            image_url=url,
         )
         if save_result.get("success"):
             imported += 1
@@ -7274,7 +7282,7 @@ def photo_import_zip(entity_type: str, entity_slug: str) -> Response:
 @web.route("/photos/refetch-missing/<entity_type>/<entity_slug>", methods=["POST"])
 @editor_required
 def photo_refetch_missing(entity_type: str, entity_slug: str) -> Response:
-    """Re-download photos that exist in the DB (with source_url) but are missing from disk."""
+    """Re-download photos that exist in the DB (with image_url) but are missing from disk."""
     from .db import get_db
     from .services.photo_zip import ENTITY_CONFIG
     from .services.city_photos import download_web_image
@@ -7291,10 +7299,10 @@ def photo_refetch_missing(entity_type: str, entity_slug: str) -> Response:
     photo_dir = Path(current_app.root_path).parent / cfg["photo_dir"]
 
     rows = conn.execute(
-        f"SELECT p.filename, p.source_url "
+        f"SELECT p.filename, p.image_url "
         f"FROM {photo_tbl} p "
         f"JOIN {entity_tbl} e ON e.{fk_col} = p.{fk_col} "
-        f"WHERE e.{slug_col} = ? AND p.source_url IS NOT NULL AND p.source_url != ''",
+        f"WHERE e.{slug_col} = ? AND p.image_url IS NOT NULL AND p.image_url != ''",
         (entity_slug,),
     ).fetchall()
 
@@ -7302,7 +7310,7 @@ def photo_refetch_missing(entity_type: str, entity_slug: str) -> Response:
     for r in rows:
         file_path = photo_dir / entity_slug / r["filename"]
         if not file_path.is_file():
-            missing.append({"filename": r["filename"], "source_url": r["source_url"]})
+            missing.append({"filename": r["filename"], "image_url": r["image_url"]})
 
     if not missing:
         return jsonify({"success": True, "fetched": 0, "failed": 0, "message": "Aucune photo manquante."})
@@ -7310,7 +7318,7 @@ def photo_refetch_missing(entity_type: str, entity_slug: str) -> Response:
     fetched = 0
     failed = 0
     for item in missing:
-        result = download_web_image(item["source_url"])
+        result = download_web_image(item["image_url"])
         if result is None:
             failed += 1
             continue
@@ -7355,17 +7363,17 @@ def photo_refetch_all() -> Response:
                 photo_base = Path(__file__).resolve().parent.parent / cfg["photo_dir"]
 
                 rows = conn.execute(
-                    f"SELECT e.{slug_col} AS slug, p.filename, p.source_url "
+                    f"SELECT e.{slug_col} AS slug, p.filename, p.image_url "
                     f"FROM {photo_tbl} p "
                     f"JOIN {entity_tbl} e ON e.{fk_col} = p.{fk_col} "
-                    f"WHERE p.source_url IS NOT NULL AND p.source_url != ''"
+                    f"WHERE p.image_url IS NOT NULL AND p.image_url != ''"
                 ).fetchall()
 
                 missing = []
                 for r in rows:
                     fp = photo_base / r["slug"] / r["filename"]
                     if not fp.is_file():
-                        missing.append({"slug": r["slug"], "filename": r["filename"], "source_url": r["source_url"]})
+                        missing.append({"slug": r["slug"], "filename": r["filename"], "image_url": r["image_url"]})
 
                 if not missing:
                     yield f"data: {_json.dumps({'type': 'entity_skip', 'entity_type': etype, 'total_db': len(rows)})}\n\n"
@@ -7374,7 +7382,7 @@ def photo_refetch_all() -> Response:
                 yield f"data: {_json.dumps({'type': 'entity_start', 'entity_type': etype, 'missing': len(missing), 'total_db': len(rows)})}\n\n"
 
                 for i, item in enumerate(missing, 1):
-                    result = download_web_image(item["source_url"])
+                    result = download_web_image(item["image_url"])
                     if result is None:
                         grand_failed += 1
                         status = "failed"

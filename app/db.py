@@ -506,6 +506,20 @@ def run_migrations(config: Mapping[str, Any]) -> None:
         admin_row = cur.execute(
             "SELECT user_id FROM app_user WHERE role = 'admin' ORDER BY user_id LIMIT 1"
         ).fetchone()
+
+        # --- Add image_url column to all photo tables (direct download URL) ---
+        _photo_tables = [
+            "dim_city_photo", "dim_event_photo", "dim_person_photo",
+            "dim_country_photo", "dim_region_photo", "dim_monument_photo",
+        ]
+        for ptbl in _photo_tables:
+            cur.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = %s AND column_name = 'image_url'",
+                (ptbl,),
+            )
+            if not cur.fetchone():
+                cur.execute(f"ALTER TABLE {ptbl} ADD COLUMN image_url TEXT DEFAULT ''")
+
         if admin_row:
             admin_id = admin_row[0]
             for tbl in _tracking_tables:

@@ -64,7 +64,7 @@ ENTITY_CONFIG: dict[str, dict[str, str]] = {
 }
 
 # Metadata fields to export (common across all photo tables)
-_META_FIELDS = ("filename", "caption", "source_url", "attribution", "is_primary", "photo_order")
+_META_FIELDS = ("filename", "caption", "source_url", "attribution", "is_primary", "photo_order", "image_url")
 
 
 def export_photos_zip(conn: Any, entity_type: str, entity_slug: str) -> io.BytesIO | None:

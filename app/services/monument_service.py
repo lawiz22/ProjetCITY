@@ -460,6 +460,7 @@ def save_monument_photo(
     attribution: str = "",
     caption: str = "",
     set_primary: bool = False,
+    image_url: str = "",
 ) -> dict[str, Any]:
     suffix = Path(original_filename).suffix.lower()
     if suffix not in ALLOWED_EXTENSIONS:
@@ -480,10 +481,10 @@ def save_monument_photo(
 
     conn.execute(
         """INSERT INTO dim_monument_photo
-           (monument_id, filename, caption, source_url, attribution, is_primary, photo_order)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+           (monument_id, filename, caption, source_url, attribution, is_primary, photo_order, image_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         (monument_id, unique_name, caption, source_url, attribution,
-         bool(set_primary), max_order + 1),
+         bool(set_primary), max_order + 1, image_url),
     )
     conn.commit()
     return {"success": True, "filename": unique_name}
