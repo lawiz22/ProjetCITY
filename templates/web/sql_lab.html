@@ -371,6 +371,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             else if (evt.type === 'table_skip') addLine('   ⬜ ' + evt.table + ' — vide', 'info');
                             else if (evt.type === 'photos_start') addLine('\n📷 Import de ' + evt.count + ' photo(s)…', 'info');
+                            else if (evt.type === 'photo_progress') {
+                                var pct = Math.round(evt.current / evt.total * 100);
+                                var label = evt.written ? '📥' : '⏭️';
+                                title.textContent = '📷 Photos ' + evt.current + '/' + evt.total + ' (' + pct + '%)';
+                                if (evt.current % 20 === 0 || evt.current === evt.total) {
+                                    addLine('   ' + label + ' ' + evt.current + '/' + evt.total + ' — ' + evt.file, 'info');
+                                }
+                            }
                             else if (evt.type === 'photos_done') addLine('   ✅ ' + evt.imported + '/' + evt.total + ' photo(s) importée(s)', 'ok');
                             else if (evt.type === 'summary') {
                                 addLine('\n' + evt.message, 'done');

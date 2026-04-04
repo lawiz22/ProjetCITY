@@ -253,7 +253,7 @@ def import_full_backup(conn: Any, zip_data: bytes, backup_tables: list[dict],
     photo_names = [n for n in zf.namelist() if n.startswith("photos/") and not n.endswith("/")]
     if photo_names:
         yield {"type": "photos_start", "count": len(photo_names)}
-        for arcname in photo_names:
+        for i, arcname in enumerate(photo_names, 1):
             # arcname = photos/cities/montreal-quebec/abc123.jpg
             parts = arcname.split("/")
             if len(parts) < 4:
@@ -266,9 +266,19 @@ def import_full_backup(conn: Any, zip_data: bytes, backup_tables: list[dict],
             dest_dir = IMAGES_ROOT / subdir / slug
             dest_dir.mkdir(parents=True, exist_ok=True)
             dest = dest_dir / os.path.basename(fname)
+            written = False
             if not dest.exists():
                 dest.write_bytes(zf.read(arcname))
                 photo_count += 1
+                written = True
+
+            yield {
+                "type": "photo_progress",
+                "current": i,
+                "total": len(photo_names),
+                "file": f"{subdir}/{slug}/{os.path.basename(fname)}",
+                "written": written,
+            }
 
         yield {"type": "photos_done", "imported": photo_count, "total": len(photo_names)}
 
