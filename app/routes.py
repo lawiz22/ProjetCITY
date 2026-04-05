@@ -2404,6 +2404,10 @@ _BACKUP_TABLES: list[dict] = [
      "conflict": "(monument_slug)", "group": "monument"},
     {"name": "dim_monument_location", "pk": "monument_location_id", "conflict": None, "group": "monument"},
     {"name": "dim_monument_photo", "pk": "monument_photo_id", "conflict": None, "group": "monument"},
+    {"name": "dim_legend", "pk": "legend_id",
+     "conflict": "(legend_slug)", "group": "legend"},
+    {"name": "dim_legend_location", "pk": "legend_location_id", "conflict": None, "group": "legend"},
+    {"name": "dim_legend_photo", "pk": "legend_photo_id", "conflict": None, "group": "legend"},
     {"name": "dim_country", "pk": "country_id",
      "conflict": "(country_slug)", "group": "vrp"},
     {"name": "fact_country_population", "pk": "country_pop_id",
@@ -2426,16 +2430,18 @@ _BACKUP_TABLES: list[dict] = [
 
 # Export scope definitions
 _EXPORT_SCOPES = {
-    "all":       {"label": "Tout", "groups": {"shared", "vrp", "event", "person", "monument"}},
+    "all":       {"label": "Tout", "groups": {"shared", "vrp", "event", "person", "monument", "legend"}},
     "vrp":       {"label": "Villes / Régions / Pays", "groups": {"shared", "vrp"}},
     "event":     {"label": "Événements", "groups": {"shared", "event"}},
     "person":    {"label": "Personnages", "groups": {"shared", "person"}},
     "monument":  {"label": "Monuments", "groups": {"shared", "monument"}},
-    "delta_all": {"label": "Derniers ajouts — Tout", "groups": {"shared", "vrp", "event", "person", "monument"}, "delta": True},
+    "legend":    {"label": "Légendes", "groups": {"shared", "legend"}},
+    "delta_all": {"label": "Derniers ajouts — Tout", "groups": {"shared", "vrp", "event", "person", "monument", "legend"}, "delta": True},
     "delta_vrp": {"label": "Derniers ajouts — V/R/P", "groups": {"shared", "vrp"}, "delta": True},
     "delta_event": {"label": "Derniers ajouts — Événements", "groups": {"shared", "event"}, "delta": True},
     "delta_person": {"label": "Derniers ajouts — Personnages", "groups": {"shared", "person"}, "delta": True},
     "delta_monument": {"label": "Derniers ajouts — Monuments", "groups": {"shared", "monument"}, "delta": True},
+    "delta_legend": {"label": "Derniers ajouts — Légendes", "groups": {"shared", "legend"}, "delta": True},
 }
 
 _EXPORT_STATE_KEY = "backup_export_state"
@@ -2465,6 +2471,9 @@ def _reset_all_sequences(conn) -> None:
         ("dim_monument",                 "monument_id"),
         ("dim_monument_location",        "monument_location_id"),
         ("dim_monument_photo",           "monument_photo_id"),
+        ("dim_legend",                   "legend_id"),
+        ("dim_legend_location",          "legend_location_id"),
+        ("dim_legend_photo",             "legend_photo_id"),
         ("dim_country",                  "country_id"),
         ("fact_country_population",      "country_pop_id"),
         ("dim_country_photo",            "photo_id"),
@@ -2889,7 +2898,7 @@ def backup_export_full() -> Response:
     from .services.full_backup import export_full_backup_streaming
 
     db_url = current_app.config.get("DATABASE_URL", "")
-    scope_groups = {"shared", "vrp", "event", "person", "monument"}
+    scope_groups = {"shared", "vrp", "event", "person", "monument", "legend"}
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     filename = f"projetcity-full-backup-{timestamp}.zip"
 
@@ -2914,7 +2923,7 @@ def backup_export_entity_photos(entity_type: str) -> Response:
     from .db import get_db
     from .services.full_backup import export_entity_photos_zip
 
-    valid_types = ("city", "event", "person", "monument", "country", "region")
+    valid_types = ("city", "event", "person", "monument", "country", "region", "legend")
     if entity_type not in valid_types:
         return jsonify({"success": False, "error": f"Type inconnu: {entity_type}"}), 400
 
@@ -2925,7 +2934,8 @@ def backup_export_entity_photos(entity_type: str) -> Response:
         return redirect(url_for("web.sql_lab"))
 
     labels = {"city": "villes", "event": "evenements", "person": "personnages",
-              "monument": "monuments", "country": "pays", "region": "regions"}
+              "monument": "monuments", "country": "pays", "region": "regions",
+              "legend": "legendes"}
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     filename = f"photos-{labels.get(entity_type, entity_type)}-{timestamp}.zip"
 

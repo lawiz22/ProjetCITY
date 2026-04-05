@@ -19,8 +19,7 @@ _PHOTO_ENTITIES = {
     "person":   ("dim_person_photo",   "person_id",   "person_slug",   "dim_person",   "persons"),
     "monument": ("dim_monument_photo", "monument_id", "monument_slug", "dim_monument", "monuments"),
     "country":  ("dim_country_photo",  "country_id",  "country_slug",  "dim_country",  "countries"),
-    "region":   ("dim_region_photo",   "region_id",   "region_slug",   "dim_region",   "regions"),
-}
+    "region":   ("dim_region_photo",   "region_id",   "region_slug",   "dim_region",   "regions"),    "legend":   ("dim_legend_photo",    "legend_id",   "legend_slug",   "dim_legend",   "legends"),}
 
 
 def _serialize_value(value: object) -> object:

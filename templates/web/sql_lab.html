@@ -37,11 +37,13 @@
                         <option value="event">📅 Événements</option>
                         <option value="person">🧑 Personnages</option>
                         <option value="monument">🏛️ Monuments</option>
+                        <option value="legend">📜 Légendes</option>
                         <option value="delta_all">🆕 Derniers ajouts — Tout</option>
                         <option value="delta_vrp">🆕 Derniers ajouts — V/R/P</option>
                         <option value="delta_event">🆕 Derniers ajouts — Événements</option>
                         <option value="delta_person">🆕 Derniers ajouts — Personnages</option>
                         <option value="delta_monument">🆕 Derniers ajouts — Monuments</option>
+                        <option value="delta_legend">🆕 Derniers ajouts — Légendes</option>
                     </select>
                     <a id="export-link" href="{{ url_for('web.sql_lab_backup_export') }}?scope=all" class="secondary-button" style="text-decoration:none; display:inline-flex; align-items:center; gap:.3rem;">
                         📥 Exporter
@@ -71,7 +73,7 @@
                     <h4 style="margin:0 0 .4rem; font-size:.9em;">📷 Export / Import photos par catégorie</h4>
                     <p class="helper-text" style="margin:0 0 .4rem; font-size:.85em;">Chaque ZIP contient les photos + les entrées BD correspondantes.</p>
                     <div class="button-row" style="gap:.4rem; flex-wrap:wrap;">
-                        {% for etype, emoji, label in [('city','🏙️','Villes'),('country','🌍','Pays'),('region','🗺️','Régions'),('event','📅','Événements'),('person','🧑','Personnages'),('monument','🏛️','Monuments')] %}
+                        {% for etype, emoji, label in [('city','🏙️','Villes'),('country','🌍','Pays'),('region','🗺️','Régions'),('event','📅','Événements'),('person','🧑','Personnages'),('monument','🏛️','Monuments'),('legend','📜','Légendes')] %}
                         <div style="display:inline-flex; flex-direction:column; gap:.2rem; align-items:stretch;">
                             <a href="{{ url_for('web.backup_export_entity_photos', entity_type=etype) }}" class="secondary-button" style="text-decoration:none; font-size:.85em; padding:.3rem .6rem; text-align:center;">📥 {{ emoji }} {{ label }}</a>
                             <label class="secondary-button" style="cursor:pointer; font-size:.85em; padding:.3rem .6rem; text-align:center;">
