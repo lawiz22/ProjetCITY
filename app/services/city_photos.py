@@ -1206,19 +1206,75 @@ def search_annotation_images(
 # The search must focus on the legend subject itself, not a city.
 
 _LEGEND_CATEGORY_HINTS: dict[str, list[str]] = {
-    "creature":        ["creature", "monster", "cryptid", "mythology"],
-    "fantome":         ["ghost", "haunting", "specter", "paranormal"],
-    "ovni":            ["UFO", "unidentified flying object", "extraterrestrial"],
-    "disparition":     ["disappearance", "mystery", "missing"],
-    "malediction":     ["curse", "cursed", "malediction"],
-    "lieu_hante":      ["haunted", "haunted place", "ghost"],
-    "phenomene":       ["phenomenon", "unexplained", "paranormal"],
-    "origine_inconnue":["legend", "myth", "folklore"],
-    "mythe":           ["myth", "mythology", "folklore"],
-    "legende_urbaine": ["urban legend", "hoax", "folklore"],
-    "conspiration":    ["conspiracy", "cover-up", "secret"],
-    "cryptide":        ["cryptid", "creature", "sighting"],
-    "miracle":         ["miracle", "supernatural", "divine"],
+    "creature":        ["creature", "monster", "cryptid", "mythology", "beast"],
+    "fantome":         ["ghost", "haunting", "specter", "paranormal", "apparition"],
+    "ovni":            ["UFO", "unidentified flying object", "extraterrestrial", "alien"],
+    "disparition":     ["disappearance", "mystery", "missing", "vanished"],
+    "malediction":     ["curse", "cursed", "malediction", "hex"],
+    "lieu_hante":      ["haunted", "haunted place", "ghost", "abandoned"],
+    "phenomene":       ["phenomenon", "unexplained", "paranormal", "strange"],
+    "origine_inconnue":["legend", "myth", "folklore", "mystery"],
+    "mythe":           ["myth", "mythology", "folklore", "mythical"],
+    "legende_urbaine": ["urban legend", "hoax", "folklore", "creepypasta"],
+    "conspiration":    ["conspiracy", "cover-up", "secret", "classified"],
+    "cryptide":        ["cryptid", "creature", "sighting", "monster"],
+    "miracle":         ["miracle", "supernatural", "divine", "sacred"],
+}
+
+# French legend keywords → English equivalents for better Commons results
+_FR_LEGEND_DICT: dict[str, str] = {
+    "monstre":     "monster",
+    "fantôme":     "ghost",
+    "fantome":     "ghost",
+    "spectre":     "specter ghost",
+    "créature":    "creature",
+    "creature":    "creature",
+    "mystère":     "mystery",
+    "mystere":     "mystery",
+    "légende":     "legend",
+    "legende":     "legend",
+    "malédiction": "curse",
+    "sorcière":    "witch",
+    "sorcier":     "sorcerer wizard",
+    "loup-garou":  "werewolf",
+    "vampire":     "vampire",
+    "revenant":    "ghost revenant",
+    "apparition":  "apparition ghost",
+    "hante":       "haunted",
+    "hanté":       "haunted",
+    "hantée":      "haunted",
+    "phénomène":   "phenomenon",
+    "phenomene":   "phenomenon",
+    "disparition": "disappearance",
+    "enlèvement":  "abduction",
+    "cryptide":    "cryptid",
+    "bête":        "beast creature",
+    "bete":        "beast creature",
+    "diable":      "devil demon",
+    "démon":       "demon",
+    "demon":       "demon",
+    "serpent":     "serpent sea serpent",
+    "dragon":      "dragon",
+    "géant":       "giant",
+    "canot":       "canoe",
+    "volant":      "flying",
+    "chasse":      "hunt",
+    "galerie":     "gallery",
+    "feu":         "fire",
+    "lac":         "lake",
+    "forêt":       "forest",
+    "mer":         "sea ocean",
+    "nuit":        "night",
+    "mort":        "death dead",
+    "sang":        "blood",
+    "ombre":       "shadow",
+    "brume":       "fog mist",
+    "cri":         "scream cry",
+    "vol":         "flight",
+    "disparu":     "disappeared missing",
+    "inexpliqué":  "unexplained",
+    "inexplique":  "unexplained",
+    "ovni":        "UFO",
 }
 
 _LEGEND_IRRELEVANT_CATS = {
@@ -1227,6 +1283,8 @@ _LEGEND_IRRELEVANT_CATS = {
     "football player", "soccer player", "basketball player",
     "baseball player", "hockey player",
     "logo", "icon", "screenshot", "stub",
+    "map of", "location map", "administrative",
+    "coat of arms", "flag of", "seal of",
 }
 
 
@@ -1239,8 +1297,12 @@ def search_legend_images(
 ) -> list[dict[str, Any]]:
     """Search Wikipedia + Wikimedia Commons for legend-related images.
 
-    Unlike annotation search, this focuses on the *subject* (creature,
-    phenomenon, event) rather than a geographic location.
+    Strategy (prioritized):
+      1. Proper nouns from the name (e.g. "Wendigo", "Champlain")
+      2. Subject keywords translated to English (e.g. "monster lake")
+      3. Category hints (e.g. "creature", "cryptid")
+      4. Wikipedia article images
+      5. Country/geography as last resort only
     """
     import re
 
@@ -1255,59 +1317,89 @@ def search_legend_images(
                 return False
         return True
 
-    # Clean the legend name: remove "La légende de", "Le mystère de", etc.
+    # Clean the legend name: remove "La légende de", "Le mystère du", etc.
     clean_name = re.sub(
         r"^(la\s+légende\s+d[eu']\s*|le\s+mystère\s+d[eu']\s*|"
-        r"l['']\s*histoire\s+d[eu']\s*|les?\s+)",
+        r"l['']\s*histoire\s+d[eu']\s*|les?\s+|le\s+|la\s+)",
         "", legend_name, flags=re.IGNORECASE,
     ).strip()
 
     # Get category hints
     cat = (legend_category or "").lower()
-    hints = _LEGEND_CATEGORY_HINTS.get(cat, ["legend", "myth"])
+    hints = _LEGEND_CATEGORY_HINTS.get(cat, ["legend", "myth", "folklore"])
 
-    # English translations of the name
+    # Extract proper nouns (capitalized words = typically the unique identifier)
+    proper_nouns = _extract_proper_nouns(clean_name)
+
+    # Extract ALL meaningful keywords from name
+    name_keywords = _extract_keywords(clean_name)
+
+    # Translate each French keyword to English
+    en_keywords: list[str] = []
+    for kw in name_keywords:
+        en = _FR_LEGEND_DICT.get(kw.lower(), "")
+        if en:
+            en_keywords.append(en.split()[0])  # Take first translation
+        elif kw[0].isupper():
+            en_keywords.append(kw)  # Keep proper nouns as-is
+
+    # Get English translation of the full name via Wikipedia
     en_titles = _translate_label_to_english(clean_name)
-    en_name = en_titles[0] if en_titles else clean_name
-
-    # Extract keywords from summary for extra context
-    summary_kw: list[str] = []
-    if summary:
-        summary_kw = _extract_keywords(summary)[:5]
+    en_name = en_titles[0] if en_titles else ""
 
     year_str = str(year_reported) if year_reported else ""
 
-    # ---- Build query tiers ----
-    # Tier 1: Direct name queries (best precision)
+    # ---- Build query tiers (subject-first, geography-last) ----
+
+    # Tier 1: Proper nouns + subject keywords (most precise)
     tier1: list[str] = []
-    tier1.append(clean_name)
-    if en_name.lower() != clean_name.lower():
+    # The proper nouns ARE the legend (e.g. "Wendigo", "Champlain")
+    if proper_nouns:
+        pn_str = " ".join(proper_nouns[:3])
+        tier1.append(pn_str)
+        # Proper nouns + first hint (e.g. "Wendigo creature")
+        tier1.append(f"{pn_str} {hints[0]}")
+        if year_str:
+            tier1.append(f"{pn_str} {year_str}")
+    # English translation of the full name
+    if en_name and en_name.lower() != clean_name.lower():
         tier1.append(en_name)
-    if year_str:
-        tier1.append(f"{clean_name} {year_str}")
-        if en_name.lower() != clean_name.lower():
-            tier1.append(f"{en_name} {year_str}")
+        tier1.append(f"{en_name} {hints[0]}")
+    # Full cleaned name
+    tier1.append(clean_name)
 
-    # Tier 2: Name + category hints (e.g. "Wendigo creature mythology")
+    # Tier 2: English keywords + hints (subject-focused)
     tier2: list[str] = []
-    for hint in hints[:2]:
-        tier2.append(f"{clean_name} {hint}")
-        if en_name.lower() != clean_name.lower():
-            tier2.append(f"{en_name} {hint}")
-    if country:
-        tier2.append(f"{clean_name} {country}")
-        if en_name.lower() != clean_name.lower():
-            tier2.append(f"{en_name} {country}")
+    if en_keywords:
+        en_kw_str = " ".join(en_keywords[:3])
+        tier2.append(en_kw_str)
+        for hint in hints[:2]:
+            tier2.append(f"{en_kw_str} {hint}")
+    # Category hints alone (e.g. "monster cryptid", "ghost haunting")
+    for hint in hints[:3]:
+        if proper_nouns:
+            tier2.append(f"{proper_nouns[0]} {hint}")
 
-    # Tier 3: Summary keywords + hints (broadest)
+    # Tier 3: Broader — summary keywords, category hints alone, country
     tier3: list[str] = []
-    if summary_kw:
-        kw_str = " ".join(summary_kw[:3])
-        tier3.append(kw_str)
-        for hint in hints[:1]:
-            tier3.append(f"{kw_str} {hint}")
-    for hint in hints:
-        tier3.append(hint)
+    if summary:
+        sum_kw = _extract_keywords(summary)[:4]
+        # Translate summary keywords too
+        en_sum: list[str] = []
+        for kw in sum_kw:
+            en = _FR_LEGEND_DICT.get(kw.lower(), "")
+            if en:
+                en_sum.append(en.split()[0])
+            elif kw[0].isupper():
+                en_sum.append(kw)
+        if en_sum:
+            tier3.append(" ".join(en_sum[:3]))
+    # Hints alone as absolute fallback for subject
+    for h1, h2 in zip(hints[:2], hints[1:3]):
+        tier3.append(f"{h1} {h2}")
+    # Country only as very last resort
+    if country and proper_nouns:
+        tier3.append(f"{proper_nouns[0]} {country}")
 
     # Dedup
     def _dedup(queries: list[str]) -> list[str]:
@@ -1324,14 +1416,14 @@ def search_legend_images(
     tier2 = _dedup(tier2)
     tier3 = _dedup(tier3)
 
-    # --- Tier 1: Direct name ---
-    for query in tier1[:6]:
+    # --- Tier 1: Proper nouns + subject ---
+    for query in tier1[:8]:
         batch = _search_commons_batch(query, seen_urls, limit=30)
         images.extend(b for b in batch if _is_relevant(b))
         if len(images) >= 15:
             break
 
-    # --- Tier 2: Name + hints ---
+    # --- Tier 2: English keywords + hints ---
     if len(images) < 15:
         for query in tier2[:8]:
             batch = _search_commons_batch(query, seen_urls, limit=25)
@@ -1339,9 +1431,9 @@ def search_legend_images(
             if len(images) >= 25:
                 break
 
-    # --- Tier 3: Broad fallback ---
+    # --- Tier 3: Broad fallback (summary, hints alone, country) ---
     if len(images) < 10:
-        for query in tier3[:4]:
+        for query in tier3[:6]:
             batch = _search_commons_batch(query, seen_urls, limit=20)
             images.extend(b for b in batch if _is_relevant(b))
             if len(images) >= 20:
@@ -1349,10 +1441,18 @@ def search_legend_images(
 
     # --- Wikipedia article images as final fallback ---
     if len(images) < 10:
-        wiki_queries = [clean_name]
-        if en_name.lower() != clean_name.lower():
+        wiki_queries: list[str] = []
+        if proper_nouns:
+            wiki_queries.append(" ".join(proper_nouns[:3]))
+        if en_name and en_name.lower() != clean_name.lower():
             wiki_queries.append(en_name)
+        wiki_queries.append(clean_name)
+        seen_wq: set[str] = set()
         for query in wiki_queries:
+            ql = query.lower()
+            if ql in seen_wq:
+                continue
+            seen_wq.add(ql)
             if len(images) >= 30:
                 break
             batch = _search_wiki_article_images(query, seen_urls)
