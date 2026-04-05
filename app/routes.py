@@ -7769,7 +7769,13 @@ def legend_import() -> Response:
             conn.commit()
 
     # Auto-search photo from Wikipedia
-    _auto_import_legend_photo(conn, legend_id, data["legend_slug"], data["legend_name"])
+    _auto_import_legend_photo(
+        conn, legend_id, data["legend_slug"], data["legend_name"],
+        legend_category=data.get("legend_category"),
+        summary=data.get("summary"),
+        country=data.get("country"),
+        year_reported=data.get("year_reported"),
+    )
 
     return jsonify({
         "success": True,
@@ -7780,13 +7786,23 @@ def legend_import() -> Response:
     })
 
 
-def _auto_import_legend_photo(conn, legend_id: int, legend_slug: str, legend_name: str) -> None:
+def _auto_import_legend_photo(
+    conn, legend_id: int, legend_slug: str, legend_name: str,
+    legend_category: str | None = None, summary: str | None = None,
+    country: str | None = None, year_reported: int | None = None,
+) -> None:
     """Try to auto-import a photo from Wikipedia/Commons."""
     try:
-        from .services.city_photos import search_annotation_images, download_web_image
+        from .services.city_photos import search_legend_images, download_web_image
         from .services.legend_service import save_legend_photo
 
-        images = search_annotation_images(legend_name, "", None, None)
+        images = search_legend_images(
+            legend_name=legend_name,
+            legend_category=legend_category,
+            summary=summary,
+            country=country,
+            year_reported=year_reported,
+        )
         if images:
             img = images[0]
             result = download_web_image(img.get("url", ""))
