@@ -5511,6 +5511,7 @@ def ai_lab_suggest_event() -> Response:
     filter_country  = request.form.get("country", "").strip()
     filter_region   = request.form.get("region", "").strip()
     filter_category = request.form.get("category", "").strip()
+    filter_decade   = request.form.get("decade", "").strip()
 
     conn = get_db()
 
@@ -5532,6 +5533,8 @@ def ai_lab_suggest_event() -> Response:
     if filter_category:
         label = CATEGORY_LABELS.get(filter_category, filter_category)
         context_parts.append(f"dans la catégorie '{label}'")
+    if filter_decade:
+        context_parts.append(f"datant de la période {filter_decade}")
     context_str = ", ".join(context_parts) if context_parts else "de n'importe quel pays, région ou catégorie"
 
     if existing_entries:
@@ -6122,6 +6125,7 @@ def ai_lab_suggest_person() -> Response:
     filter_country  = request.form.get("country", "").strip()
     filter_region   = request.form.get("region", "").strip()
     filter_category = request.form.get("category", "").strip()
+    filter_decade   = request.form.get("decade", "").strip()
 
     conn = get_db()
     existing_rows = conn.execute(
@@ -6140,6 +6144,8 @@ def ai_lab_suggest_person() -> Response:
     if filter_category:
         label = CATEGORY_LABELS.get(filter_category, filter_category)
         context_parts.append(f"dans la catégorie '{label}'")
+    if filter_decade:
+        context_parts.append(f"ayant vécu durant la période {filter_decade}")
     context_str = ", ".join(context_parts) if context_parts else "de n'importe quel pays, région ou catégorie"
 
     if existing_entries:
@@ -6700,6 +6706,7 @@ def ai_lab_suggest_monument() -> Response:
     filter_country  = request.form.get("country", "").strip()
     filter_region   = request.form.get("region", "").strip()
     filter_category = request.form.get("category", "").strip()
+    filter_decade   = request.form.get("decade", "").strip()
 
     conn = get_db()
     existing_rows = conn.execute(
@@ -6718,6 +6725,8 @@ def ai_lab_suggest_monument() -> Response:
     if filter_category:
         label = CATEGORY_LABELS.get(filter_category, filter_category)
         context_parts.append(f"dans la catégorie '{label}'")
+    if filter_decade:
+        context_parts.append(f"construit durant la période {filter_decade}")
     context_str = ", ".join(context_parts) if context_parts else "de n'importe quel pays, région ou catégorie"
 
     if existing_entries:

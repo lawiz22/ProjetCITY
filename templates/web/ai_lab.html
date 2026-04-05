@@ -239,6 +239,40 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="ev-suggest-decade">Période (optionnel)</label>
+                <select id="ev-suggest-decade" class="opt-input">
+                    <option value="">— Toutes les périodes —</option>
+                    <option value="avant 1500">Avant 1500</option>
+                    <option value="1500-1599">1500 – 1599</option>
+                    <option value="1600-1699">1600 – 1699</option>
+                    <option value="1700-1749">1700 – 1749</option>
+                    <option value="1750-1799">1750 – 1799</option>
+                    <option value="1800-1809">1800 – 1809</option>
+                    <option value="1810-1819">1810 – 1819</option>
+                    <option value="1820-1829">1820 – 1829</option>
+                    <option value="1830-1839">1830 – 1839</option>
+                    <option value="1840-1849">1840 – 1849</option>
+                    <option value="1850-1859">1850 – 1859</option>
+                    <option value="1860-1869">1860 – 1869</option>
+                    <option value="1870-1879">1870 – 1879</option>
+                    <option value="1880-1889">1880 – 1889</option>
+                    <option value="1890-1899">1890 – 1899</option>
+                    <option value="1900-1909">1900 – 1909</option>
+                    <option value="1910-1919">1910 – 1919</option>
+                    <option value="1920-1929">1920 – 1929</option>
+                    <option value="1930-1939">1930 – 1939</option>
+                    <option value="1940-1949">1940 – 1949</option>
+                    <option value="1950-1959">1950 – 1959</option>
+                    <option value="1960-1969">1960 – 1969</option>
+                    <option value="1970-1979">1970 – 1979</option>
+                    <option value="1980-1989">1980 – 1989</option>
+                    <option value="1990-1999">1990 – 1999</option>
+                    <option value="2000-2009">2000 – 2009</option>
+                    <option value="2010-2019">2010 – 2019</option>
+                    <option value="2020-2029">2020 – 2029</option>
+                </select>
+            </div>
         </div>
         <div class="opt-actions" style="margin-top:.5rem;">
             <button type="button" class="suggest-city-btn" id="ev-suggest-btn">🎲 Suggérer un événement</button>
@@ -319,6 +353,40 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="per-suggest-decade">Période (optionnel)</label>
+                <select id="per-suggest-decade" class="opt-input">
+                    <option value="">— Toutes les périodes —</option>
+                    <option value="avant 1500">Avant 1500</option>
+                    <option value="1500-1599">1500 – 1599</option>
+                    <option value="1600-1699">1600 – 1699</option>
+                    <option value="1700-1749">1700 – 1749</option>
+                    <option value="1750-1799">1750 – 1799</option>
+                    <option value="1800-1809">1800 – 1809</option>
+                    <option value="1810-1819">1810 – 1819</option>
+                    <option value="1820-1829">1820 – 1829</option>
+                    <option value="1830-1839">1830 – 1839</option>
+                    <option value="1840-1849">1840 – 1849</option>
+                    <option value="1850-1859">1850 – 1859</option>
+                    <option value="1860-1869">1860 – 1869</option>
+                    <option value="1870-1879">1870 – 1879</option>
+                    <option value="1880-1889">1880 – 1889</option>
+                    <option value="1890-1899">1890 – 1899</option>
+                    <option value="1900-1909">1900 – 1909</option>
+                    <option value="1910-1919">1910 – 1919</option>
+                    <option value="1920-1929">1920 – 1929</option>
+                    <option value="1930-1939">1930 – 1939</option>
+                    <option value="1940-1949">1940 – 1949</option>
+                    <option value="1950-1959">1950 – 1959</option>
+                    <option value="1960-1969">1960 – 1969</option>
+                    <option value="1970-1979">1970 – 1979</option>
+                    <option value="1980-1989">1980 – 1989</option>
+                    <option value="1990-1999">1990 – 1999</option>
+                    <option value="2000-2009">2000 – 2009</option>
+                    <option value="2010-2019">2010 – 2019</option>
+                    <option value="2020-2029">2020 – 2029</option>
+                </select>
+            </div>
         </div>
         <div class="opt-actions" style="margin-top:.5rem;">
             <button type="button" class="suggest-city-btn" id="per-suggest-btn">🎲 Suggérer un personnage</button>
@@ -396,6 +464,40 @@
                     {% for key, label in monument_category_labels.items() %}
                     <option value="{{ key }}">{{ monument_category_emojis[key] }} {{ label }}</option>
                     {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="mon-suggest-decade">Période (optionnel)</label>
+                <select id="mon-suggest-decade" class="opt-input">
+                    <option value="">— Toutes les périodes —</option>
+                    <option value="avant 1500">Avant 1500</option>
+                    <option value="1500-1599">1500 – 1599</option>
+                    <option value="1600-1699">1600 – 1699</option>
+                    <option value="1700-1749">1700 – 1749</option>
+                    <option value="1750-1799">1750 – 1799</option>
+                    <option value="1800-1809">1800 – 1809</option>
+                    <option value="1810-1819">1810 – 1819</option>
+                    <option value="1820-1829">1820 – 1829</option>
+                    <option value="1830-1839">1830 – 1839</option>
+                    <option value="1840-1849">1840 – 1849</option>
+                    <option value="1850-1859">1850 – 1859</option>
+                    <option value="1860-1869">1860 – 1869</option>
+                    <option value="1870-1879">1870 – 1879</option>
+                    <option value="1880-1889">1880 – 1889</option>
+                    <option value="1890-1899">1890 – 1899</option>
+                    <option value="1900-1909">1900 – 1909</option>
+                    <option value="1910-1919">1910 – 1919</option>
+                    <option value="1920-1929">1920 – 1929</option>
+                    <option value="1930-1939">1930 – 1939</option>
+                    <option value="1940-1949">1940 – 1949</option>
+                    <option value="1950-1959">1950 – 1959</option>
+                    <option value="1960-1969">1960 – 1969</option>
+                    <option value="1970-1979">1970 – 1979</option>
+                    <option value="1980-1989">1980 – 1989</option>
+                    <option value="1990-1999">1990 – 1999</option>
+                    <option value="2000-2009">2000 – 2009</option>
+                    <option value="2010-2019">2010 – 2019</option>
+                    <option value="2020-2029">2020 – 2029</option>
                 </select>
             </div>
         </div>
@@ -1348,6 +1450,7 @@
         fd.append('country',  document.getElementById('ev-suggest-country').value);
         fd.append('region',   document.getElementById('ev-suggest-region').value);
         fd.append('category', document.getElementById('ev-suggest-category').value);
+        fd.append('decade',   document.getElementById('ev-suggest-decade').value);
 
         fetch(evSuggestEventUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
@@ -1491,6 +1594,7 @@
         fd.append('country',  document.getElementById('per-suggest-country').value);
         fd.append('region',   document.getElementById('per-suggest-region').value);
         fd.append('category', document.getElementById('per-suggest-category').value);
+        fd.append('decade',   document.getElementById('per-suggest-decade').value);
 
         fetch(perSuggestUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
@@ -2898,6 +3002,7 @@
         fd.append('country',  document.getElementById('mon-suggest-country').value);
         fd.append('region',   document.getElementById('mon-suggest-region').value);
         fd.append('category', document.getElementById('mon-suggest-category').value);
+        fd.append('decade',   document.getElementById('mon-suggest-decade').value);
 
         fetch(monSuggestUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
