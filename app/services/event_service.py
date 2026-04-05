@@ -360,6 +360,19 @@ def delete_event(conn: Any, event_id: int) -> None:
 # Event photos
 # ---------------------------------------------------------------------------
 
+def _event_default_date(conn: Any, event_id: int) -> str:
+    """Return the event's start date or year, or empty."""
+    row = conn.execute(
+        "SELECT event_date_start, event_year FROM dim_event WHERE event_id = ?", (event_id,)
+    ).fetchone()
+    if row:
+        if row["event_date_start"]:
+            return row["event_date_start"]
+        if row["event_year"]:
+            return str(row["event_year"])
+    return ""
+
+
 def _ensure_event_photo_dir(event_slug: str) -> Path:
     d = EVENT_PHOTO_DIR / event_slug
     d.mkdir(parents=True, exist_ok=True)
@@ -397,10 +410,11 @@ def save_event_photo(
 
     conn.execute(
         """INSERT INTO dim_event_photo
-           (event_id, filename, caption, source_url, attribution, is_primary, photo_order, image_url)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+           (event_id, filename, caption, source_url, attribution, is_primary, photo_order, image_url, photo_date)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (event_id, unique_name, caption, source_url, attribution,
-         bool(set_primary), max_order + 1, image_url),
+         bool(set_primary), max_order + 1, image_url,
+         _event_default_date(conn, event_id)),
     )
     conn.commit()
     return {"success": True, "filename": unique_name}

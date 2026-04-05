@@ -7723,11 +7723,13 @@ def photo_gallery():
         SELECT cp.photo_id AS id, cp.filename, cp.caption, cp.source_url,
                cp.attribution, cp.is_primary, cp.created_at, cp.photo_date,
                cp.exif_date, cp.exif_camera,
-               c.city_name AS entity_name, c.city_slug AS entity_slug
+               c.city_name AS entity_name, c.city_slug AS entity_slug,
+               c.foundation_year
         FROM dim_city_photo cp
         JOIN dim_city c ON c.city_id = cp.city_id
     """).fetchall()
     for r in rows:
+        entity_date = str(r["foundation_year"]) if r["foundation_year"] else ""
         photos.append({
             "id": r["id"], "table": "dim_city_photo", "pk": "photo_id",
             "category": "city", "category_label": "Ville", "category_emoji": "🏙️",
@@ -7743,17 +7745,21 @@ def photo_gallery():
             "entity_name": r["entity_name"],
             "entity_slug": r["entity_slug"],
             "entity_url": f"/cities/{r['entity_slug']}",
+            "entity_date": entity_date,
+            "entity_date_label": f"Fondation : {entity_date}" if entity_date else "",
         })
 
     # ── Event photos ──
     rows = conn.execute("""
         SELECT ep.event_photo_id AS id, ep.filename, ep.caption, ep.source_url,
                ep.attribution, ep.is_primary, ep.created_at, ep.photo_date,
-               e.event_name AS entity_name, e.event_slug AS entity_slug
+               e.event_name AS entity_name, e.event_slug AS entity_slug,
+               e.event_date_start, e.event_year
         FROM dim_event_photo ep
         JOIN dim_event e ON e.event_id = ep.event_id
     """).fetchall()
     for r in rows:
+        entity_date = r["event_date_start"] or (str(r["event_year"]) if r["event_year"] else "")
         photos.append({
             "id": r["id"], "table": "dim_event_photo", "pk": "event_photo_id",
             "category": "event", "category_label": "Événement", "category_emoji": "📜",
@@ -7769,17 +7775,21 @@ def photo_gallery():
             "entity_name": r["entity_name"],
             "entity_slug": r["entity_slug"],
             "entity_url": f"/events/{r['entity_slug']}",
+            "entity_date": entity_date,
+            "entity_date_label": f"Date événement : {entity_date}" if entity_date else "",
         })
 
     # ── Person photos ──
     rows = conn.execute("""
         SELECT pp.person_photo_id AS id, pp.filename, pp.caption, pp.source_url,
                pp.attribution, pp.is_primary, pp.created_at, pp.photo_date,
-               p.person_name AS entity_name, p.person_slug AS entity_slug
+               p.person_name AS entity_name, p.person_slug AS entity_slug,
+               p.birth_date, p.birth_year
         FROM dim_person_photo pp
         JOIN dim_person p ON p.person_id = pp.person_id
     """).fetchall()
     for r in rows:
+        entity_date = r["birth_date"] or (str(r["birth_year"]) if r["birth_year"] else "")
         photos.append({
             "id": r["id"], "table": "dim_person_photo", "pk": "person_photo_id",
             "category": "person", "category_label": "Personnage", "category_emoji": "🧑",
@@ -7795,17 +7805,21 @@ def photo_gallery():
             "entity_name": r["entity_name"],
             "entity_slug": r["entity_slug"],
             "entity_url": f"/persons/{r['entity_slug']}",
+            "entity_date": entity_date,
+            "entity_date_label": f"Naissance : {entity_date}" if entity_date else "",
         })
 
     # ── Monument photos ──
     rows = conn.execute("""
         SELECT mp.monument_photo_id AS id, mp.filename, mp.caption, mp.source_url,
                mp.attribution, mp.is_primary, mp.created_at, mp.photo_date,
-               m.monument_name AS entity_name, m.monument_slug AS entity_slug
+               m.monument_name AS entity_name, m.monument_slug AS entity_slug,
+               m.construction_date, m.construction_year
         FROM dim_monument_photo mp
         JOIN dim_monument m ON m.monument_id = mp.monument_id
     """).fetchall()
     for r in rows:
+        entity_date = r["construction_date"] or (str(r["construction_year"]) if r["construction_year"] else "")
         photos.append({
             "id": r["id"], "table": "dim_monument_photo", "pk": "monument_photo_id",
             "category": "monument", "category_label": "Monument", "category_emoji": "🏛️",
@@ -7821,6 +7835,8 @@ def photo_gallery():
             "entity_name": r["entity_name"],
             "entity_slug": r["entity_slug"],
             "entity_url": f"/monuments/{r['entity_slug']}",
+            "entity_date": entity_date,
+            "entity_date_label": f"Construction : {entity_date}" if entity_date else "",
         })
 
     # ── Country photos ──
@@ -7847,6 +7863,8 @@ def photo_gallery():
             "entity_name": r["entity_name"],
             "entity_slug": r["entity_slug"],
             "entity_url": f"/countries/{r['entity_slug']}",
+            "entity_date": "",
+            "entity_date_label": "",
         })
 
     # ── Region photos ──
@@ -7873,6 +7891,8 @@ def photo_gallery():
             "entity_name": r["entity_name"],
             "entity_slug": r["entity_slug"],
             "entity_url": f"/regions/{r['entity_slug']}",
+            "entity_date": "",
+            "entity_date_label": "",
         })
 
     # Sort by newest first by default

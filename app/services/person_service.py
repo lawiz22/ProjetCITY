@@ -424,6 +424,19 @@ def delete_person(conn: Any, person_id: int) -> None:
 # Person photos
 # ---------------------------------------------------------------------------
 
+def _person_default_date(conn: Any, person_id: int) -> str:
+    """Return the person's birth_date or birth_year, or empty."""
+    row = conn.execute(
+        "SELECT birth_date, birth_year FROM dim_person WHERE person_id = ?", (person_id,)
+    ).fetchone()
+    if row:
+        if row["birth_date"]:
+            return row["birth_date"]
+        if row["birth_year"]:
+            return str(row["birth_year"])
+    return ""
+
+
 def _ensure_person_photo_dir(person_slug: str) -> Path:
     d = PERSON_PHOTO_DIR / person_slug
     d.mkdir(parents=True, exist_ok=True)
@@ -461,10 +474,11 @@ def save_person_photo(
 
     conn.execute(
         """INSERT INTO dim_person_photo
-           (person_id, filename, caption, source_url, attribution, is_primary, photo_order, image_url)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+           (person_id, filename, caption, source_url, attribution, is_primary, photo_order, image_url, photo_date)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (person_id, unique_name, caption, source_url, attribution,
-         bool(set_primary), max_order + 1, image_url),
+         bool(set_primary), max_order + 1, image_url,
+         _person_default_date(conn, person_id)),
     )
     conn.commit()
     return {"success": True, "filename": unique_name}

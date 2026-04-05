@@ -444,6 +444,19 @@ def delete_monument(conn: Any, monument_id: int) -> None:
 # Monument photos
 # ---------------------------------------------------------------------------
 
+def _monument_default_date(conn: Any, monument_id: int) -> str:
+    """Return the monument's construction_date or construction_year, or empty."""
+    row = conn.execute(
+        "SELECT construction_date, construction_year FROM dim_monument WHERE monument_id = ?", (monument_id,)
+    ).fetchone()
+    if row:
+        if row["construction_date"]:
+            return row["construction_date"]
+        if row["construction_year"]:
+            return str(row["construction_year"])
+    return ""
+
+
 def _ensure_monument_photo_dir(monument_slug: str) -> Path:
     d = MONUMENT_PHOTO_DIR / monument_slug
     d.mkdir(parents=True, exist_ok=True)
@@ -481,10 +494,11 @@ def save_monument_photo(
 
     conn.execute(
         """INSERT INTO dim_monument_photo
-           (monument_id, filename, caption, source_url, attribution, is_primary, photo_order, image_url)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+           (monument_id, filename, caption, source_url, attribution, is_primary, photo_order, image_url, photo_date)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (monument_id, unique_name, caption, source_url, attribution,
-         bool(set_primary), max_order + 1, image_url),
+         bool(set_primary), max_order + 1, image_url,
+         _monument_default_date(conn, monument_id)),
     )
     conn.commit()
     return {"success": True, "filename": unique_name}

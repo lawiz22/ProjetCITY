@@ -223,6 +223,16 @@ def extract_exif(file_path: str | Path) -> dict[str, Any]:
 # Save photo to library
 # ---------------------------------------------------------------------------
 
+def _city_default_date(conn: Any, city_id: int) -> str:
+    """Return the city's foundation_year as a date string, or empty."""
+    row = conn.execute(
+        "SELECT foundation_year FROM dim_city WHERE city_id = ?", (city_id,)
+    ).fetchone()
+    if row and row["foundation_year"]:
+        return str(row["foundation_year"])
+    return ""
+
+
 def _ensure_city_photo_dir(city_slug: str) -> Path:
     """Create and return the per-city photo directory."""
     d = CITY_PHOTO_DIR / city_slug
@@ -271,12 +281,13 @@ def save_photo_to_library(
     cursor = conn.execute(
         """INSERT INTO dim_city_photo
            (city_id, filename, caption, source_url, attribution, is_primary,
-            exif_lat, exif_lon, exif_date, exif_camera, image_url)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            exif_lat, exif_lon, exif_date, exif_camera, image_url, photo_date)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            RETURNING photo_id""",
         (city_id, unique_name, caption, source_url, attribution,
          bool(set_primary),
-         exif["lat"], exif["lon"], exif["date"], exif["camera"], image_url),
+         exif["lat"], exif["lon"], exif["date"], exif["camera"], image_url,
+         _city_default_date(conn, city_id)),
     )
     photo_id = cursor.fetchone()[0]
     conn.commit()

@@ -118,6 +118,7 @@
                 <div class="gal-modal-fields">
                     <label>📅 Date de la photo
                         <input type="text" id="gal-modal-date" placeholder="AAAA-MM-JJ">
+                        <button type="button" class="gal-autofill-date-btn" id="gal-modal-autofill-date" style="display:none" title="Attribuer la date de l'entité">📅 Attribuer la date</button>
                     </label>
                     <label>📝 Légende
                         <input type="text" id="gal-modal-caption">
@@ -318,6 +319,8 @@
         openModal(idx);
     });
 
+    var modalAutofillDate = document.getElementById('gal-modal-autofill-date');
+
     function openModal(idx) {
         currentModalIdx = idx;
         var p = photos[idx];
@@ -335,6 +338,13 @@
         if (p.created_at) metaParts.push('Ajoutée : ' + p.created_at.substring(0, 10));
         modalMeta.textContent = metaParts.join(' · ');
         modalStatus.textContent = '';
+        /* Auto-fill date button: show only if entity has a date */
+        if (p.entity_date && modalAutofillDate) {
+            modalAutofillDate.style.display = '';
+            modalAutofillDate.textContent = '📅 ' + p.entity_date_label;
+        } else if (modalAutofillDate) {
+            modalAutofillDate.style.display = 'none';
+        }
         backdrop.style.display = '';
         document.body.style.overflow = 'hidden';
     }
@@ -368,6 +378,17 @@
         if (e.key === 'ArrowLeft') navigateModal(-1);
         if (e.key === 'ArrowRight') navigateModal(1);
     });
+
+    /* ── Auto-fill date from entity ── */
+    if (modalAutofillDate) {
+        modalAutofillDate.addEventListener('click', function() {
+            if (currentModalIdx === -1) return;
+            var p = photos[currentModalIdx];
+            if (p && p.entity_date) {
+                modalDate.value = p.entity_date;
+            }
+        });
+    }
 
     /* ── Save photo metadata ── */
     modalSave.addEventListener('click', function() {

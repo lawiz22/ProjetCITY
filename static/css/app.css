@@ -7267,6 +7267,18 @@ a.event-card.event-card-compact {
 .gal-modal-status { font-size: .85rem; min-height: 1.2em; }
 .gal-status-ok { color: #22c55e; }
 .gal-status-err { color: #ef4444; }
+.gal-autofill-date-btn {
+    margin-top: 3px;
+    padding: .25rem .5rem;
+    font-size: .78rem;
+    background: var(--accent, #3b82f6);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.gal-autofill-date-btn:hover { opacity: .85; }
 
 /* Category badges in modal */
 .gal-badge {
