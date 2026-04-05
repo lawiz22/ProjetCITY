@@ -70,7 +70,7 @@
              data-entity="{{ p.entity_name|lower }}"
              data-date="{{ p.photo_date }}"
              data-created="{{ p.created_at }}">
-            <img src="/static/{{ p.path }}" alt="" loading="lazy">
+            <img src="/static/{{ p.path|thumb_url }}" alt="" loading="lazy">
         </div>
         {% endfor %}
     </div>

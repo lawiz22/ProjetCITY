@@ -311,6 +311,10 @@ def import_full_backup(conn: Any, zip_data: bytes, backup_tables: list[dict],
             # Always write (overwrite) — previous imports may have written
             # to ephemeral container disk instead of the persistent volume
             dest.write_bytes(zf.read(arcname))
+            # Generate thumbnail for imported photo
+            from app.services.city_photos import generate_thumbnail
+            if not os.path.basename(fname).startswith("thumb_"):
+                generate_thumbnail(dest)
             photo_count += 1
 
             yield {

@@ -92,7 +92,7 @@
            data-evt-locations="{{ ev.location_names or '' }}">
             {% if ev.primary_photo %}
             <div class="event-card-thumb">
-                <img src="{{ url_for('static', filename=ev.primary_photo) }}" alt="" loading="lazy">
+                <img src="{{ url_for('static', filename=ev.primary_photo|thumb_url) }}" alt="" loading="lazy">
             </div>
             {% endif %}
             <div class="event-card-body">

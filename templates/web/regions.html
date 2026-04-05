@@ -69,7 +69,7 @@
            href="{{ url_for('web.region_detail', region_slug=region.region_slug) }}">
             <div class="city-card-media">
                 {% if region.card_image %}
-                <img src="{{ url_for('static', filename=region.card_image) }}" alt="{{ region.region_name }}" loading="lazy" style="{% if region.card_image_type == 'flag' %}object-fit: contain; background:#f4f4f4;{% else %}object-fit: cover;{% endif %}">
+                <img src="{{ url_for('static', filename=region.card_image|thumb_url) }}" alt="{{ region.region_name }}" loading="lazy" style="{% if region.card_image_type == 'flag' %}object-fit: contain; background:#f4f4f4;{% else %}object-fit: cover;{% endif %}">
                 {% else %}
                 <div style="background: {{ region.region_color or '#2f6fed' }}; width:100%; height:100%;"></div>
                 {% endif %}

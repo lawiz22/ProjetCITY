@@ -158,7 +158,7 @@
         <div class="photo-gallery">
             {% for photo in country_photos %}
             <div class="photo-card{% if photo.is_primary %} photo-card-primary{% endif %}">
-                <div class="photo-card-img" style="background-image: url('{{ url_for('static', filename=photo.photo_path) }}');" data-photo-full="{{ url_for('static', filename=photo.photo_path) }}"></div>
+                <div class="photo-card-img" style="background-image: url('{{ url_for('static', filename=photo.photo_path|thumb_url) }}');" data-photo-full="{{ url_for('static', filename=photo.photo_path) }}"></div>
                 <div class="photo-card-info">
                     {% if photo.is_primary %}<span class="photo-badge-primary">★ Principale</span>{% endif %}
                     {% if photo.source_url %}

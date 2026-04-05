@@ -71,7 +71,7 @@
     </section>
     {% if primary_photo %}
     <section class="panel event-desc-photo-panel">
-        <img src="{{ url_for('static', filename=primary_photo.photo_path) }}" alt="{{ primary_photo.caption or monument.monument_name }}" style="cursor:pointer;" onclick="openLightbox(this.src)">
+        <img src="{{ url_for('static', filename=primary_photo.photo_path|thumb_url) }}" alt="{{ primary_photo.caption or monument.monument_name }}" style="cursor:pointer;" onclick="openLightbox('{{ url_for('static', filename=primary_photo.photo_path) }}')">
         {% if primary_photo.caption %}
         <span class="event-desc-photo-caption">{{ primary_photo.caption }}</span>
         {% endif %}
@@ -192,7 +192,7 @@
         <div class="event-photos-grid">
             {% for photo in monument.photos %}
             <div class="event-photo-card{% if photo.is_primary %} event-photo-primary{% endif %}">
-                <img src="{{ url_for('static', filename=photo.photo_path) }}" alt="{{ photo.caption or monument.monument_name }}" loading="lazy" style="cursor:pointer;" onclick="openLightbox(this.src)">
+                <img src="{{ url_for('static', filename=photo.photo_path|thumb_url) }}" alt="{{ photo.caption or monument.monument_name }}" loading="lazy" style="cursor:pointer;" onclick="openLightbox('{{ url_for('static', filename=photo.photo_path) }}')">
                 {% if photo.caption %}
                 <div class="event-photo-caption">{{ photo.caption }}</div>
                 {% endif %}

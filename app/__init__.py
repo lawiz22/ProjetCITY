@@ -24,6 +24,23 @@ def _flag_url(country: str, region: str | None = None) -> str:
     return f"/static/images/flags/countries/{_slugify(country)}.png"
 
 
+def _thumb_url(photo_path: str | None) -> str:
+    """Convert a photo path to its thumbnail equivalent with fallback.
+
+    ``images/cities/slug/abc123.jpg`` → ``images/cities/slug/thumb_abc123.jpg``
+    If the thumbnail file doesn't exist on disk, returns the original path.
+    """
+    if not photo_path:
+        return photo_path or ""
+    p = Path(photo_path)
+    thumb_name = f"thumb_{p.stem}.jpg"
+    thumb_rel = str(p.parent / thumb_name).replace("\\", "/")
+    static_root = Path(__file__).resolve().parents[1] / "static"
+    if (static_root / thumb_rel).exists():
+        return thumb_rel
+    return photo_path
+
+
 def create_app() -> Flask:
     root_dir = Path(__file__).resolve().parents[1]
     app = Flask(
@@ -39,6 +56,7 @@ def create_app() -> Flask:
     _ensure_admin_user(app)
     app.jinja_env.globals["flag_url"] = _flag_url
     app.jinja_env.globals["require_user_key"] = app.config.get("REQUIRE_USER_API_KEY", False)
+    app.jinja_env.filters["thumb_url"] = _thumb_url
 
     @app.before_request
     def _before_request() -> None:

@@ -40,7 +40,7 @@ def main() -> None:
     volume_images.mkdir(parents=True, exist_ok=True)
 
     # Ensure essential subdirectories exist on the volume
-    for subdir in ("cities", "countries", "regions", "events", "persons", "monuments", "flags", "flags/countries", "flags/regions", "annotations"):
+    for subdir in ("cities", "countries", "regions", "events", "persons", "monuments", "legends", "flags", "flags/countries", "flags/regions", "annotations"):
         (volume_images / subdir).mkdir(parents=True, exist_ok=True)
 
     # Already symlinked correctly — still sync baked-in assets then return

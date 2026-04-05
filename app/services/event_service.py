@@ -399,6 +399,8 @@ def save_event_photo(
     unique_name = f"{uuid.uuid4().hex[:12]}{suffix}"
     dest = photo_dir / unique_name
     dest.write_bytes(file_bytes)
+    from app.services.city_photos import generate_thumbnail
+    generate_thumbnail(dest)
 
     if set_primary:
         conn.execute("UPDATE dim_event_photo SET is_primary = FALSE WHERE event_id = ?", (event_id,))

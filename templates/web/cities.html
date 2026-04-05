@@ -96,7 +96,7 @@
            data-city-region="{{ city.region }}"
            data-city-density="{{ city.density or 0 }}">
             <div class="city-card-media">
-                <img src="{{ url_for('static', filename=city.photo_path) }}" alt="Vue de {{ city.city_name }}" loading="lazy">
+                <img src="{{ url_for('static', filename=city.photo_path|thumb_url) }}" alt="Vue de {{ city.city_name }}" loading="lazy">
                 <div class="city-card-overlay"></div>
                 <div class="city-card-heading">
                     <span class="city-dot" style="background: {{ city.city_color or '#2f6fed' }}"></span>

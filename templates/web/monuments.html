@@ -92,7 +92,7 @@
            data-mon-level="{{ m.monument_level }}">
             {% if m.primary_photo %}
             <div class="event-card-thumb">
-                <img src="{{ url_for('static', filename=m.primary_photo) }}" alt="" loading="lazy">
+                <img src="{{ url_for('static', filename=m.primary_photo|thumb_url) }}" alt="" loading="lazy">
             </div>
             {% endif %}
             <div class="event-card-body">

@@ -29,6 +29,35 @@ COMMONS_IMAGEINFO_URL = "https://commons.wikimedia.org/w/api.php?action=query&ti
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
+THUMB_MAX_SIZE = (400, 400)
+THUMB_QUALITY = 80
+
+
+def generate_thumbnail(original_path: str | Path) -> Path | None:
+    """Generate a 400px-wide JPEG thumbnail next to the original image.
+
+    Returns the thumbnail Path, or None if generation failed.
+    The thumb is named ``thumb_{original_filename}`` (always .jpg).
+    If the thumbnail already exists and is non-empty, it is returned as-is.
+    """
+    from PIL import Image
+
+    src = Path(original_path)
+    if not src.exists():
+        return None
+    thumb_name = f"thumb_{src.stem}.jpg"
+    thumb_path = src.parent / thumb_name
+    if thumb_path.exists() and thumb_path.stat().st_size > 0:
+        return thumb_path
+    try:
+        with Image.open(src) as img:
+            img = img.convert("RGB")
+            img.thumbnail(THUMB_MAX_SIZE, Image.LANCZOS)
+            img.save(thumb_path, "JPEG", quality=THUMB_QUALITY, optimize=True)
+        return thumb_path
+    except Exception:
+        return None
+
 
 # ---------------------------------------------------------------------------
 # Legacy manifest support (backward compat)
@@ -261,6 +290,7 @@ def save_photo_to_library(
     unique_name = f"{uuid.uuid4().hex[:12]}{suffix}"
     dest = photo_dir / unique_name
     dest.write_bytes(file_bytes)
+    generate_thumbnail(dest)
 
     # Extract EXIF
     exif = extract_exif(str(dest))
@@ -1329,6 +1359,7 @@ def save_region_photo_to_library(
     unique_name = f"{uuid.uuid4().hex[:12]}{suffix}"
     dest = photo_dir / unique_name
     dest.write_bytes(file_bytes)
+    generate_thumbnail(dest)
 
     if set_primary:
         conn.execute("UPDATE dim_region_photo SET is_primary = FALSE WHERE region_id = ?", (region_id,))
@@ -1543,6 +1574,7 @@ def save_country_photo_to_library(
     unique_name = f"{uuid.uuid4().hex[:12]}{suffix}"
     dest = photo_dir / unique_name
     dest.write_bytes(file_bytes)
+    generate_thumbnail(dest)
 
     if set_primary:
         conn.execute("UPDATE dim_country_photo SET is_primary = FALSE WHERE country_id = ?", (country_id,))

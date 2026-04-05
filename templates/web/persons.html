@@ -91,7 +91,7 @@
            data-per-level="{{ p.person_level }}">
             {% if p.primary_photo %}
             <div class="event-card-thumb">
-                <img src="{{ url_for('static', filename=p.primary_photo) }}" alt="" loading="lazy">
+                <img src="{{ url_for('static', filename=p.primary_photo|thumb_url) }}" alt="" loading="lazy">
             </div>
             {% endif %}
             <div class="event-card-body">

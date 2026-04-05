@@ -208,6 +208,8 @@ def import_photos_zip(conn: Any, entity_type: str, entity_slug: str, zip_data: b
         new_filename = uuid.uuid4().hex[:12] + ext
         dest = photo_dir / new_filename
         dest.write_bytes(data)
+        from app.services.city_photos import generate_thumbnail
+        generate_thumbnail(dest)
 
         # Metadata from manifest
         meta = manifest_map.get(basename, {})
