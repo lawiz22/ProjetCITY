@@ -42,6 +42,7 @@
                     <a href="{{ url_for('web.events_list') }}">Événements</a>
                     <a href="{{ url_for('web.persons_list') }}">Personnages</a>
                     <a href="{{ url_for('web.monuments_list') }}">Monuments</a>
+                    <a href="{{ url_for('web.legends_list') }}">Légendes</a>
                     <a href="{{ url_for('web.photo_gallery') }}">Galerie</a>
                     <a href="{{ url_for('web.reference_population') }}">Réf. pop.</a>
                     {% if current_user and current_user.role in ('admin', 'editeur', 'collaborateur') %}

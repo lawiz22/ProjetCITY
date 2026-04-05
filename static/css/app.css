@@ -7295,6 +7295,7 @@ a.event-card.event-card-compact {
 .gal-badge-monument { background: #1abc9c; }
 .gal-badge-country  { background: #3498db; }
 .gal-badge-region   { background: #e67e22; }
+.gal-badge-legend   { background: #8b5cf6; }
 
 /* Toggle label */
 .gal-toggle-label {

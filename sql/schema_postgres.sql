@@ -1069,4 +1069,103 @@ GROUP BY
     m.summary,
     m.created_at;
 
+-- ===== LEGENDS =====
+
+CREATE TABLE IF NOT EXISTS dim_legend (
+    legend_id BIGSERIAL PRIMARY KEY,
+    legend_name TEXT NOT NULL,
+    legend_slug TEXT NOT NULL UNIQUE,
+    legend_type TEXT NOT NULL DEFAULT 'legende' CHECK (legend_type IN ('legende', 'inexplique')),
+    legend_category TEXT NOT NULL DEFAULT 'origine_inconnue',
+    legend_level INTEGER NOT NULL DEFAULT 2 CHECK (legend_level IN (1, 2)),
+    date_reported TEXT,
+    year_reported INTEGER,
+    country TEXT,
+    region TEXT,
+    city_name TEXT,
+    latitude NUMERIC,
+    longitude NUMERIC,
+    summary TEXT,
+    description TEXT,
+    history TEXT,
+    evidence TEXT,
+    source_text TEXT,
+    annotation_id BIGINT REFERENCES dim_annotation(annotation_id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS dim_legend_location (
+    legend_location_id BIGSERIAL PRIMARY KEY,
+    legend_id BIGINT NOT NULL REFERENCES dim_legend(legend_id) ON DELETE CASCADE,
+    city_id BIGINT REFERENCES dim_city(city_id) ON DELETE SET NULL,
+    region TEXT,
+    country TEXT,
+    role TEXT NOT NULL DEFAULT 'primary'
+);
+
+CREATE TABLE IF NOT EXISTS dim_legend_photo (
+    legend_photo_id BIGSERIAL PRIMARY KEY,
+    legend_id BIGINT NOT NULL REFERENCES dim_legend(legend_id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    object_key TEXT,
+    storage_provider TEXT,
+    mime_type TEXT,
+    file_size BIGINT,
+    checksum_sha256 TEXT,
+    caption TEXT,
+    source_url TEXT,
+    attribution TEXT,
+    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+    photo_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_legend_slug ON dim_legend (legend_slug);
+CREATE INDEX IF NOT EXISTS idx_legend_type ON dim_legend (legend_type);
+CREATE INDEX IF NOT EXISTS idx_legend_category ON dim_legend (legend_category);
+CREATE INDEX IF NOT EXISTS idx_legend_level ON dim_legend (legend_level);
+CREATE INDEX IF NOT EXISTS idx_legend_location_legend ON dim_legend_location (legend_id);
+CREATE INDEX IF NOT EXISTS idx_legend_location_city ON dim_legend_location (city_id);
+CREATE INDEX IF NOT EXISTS idx_legend_photo_legend ON dim_legend_photo (legend_id);
+
+CREATE OR REPLACE VIEW vw_legend_summary AS
+SELECT
+    l.legend_id,
+    l.legend_name,
+    l.legend_slug,
+    l.legend_type,
+    l.legend_category,
+    l.legend_level,
+    l.date_reported,
+    l.year_reported,
+    l.country,
+    l.region,
+    l.city_name,
+    l.summary,
+    l.created_at,
+    COUNT(DISTINCT ll.legend_location_id) AS location_count,
+    COUNT(DISTINCT lp.legend_photo_id) AS photo_count,
+    STRING_AGG(DISTINCT COALESCE(dc.city_name, ll.region), ',') AS location_names
+FROM dim_legend l
+LEFT JOIN dim_legend_location ll ON ll.legend_id = l.legend_id
+LEFT JOIN dim_city dc ON dc.city_id = ll.city_id
+LEFT JOIN dim_legend_photo lp ON lp.legend_id = l.legend_id
+GROUP BY
+    l.legend_id,
+    l.legend_name,
+    l.legend_slug,
+    l.legend_type,
+    l.legend_category,
+    l.legend_level,
+    l.date_reported,
+    l.year_reported,
+    l.country,
+    l.region,
+    l.city_name,
+    l.summary,
+    l.created_at;
+
 COMMIT;

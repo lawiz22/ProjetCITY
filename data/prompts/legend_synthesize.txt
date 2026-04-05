@@ -1,0 +1,16 @@
+Tu es un expert en folklore et phénomènes inexpliqués. À partir des deux versions ci-dessous d'une fiche de légende, produis une synthèse qui combine le meilleur des deux.
+
+Règles :
+1. Conserve toutes les informations factuelles des deux versions.
+2. En cas de conflit, privilégie la version la plus détaillée et sourcée.
+3. Fusionne les sections textuelles en gardant le maximum de contenu unique.
+4. Le résultat DOIT être dans le même format structuré exact.
+5. Ne raccourcis aucune section : fusionne et enrichis.
+
+=== VERSION ORIGINALE ===
+{ORIGINAL}
+
+=== VERSION RAFFINÉE ===
+{REFINED}
+
+Retourne la fiche synthétisée dans le même format exact, sans commentaires.

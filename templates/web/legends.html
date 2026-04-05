@@ -1,0 +1,397 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>👻 Légendes et événements inexpliqués</h2>
+            <span id="leg-dir-count">{{ legends|length }} légende{% if legends|length != 1 %}s{% endif %}</span>
+        </div>
+        <div class="dir-controls">
+            <!-- Country filter -->
+            <div class="dir-filter">
+                <select id="leg-filter-country">
+                    <option value="">Tous les pays</option>
+                    {% for c in countries_list %}
+                    <option value="{{ c }}" {% if filters.country == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Region filter -->
+            <div class="dir-filter">
+                <select id="leg-filter-region">
+                    <option value="">Toutes les régions</option>
+                    {% for r in regions_list %}
+                    <option value="{{ r }}" {% if filters.region == r %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Type filter -->
+            <div class="dir-filter">
+                <select id="leg-filter-type">
+                    <option value="">Tous les types</option>
+                    {% for t in legend_types %}
+                    <option value="{{ t }}" {% if filters.type == t %}selected{% endif %}>
+                        {{ type_emojis[t] }} {{ type_labels[t] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Category filter -->
+            <div class="dir-filter">
+                <select id="leg-filter-category">
+                    <option value="">Toutes catégories</option>
+                    {% for cat in all_categories %}
+                    <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %} data-type="{% if cat in categories_by_type.get('legende', []) %}legende{% else %}inexplique{% endif %}">
+                        {{ category_emojis[cat] }} {{ category_labels[cat] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Level filter -->
+            <div class="dir-filter">
+                <select id="leg-filter-level">
+                    <option value="">Tous niveaux</option>
+                    <option value="1" {% if filters.level == '1' %}selected{% endif %}>⭐ Majeur</option>
+                    <option value="2" {% if filters.level == '2' %}selected{% endif %}>📌 Significatif</option>
+                </select>
+            </div>
+            <!-- Search -->
+            <div class="dir-filter">
+                <input type="text" id="leg-filter-search" placeholder="Rechercher…" value="{{ filters.search }}">
+            </div>
+            <!-- Sort -->
+            <div class="dir-sort">
+                <label for="leg-sort-select">Trier par</label>
+                <select id="leg-sort-select">
+                    <option value="name-asc">Nom A → Z</option>
+                    <option value="name-desc">Nom Z → A</option>
+                    <option value="year-desc">Année ↓ (récent)</option>
+                    <option value="year-asc">Année ↑ (ancien)</option>
+                </select>
+            </div>
+            <!-- View switcher -->
+            <div class="view-switcher" role="group" aria-label="Mode d'affichage">
+                <a class="secondary-button inline-button view-mode-button view-mode-button-large {% if view_mode == 'large' %}is-active{% endif %}" href="{{ url_for('web.legends_list', view='large') }}" aria-label="Vue gros bloc" title="Vue gros bloc">
+                    <span class="view-mode-icon view-mode-large" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-medium {% if view_mode == 'medium' %}is-active{% endif %}" href="{{ url_for('web.legends_list', view='medium') }}" aria-label="Vue moyen bloc" title="Vue moyen bloc">
+                    <span class="view-mode-icon view-mode-medium" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-small {% if view_mode == 'small' %}is-active{% endif %}" href="{{ url_for('web.legends_list', view='small') }}" aria-label="Vue petit bloc" title="Vue petit bloc">
+                    <span class="view-mode-icon view-mode-small" aria-hidden="true"></span>
+                </a>
+                <a class="secondary-button inline-button view-mode-button view-mode-button-compact {% if view_mode == 'compact' %}is-active{% endif %}" href="{{ url_for('web.legends_list', view='compact') }}" aria-label="Vue liste" title="Vue liste">
+                    <span class="view-mode-icon view-mode-compact" aria-hidden="true"></span>
+                </a>
+            </div>
+            <button type="button" class="secondary-button inline-button" id="leg-geocode-btn" title="Géocoder les légendes sans coordonnées">📍 Géocoder</button>
+        </div>
+    </div>
+
+    <!-- Pagination top -->
+    <div class="dir-pager" id="leg-pager-top">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Légendes par page:</span>
+            <select id="leg-per-page-select">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Toutes</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="leg-pager-info-top"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    <div class="event-grid event-grid-{{ view_mode }}" id="leg-dir-grid">
+        {% for lg in legends %}
+        <a class="event-card event-card-{{ view_mode }}{% if lg.primary_photo %} event-card-has-photo{% endif %}"
+           href="{{ url_for('web.legend_detail', legend_slug=lg.legend_slug) }}"
+           data-leg-name="{{ lg.legend_name }}"
+           data-leg-year="{{ lg.year_reported or 0 }}"
+           data-leg-category="{{ lg.legend_category }}"
+           data-leg-type="{{ lg.legend_type }}"
+           data-leg-level="{{ lg.legend_level }}">
+            {% if lg.primary_photo %}
+            <div class="event-card-thumb">
+                <img src="{{ url_for('static', filename=lg.primary_photo) }}" alt="" loading="lazy">
+            </div>
+            {% endif %}
+            <div class="event-card-body">
+                <div class="event-card-header">
+                    <span class="event-card-year">{{ lg.year_reported or '?' }}</span>
+                    <span class="event-card-cat badge badge-legend-{{ lg.legend_type }}">
+                        {{ type_emojis.get(lg.legend_type, '📜') }} {{ type_labels.get(lg.legend_type, lg.legend_type) }}
+                    </span>
+                    <span class="event-card-cat badge badge-{{ lg.legend_category }}">
+                        {{ category_emojis.get(lg.legend_category, '🔮') }} {{ category_labels.get(lg.legend_category, lg.legend_category) }}
+                    </span>
+                    {% if lg.legend_level == 1 %}
+                    <span class="event-card-level event-level-major" title="Majeur">⭐</span>
+                    {% endif %}
+                </div>
+                <h3 class="event-card-title">{{ lg.legend_name }}</h3>
+                <div class="event-card-meta">
+                    {% if lg.location_count %}
+                    <span>📍 {{ lg.location_count }} lieu{% if lg.location_count > 1 %}x{% endif %}</span>
+                    {% endif %}
+                    {% if lg.photo_count %}
+                    <span>📷 {{ lg.photo_count }}</span>
+                    {% endif %}
+                </div>
+                {% if lg.location_names %}
+                <div class="event-card-locations">{{ lg.location_names }}</div>
+                {% endif %}
+                {% if lg.summary %}
+                <div class="event-card-desc">{{ lg.summary[:180] }}{% if lg.summary|length > 180 %}…{% endif %}</div>
+                {% endif %}
+                {% if lg.created_by_name %}
+                <div class="city-card-meta-creator">
+                    Ajouté par {{ lg.created_by_name }}
+                    {% if lg.entity_created_at %} le {{ (lg.entity_created_at|string)[:10] }}{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination bottom -->
+    <div class="dir-pager" id="leg-pager-bottom">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Légendes par page:</span>
+            <select class="leg-per-page-mirror">
+                <option value="20">20</option>
+                <option value="40" selected>40</option>
+                <option value="80">80</option>
+                <option value="100">100</option>
+                <option value="all">Toutes</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="leg-pager-info-bottom"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    {% if not legends %}
+    <div class="empty-state" style="padding:2rem;">
+        <p>Aucune légende trouvée.</p>
+        <p>Utilisez l'<a href="{{ url_for('web.ai_lab') }}">AI Lab</a> pour générer des légendes.</p>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Legends directory sort, filter & pagination JS -->
+<script>
+(function() {
+    var grid = document.getElementById('leg-dir-grid');
+    var sortSelect = document.getElementById('leg-sort-select');
+    var perPageSelect = document.getElementById('leg-per-page-select');
+    var countSpan = document.getElementById('leg-dir-count');
+    var typeSelect = document.getElementById('leg-filter-type');
+    var categorySelect = document.getElementById('leg-filter-category');
+    var levelSelect = document.getElementById('leg-filter-level');
+    var searchInput = document.getElementById('leg-filter-search');
+    var countrySelect = document.getElementById('leg-filter-country');
+    var regionSelect = document.getElementById('leg-filter-region');
+    if (!grid || !sortSelect || !perPageSelect) return;
+
+    /* Server-side country/region filters — reload page with query params */
+    function reloadWithServerFilters() {
+        var params = new URLSearchParams(window.location.search);
+        var country = countrySelect ? countrySelect.value : '';
+        var region  = regionSelect ? regionSelect.value : '';
+        if (country) { params.set('country', country); } else { params.delete('country'); }
+        if (region)  { params.set('region', region); }  else { params.delete('region'); }
+        window.location.search = params.toString();
+    }
+    if (countrySelect) countrySelect.addEventListener('change', reloadWithServerFilters);
+    if (regionSelect)  regionSelect.addEventListener('change', reloadWithServerFilters);
+
+    var mirrors = document.querySelectorAll('.leg-per-page-mirror');
+    mirrors.forEach(function(m) {
+        m.value = perPageSelect.value;
+        m.addEventListener('change', function() {
+            perPageSelect.value = m.value;
+            currentPage = 1;
+            render();
+        });
+    });
+
+    var allCards = Array.prototype.slice.call(grid.querySelectorAll('.event-card'));
+    var filtered = allCards.slice();
+    var sorted = allCards.slice();
+    var currentPage = 1;
+
+    /* Dynamic category filter: show only categories matching selected type */
+    var categoriesByType = {{ categories_by_type | tojson }};
+    function updateCategoryOptions() {
+        var selectedType = typeSelect.value;
+        var opts = categorySelect.querySelectorAll('option[data-type]');
+        opts.forEach(function(opt) {
+            if (!selectedType) {
+                opt.style.display = '';
+            } else {
+                opt.style.display = opt.dataset.type === selectedType ? '' : 'none';
+                if (opt.selected && opt.style.display === 'none') {
+                    categorySelect.value = '';
+                }
+            }
+        });
+    }
+    typeSelect.addEventListener('change', function() {
+        updateCategoryOptions();
+        applyFilters();
+    });
+    updateCategoryOptions();
+
+    function applyFilters() {
+        var type = typeSelect.value;
+        var category = categorySelect.value;
+        var level = levelSelect.value;
+        var search = searchInput.value.trim().toLowerCase();
+
+        filtered = allCards.filter(function(c) {
+            if (type && c.dataset.legType !== type) return false;
+            if (category && c.dataset.legCategory !== category) return false;
+            if (level && String(c.dataset.legLevel) !== level) return false;
+            if (search) {
+                var name = (c.dataset.legName || '').toLowerCase();
+                if (name.indexOf(search) === -1) return false;
+            }
+            return true;
+        });
+        doSort(true);
+    }
+
+    categorySelect.addEventListener('change', applyFilters);
+    levelSelect.addEventListener('change', applyFilters);
+    var searchTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilters, 200);
+    });
+
+    function getPerPage() {
+        var v = perPageSelect.value;
+        return v === 'all' ? sorted.length || 1 : parseInt(v, 10);
+    }
+
+    function tp() {
+        return Math.max(1, Math.ceil(sorted.length / getPerPage()));
+    }
+
+    function doSort(resetPage) {
+        var val = sortSelect.value;
+        var parts = val.split('-');
+        var field = parts[0];
+        var dir = parts[1];
+        sorted = filtered.slice();
+        sorted.sort(function(a, b) {
+            if (field === 'name') {
+                var va = (a.dataset.legName || '').toLowerCase();
+                var vb = (b.dataset.legName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else {
+                var va = parseInt(a.dataset.legYear, 10) || 0;
+                var vb = parseInt(b.dataset.legYear, 10) || 0;
+                return dir === 'asc' ? va - vb : vb - va;
+            }
+        });
+        if (resetPage) currentPage = 1;
+        render();
+    }
+
+    function render() {
+        var pp = getPerPage();
+        var total = tp();
+        if (currentPage > total) currentPage = total;
+        var start = (currentPage - 1) * pp;
+        var end = start + pp;
+
+        allCards.forEach(function(c) { c.style.display = 'none'; });
+        sorted.slice(start, end).forEach(function(c) { c.style.display = ''; });
+        sorted.forEach(function(c) { grid.appendChild(c); });
+
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+
+        var n = sorted.length;
+        countSpan.textContent = n + ' légende' + (n !== 1 ? 's' : '');
+
+        var infoText = 'Page ' + currentPage + ' de ' + total;
+        document.querySelectorAll('#leg-pager-top .dir-pager-info, #leg-pager-bottom .dir-pager-info').forEach(function(el) { el.textContent = infoText; });
+
+        var isFirst = currentPage <= 1;
+        var isLast = currentPage >= total;
+        var showPager = total > 1;
+
+        [document.getElementById('leg-pager-top'), document.getElementById('leg-pager-bottom')].forEach(function(pager) {
+            if (!pager) return;
+            pager.style.display = showPager ? '' : 'none';
+            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+                var d = btn.dataset.dir;
+                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
+            });
+        });
+    }
+
+    document.querySelectorAll('#leg-pager-top .dir-pager-arrow, #leg-pager-bottom .dir-pager-arrow').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var total = tp();
+            switch (btn.dataset.dir) {
+                case 'first': currentPage = 1; break;
+                case 'prev':  if (currentPage > 1) currentPage--; break;
+                case 'next':  if (currentPage < total) currentPage++; break;
+                case 'last':  currentPage = total; break;
+            }
+            render();
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    sortSelect.addEventListener('change', function() { doSort(true); });
+    perPageSelect.addEventListener('change', function() {
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+        currentPage = 1;
+        render();
+    });
+
+    doSort(false);
+
+    /* Geocode missing legends */
+    var geocodeBtn = document.getElementById('leg-geocode-btn');
+    if (geocodeBtn) {
+        geocodeBtn.addEventListener('click', function() {
+            geocodeBtn.disabled = true;
+            geocodeBtn.textContent = '⏳ Géocodage…';
+            fetch('{{ url_for("web.legends_geocode_missing") }}', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    geocodeBtn.disabled = false;
+                    geocodeBtn.textContent = '📍 Géocoder';
+                    if (d.total === 0) { alert('Toutes les légendes sont déjà géocodées.'); }
+                    else { alert('Géocodage terminé : ' + d.geocoded + '/' + d.total + ' légendes géocodées.'); }
+                })
+                .catch(function(err) {
+                    geocodeBtn.disabled = false;
+                    geocodeBtn.textContent = '📍 Géocoder';
+                    alert('❌ ' + err.message);
+                });
+        });
+    }
+})();
+</script>
+
+{% endblock %}

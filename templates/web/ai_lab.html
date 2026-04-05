@@ -52,6 +52,7 @@
     <button class="ailab-tab" data-ailab-tab="evenement">📅 Événement</button>
     <button class="ailab-tab" data-ailab-tab="personnage">🧑 Personnage</button>
     <button class="ailab-tab" data-ailab-tab="monument">🏛️ Monument</button>
+    <button class="ailab-tab" data-ailab-tab="legende">👻 Légende</button>
     <button class="ailab-tab" data-ailab-tab="pays">🌍 Pays</button>
     <button class="ailab-tab" data-ailab-tab="regions">📍 Régions</button>
     <button class="ailab-tab" data-ailab-tab="raffinement">🔬 Raffinement</button>
@@ -542,6 +543,105 @@
 
 </div><!-- /ailab-tab-monument -->
 
+<!-- ==================== TAB: Légende ==================== -->
+<div class="ailab-tab-content" id="ailab-tab-legende">
+
+<!-- ===================== Légende — Suggérer ===================== -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>Suggérer une légende</h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-top-row">
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="leg-suggest-country">Pays (optionnel)</label>
+                <select id="leg-suggest-country" class="opt-input">
+                    <option value="">— Tous les pays —</option>
+                    {% for c in countries_for_legend %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="leg-suggest-region">Région (optionnel)</label>
+                <select id="leg-suggest-region" class="opt-input">
+                    <option value="">— Toutes les régions —</option>
+                    {% for r in regions_for_legend %}
+                    <option value="{{ r }}">{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="leg-suggest-city">Ville (optionnel)</label>
+                <input type="text" id="leg-suggest-city" class="opt-input" list="leg-suggest-city-list" placeholder="Tapez pour filtrer…" autocomplete="off">
+                <datalist id="leg-suggest-city-list">
+                    {% for c in cities_for_legend %}
+                    <option value="{{ c }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+        </div>
+        <div class="ai-lab-top-row" style="margin-top:.35rem;">
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="leg-suggest-type">Type (optionnel)</label>
+                <select id="leg-suggest-type" class="opt-input">
+                    <option value="">— Tous les types —</option>
+                    {% for key, label in legend_type_labels.items() %}
+                    <option value="{{ key }}">{{ legend_type_emojis[key] }} {{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="ai-lab-field" style="flex:1;">
+                <label class="opt-label" for="leg-suggest-category">Catégorie (optionnel)</label>
+                <select id="leg-suggest-category" class="opt-input">
+                    <option value="">— Toutes les catégories —</option>
+                    {% for key, label in legend_category_labels.items() %}
+                    <option value="{{ key }}">{{ legend_category_emojis[key] }} {{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="opt-actions" style="margin-top:.5rem;">
+            <button type="button" class="suggest-city-btn" id="leg-suggest-btn">🎲 Suggérer une légende</button>
+        </div>
+        <div class="opt-test-result" id="leg-suggest-result" style="display:none;"></div>
+    </div>
+</section>
+
+<!-- ===================== Légende — Générer ===================== -->
+<section class="panel ailab-step" id="step-legend-panel">
+    <div class="panel-head">
+        <h2>
+            Légende ou phénomène inexpliqué
+            <span class="ailab-check" id="step-legend-check">✓</span>
+        </h2>
+    </div>
+    <div class="options-body ai-lab-body">
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai-legend-input">Nom de la légende</label>
+            <input type="text" id="ai-legend-input" class="opt-input" placeholder="ex: Le Mothman de Point Pleasant, Le Loup-garou du Gévaudan" spellcheck="false">
+        </div>
+        <div class="ai-lab-field">
+            <label class="opt-label" for="ai-legend-prompt">Prompt (modifiable)</label>
+            <textarea id="ai-legend-prompt" class="opt-input ai-lab-prompt" rows="12" spellcheck="false">{{ prompt_legend }}</textarea>
+        </div>
+        <div class="opt-actions">
+            <button type="button" class="opt-btn opt-btn-save" id="ai-legend-generate">🚀 Générer</button>
+        </div>
+        <div class="ai-lab-field" id="ai-legend-result-wrap" style="display:none;">
+            <label class="opt-label">Résultat</label>
+            <textarea id="ai-legend-result" class="opt-input ai-lab-result" rows="28" readonly></textarea>
+            <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+                <button type="button" class="opt-btn opt-btn-test ai-copy-btn" id="ai-legend-copy">📋 Copier</button>
+                <button type="button" class="opt-btn opt-btn-save" id="ai-legend-import">📥 Importer la légende</button>
+            </div>
+            <div class="opt-test-result" id="ai-legend-import-result" style="display:none;"></div>
+        </div>
+    </div>
+</section>
+
+</div><!-- /ailab-tab-legende -->
+
 <!-- ==================== TAB: Pays ==================== -->
 <div class="ailab-tab-content" id="ailab-tab-pays">
 
@@ -829,6 +929,9 @@
             </label>
             <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
                 <input type="radio" name="refine-entity-type" value="monument"> 🏛️ Monument
+            </label>
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
+                <input type="radio" name="refine-entity-type" value="legende"> 👻 Légende
             </label>
             <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
                 <input type="radio" name="refine-entity-type" value="ville" disabled> 🏙️ Ville
@@ -1166,6 +1269,114 @@
     </div><!-- /refine-monument-card -->
 
 </div><!-- /refine-entity-monument -->
+
+<!-- LÉGENDE panel -->
+<div id="refine-entity-legende" style="display:none;">
+
+    <!-- Legend picker -->
+    <section class="panel">
+        <h3 class="panel-title">👻 Choisir une légende</h3>
+        <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+            <div class="ai-lab-field" style="max-width:520px;">
+                <label class="opt-label" for="refine-legend-select">Légende</label>
+                <select id="refine-legend-select" class="opt-input">
+                    <option value="">— Choisir une légende —</option>
+                    {% for l in legends_for_refine %}
+                    <option value="{{ l.legend_slug }}">{{ l.year_reported or '?' }} — {{ l.legend_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="refine-legend-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
+        </div>
+    </section>
+
+    <!-- Summary card (hidden until legend selected) -->
+    <div id="refine-legend-card" style="display:none;">
+        <section class="panel">
+            <h3 class="panel-title">📋 Fiche actuelle</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div id="refine-legend-card-content" style="font-size:.9rem;line-height:1.7;"></div>
+                <details style="margin-top:.75rem;">
+                    <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">Voir le texte source complet</summary>
+                    <textarea id="refine-legend-source-text" class="opt-input opt-textarea" rows="10"
+                        style="width:100%;font-family:monospace;font-size:.78rem;margin-top:.5rem;" readonly></textarea>
+                </details>
+            </div>
+        </section>
+
+        <!-- Refinement type + prompt + button -->
+        <section class="panel">
+            <h3 class="panel-title">🔬 Raffiner</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
+                    <div class="ai-lab-field" style="flex:0 0 auto;">
+                        <label class="opt-label" for="refine-legend-type">Type de raffinement</label>
+                        <select id="refine-legend-type" class="opt-input opt-input-model">
+                            <option value="enrich">✨ Enrichir et valider</option>
+                            <option value="correct">🔧 Corriger les erreurs</option>
+                            <option value="expand">➕ Ajouter de la nouvelle info</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ai-lab-field" style="margin-bottom:1rem;">
+                    <label class="opt-label" for="refine-legend-prompt">Instructions (modifiables)</label>
+                    <textarea id="refine-legend-prompt" class="opt-input opt-textarea" rows="8"
+                        style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_legend }}</textarea>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-legend-btn">🔬 Raffiner avec l'IA</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result panel (hidden until AI responds) -->
+        <div id="refine-legend-result-wrap" style="display:none;">
+            <section class="panel">
+                <h3 class="panel-title">🧬 Résultat de l'IA</h3>
+                <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                        <button type="button" class="opt-btn" id="refine-legend-copy-btn">📋 Copier</button>
+                    </div>
+                    <textarea id="refine-legend-result" class="opt-input opt-textarea" rows="16"
+                        style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+
+                    <!-- 3 choices -->
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
+                        <span style="font-size:.85rem;color:var(--muted);font-weight:600;">Que faire ?</span>
+                        <button type="button" class="opt-btn" id="refine-legend-keep-btn">↩️ Garder l'original</button>
+                        <button type="button" class="opt-btn opt-btn-success" id="refine-legend-use-btn">✅ Utiliser la version raffinée</button>
+                        <button type="button" class="opt-btn opt-btn-primary" id="refine-legend-synth-btn">⚗️ Synthèse IA des 2 versions</button>
+                    </div>
+
+                    <div id="refine-legend-save-result" style="display:none;" class="opt-test-result"></div>
+                </div>
+            </section>
+
+            <!-- Synthesis result (hidden until synthesis completes) -->
+            <div id="refine-legend-synth-wrap" style="display:none;">
+                <section class="panel">
+                    <h3 class="panel-title">⚗️ Synthèse IA</h3>
+                    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                        <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+                            L'IA a réconcilié les deux versions. Vérifiez le résultat et sauvegardez si satisfait.
+                        </p>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-legend-synth-copy-btn">📋 Copier</button>
+                        </div>
+                        <textarea id="refine-legend-synth-result" class="opt-input opt-textarea" rows="16"
+                            style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;align-items:center;">
+                            <button type="button" class="opt-btn opt-btn-success" id="refine-legend-synth-save-btn">💾 Sauvegarder la synthèse</button>
+                        </div>
+                        <div id="refine-legend-synth-save-result" style="display:none;" class="opt-test-result"></div>
+                    </div>
+                </section>
+            </div><!-- /refine-legend-synth-wrap -->
+        </div><!-- /refine-legend-result-wrap -->
+
+    </div><!-- /refine-legend-card -->
+
+</div><!-- /refine-entity-legende -->
 
 </div><!-- /ailab-tab-raffinement -->
 
@@ -2706,9 +2917,11 @@
             var panelEv  = document.getElementById('refine-entity-evenement');
             var panelPer = document.getElementById('refine-entity-personnage');
             var panelMon = document.getElementById('refine-entity-monument');
+            var panelLeg = document.getElementById('refine-entity-legende');
             if (panelEv) panelEv.style.display = val === 'evenement' ? '' : 'none';
             if (panelPer) panelPer.style.display = val === 'personnage' ? '' : 'none';
             if (panelMon) panelMon.style.display = val === 'monument' ? '' : 'none';
+            if (panelLeg) panelLeg.style.display = val === 'legende' ? '' : 'none';
         });
     });
 
@@ -3117,6 +3330,149 @@
             });
     });
 
+    /* ====================================================================
+     * TAB: LÉGENDE — Suggest + Generate + Import
+     * ==================================================================== */
+    var legendGenBtn = document.getElementById('ai-legend-generate');
+    var legendInput  = document.getElementById('ai-legend-input');
+    var legendPrompt = document.getElementById('ai-legend-prompt');
+    var legendResultWrap = document.getElementById('ai-legend-result-wrap');
+    var legendResult = document.getElementById('ai-legend-result');
+    var legendCheck  = document.getElementById('step-legend-check');
+
+    /* ---- Suggest legend button ---- */
+    var legSuggestBtn    = document.getElementById('leg-suggest-btn');
+    var legSuggestResult = document.getElementById('leg-suggest-result');
+    var legSuggestUrl    = '{{ url_for("web.ai_lab_suggest_legend") }}';
+
+    legSuggestBtn.addEventListener('click', function() {
+        legSuggestBtn.disabled = true;
+        legSuggestBtn.textContent = '⏳ Suggestion en cours…';
+        legSuggestResult.style.display = '';
+        legSuggestResult.className = 'opt-test-result opt-test-pending';
+        legSuggestResult.textContent = 'Interrogation de l\'IA…';
+
+        var fd = new FormData();
+        fd.append('model', modelSelect.value);
+        fd.append('country',     document.getElementById('leg-suggest-country').value);
+        fd.append('region',      document.getElementById('leg-suggest-region').value);
+        fd.append('city',        document.getElementById('leg-suggest-city').value);
+        fd.append('legend_type', document.getElementById('leg-suggest-type').value);
+        fd.append('category',    document.getElementById('leg-suggest-category').value);
+
+        fetch(legSuggestUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                legSuggestBtn.disabled = false;
+                legSuggestBtn.textContent = '🎲 Suggérer une légende';
+                if (data.success) {
+                    var name = data.reply.trim();
+                    legSuggestResult.className = 'opt-test-result opt-test-success';
+                    legSuggestResult.innerHTML = '✅ <strong>' + name.replace(/</g,'&lt;') + '</strong>'
+                        + ' <button type="button" class="opt-btn" style="padding:.2rem .7rem;font-size:.85rem;margin-left:.75rem;" id="leg-use-suggestion">Utiliser →</button>';
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    document.getElementById('leg-use-suggestion').addEventListener('click', function() {
+                        legendInput.value = name;
+                        var pt = legendPrompt.value;
+                        if (pt.includes('{CITY_INPUT}')) {
+                            legendPrompt.value = pt.replace('{CITY_INPUT}', name);
+                        }
+                        document.getElementById('step-legend-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                } else {
+                    legSuggestResult.className = 'opt-test-result opt-test-error';
+                    legSuggestResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                legSuggestBtn.disabled = false;
+                legSuggestBtn.textContent = '🎲 Suggérer une légende';
+                legSuggestResult.className = 'opt-test-result opt-test-error';
+                legSuggestResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    legendGenBtn.addEventListener('click', function() {
+        var name = legendInput.value.trim();
+        if (!name) { alert('Entrez un nom de légende.'); return; }
+        legendGenBtn.disabled = true;
+        legendGenBtn.textContent = '⏳ Génération en cours…';
+        legendResultWrap.style.display = '';
+        legendResult.value = 'Interrogation de ' + modelSelect.value + '…';
+
+        var fd = new FormData();
+        fd.append('city_input', name);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', legendPrompt.value);
+        fd.append('max_tokens', '4000');
+
+        fetch(generateUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                legendGenBtn.disabled = false;
+                legendGenBtn.textContent = '🚀 Générer';
+                if (data.success) {
+                    legendResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    legendCheck.classList.add('visible');
+                } else {
+                    legendResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                legendGenBtn.disabled = false;
+                legendGenBtn.textContent = '🚀 Générer';
+                legendResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* Copy button for legend */
+    document.getElementById('ai-legend-copy').addEventListener('click', function() {
+        legendResult.select();
+        navigator.clipboard.writeText(legendResult.value).then(function() {
+            var btn = document.getElementById('ai-legend-copy');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* Import legend button */
+    document.getElementById('ai-legend-import').addEventListener('click', function() {
+        var text = legendResult.value.trim();
+        if (!text) { alert('Aucun résultat à importer.'); return; }
+        var importBtn = document.getElementById('ai-legend-import');
+        var importResult = document.getElementById('ai-legend-import-result');
+        importBtn.disabled = true;
+        importBtn.textContent = '⏳ Import…';
+        importResult.style.display = '';
+        importResult.className = 'opt-test-result opt-test-pending';
+        importResult.textContent = 'Importation…';
+
+        var fd = new FormData();
+        fd.append('legend_text', text);
+
+        fetch('{{ url_for("web.legend_import") }}', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer la légende';
+                if (data.success) {
+                    importResult.className = 'opt-test-result opt-test-success';
+                    importResult.innerHTML = '✅ <strong>' + data.legend_name + '</strong> importée!<br>' +
+                        '<a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir la légende</a>';
+                } else {
+                    importResult.className = 'opt-test-result opt-test-error';
+                    importResult.innerHTML = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer la légende';
+                importResult.className = 'opt-test-result opt-test-error';
+                importResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
     /* =====================================================================
      * RAFFINEMENT TAB — Monument
      * ===================================================================== */
@@ -3377,6 +3733,239 @@
                 btn.textContent = '💾 Sauvegarder la synthèse';
                 refineMonumentSynthSaveResult.className = 'opt-test-result opt-test-error';
                 refineMonumentSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* =====================================================================
+     * RAFFINEMENT TAB — Légende
+     * ===================================================================== */
+    var refineLegendSelect      = document.getElementById('refine-legend-select');
+    var refineLegendLoading     = document.getElementById('refine-legend-loading');
+    var refineLegendCard        = document.getElementById('refine-legend-card');
+    var refineLegendCardContent = document.getElementById('refine-legend-card-content');
+    var refineLegendSourceText  = document.getElementById('refine-legend-source-text');
+    var refineLegendType        = document.getElementById('refine-legend-type');
+    var refineLegendPrompt      = document.getElementById('refine-legend-prompt');
+    var refineLegendBtn         = document.getElementById('refine-legend-btn');
+    var refineLegendResultWrap  = document.getElementById('refine-legend-result-wrap');
+    var refineLegendResult      = document.getElementById('refine-legend-result');
+    var refineLegendSaveResult  = document.getElementById('refine-legend-save-result');
+    var refineLegendSynthWrap   = document.getElementById('refine-legend-synth-wrap');
+    var refineLegendSynthResult = document.getElementById('refine-legend-synth-result');
+    var refineLegendSynthSaveResult = document.getElementById('refine-legend-synth-save-result');
+
+    var refineLegendLoadUrl  = '{{ url_for("web.ai_lab_refine_legend_load", legend_slug="__SLUG__") }}';
+    var refineLegendGenUrl   = '{{ url_for("web.ai_lab_refine_legend_generate") }}';
+    var refineLegendSaveUrl  = '{{ url_for("web.ai_lab_refine_legend_save") }}';
+
+    var _baseRefineLegendPrompt = {{ prompt_refine_legend | tojson }};
+    var refineLegendPrompts = {
+        enrich: _baseRefineLegendPrompt,
+        correct: _baseRefineLegendPrompt.replace(
+            'Enrichis et valide la fiche',
+            'Corrige les erreurs dans la fiche'
+        ),
+        expand: _baseRefineLegendPrompt.replace(
+            'Enrichis et valide la fiche',
+            'Ajoute de la nouvelle information à la fiche'
+        )
+    };
+
+    refineLegendType.addEventListener('change', function() {
+        refineLegendPrompt.value = refineLegendPrompts[refineLegendType.value] || _baseRefineLegendPrompt;
+    });
+
+    refineLegendSelect.addEventListener('change', function() {
+        var slug = refineLegendSelect.value;
+        if (!slug) { refineLegendCard.style.display = 'none'; return; }
+        refineLegendLoading.style.display = '';
+        refineLegendCard.style.display = 'none';
+        refineLegendResultWrap.style.display = 'none';
+        refineLegendSynthWrap.style.display = 'none';
+
+        fetch(refineLegendLoadUrl.replace('__SLUG__', encodeURIComponent(slug)))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineLegendLoading.style.display = 'none';
+                if (data.success) {
+                    refineLegendSourceText.value = data.source_text || '(pas de texte source)';
+                    refineLegendCardContent.innerHTML =
+                        '<strong>' + (data.legend_name || '').replace(/</g,'&lt;') + '</strong>'
+                        + (data.legend_type ? ' — <em>' + data.legend_type + '</em>' : '')
+                        + (data.year_reported ? ' (' + data.year_reported + ')' : '')
+                        + (data.legend_category ? ' — ' + data.legend_category : '')
+                        + '<br>'
+                        + (data.summary ? '<p style="margin:.5rem 0;font-size:.85rem;">' + data.summary.replace(/</g,'&lt;').substring(0, 300) + '…</p>' : '');
+                    refineLegendCard.style.display = '';
+                }
+            })
+            .catch(function() { refineLegendLoading.style.display = 'none'; });
+    });
+
+    /* ---- Refine legend ---- */
+    refineLegendBtn.addEventListener('click', function() {
+        var slug = refineLegendSelect.value;
+        if (!slug) { alert('Sélectionnez une légende.'); return; }
+        refineLegendBtn.disabled = true;
+        refineLegendBtn.textContent = '⏳ Raffinement en cours…';
+        refineLegendResultWrap.style.display = 'none';
+        refineLegendSynthWrap.style.display = 'none';
+
+        var fd = new FormData();
+        fd.append('legend_slug', slug);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', refineLegendPrompt.value);
+
+        fetch(refineLegendGenUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineLegendBtn.disabled = false;
+                refineLegendBtn.textContent = '🔬 Raffiner avec l\'IA';
+                if (data.success) {
+                    refineLegendResult.value = data.reply;
+                    refineLegendResultWrap.style.display = '';
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                } else {
+                    alert('❌ ' + data.error);
+                }
+            })
+            .catch(function(err) {
+                refineLegendBtn.disabled = false;
+                refineLegendBtn.textContent = '🔬 Raffiner avec l\'IA';
+                alert('❌ Erreur réseau : ' + err.message);
+            });
+    });
+
+    /* ---- Copy legend result ---- */
+    document.getElementById('refine-legend-copy-btn').addEventListener('click', function() {
+        refineLegendResult.select();
+        navigator.clipboard.writeText(refineLegendResult.value).then(function() {
+            var btn = document.getElementById('refine-legend-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Keep original ---- */
+    document.getElementById('refine-legend-keep-btn').addEventListener('click', function() {
+        refineLegendResultWrap.style.display = 'none';
+    });
+
+    /* ---- Use refined version ---- */
+    document.getElementById('refine-legend-use-btn').addEventListener('click', function() {
+        var text = refineLegendResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-legend-use-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineLegendSaveResult.style.display = '';
+        refineLegendSaveResult.className = 'opt-test-result opt-test-pending';
+        refineLegendSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('legend_text', text);
+
+        fetch(refineLegendSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                if (data.success) {
+                    refineLegendSaveResult.className = 'opt-test-result opt-test-success';
+                    refineLegendSaveResult.innerHTML = '✅ <strong>' + data.legend_name.replace(/</g,'&lt;') + '</strong> sauvegardée!'
+                        + ' <a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir la légende</a>';
+                } else {
+                    refineLegendSaveResult.className = 'opt-test-result opt-test-error';
+                    refineLegendSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                refineLegendSaveResult.className = 'opt-test-result opt-test-error';
+                refineLegendSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Synthesis button ---- */
+    document.getElementById('refine-legend-synth-btn').addEventListener('click', function() {
+        var origText = refineLegendSourceText.value;
+        var refText  = refineLegendResult.value.trim();
+        if (!refText) { alert('Pas de résultat à synthétiser.'); return; }
+        var btn = document.getElementById('refine-legend-synth-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Synthèse IA…';
+        refineLegendSynthWrap.style.display = '';
+        refineLegendSynthResult.value = 'Interrogation de l\'IA…';
+
+        var fd = new FormData();
+        fd.append('legend_slug', refineLegendSelect.value);
+        fd.append('model', modelSelect.value);
+        fd.append('original_text', origText);
+        fd.append('refined_text', refText);
+
+        fetch(refineLegendGenUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                if (data.success) {
+                    refineLegendSynthResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                } else {
+                    refineLegendSynthResult.value = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                refineLegendSynthResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* ---- Copy legend synthesis result ---- */
+    document.getElementById('refine-legend-synth-copy-btn').addEventListener('click', function() {
+        refineLegendSynthResult.select();
+        navigator.clipboard.writeText(refineLegendSynthResult.value).then(function() {
+            var btn = document.getElementById('refine-legend-synth-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    /* ---- Save legend synthesis ---- */
+    document.getElementById('refine-legend-synth-save-btn').addEventListener('click', function() {
+        var text = refineLegendSynthResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-legend-synth-save-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineLegendSynthSaveResult.style.display = '';
+        refineLegendSynthSaveResult.className = 'opt-test-result opt-test-pending';
+        refineLegendSynthSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('legend_text', text);
+
+        fetch(refineLegendSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                if (data.success) {
+                    refineLegendSynthSaveResult.className = 'opt-test-result opt-test-success';
+                    refineLegendSynthSaveResult.innerHTML = '✅ <strong>' + data.legend_name.replace(/</g,'&lt;') + '</strong> sauvegardée!'
+                        + ' <a href="' + data.redirect + '" style="color:inherit;font-weight:700;">→ Voir la légende</a>';
+                } else {
+                    refineLegendSynthSaveResult.className = 'opt-test-result opt-test-error';
+                    refineLegendSynthSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                refineLegendSynthSaveResult.className = 'opt-test-result opt-test-error';
+                refineLegendSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
     });
 

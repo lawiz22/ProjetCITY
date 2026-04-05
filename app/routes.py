@@ -4786,6 +4786,21 @@ def ai_lab() -> str:
     ).fetchall()]
     countries_for_monument = countries_for_region
     regions_for_monument = regions_for_event
+    prompt_legend = load_prompt("legend_data.txt")
+    prompt_refine_legend = load_prompt("legend_refine.txt")
+    from .services.legend_service import CATEGORY_LABELS as LEGEND_CATEGORY_LABELS
+    from .services.legend_service import CATEGORY_EMOJIS as LEGEND_CATEGORY_EMOJIS
+    from .services.legend_service import TYPE_LABELS as LEGEND_TYPE_LABELS
+    from .services.legend_service import TYPE_EMOJIS as LEGEND_TYPE_EMOJIS
+    legends_for_refine = [dict(r) for r in conn.execute(
+        "SELECT legend_name, legend_slug, year_reported, legend_category, legend_type "
+        "FROM dim_legend ORDER BY year_reported DESC NULLS LAST, LOWER(legend_name), legend_name"
+    ).fetchall()]
+    countries_for_legend = countries_for_region
+    regions_for_legend = regions_for_event
+    cities_for_legend = [r["city_name"] for r in conn.execute(
+        "SELECT city_name FROM dim_city ORDER BY LOWER(city_name), city_name"
+    ).fetchall()]
     return render_template(
         "web/ai_lab.html",
         page_title="AI Lab",
@@ -4822,6 +4837,16 @@ def ai_lab() -> str:
         monuments_for_refine=monuments_for_refine,
         countries_for_monument=countries_for_monument,
         regions_for_monument=regions_for_monument,
+        prompt_legend=prompt_legend,
+        prompt_refine_legend=prompt_refine_legend,
+        legend_category_labels=LEGEND_CATEGORY_LABELS,
+        legend_category_emojis=LEGEND_CATEGORY_EMOJIS,
+        legend_type_labels=LEGEND_TYPE_LABELS,
+        legend_type_emojis=LEGEND_TYPE_EMOJIS,
+        legends_for_refine=legends_for_refine,
+        countries_for_legend=countries_for_legend,
+        regions_for_legend=regions_for_legend,
+        cities_for_legend=cities_for_legend,
     )
 
 
@@ -6986,6 +7011,247 @@ def ai_lab_refine_monument_save() -> Response:
 
 
 # ---------------------------------------------------------------------------
+# AI Lab – Legend suggest & refine
+# ---------------------------------------------------------------------------
+
+@web.route("/ai-lab/suggest-legend", methods=["POST"])
+@editor_required
+def ai_lab_suggest_legend() -> Response:
+    """Ask Mammouth to suggest a legend/unexplained event not yet in the DB."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .services.legend_service import CATEGORY_LABELS, TYPE_LABELS
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    filter_country  = request.form.get("country", "").strip()
+    filter_region   = request.form.get("region", "").strip()
+    filter_city     = request.form.get("city", "").strip()
+    filter_type     = request.form.get("legend_type", "").strip()
+    filter_category = request.form.get("category", "").strip()
+
+    conn = get_db()
+    existing_rows = conn.execute(
+        "SELECT legend_name, legend_slug, year_reported FROM dim_legend ORDER BY legend_name"
+    ).fetchall()
+    existing_entries = [
+        f"{r['legend_name']} ({r['year_reported']})" if r["year_reported"] else r["legend_name"]
+        for r in existing_rows
+    ]
+
+    context_parts: list[str] = []
+    if filter_city:
+        context_parts.append(f"associé à la ville de '{filter_city}'")
+    if filter_country:
+        context_parts.append(f"situé dans le pays '{filter_country}'")
+    if filter_region:
+        context_parts.append(f"situé dans la région '{filter_region}'")
+    if filter_type:
+        label = TYPE_LABELS.get(filter_type, filter_type)
+        context_parts.append(f"de type '{label}'")
+    if filter_category:
+        label = CATEGORY_LABELS.get(filter_category, filter_category)
+        context_parts.append(f"dans la catégorie '{label}'")
+    context_str = ", ".join(context_parts) if context_parts else "de n'importe quel pays, région ou catégorie"
+
+    if existing_entries:
+        exclusion_block = (
+            f"Ma base contient déjà ces {len(existing_entries)} légendes/événements inexpliqués (nom + année) :\n"
+            f"{chr(10).join('- ' + e for e in existing_entries[:100])}\n"
+            f"{'[… et plus]' if len(existing_entries) > 100 else ''}\n\n"
+            f"RÈGLE ABSOLUE : ne suggère PAS un élément déjà présent dans cette liste, "
+            f"ni un synonyme, ni une variante du même nom.\n\n"
+        )
+    else:
+        exclusion_block = ""
+
+    no_result_note = ""
+    if filter_city or filter_region:
+        no_result_note = (
+            "\nSi aucune légende ou événement inexpliqué documenté n'est associé à ce lieu, "
+            "réponds UNIQUEMENT : AUCUN_RESULTAT"
+            "\nNe fabrique pas de légende fictive.\n"
+        )
+
+    prompt = (
+        f"{exclusion_block}"
+        f"Suggère UNE légende, un mythe, ou un événement inexpliqué {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
+        f"L'élément doit être documenté et avoir une certaine notoriété.\n"
+        f"{no_result_note}"
+        f"Réponds UNIQUEMENT avec le nom complet.\n"
+        f"Aucun autre texte, aucune explication."
+    )
+
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    if result.get("success") and result.get("reply", "").strip().upper() == "AUCUN_RESULTAT":
+        location_label = filter_city or filter_region or filter_country or "ce lieu"
+        result["reply"] = ""
+        result["success"] = False
+        result["error"] = f"Aucune légende ou événement inexpliqué documenté trouvé pour {location_label}."
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/legend/<legend_slug>")
+@editor_required
+def ai_lab_refine_legend_load(legend_slug: str) -> Response:
+    """Load a legend's current data as JSON for the Raffinement tab."""
+    from .db import get_db
+    from .services.legend_service import get_legend
+
+    conn = get_db()
+    legend = get_legend(conn, legend_slug)
+    if legend is None:
+        return jsonify({"success": False, "error": "Légende introuvable."})
+
+    source_text = legend.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'LEGEND_NAME = "{legend["legend_name"]}"',
+            f'LEGEND_TYPE = "{legend.get("legend_type") or "legende"}"',
+            f'LEGEND_CATEGORY = "{legend.get("legend_category") or "origine_inconnue"}"',
+            f'LEGEND_LEVEL = {legend.get("legend_level") or 2}',
+            f'DATE_REPORTED = "{legend.get("date_reported") or ""}"',
+            f'YEAR_REPORTED = {legend.get("year_reported") or ""}',
+            f'LATITUDE = {legend.get("latitude") or ""}',
+            f'LONGITUDE = {legend.get("longitude") or ""}',
+            "",
+            "=== RÉSUMÉ ===",
+            legend.get("summary") or "",
+            "",
+            "=== DESCRIPTION ===",
+            legend.get("description") or "",
+            "",
+            "=== HISTOIRE ===",
+            legend.get("history") or "",
+            "",
+            "=== PREUVES ===",
+            legend.get("evidence") or "",
+            "",
+            "=== LIEUX ===",
+        ]
+        for loc in legend.get("locations", []):
+            if loc.get("city_name") or loc.get("matched_city_name"):
+                city_name = loc.get("matched_city_name") or loc.get("city_name") or ""
+                lines.append(f"{city_name}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    return jsonify({
+        "success": True,
+        "legend_name": legend["legend_name"],
+        "year_reported": legend.get("year_reported"),
+        "legend_type": legend.get("legend_type"),
+        "legend_category": legend.get("legend_category"),
+        "legend_level": legend.get("legend_level"),
+        "summary": (legend.get("summary") or "")[:300],
+        "location_count": len(legend.get("locations", [])),
+        "source_text": source_text,
+    })
+
+
+@web.route("/ai-lab/refine/legend/generate", methods=["POST"])
+@editor_required
+def ai_lab_refine_legend_generate() -> Response:
+    """Generate a refined version of a legend via AI."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+    from .services.legend_service import get_legend
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    legend_slug = request.form.get("legend_slug", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not legend_slug:
+        return jsonify({"success": False, "error": "Légende non spécifiée."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    conn = get_db()
+    legend = get_legend(conn, legend_slug)
+    if legend is None:
+        return jsonify({"success": False, "error": "Légende introuvable."})
+
+    source_text = legend.get("source_text") or ""
+    if not source_text:
+        lines = [
+            f'LEGEND_NAME = "{legend["legend_name"]}"',
+            f'LEGEND_TYPE = "{legend.get("legend_type") or "legende"}"',
+            f'LEGEND_CATEGORY = "{legend.get("legend_category") or "origine_inconnue"}"',
+            f'LEGEND_LEVEL = {legend.get("legend_level") or 2}',
+            f'DATE_REPORTED = "{legend.get("date_reported") or ""}"',
+            f'YEAR_REPORTED = {legend.get("year_reported") or ""}',
+            "",
+            "=== RÉSUMÉ ===",
+            legend.get("summary") or "",
+            "",
+            "=== DESCRIPTION ===",
+            legend.get("description") or "",
+            "",
+            "=== HISTOIRE ===",
+            legend.get("history") or "",
+            "",
+            "=== PREUVES ===",
+            legend.get("evidence") or "",
+            "",
+            "=== LIEUX ===",
+        ]
+        for loc in legend.get("locations", []):
+            if loc.get("city_name") or loc.get("matched_city_name"):
+                city_name = loc.get("matched_city_name") or loc.get("city_name") or ""
+                lines.append(f"{city_name}, {loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+            else:
+                lines.append(f"{loc.get('region', '')}, {loc.get('country', '')}, {loc.get('role', 'primary')}")
+        source_text = "\n".join(lines)
+
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.3)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/legend/save", methods=["POST"])
+@editor_required
+def ai_lab_refine_legend_save() -> Response:
+    """Save the (refined) legend text to the database."""
+    from .db import get_db
+    from .services.legend_service import parse_legend_text, import_legend
+
+    text = request.form.get("legend_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+
+    try:
+        data = parse_legend_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    legend_id = import_legend(conn, data)
+    log_action("import", "legend", data["legend_slug"],
+               f"Légende raffinée sauvegardée: {data['legend_name']}")
+    return jsonify({
+        "success": True,
+        "legend_name": data["legend_name"],
+        "legend_slug": data["legend_slug"],
+        "legend_id": legend_id,
+        "redirect": url_for("web.legend_detail", legend_slug=data["legend_slug"]),
+    })
+
+
+# ---------------------------------------------------------------------------
 # Monuments (Buildings & Landmarks)
 # ---------------------------------------------------------------------------
 
@@ -7375,6 +7641,419 @@ def monument_photo_import_web(monument_slug: str) -> Response:
             imported += 1
     if imported:
         log_action("upload_photo", "monument", monument_slug, f"{imported} photo(s) importée(s) depuis le web pour {monument['monument_name']}")
+    return jsonify({"imported": imported})
+
+
+# ---------------------------------------------------------------------------
+# Legends & Unexplained Events
+# ---------------------------------------------------------------------------
+
+@web.route("/legends")
+def legends_list() -> str:
+    from .db import get_db
+    from .services.legend_service import (
+        get_legends_list, get_legend_primary_photo,
+        LEGEND_TYPES, ALL_CATEGORIES, CATEGORIES_BY_TYPE,
+        CATEGORY_LABELS, CATEGORY_EMOJIS, TYPE_LABELS, TYPE_EMOJIS,
+    )
+
+    conn = get_db()
+    filters = {
+        "type": request.args.get("type", ""),
+        "category": request.args.get("category", ""),
+        "level": request.args.get("level", ""),
+        "search": request.args.get("search", ""),
+        "country": request.args.get("country", ""),
+        "region": request.args.get("region", ""),
+    }
+    view_mode = request.args.get("view", "small").strip().lower()
+    if view_mode not in {"large", "medium", "small", "compact"}:
+        view_mode = "small"
+    legends = get_legends_list(conn, filters)
+    for lg in legends:
+        lg["primary_photo"] = get_legend_primary_photo(conn, lg["legend_slug"])
+    countries_list = [r[1] for r in conn.execute(
+        "SELECT DISTINCT LOWER(country), country FROM dim_legend WHERE country IS NOT NULL AND country != '' ORDER BY LOWER(country)"
+    ).fetchall()]
+    regions_list = [r[1] for r in conn.execute(
+        "SELECT DISTINCT LOWER(region), region FROM dim_legend WHERE region IS NOT NULL AND region != '' ORDER BY LOWER(region)"
+    ).fetchall()]
+    return render_template(
+        "web/legends.html",
+        page_title="Légendes et événements inexpliqués",
+        legends=legends,
+        filters=filters,
+        view_mode=view_mode,
+        legend_types=LEGEND_TYPES,
+        all_categories=ALL_CATEGORIES,
+        categories_by_type=CATEGORIES_BY_TYPE,
+        category_labels=CATEGORY_LABELS,
+        category_emojis=CATEGORY_EMOJIS,
+        type_labels=TYPE_LABELS,
+        type_emojis=TYPE_EMOJIS,
+        countries_list=countries_list,
+        regions_list=regions_list,
+    )
+
+
+@web.route("/legends/<legend_slug>")
+def legend_detail(legend_slug: str) -> str:
+    from .db import get_db
+    from .services.legend_service import get_legend, CATEGORY_LABELS, CATEGORY_EMOJIS, TYPE_LABELS, TYPE_EMOJIS
+    from .services.city_photos import count_missing_photos
+
+    conn = get_db()
+    legend = get_legend(conn, legend_slug)
+    if legend is None:
+        flash("Légende introuvable.", "error")
+        return redirect(url_for("web.legends_list"))
+    return render_template(
+        "web/legend_detail.html",
+        page_title=legend["legend_name"],
+        legend=legend,
+        category_labels=CATEGORY_LABELS,
+        category_emojis=CATEGORY_EMOJIS,
+        type_labels=TYPE_LABELS,
+        type_emojis=TYPE_EMOJIS,
+        missing_photos_count=count_missing_photos(conn, "legend", legend_slug),
+    )
+
+
+@web.route("/legends/import", methods=["POST"])
+@editor_required
+def legend_import() -> Response:
+    from .db import get_db
+    from .services.legend_service import parse_legend_text, import_legend
+
+    text = request.form.get("legend_text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+    try:
+        data = parse_legend_text(text)
+        data["source_text"] = text
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)})
+
+    conn = get_db()
+    try:
+        legend_id = import_legend(conn, data)
+    except Exception as exc:
+        return jsonify({"success": False, "error": f"Erreur BD : {exc}"})
+    log_action("import", "legend", data["legend_slug"], f"Légende importée: {data['legend_name']} ({data.get('year_reported', '')})")
+
+    # Auto-geocode if no coordinates provided
+    if data.get("latitude") is None or data.get("longitude") is None:
+        from .services.city_coordinates import geocode_monument
+        primary_loc = next((l for l in data.get("locations", []) if l.get("role") == "primary"), None)
+        coords = geocode_monument(
+            data["legend_name"],
+            city_name=primary_loc["city_name"] if primary_loc else None,
+            region=primary_loc.get("region") if primary_loc else None,
+            country=primary_loc.get("country") if primary_loc else None,
+        )
+        if coords:
+            conn.execute(
+                "UPDATE dim_legend SET latitude = ?, longitude = ? WHERE legend_id = ?",
+                (coords["lat"], coords["lng"], legend_id),
+            )
+            conn.commit()
+
+    # Auto-search photo from Wikipedia
+    _auto_import_legend_photo(conn, legend_id, data["legend_slug"], data["legend_name"])
+
+    return jsonify({
+        "success": True,
+        "legend_name": data["legend_name"],
+        "legend_slug": data["legend_slug"],
+        "legend_id": legend_id,
+        "redirect": url_for("web.legend_detail", legend_slug=data["legend_slug"]),
+    })
+
+
+def _auto_import_legend_photo(conn, legend_id: int, legend_slug: str, legend_name: str) -> None:
+    """Try to auto-import a photo from Wikipedia/Commons."""
+    try:
+        from .services.city_photos import search_annotation_images, download_web_image
+        from .services.legend_service import save_legend_photo
+
+        images = search_annotation_images(legend_name, "", None, None)
+        if images:
+            img = images[0]
+            result = download_web_image(img.get("url", ""))
+            if result:
+                file_bytes, ext = result
+                save_legend_photo(
+                    conn, legend_id, legend_slug,
+                    file_bytes, f"auto-photo{ext}",
+                    source_url=img.get("source_page", ""),
+                    attribution=img.get("title", "Wikipedia/Wikimedia"),
+                    caption=f"Photo de {legend_name}",
+                    set_primary=True,
+                    image_url=img.get("url", ""),
+                )
+    except Exception:
+        pass
+
+
+@web.route("/legends/geocode-missing", methods=["POST"])
+@editor_required
+def legends_geocode_missing() -> Response:
+    """Geocode all legends that have no latitude/longitude."""
+    import time
+    from .db import get_db
+    from .services.city_coordinates import geocode_monument
+
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT l.legend_id, l.legend_name,
+                  ll.region, ll.country,
+                  dc.city_name
+           FROM dim_legend l
+           LEFT JOIN dim_legend_location ll ON ll.legend_id = l.legend_id AND ll.role = 'primary'
+           LEFT JOIN dim_city dc ON dc.city_id = ll.city_id
+           WHERE l.latitude IS NULL OR l.longitude IS NULL"""
+    ).fetchall()
+
+    results = []
+    for row in rows:
+        coords = geocode_monument(
+            row["legend_name"],
+            city_name=row["city_name"],
+            region=row["region"],
+            country=row["country"],
+        )
+        if coords:
+            conn.execute(
+                "UPDATE dim_legend SET latitude = ?, longitude = ? WHERE legend_id = ?",
+                (coords["lat"], coords["lng"], row["legend_id"]),
+            )
+            conn.commit()
+            results.append({"legend": row["legend_name"], "lat": coords["lat"], "lng": coords["lng"], "ok": True})
+        else:
+            results.append({"legend": row["legend_name"], "ok": False})
+        time.sleep(1)
+
+    geocoded = sum(1 for r in results if r["ok"])
+    if geocoded:
+        log_action("geocode", "legend", None, f"Géocodage: {geocoded}/{len(rows)} légendes géocodées")
+    return jsonify({"total": len(rows), "geocoded": geocoded, "results": results})
+
+
+@web.route("/legends/<legend_slug>/coordinates", methods=["POST"])
+@editor_required
+def legend_save_coordinates(legend_slug: str) -> Response:
+    """Save manually placed coordinates for a legend."""
+    from .db import get_db
+
+    data = request.get_json(silent=True) or {}
+    lat = data.get("latitude")
+    lng = data.get("longitude")
+    if lat is None or lng is None:
+        return jsonify({"success": False, "error": "latitude et longitude requis."})
+    try:
+        lat = round(float(lat), 4)
+        lng = round(float(lng), 4)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Coordonnées invalides."})
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT legend_id FROM dim_legend WHERE legend_slug = ?", (legend_slug,)
+    ).fetchone()
+    if not row:
+        return jsonify({"success": False, "error": "Légende introuvable."})
+
+    conn.execute(
+        "UPDATE dim_legend SET latitude = ?, longitude = ? WHERE legend_slug = ?",
+        (lat, lng, legend_slug),
+    )
+    conn.commit()
+    log_action("geocode_manual", "legend", legend_slug,
+               f"Coordonnées manuelles: {lat}, {lng}")
+    return jsonify({"success": True, "latitude": lat, "longitude": lng})
+
+
+@web.route("/legends/<legend_slug>/delete", methods=["POST"])
+@editor_required
+def legend_delete(legend_slug: str) -> Response:
+    from .db import get_db
+    from .services.legend_service import get_legend, delete_legend
+
+    conn = get_db()
+    legend = get_legend(conn, legend_slug)
+    if legend is None:
+        flash("Légende introuvable.", "error")
+        return redirect(url_for("web.legends_list"))
+    delete_legend(conn, legend["legend_id"])
+    log_action("delete", "legend", legend_slug, f"Légende '{legend['legend_name']}' supprimée")
+    flash(f"Légende « {legend['legend_name']} » supprimée.", "success")
+    return redirect(url_for("web.legends_list"))
+
+
+@web.route("/legends/<legend_slug>/photos/upload", methods=["POST"])
+@editor_required
+def legend_photo_upload(legend_slug: str) -> Response:
+    from .db import get_db
+    from .services.legend_service import get_legend, save_legend_photo
+
+    conn = get_db()
+    legend = get_legend(conn, legend_slug)
+    if legend is None:
+        return jsonify({"success": False, "error": "Légende introuvable."})
+
+    file = request.files.get("photo")
+    if not file or not file.filename:
+        return jsonify({"success": False, "error": "Aucun fichier sélectionné."})
+
+    result = save_legend_photo(
+        conn,
+        legend["legend_id"],
+        legend_slug,
+        file.read(),
+        file.filename,
+        source_url=request.form.get("source_url", ""),
+        attribution=request.form.get("attribution", ""),
+        caption=request.form.get("caption", ""),
+        set_primary=request.form.get("set_primary") == "on",
+    )
+    if result.get("success"):
+        log_action("upload_photo", "legend", legend_slug, f"Photo uploadée pour la légende {legend['legend_name']}")
+    return jsonify(result)
+
+
+@web.route("/legends/<legend_slug>/photos/<int:photo_id>/delete", methods=["POST"])
+@editor_required
+def legend_photo_delete(legend_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.legend_service import delete_legend_photo
+
+    conn = get_db()
+    delete_legend_photo(conn, photo_id, legend_slug)
+    log_action("delete_photo", "legend", legend_slug, f"Photo #{photo_id} supprimée de la légende {legend_slug}")
+    return jsonify({"success": True})
+
+
+@web.route("/legends/<legend_slug>/photos/<int:photo_id>/primary", methods=["POST"])
+@editor_required
+def legend_photo_primary(legend_slug: str, photo_id: int) -> Response:
+    from .db import get_db
+    from .services.legend_service import get_legend, set_legend_photo_primary
+
+    conn = get_db()
+    legend = get_legend(conn, legend_slug)
+    if legend is None:
+        return jsonify({"success": False, "error": "Légende introuvable."})
+    set_legend_photo_primary(conn, photo_id, legend["legend_id"])
+    log_action("update_photo", "legend", legend_slug, f"Photo #{photo_id} définie comme principale pour {legend['legend_name']}")
+    return jsonify({"success": True})
+
+
+@web.route("/legends/<legend_slug>/photos/search")
+def legend_photo_search(legend_slug: str) -> Response:
+    """AJAX: smart search for legend photos (Wikipedia + Commons)."""
+    from .db import get_db
+    from .services.legend_service import get_legend
+    from .services.city_photos import search_annotation_images
+
+    conn = get_db()
+    legend = get_legend(conn, legend_slug)
+    if legend is None:
+        return jsonify({"error": "Légende introuvable.", "images": []})
+
+    legend_name = legend["legend_name"]
+    year_reported = legend.get("year_reported")
+    label = f"{legend_name} ({year_reported})" if year_reported else legend_name
+
+    city_name = ""
+    for loc in legend.get("locations", []):
+        if loc.get("matched_city_name"):
+            city_name = loc["matched_city_name"]
+            break
+        if loc.get("city_name"):
+            city_name = loc["city_name"]
+            break
+
+    country = None
+    for loc in legend.get("locations", []):
+        if loc.get("country"):
+            country = loc["country"]
+            break
+
+    images = search_annotation_images(label, city_name, None, country)
+    return jsonify({"images": images})
+
+
+@web.route("/legends/<legend_slug>/photos/manual-search")
+def legend_photo_manual_search(legend_slug: str) -> Response:
+    """AJAX: manual keyword search on Wikimedia Commons for legend photos."""
+    from .services.city_photos import _search_commons_batch
+
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"images": []})
+
+    seen_urls: set[str] = set()
+    images: list[dict] = []
+
+    words = query.split()
+    if len(words) <= 4:
+        images = _search_commons_batch(query, seen_urls, limit=40)
+    else:
+        images.extend(_search_commons_batch(query, seen_urls, limit=20))
+        sub = " ".join(words[:4])
+        images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+        if len(images) < 20:
+            sub = " ".join(words[:3])
+            images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+        if len(images) < 15:
+            sub = " ".join(words[-3:])
+            images.extend(_search_commons_batch(sub, seen_urls, limit=20))
+
+    return jsonify({"images": images[:40]})
+
+
+@web.route("/legends/<legend_slug>/photos/import-web", methods=["POST"])
+@editor_required
+def legend_photo_import_web(legend_slug: str) -> Response:
+    """Import multiple web images into a legend's photo library."""
+    from .db import get_db
+    from .services.legend_service import get_legend, save_legend_photo
+    from .services.city_photos import download_web_image
+
+    conn = get_db()
+    legend = get_legend(conn, legend_slug)
+    if legend is None:
+        return jsonify({"error": "Légende introuvable.", "imported": 0})
+
+    data = request.get_json(silent=True)
+    if not data or not isinstance(data.get("images"), list):
+        return jsonify({"error": "Aucune image sélectionnée.", "imported": 0})
+
+    imported = 0
+    for img in data["images"]:
+        url = img.get("url", "")
+        if not url:
+            continue
+        result = download_web_image(url)
+        if not result:
+            continue
+        file_bytes, ext = result
+        save_result = save_legend_photo(
+            conn,
+            legend["legend_id"],
+            legend_slug,
+            file_bytes,
+            f"web-import{ext}",
+            source_url=img.get("source_page", ""),
+            attribution=img.get("title", "Wikipedia/Wikimedia"),
+            caption=img.get("caption", ""),
+            set_primary=(imported == 0 and not legend.get("photos")),
+            image_url=url,
+        )
+        if save_result.get("success"):
+            imported += 1
+    if imported:
+        log_action("upload_photo", "legend", legend_slug, f"{imported} photo(s) importée(s) depuis le web pour {legend['legend_name']}")
     return jsonify({"imported": imported})
 
 
@@ -7893,6 +8572,36 @@ def photo_gallery():
             "entity_url": f"/regions/{r['entity_slug']}",
             "entity_date": "",
             "entity_date_label": "",
+        })
+
+    # ── Legend photos ──
+    rows = conn.execute("""
+        SELECT lp.legend_photo_id AS id, lp.filename, lp.caption, lp.source_url,
+               lp.attribution, lp.is_primary, lp.created_at, lp.photo_date,
+               l.legend_name AS entity_name, l.legend_slug AS entity_slug,
+               l.date_reported, l.year_reported
+        FROM dim_legend_photo lp
+        JOIN dim_legend l ON l.legend_id = lp.legend_id
+    """).fetchall()
+    for r in rows:
+        entity_date = r["date_reported"] or (str(r["year_reported"]) if r["year_reported"] else "")
+        photos.append({
+            "id": r["id"], "table": "dim_legend_photo", "pk": "legend_photo_id",
+            "category": "legend", "category_label": "Légende", "category_emoji": "👻",
+            "filename": r["filename"],
+            "path": f"images/legends/{r['entity_slug']}/{r['filename']}",
+            "caption": r["caption"] or "",
+            "source_url": r["source_url"] or "",
+            "attribution": r["attribution"] or "",
+            "is_primary": r["is_primary"],
+            "photo_date": r["photo_date"] or "",
+            "exif_camera": "",
+            "created_at": str(r["created_at"] or ""),
+            "entity_name": r["entity_name"],
+            "entity_slug": r["entity_slug"],
+            "entity_url": f"/legends/{r['entity_slug']}",
+            "entity_date": entity_date,
+            "entity_date_label": f"Signalé : {entity_date}" if entity_date else "",
         })
 
     # Sort by newest first by default

@@ -482,8 +482,118 @@ def run_migrations(config: Mapping[str, Any]) -> None:
         """)
 
 
+        # --- dim_legend tables ---
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS dim_legend (
+                legend_id BIGSERIAL PRIMARY KEY,
+                legend_name TEXT NOT NULL,
+                legend_slug TEXT NOT NULL UNIQUE,
+                legend_type TEXT NOT NULL DEFAULT 'legende' CHECK (legend_type IN ('legende', 'inexplique')),
+                legend_category TEXT NOT NULL DEFAULT 'origine_inconnue',
+                legend_level INTEGER NOT NULL DEFAULT 2 CHECK (legend_level IN (1, 2)),
+                date_reported TEXT,
+                year_reported INTEGER,
+                country TEXT,
+                region TEXT,
+                city_name TEXT,
+                latitude NUMERIC,
+                longitude NUMERIC,
+                summary TEXT,
+                description TEXT,
+                history TEXT,
+                evidence TEXT,
+                source_text TEXT,
+                annotation_id BIGINT REFERENCES dim_annotation(annotation_id) ON DELETE SET NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+                updated_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS dim_legend_location (
+                legend_location_id BIGSERIAL PRIMARY KEY,
+                legend_id BIGINT NOT NULL REFERENCES dim_legend(legend_id) ON DELETE CASCADE,
+                city_id BIGINT REFERENCES dim_city(city_id) ON DELETE SET NULL,
+                region TEXT,
+                country TEXT,
+                role TEXT NOT NULL DEFAULT 'primary'
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS dim_legend_photo (
+                legend_photo_id BIGSERIAL PRIMARY KEY,
+                legend_id BIGINT NOT NULL REFERENCES dim_legend(legend_id) ON DELETE CASCADE,
+                filename TEXT NOT NULL,
+                object_key TEXT,
+                storage_provider TEXT,
+                mime_type TEXT,
+                file_size BIGINT,
+                checksum_sha256 TEXT,
+                caption TEXT,
+                source_url TEXT,
+                attribution TEXT,
+                is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+                photo_order INTEGER NOT NULL DEFAULT 0,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+
+        # --- dim_legend country/region/city_name columns ---
+        cur.execute(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_legend'",
+        )
+        _leg_cols = {row[0] for row in cur.fetchall()}
+        if _leg_cols and "country" not in _leg_cols:
+            cur.execute("ALTER TABLE dim_legend ADD COLUMN country TEXT")
+        if _leg_cols and "region" not in _leg_cols:
+            cur.execute("ALTER TABLE dim_legend ADD COLUMN region TEXT")
+        if _leg_cols and "city_name" not in _leg_cols:
+            cur.execute("ALTER TABLE dim_legend ADD COLUMN city_name TEXT")
+
+        # --- vw_legend_summary view ---
+        cur.execute("DROP VIEW IF EXISTS vw_legend_summary")
+        cur.execute("""
+            CREATE VIEW vw_legend_summary AS
+            SELECT
+                l.legend_id,
+                l.legend_name,
+                l.legend_slug,
+                l.legend_type,
+                l.legend_category,
+                l.legend_level,
+                l.date_reported,
+                l.year_reported,
+                l.country,
+                l.region,
+                l.city_name,
+                l.summary,
+                l.created_at,
+                COUNT(DISTINCT ll.legend_location_id) AS location_count,
+                COUNT(DISTINCT lp.legend_photo_id) AS photo_count,
+                STRING_AGG(DISTINCT COALESCE(dc.city_name, ll.region), ',') AS location_names
+            FROM dim_legend l
+            LEFT JOIN dim_legend_location ll ON ll.legend_id = l.legend_id
+            LEFT JOIN dim_city dc ON dc.city_id = ll.city_id
+            LEFT JOIN dim_legend_photo lp ON lp.legend_id = l.legend_id
+            GROUP BY
+                l.legend_id,
+                l.legend_name,
+                l.legend_slug,
+                l.legend_type,
+                l.legend_category,
+                l.legend_level,
+                l.date_reported,
+                l.year_reported,
+                l.country,
+                l.region,
+                l.city_name,
+                l.summary,
+                l.created_at
+        """)
+
         # --- tracking columns on entity tables ---
-        _tracking_tables = ["dim_city", "dim_country", "dim_region", "dim_event", "dim_person", "dim_monument"]
+        _tracking_tables = ["dim_city", "dim_country", "dim_region", "dim_event", "dim_person", "dim_monument", "dim_legend"]
         for tbl in _tracking_tables:
             # Check which columns exist
             cur.execute(
@@ -511,6 +621,7 @@ def run_migrations(config: Mapping[str, Any]) -> None:
         _photo_tables = [
             "dim_city_photo", "dim_event_photo", "dim_person_photo",
             "dim_country_photo", "dim_region_photo", "dim_monument_photo",
+            "dim_legend_photo",
         ]
         for ptbl in _photo_tables:
             cur.execute(
@@ -557,6 +668,9 @@ def run_migrations(config: Mapping[str, Any]) -> None:
             ("dim_monument",                 "monument_id"),
             ("dim_monument_location",        "monument_location_id"),
             ("dim_monument_photo",           "monument_photo_id"),
+            ("dim_legend",                   "legend_id"),
+            ("dim_legend_location",          "legend_location_id"),
+            ("dim_legend_photo",             "legend_photo_id"),
             ("dim_country",                  "country_id"),
             ("dim_country_photo",            "photo_id"),
             ("dim_region",                   "region_id"),

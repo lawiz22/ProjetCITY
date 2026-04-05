@@ -1,0 +1,723 @@
+{% extends 'web/base.html' %}
+{% from 'web/_refetch_photos.html' import refetch_button, refetch_script %}
+
+{% block hero_title %}{% endblock %}
+
+{% block content %}
+
+{% set primary_photo = legend.photos | selectattr('is_primary') | first %}
+
+<!-- ===== HERO HEADER ===== -->
+<section class="event-hero"{% if primary_photo %} style="--evt-hero-image: url('{{ url_for('static', filename=primary_photo.photo_path) }}')"{% endif %}>
+    <div class="event-hero-overlay"></div>
+    <article class="event-hero-content">
+        <div class="event-hero-top">
+            <p class="eyebrow">
+                <span class="badge badge-legend-{{ legend.legend_type }}">{{ type_emojis.get(legend.legend_type, '📜') }} {{ type_labels.get(legend.legend_type, legend.legend_type) }}</span>
+                <span class="badge badge-{{ legend.legend_category }}">{{ category_emojis.get(legend.legend_category, '🔮') }} {{ category_labels.get(legend.legend_category, legend.legend_category) }}</span>
+                {% if legend.legend_level == 1 %}<span class="event-level-major" title="Majeur">⭐</span>{% endif %}
+            </p>
+            <div class="event-hero-actions">
+                <a href="{{ url_for('web.legends_list') }}" class="event-hero-btn">← Retour</a>
+                <form method="post" action="{{ url_for('web.legend_delete', legend_slug=legend.legend_slug) }}" onsubmit="return confirm('Supprimer cette légende ?');" style="margin:0;">
+                    <button type="submit" class="event-hero-btn event-hero-btn-danger">🗑️ Supprimer</button>
+                </form>
+            </div>
+        </div>
+        <h2>{{ legend.legend_name }}</h2>
+        <div class="event-hero-badges">
+            {% if legend.country or legend.region or legend.city_name %}
+            <span class="event-hero-badge">📍 {{ [legend.city_name, legend.region, legend.country]|select|join(', ') }}</span>
+            {% endif %}
+            {% if legend.year_reported %}
+            <span class="event-hero-badge">📅 {{ legend.year_reported }}{% if legend.date_reported %} ({{ legend.date_reported }}){% endif %}</span>
+            {% endif %}
+            {% if legend.locations %}
+            <span class="event-hero-badge">📍 {{ legend.locations|length }} lieu{% if legend.locations|length != 1 %}x{% endif %}</span>
+            {% endif %}
+            {% if legend.photos %}
+            <span class="event-hero-badge">📷 {{ legend.photos|length }} photo{% if legend.photos|length != 1 %}s{% endif %}</span>
+            {% endif %}
+        </div>
+    </article>
+</section>
+
+<!-- ===== RÉSUMÉ + PHOTO ===== -->
+{% if legend.summary %}
+<div class="event-desc-row{% if primary_photo %} event-desc-row-has-photo{% endif %}">
+    <section class="panel">
+        <div class="panel-head">
+            <h2>📝 Résumé</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in legend.summary.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% if primary_photo %}
+    <section class="panel event-desc-photo-panel">
+        <img src="{{ url_for('static', filename=primary_photo.photo_path) }}" alt="{{ primary_photo.caption or legend.legend_name }}" style="cursor:pointer;" onclick="openLightbox(this.src)">
+        {% if primary_photo.caption %}
+        <span class="event-desc-photo-caption">{{ primary_photo.caption }}</span>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Description + Histoire -->
+<div class="event-impacts-grid">
+    {% if legend.description %}
+    <section class="panel">
+        <div class="panel-head">
+            <h2>📖 Description</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in legend.description.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if legend.history %}
+    <section class="panel">
+        <div class="panel-head">
+            <h2>🕰️ Historique</h2>
+        </div>
+        <div class="options-body event-text-body">
+            {% for para in legend.history.split('\n\n') %}
+            <p>{{ para }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Preuves / Evidence -->
+{% if legend.evidence %}
+<section class="panel">
+    <div class="panel-head">
+        <h2>🔎 Preuves et témoignages</h2>
+    </div>
+    <div class="options-body event-text-body">
+        {% for para in legend.evidence.split('\n\n') %}
+        <p>{{ para }}</p>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Carte de localisation -->
+<section class="panel">
+    <div class="panel-head">
+        <h2>🗺️ Localisation</h2>
+        {% if legend.latitude and legend.longitude %}
+        <span id="leg-coords-display">📌 {{ legend.latitude }}, {{ legend.longitude }}</span>
+        {% else %}
+        <span id="leg-coords-display" style="opacity:.5">📌 Non géolocalisé</span>
+        {% endif %}
+    </div>
+    <div class="options-body" style="padding:0;position:relative;">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}">
+        <div id="legend-map" style="height:400px;width:100%;border-radius:0 0 12px 12px;"></div>
+        <div style="position:absolute;top:10px;right:10px;z-index:1000;display:flex;gap:.5rem;">
+            <button type="button" class="secondary-button" id="leg-map-edit-btn" style="font-size:.85rem;padding:.35rem .7rem;">✏️ Placer manuellement</button>
+            <button type="button" class="secondary-button" id="leg-map-save-btn" style="font-size:.85rem;padding:.35rem .7rem;display:none;background:#27ae60;color:#fff;">💾 Sauvegarder</button>
+            <button type="button" class="secondary-button" id="leg-map-cancel-btn" style="font-size:.85rem;padding:.35rem .7rem;display:none;">✖ Annuler</button>
+        </div>
+    </div>
+</section>
+
+<!-- Locations -->
+{% if legend.locations %}
+<section class="panel">
+    <div class="panel-head">
+        <h2>📍 Lieux liés</h2>
+        <span>{{ legend.locations|length }} lieu{% if legend.locations|length != 1 %}x{% endif %}</span>
+    </div>
+    <div class="options-body">
+        <div class="event-locations-list">
+            {% for loc in legend.locations %}
+            <div class="event-location-item">
+                <span class="event-location-role role-{{ loc.role }}">
+                    {% if loc.role == 'primary' %}🔴{% elif loc.role == 'secondary' %}🟠{% else %}🟡{% endif %}
+                    {{ loc.role }}
+                </span>
+                {% if loc.matched_city_slug %}
+                <a href="{{ url_for('web.city_detail', city_slug=loc.matched_city_slug) }}">
+                    {{ loc.matched_city_name }}
+                </a>
+                {% elif loc.region or loc.country %}
+                <span>{{ loc.region }}{% if loc.region and loc.country %}, {% endif %}{{ loc.country }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Photos -->
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>📷 Photos</h2>
+            <span>{{ legend.photos|length }} photo{% if legend.photos|length != 1 %}s{% endif %}</span>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+            <button type="button" class="event-search-web-btn" id="leg-photo-search-btn">🔍 Rechercher sur le web</button>
+            <a href="{{ url_for('web.photo_export_zip', entity_type='legend', entity_slug=legend.legend_slug) }}" class="event-search-web-btn" title="Exporter les photos en ZIP">📦 Export ZIP</a>
+            <button type="button" class="event-search-web-btn" id="photo-import-zip-btn">📥 Import ZIP</button>
+            {{ refetch_button('legend', legend.legend_slug, missing_photos_count, 'event-search-web-btn') }}
+        </div>
+    </div>
+    <div class="options-body">
+        {% if legend.photos %}
+        <div class="event-photos-grid">
+            {% for photo in legend.photos %}
+            <div class="event-photo-card{% if photo.is_primary %} event-photo-primary{% endif %}">
+                <img src="{{ url_for('static', filename=photo.photo_path) }}" alt="{{ photo.caption or legend.legend_name }}" loading="lazy" style="cursor:pointer;" onclick="openLightbox(this.src)">
+                {% if photo.caption %}
+                <div class="event-photo-caption">{{ photo.caption }}</div>
+                {% endif %}
+                {% if photo.source_url %}
+                <a href="{{ photo.source_url }}" target="_blank" class="event-photo-source" title="Source">🔗</a>
+                {% endif %}
+                <div class="event-photo-actions">
+                    {% if not photo.is_primary %}
+                    <button type="button" class="opt-btn opt-btn-save event-photo-btn" onclick="setPhotoPrimary({{ photo.legend_photo_id }})" title="Définir comme principale">⭐</button>
+                    {% endif %}
+                    <button type="button" class="opt-btn event-photo-btn" onclick="deletePhoto({{ photo.legend_photo_id }})" title="Supprimer" style="background:#c0392b;color:#fff;">🗑️</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="opacity:.6;padding:1rem;">Aucune photo. Cliquez « Rechercher sur le web » pour en trouver.</p>
+        {% endif %}
+
+        <!-- Upload form -->
+        <div class="event-photo-upload" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--panel-border,#333);">
+            <h4>📤 Upload manuel</h4>
+            <form id="leg-photo-form" enctype="multipart/form-data">
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0;">
+                    <input type="file" name="photo" accept="image/*" required style="flex:1;min-width:200px;">
+                    <input type="text" name="caption" class="opt-input" placeholder="Légende" style="flex:1;min-width:150px;">
+                </div>
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0;">
+                    <input type="text" name="source_url" class="opt-input" placeholder="URL source" style="flex:1;">
+                    <input type="text" name="attribution" class="opt-input" placeholder="Attribution" style="flex:1;">
+                    <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;"><input type="checkbox" name="set_primary"> Principale</label>
+                </div>
+                <button type="submit" class="opt-btn opt-btn-save">📤 Uploader</button>
+                <span id="leg-upload-status" style="margin-left:.5rem;"></span>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Photo Search Modal ===================== -->
+<div class="photo-search-modal" id="leg-photo-modal" style="display:none;">
+    <div class="photo-search-modal-backdrop"></div>
+    <div class="photo-search-modal-content" style="max-width:1100px;">
+        <div class="photo-search-modal-header">
+            <h3>🔍 Recherche de photos — {{ legend.legend_name }}</h3>
+            <button type="button" class="photo-search-modal-close">&times;</button>
+        </div>
+        <div class="photo-search-tabs">
+            <button type="button" class="photo-search-tab active" data-leg-tab="auto">🌐 Recherche auto</button>
+            <button type="button" class="photo-search-tab" data-leg-tab="manual">🔎 Recherche manuelle</button>
+        </div>
+        <div class="photo-search-modal-body">
+            <div id="leg-auto-panel">
+                <p class="helper-text" id="leg-auto-status">Cliquez « Rechercher sur le web » pour lancer la recherche.</p>
+                <div class="photo-search-grid" id="leg-auto-grid"></div>
+            </div>
+            <div id="leg-manual-panel" style="display:none;">
+                <p class="helper-text" style="margin:0 0 .5rem;">Cliquez ou glissez les mots-clés dans la barre de recherche :</p>
+                <div class="ann-pill-tray" id="leg-pill-tray"></div>
+                <div class="ann-search-bar">
+                    <div class="ann-search-input-wrap" id="leg-search-input-wrap">
+                        <input type="text" id="leg-manual-input" placeholder="Glissez des mots-clés ici ou tapez…" autocomplete="off">
+                    </div>
+                    <button type="button" class="ann-manual-search-btn opt-btn opt-btn-save" id="leg-manual-search-btn">🔍 Chercher</button>
+                </div>
+                <p class="helper-text" id="leg-manual-status"></p>
+                <div class="photo-search-grid" id="leg-manual-grid"></div>
+            </div>
+        </div>
+        <div class="photo-search-modal-footer">
+            <span id="leg-photo-count">0 sélectionnée(s)</span>
+            <button type="button" class="opt-btn opt-btn-save" id="leg-photo-import-btn" disabled>📥 Importer la sélection</button>
+        </div>
+    </div>
+</div>
+
+<!-- Source text -->
+{% if legend.source_text %}
+<section class="panel">
+    <div class="panel-head" style="cursor:pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? '' : 'none';">
+        <h2>📝 Texte source (AI)</h2>
+        <span>Cliquer pour afficher/masquer</span>
+    </div>
+    <div class="options-body" style="display:none;">
+        <pre style="white-space:pre-wrap;font-size:.85rem;opacity:.8;max-height:400px;overflow:auto;">{{ legend.source_text }}</pre>
+    </div>
+</section>
+{% endif %}
+
+<script>
+function openLightbox(src) {
+    var overlay = document.createElement('div');
+    overlay.className = 'photo-lightbox';
+    overlay.innerHTML = '<img src="' + src + '" alt="Photo">';
+    overlay.addEventListener('click', function() { overlay.remove(); });
+    document.addEventListener('keydown', function handler(e) {
+        if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', handler); }
+    });
+    document.body.appendChild(overlay);
+}
+</script>
+
+<script>
+(function() {
+    var slug = '{{ legend.legend_slug }}';
+    var legendName = {{ legend.legend_name | tojson }};
+    var yearReported = {{ legend.year_reported | tojson }};
+    var legendCategory = {{ legend.legend_category | tojson }};
+    var selectedImages = {};
+
+    /* ---- Basic photo CRUD ---- */
+    document.getElementById('leg-photo-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        var status = document.getElementById('leg-upload-status');
+        status.textContent = '⏳ Upload…';
+        var fd = new FormData(form);
+        fetch('/legends/' + encodeURIComponent(slug) + '/photos/upload', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) { location.reload(); }
+                else { status.textContent = '❌ ' + d.error; }
+            })
+            .catch(function(err) { status.textContent = '❌ ' + err.message; });
+    });
+
+    window.deletePhoto = function(photoId) {
+        if (!confirm('Supprimer cette photo ?')) return;
+        fetch('/legends/' + encodeURIComponent(slug) + '/photos/' + photoId + '/delete', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { if (d.success) location.reload(); });
+    };
+
+    window.setPhotoPrimary = function(photoId) {
+        fetch('/legends/' + encodeURIComponent(slug) + '/photos/' + photoId + '/primary', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { if (d.success) location.reload(); });
+    };
+
+    /* ---- Photo Search Modal ---- */
+    var modal = document.getElementById('leg-photo-modal');
+    var autoGrid = document.getElementById('leg-auto-grid');
+    var autoStatus = document.getElementById('leg-auto-status');
+    var manualGrid = document.getElementById('leg-manual-grid');
+    var manualStatus = document.getElementById('leg-manual-status');
+    var manualInput = document.getElementById('leg-manual-input');
+    var pillTray = document.getElementById('leg-pill-tray');
+    var countEl = document.getElementById('leg-photo-count');
+    var importBtn = document.getElementById('leg-photo-import-btn');
+    var autoLoaded = false;
+
+    function openModal() {
+        modal.style.display = '';
+        if (!autoLoaded) {
+            autoLoaded = true;
+            autoStatus.textContent = '⏳ Recherche en cours…';
+            autoGrid.innerHTML = '';
+            fetch('/legends/' + encodeURIComponent(slug) + '/photos/search')
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.images && d.images.length) {
+                        autoStatus.textContent = d.images.length + ' photos trouvées. Cliquez pour sélectionner.';
+                        renderGrid(autoGrid, d.images);
+                    } else {
+                        autoStatus.textContent = 'Aucune photo trouvée. Essayez la recherche manuelle.';
+                    }
+                })
+                .catch(function(err) {
+                    autoStatus.textContent = '❌ Erreur: ' + err.message;
+                });
+        }
+        buildPills();
+    }
+
+    function closeModal() { modal.style.display = 'none'; }
+
+    document.getElementById('leg-photo-search-btn').addEventListener('click', openModal);
+    modal.querySelector('.photo-search-modal-backdrop').addEventListener('click', closeModal);
+    modal.querySelector('.photo-search-modal-close').addEventListener('click', closeModal);
+
+    /* ---- Tabs ---- */
+    modal.querySelectorAll('[data-leg-tab]').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            modal.querySelectorAll('[data-leg-tab]').forEach(function(t) { t.classList.remove('active'); });
+            tab.classList.add('active');
+            var target = tab.getAttribute('data-leg-tab');
+            document.getElementById('leg-auto-panel').style.display = target === 'auto' ? '' : 'none';
+            document.getElementById('leg-manual-panel').style.display = target === 'manual' ? '' : 'none';
+        });
+    });
+
+    /* ---- Render grid ---- */
+    function renderGrid(container, images) {
+        container.innerHTML = '';
+        images.forEach(function(img) {
+            var div = document.createElement('div');
+            div.className = 'photo-search-card';
+            var key = img.url;
+            if (selectedImages[key]) div.classList.add('photo-search-selected');
+            var imgTitle = (img.title || '').replace('File:', '').replace(/_/g, ' ');
+            var imgDesc = (img.description || '').replace(/</g, '&lt;');
+            var captionText = imgDesc || imgTitle.replace(/</g, '&lt;');
+            var tooltipText = imgDesc ? (imgTitle + '\n' + imgDesc) : imgTitle;
+            div.innerHTML =
+                '<img src="' + escHtml(img.thumb_url || img.url) + '" alt="' + escHtml(imgTitle) + '" title="' + tooltipText.replace(/"/g, '&quot;') + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+                '<span class="photo-search-check">✓</span>' +
+                '<span class="photo-search-caption">' + captionText + '</span>' +
+                '<span class="photo-search-size">' + (img.width || '?') + '×' + (img.height || '?') + '</span>';
+            div.addEventListener('click', function() {
+                if (selectedImages[key]) {
+                    delete selectedImages[key];
+                    div.classList.remove('photo-search-selected');
+                } else {
+                    selectedImages[key] = img;
+                    div.classList.add('photo-search-selected');
+                }
+                updateCount();
+            });
+            container.appendChild(div);
+        });
+    }
+
+    function updateCount() {
+        var n = Object.keys(selectedImages).length;
+        countEl.textContent = n + ' sélectionnée(s)';
+        importBtn.disabled = n === 0;
+    }
+
+    function escHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    /* ---- Keyword pills ---- */
+    var FR_STOP = new Set(['les','des','une','par','pour','dans','avec','sur','aux','son','ses','est','sont','qui','que','pas','tout','mais','ces','cette','entre','sans','leur','leurs','plus','fait','ils','elle','ont','été','aussi','même','être','nous','vous','comme','après','quand','chez','très','peu','sous','vers']);
+
+    var searchWrap = document.getElementById('leg-search-input-wrap');
+
+    function buildPills() {
+        pillTray.innerHTML = '';
+        var cleaned = legendName.replace(/[\u{10000}-\u{10FFFF}]/gu, '').trim();
+
+        var words = cleaned.split(/\s+/).filter(function(w) {
+            return w.length >= 3 && !FR_STOP.has(w.toLowerCase());
+        });
+        var seen = new Set();
+        var pills = [];
+        words.forEach(function(w) {
+            var lw = w.toLowerCase();
+            if (!seen.has(lw)) {
+                seen.add(lw);
+                pills.push(w);
+            }
+        });
+        if (yearReported && !seen.has(String(yearReported))) pills.push(String(yearReported));
+        var helpers = ['legend', 'myth', 'folklore', 'mystery', 'unexplained'];
+        helpers.forEach(function(h) { if (!seen.has(h)) pills.push(h); });
+
+        function makePill(text) {
+            var pill = document.createElement('span');
+            pill.className = 'ann-keyword-pill';
+            pill.textContent = text;
+            pill.draggable = true;
+            pill.dataset.keyword = text;
+            pill.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', text);
+                pill.classList.add('dragging');
+            });
+            pill.addEventListener('dragend', function() {
+                pill.classList.remove('dragging');
+            });
+            pill.addEventListener('click', function() {
+                addPillToSearch(text);
+            });
+            return pill;
+        }
+        pills.forEach(function(t) { pillTray.appendChild(makePill(t)); });
+    }
+
+    function addPillToSearch(text) {
+        var existing = searchWrap.querySelectorAll('.ann-search-pill');
+        for (var i = 0; i < existing.length; i++) {
+            if (existing[i].dataset.keyword.toLowerCase() === text.toLowerCase()) return;
+        }
+        var pill = document.createElement('span');
+        pill.className = 'ann-search-pill';
+        pill.dataset.keyword = text;
+        pill.innerHTML = text + '<button type="button">&times;</button>';
+        pill.querySelector('button').addEventListener('click', function(e) {
+            e.stopPropagation();
+            pill.remove();
+        });
+        searchWrap.insertBefore(pill, manualInput);
+        manualInput.value = '';
+        manualInput.focus();
+    }
+
+    function getManualQuery() {
+        var parts = [];
+        searchWrap.querySelectorAll('.ann-search-pill').forEach(function(p) {
+            parts.push(p.dataset.keyword);
+        });
+        var typed = manualInput.value.trim();
+        if (typed) parts.push(typed);
+        return parts.join(' ');
+    }
+
+    searchWrap.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        searchWrap.classList.add('drag-over');
+    });
+    searchWrap.addEventListener('dragleave', function() {
+        searchWrap.classList.remove('drag-over');
+    });
+    searchWrap.addEventListener('drop', function(e) {
+        e.preventDefault();
+        searchWrap.classList.remove('drag-over');
+        var text = e.dataTransfer.getData('text/plain');
+        if (text) addPillToSearch(text);
+    });
+
+    manualInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var typed = manualInput.value.trim();
+            if (typed) addPillToSearch(typed);
+            else doManualSearch();
+        }
+        if (e.key === 'Backspace' && !manualInput.value) {
+            var pills = searchWrap.querySelectorAll('.ann-search-pill');
+            if (pills.length) pills[pills.length - 1].remove();
+        }
+    });
+
+    /* ---- Manual search ---- */
+    document.getElementById('leg-manual-search-btn').addEventListener('click', doManualSearch);
+
+    function doManualSearch() {
+        var q = getManualQuery();
+        if (!q.trim()) return;
+        manualStatus.textContent = '⏳ Recherche « ' + q + ' »…';
+        manualGrid.innerHTML = '';
+        fetch('/legends/' + encodeURIComponent(slug) + '/photos/manual-search?q=' + encodeURIComponent(q))
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.images && d.images.length) {
+                    manualStatus.textContent = d.images.length + ' résultats pour « ' + q + ' ».';
+                    renderGrid(manualGrid, d.images);
+                } else {
+                    manualStatus.textContent = 'Aucun résultat pour « ' + q + ' ». Essayez d\'autres mots-clés.';
+                }
+            })
+            .catch(function(err) {
+                manualStatus.textContent = '❌ Erreur: ' + err.message;
+            });
+    }
+
+    /* ---- Import selected ---- */
+    importBtn.addEventListener('click', function() {
+        var images = Object.values(selectedImages);
+        if (!images.length) return;
+        importBtn.disabled = true;
+        importBtn.textContent = '⏳ Import de ' + images.length + ' photo(s)…';
+        fetch('/legends/' + encodeURIComponent(slug) + '/photos/import-web', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ images: images })
+        })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.imported > 0) {
+                    location.reload();
+                } else {
+                    importBtn.disabled = false;
+                    importBtn.textContent = '📥 Importer la sélection';
+                    countEl.textContent = '❌ Aucune photo importée. ' + (d.error || '');
+                }
+            })
+            .catch(function(err) {
+                importBtn.disabled = false;
+                importBtn.textContent = '📥 Importer la sélection';
+                countEl.textContent = '❌ ' + err.message;
+            });
+    });
+})();
+</script>
+
+<script>
+(function() {
+    var importBtn = document.getElementById('photo-import-zip-btn');
+    if (!importBtn) return;
+    var importUrl = '{{ url_for("web.photo_import_zip", entity_type="legend", entity_slug=legend.legend_slug) }}';
+    importBtn.addEventListener('click', function() {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.zip';
+        input.addEventListener('change', function() {
+            if (!input.files.length) return;
+            importBtn.disabled = true;
+            importBtn.textContent = '⏳ Import en cours…';
+            var fd = new FormData();
+            fd.append('zip_file', input.files[0]);
+            fetch(importUrl, { method: 'POST', body: fd })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.success) { location.reload(); }
+                    else { alert('❌ ' + d.error); importBtn.disabled = false; importBtn.textContent = '📥 Import ZIP'; }
+                })
+                .catch(function(err) { alert('❌ ' + err.message); importBtn.disabled = false; importBtn.textContent = '📥 Import ZIP'; });
+        });
+        input.click();
+    });
+})();
+</script>
+
+<script src="{{ url_for('static', filename='js/leaflet.js') }}?v=5"></script>
+<script>
+(function() {
+    var hasCoords = {{ 'true' if legend.latitude and legend.longitude else 'false' }};
+    var lat = {{ legend.latitude if legend.latitude else 48.8566 }};
+    var lng = {{ legend.longitude if legend.longitude else 2.3522 }};
+    var zoom = hasCoords ? 15 : 3;
+
+    var map = L.map('legend-map').setView([lat, lng], zoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19
+    }).addTo(map);
+
+    var pinIcon = L.divIcon({
+        className: '',
+        html: '<div style="width:30px;height:30px;position:relative;">'
+            + '<div style="width:20px;height:20px;background:#8b5cf6;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.4);position:absolute;top:0;left:5px;"></div>'
+            + '<div style="width:8px;height:8px;background:rgba(0,0,0,.25);border-radius:50%;position:absolute;bottom:0;left:11px;"></div>'
+            + '</div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -28]
+    });
+
+    function makeMarker(lt, ln) {
+        return L.marker([lt, ln], { icon: pinIcon });
+    }
+
+    var marker = null;
+    if (hasCoords) {
+        marker = makeMarker(lat, lng).addTo(map)
+            .bindPopup('<strong>{{ legend.legend_name | e }}</strong>');
+    }
+
+    var editing = false;
+    var editBtn = document.getElementById('leg-map-edit-btn');
+    var saveBtn = document.getElementById('leg-map-save-btn');
+    var cancelBtn = document.getElementById('leg-map-cancel-btn');
+    var coordsDisplay = document.getElementById('leg-coords-display');
+    var origLat = lat, origLng = lng, origMarker = marker;
+
+    editBtn.addEventListener('click', function() {
+        editing = true;
+        editBtn.style.display = 'none';
+        saveBtn.style.display = '';
+        cancelBtn.style.display = '';
+        map.getContainer().style.cursor = 'crosshair';
+        if (!marker) {
+            map.setView([lat, lng], zoom < 5 ? 5 : zoom);
+        }
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        editing = false;
+        editBtn.style.display = '';
+        saveBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+        map.getContainer().style.cursor = '';
+        if (hasCoords) {
+            if (marker) { marker.setLatLng([origLat, origLng]); }
+            else { marker = makeMarker(origLat, origLng).addTo(map); }
+            map.setView([origLat, origLng], 15);
+            coordsDisplay.textContent = '📌 ' + origLat + ', ' + origLng;
+            coordsDisplay.style.opacity = '';
+        } else {
+            if (marker) { map.removeLayer(marker); marker = null; }
+            coordsDisplay.textContent = '📌 Non géolocalisé';
+            coordsDisplay.style.opacity = '.5';
+        }
+    });
+
+    map.on('click', function(e) {
+        if (!editing) return;
+        var newLat = Math.round(e.latlng.lat * 10000) / 10000;
+        var newLng = Math.round(e.latlng.lng * 10000) / 10000;
+        if (marker) {
+            marker.setLatLng([newLat, newLng]);
+        } else {
+            marker = makeMarker(newLat, newLng).addTo(map);
+        }
+        coordsDisplay.textContent = '📌 ' + newLat + ', ' + newLng;
+        coordsDisplay.style.opacity = '';
+        lat = newLat;
+        lng = newLng;
+    });
+
+    saveBtn.addEventListener('click', function() {
+        if (!marker) { alert('Cliquez sur la carte pour placer la légende.'); return; }
+        var pos = marker.getLatLng();
+        saveBtn.disabled = true;
+        saveBtn.textContent = '⏳…';
+        fetch('{{ url_for("web.legend_save_coordinates", legend_slug=legend.legend_slug) }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ latitude: pos.lat, longitude: pos.lng })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.success) {
+                hasCoords = true;
+                origLat = d.latitude; origLng = d.longitude;
+                editing = false;
+                editBtn.style.display = '';
+                saveBtn.style.display = 'none';
+                cancelBtn.style.display = 'none';
+                map.getContainer().style.cursor = '';
+                coordsDisplay.textContent = '📌 ' + d.latitude + ', ' + d.longitude;
+                marker.bindPopup('<strong>{{ legend.legend_name | e }}</strong>');
+            } else {
+                alert('❌ ' + d.error);
+            }
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Sauvegarder';
+        })
+        .catch(function(err) {
+            alert('❌ ' + err.message);
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Sauvegarder';
+        });
+    });
+})();
+</script>
+
+{{ refetch_script() }}
+{% endblock %}
