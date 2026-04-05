@@ -1201,6 +1201,323 @@ def search_annotation_images(
     return images[:40]
 
 
+# ── Legend-specific photo search ─────────────────────────────
+# Legends (Wendigo, Chasse-Galerie, MH370…) are *topics*, not places.
+# The search must focus on the legend subject itself, not a city.
+
+_LEGEND_CATEGORY_HINTS: dict[str, list[str]] = {
+    "creature":        ["creature", "monster", "cryptid", "mythology"],
+    "fantome":         ["ghost", "haunting", "specter", "paranormal"],
+    "ovni":            ["UFO", "unidentified flying object", "extraterrestrial"],
+    "disparition":     ["disappearance", "mystery", "missing"],
+    "malediction":     ["curse", "cursed", "malediction"],
+    "lieu_hante":      ["haunted", "haunted place", "ghost"],
+    "phenomene":       ["phenomenon", "unexplained", "paranormal"],
+    "origine_inconnue":["legend", "myth", "folklore"],
+    "mythe":           ["myth", "mythology", "folklore"],
+    "legende_urbaine": ["urban legend", "hoax", "folklore"],
+    "conspiration":    ["conspiracy", "cover-up", "secret"],
+    "cryptide":        ["cryptid", "creature", "sighting"],
+    "miracle":         ["miracle", "supernatural", "divine"],
+}
+
+_LEGEND_IRRELEVANT_CATS = {
+    "wrestler", "wrestling", "luchador", "catch", "wwe", "aew",
+    "porn", "adult", "erotic",
+    "football player", "soccer player", "basketball player",
+    "baseball player", "hockey player",
+    "logo", "icon", "screenshot", "stub",
+}
+
+
+def search_legend_images(
+    legend_name: str,
+    legend_category: str | None = None,
+    summary: str | None = None,
+    country: str | None = None,
+    year_reported: int | None = None,
+) -> list[dict[str, Any]]:
+    """Search Wikipedia + Wikimedia Commons for legend-related images.
+
+    Unlike annotation search, this focuses on the *subject* (creature,
+    phenomenon, event) rather than a geographic location.
+    """
+    import re
+
+    images: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+
+    def _is_relevant(img: dict) -> bool:
+        text = (img.get("title", "") + " " + img.get("description", "")
+                + " " + img.get("categories", "")).lower()
+        for bad in _LEGEND_IRRELEVANT_CATS:
+            if bad in text:
+                return False
+        return True
+
+    # Clean the legend name: remove "La légende de", "Le mystère de", etc.
+    clean_name = re.sub(
+        r"^(la\s+légende\s+d[eu']\s*|le\s+mystère\s+d[eu']\s*|"
+        r"l['']\s*histoire\s+d[eu']\s*|les?\s+)",
+        "", legend_name, flags=re.IGNORECASE,
+    ).strip()
+
+    # Get category hints
+    cat = (legend_category or "").lower()
+    hints = _LEGEND_CATEGORY_HINTS.get(cat, ["legend", "myth"])
+
+    # English translations of the name
+    en_titles = _translate_label_to_english(clean_name)
+    en_name = en_titles[0] if en_titles else clean_name
+
+    # Extract keywords from summary for extra context
+    summary_kw: list[str] = []
+    if summary:
+        summary_kw = _extract_keywords(summary)[:5]
+
+    year_str = str(year_reported) if year_reported else ""
+
+    # ---- Build query tiers ----
+    # Tier 1: Direct name queries (best precision)
+    tier1: list[str] = []
+    tier1.append(clean_name)
+    if en_name.lower() != clean_name.lower():
+        tier1.append(en_name)
+    if year_str:
+        tier1.append(f"{clean_name} {year_str}")
+        if en_name.lower() != clean_name.lower():
+            tier1.append(f"{en_name} {year_str}")
+
+    # Tier 2: Name + category hints (e.g. "Wendigo creature mythology")
+    tier2: list[str] = []
+    for hint in hints[:2]:
+        tier2.append(f"{clean_name} {hint}")
+        if en_name.lower() != clean_name.lower():
+            tier2.append(f"{en_name} {hint}")
+    if country:
+        tier2.append(f"{clean_name} {country}")
+        if en_name.lower() != clean_name.lower():
+            tier2.append(f"{en_name} {country}")
+
+    # Tier 3: Summary keywords + hints (broadest)
+    tier3: list[str] = []
+    if summary_kw:
+        kw_str = " ".join(summary_kw[:3])
+        tier3.append(kw_str)
+        for hint in hints[:1]:
+            tier3.append(f"{kw_str} {hint}")
+    for hint in hints:
+        tier3.append(hint)
+
+    # Dedup
+    def _dedup(queries: list[str]) -> list[str]:
+        seen: set[str] = set()
+        out: list[str] = []
+        for q in queries:
+            ql = q.strip().lower()
+            if ql and ql not in seen:
+                seen.add(ql)
+                out.append(q.strip())
+        return out
+
+    tier1 = _dedup(tier1)
+    tier2 = _dedup(tier2)
+    tier3 = _dedup(tier3)
+
+    # --- Tier 1: Direct name ---
+    for query in tier1[:6]:
+        batch = _search_commons_batch(query, seen_urls, limit=30)
+        images.extend(b for b in batch if _is_relevant(b))
+        if len(images) >= 15:
+            break
+
+    # --- Tier 2: Name + hints ---
+    if len(images) < 15:
+        for query in tier2[:8]:
+            batch = _search_commons_batch(query, seen_urls, limit=25)
+            images.extend(b for b in batch if _is_relevant(b))
+            if len(images) >= 25:
+                break
+
+    # --- Tier 3: Broad fallback ---
+    if len(images) < 10:
+        for query in tier3[:4]:
+            batch = _search_commons_batch(query, seen_urls, limit=20)
+            images.extend(b for b in batch if _is_relevant(b))
+            if len(images) >= 20:
+                break
+
+    # --- Wikipedia article images as final fallback ---
+    if len(images) < 10:
+        wiki_queries = [clean_name]
+        if en_name.lower() != clean_name.lower():
+            wiki_queries.append(en_name)
+        for query in wiki_queries:
+            if len(images) >= 30:
+                break
+            batch = _search_wiki_article_images(query, seen_urls)
+            images.extend(batch)
+
+    return images[:40]
+
+
+# ── Person-specific photo search ─────────────────────────────
+# Persons are *people*, not places. The search must focus on the person's
+# name, profession/category, and optionally their era — NOT a city.
+
+_PERSON_CATEGORY_HINTS: dict[str, list[str]] = {
+    "politique":       ["politician", "political leader", "statesman"],
+    "militaire":       ["military", "general", "soldier", "officer"],
+    "artiste":         ["artist", "painter", "sculptor"],
+    "musicien":        ["musician", "singer", "composer"],
+    "ecrivain":        ["writer", "author", "poet"],
+    "scientifique":    ["scientist", "researcher", "professor"],
+    "explorateur":     ["explorer", "expedition"],
+    "religieux":       ["religious leader", "priest", "bishop", "missionary"],
+    "sportif":         ["athlete", "sports"],
+    "entrepreneur":    ["businessman", "entrepreneur", "industrialist"],
+    "activiste":       ["activist", "social reformer"],
+    "architecte":      ["architect", "architecture"],
+    "ingenieur":       ["engineer", "engineering"],
+    "enseignant":      ["teacher", "educator", "professor"],
+    "medecin":         ["physician", "doctor", "medicine"],
+    "avocat":          ["lawyer", "attorney", "jurist"],
+    "journaliste":     ["journalist", "reporter"],
+    "autre":           ["historical figure", "notable person"],
+}
+
+_PERSON_IRRELEVANT_CATS = {
+    "porn", "adult", "erotic",
+    "logo", "icon", "screenshot", "stub",
+    "map", "chart", "graph", "diagram",
+}
+
+
+def search_person_images(
+    person_name: str,
+    person_category: str | None = None,
+    birth_year: int | None = None,
+    death_year: int | None = None,
+    birth_country: str | None = None,
+) -> list[dict[str, Any]]:
+    """Search Wikipedia + Wikimedia Commons for person-related images.
+
+    Focuses on the person's name and profession rather than geography.
+    """
+    import re
+
+    images: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+
+    def _is_relevant(img: dict) -> bool:
+        text = (img.get("title", "") + " " + img.get("description", "")
+                + " " + img.get("categories", "")).lower()
+        for bad in _PERSON_IRRELEVANT_CATS:
+            if bad in text:
+                return False
+        return True
+
+    # Category hints
+    cat = (person_category or "").lower()
+    hints = _PERSON_CATEGORY_HINTS.get(cat, ["historical figure"])
+
+    # English translations
+    en_titles = _translate_label_to_english(person_name)
+    en_name = en_titles[0] if en_titles else person_name
+
+    # Build year context
+    year_str = ""
+    if birth_year and death_year:
+        year_str = f"{birth_year}-{death_year}"
+    elif birth_year:
+        year_str = str(birth_year)
+
+    # Proper nouns from name (first/last name components)
+    proper_nouns = _extract_proper_nouns(person_name)
+
+    # ---- Tier 1: Direct name (portrait-focused) ----
+    tier1: list[str] = []
+    tier1.append(person_name)
+    if en_name.lower() != person_name.lower():
+        tier1.append(en_name)
+    tier1.append(f"{person_name} portrait")
+    if year_str:
+        tier1.append(f"{person_name} {year_str}")
+
+    # ---- Tier 2: Name + category/country ----
+    tier2: list[str] = []
+    for hint in hints[:2]:
+        tier2.append(f"{person_name} {hint}")
+    if birth_country:
+        tier2.append(f"{person_name} {birth_country}")
+    if en_name.lower() != person_name.lower():
+        tier2.append(f"{en_name} portrait")
+        for hint in hints[:1]:
+            tier2.append(f"{en_name} {hint}")
+
+    # ---- Tier 3: Proper noun subsets ----
+    tier3: list[str] = []
+    if len(proper_nouns) >= 2:
+        # Try last name only
+        tier3.append(proper_nouns[-1])
+        tier3.append(f"{proper_nouns[-1]} portrait")
+    if proper_nouns:
+        pn_str = " ".join(proper_nouns)
+        if pn_str.lower() != person_name.lower():
+            tier3.append(pn_str)
+
+    # Dedup
+    def _dedup(queries: list[str]) -> list[str]:
+        seen: set[str] = set()
+        out: list[str] = []
+        for q in queries:
+            ql = q.strip().lower()
+            if ql and ql not in seen:
+                seen.add(ql)
+                out.append(q.strip())
+        return out
+
+    tier1 = _dedup(tier1)
+    tier2 = _dedup(tier2)
+    tier3 = _dedup(tier3)
+
+    # --- Tier 1: Direct name ---
+    for query in tier1[:6]:
+        batch = _search_commons_batch(query, seen_urls, limit=30)
+        images.extend(b for b in batch if _is_relevant(b))
+        if len(images) >= 15:
+            break
+
+    # --- Tier 2: Name + context ---
+    if len(images) < 15:
+        for query in tier2[:8]:
+            batch = _search_commons_batch(query, seen_urls, limit=25)
+            images.extend(b for b in batch if _is_relevant(b))
+            if len(images) >= 25:
+                break
+
+    # --- Tier 3: Proper nouns ---
+    if len(images) < 10:
+        for query in tier3[:4]:
+            batch = _search_commons_batch(query, seen_urls, limit=20)
+            images.extend(b for b in batch if _is_relevant(b))
+            if len(images) >= 20:
+                break
+
+    # --- Wikipedia article images ---
+    if len(images) < 10:
+        wiki_queries = [person_name]
+        if en_name.lower() != person_name.lower():
+            wiki_queries.append(en_name)
+        for query in wiki_queries:
+            if len(images) >= 30:
+                break
+            batch = _search_wiki_article_images(query, seen_urls)
+            images.extend(batch)
+
+    return images[:40]
+
+
 def save_annotation_photo(
     conn: Any,
     annotation_id: int,

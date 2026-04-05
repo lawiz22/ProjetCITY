@@ -6629,20 +6629,20 @@ def person_photo_search(person_slug: str) -> Response:
     """AJAX: smart search for person photos (Wikipedia + Commons)."""
     from .db import get_db
     from .services.person_service import get_person
-    from .services.city_photos import search_annotation_images
+    from .services.city_photos import search_person_images
 
     conn = get_db()
     person = get_person(conn, person_slug)
     if person is None:
         return jsonify({"error": "Personnage introuvable.", "images": []})
 
-    person_name = person["person_name"]
-    birth_year = person.get("birth_year")
-    label = f"{person_name} ({birth_year})" if birth_year else person_name
-
-    city_name = person.get("birth_city") or ""
-    country = person.get("birth_country")
-    images = search_annotation_images(label, city_name, None, country)
+    images = search_person_images(
+        person_name=person["person_name"],
+        person_category=person.get("person_category"),
+        birth_year=person.get("birth_year"),
+        death_year=person.get("death_year"),
+        birth_country=person.get("birth_country"),
+    )
     return jsonify({"images": images})
 
 
@@ -7963,25 +7963,12 @@ def legend_photo_search(legend_slug: str) -> Response:
     """AJAX: smart search for legend photos (Wikipedia + Commons)."""
     from .db import get_db
     from .services.legend_service import get_legend
-    from .services.city_photos import search_annotation_images
+    from .services.city_photos import search_legend_images
 
     conn = get_db()
     legend = get_legend(conn, legend_slug)
     if legend is None:
         return jsonify({"error": "Légende introuvable.", "images": []})
-
-    legend_name = legend["legend_name"]
-    year_reported = legend.get("year_reported")
-    label = f"{legend_name} ({year_reported})" if year_reported else legend_name
-
-    city_name = ""
-    for loc in legend.get("locations", []):
-        if loc.get("matched_city_name"):
-            city_name = loc["matched_city_name"]
-            break
-        if loc.get("city_name"):
-            city_name = loc["city_name"]
-            break
 
     country = None
     for loc in legend.get("locations", []):
@@ -7989,7 +7976,13 @@ def legend_photo_search(legend_slug: str) -> Response:
             country = loc["country"]
             break
 
-    images = search_annotation_images(label, city_name, None, country)
+    images = search_legend_images(
+        legend_name=legend["legend_name"],
+        legend_category=legend.get("legend_category"),
+        summary=legend.get("summary"),
+        country=country,
+        year_reported=legend.get("year_reported"),
+    )
     return jsonify({"images": images})
 
 
