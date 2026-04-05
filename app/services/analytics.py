@@ -254,6 +254,17 @@ class AnalyticsService:
             "SELECT COUNT(*) AS cnt FROM dim_region"
         ).fetchone()
 
+        # Annotation count
+        annotation_count_row = connection.execute(
+            "SELECT COUNT(*) AS cnt FROM dim_annotation"
+        ).fetchone()
+
+        # Legend count (by type)
+        legend_rows = connection.execute(
+            "SELECT legend_type, COUNT(*) AS cnt FROM dim_legend GROUP BY legend_type"
+        ).fetchall()
+        legend_counts = {r["legend_type"]: r["cnt"] for r in legend_rows}
+
         return {
             "city_count": counts["city_count"] or 0,
             "country_count": counts["country_count"] or 0,
@@ -265,6 +276,9 @@ class AnalyticsService:
             "event_count": event_count_row["cnt"] if event_count_row else 0,
             "person_count": person_count_row["cnt"] if person_count_row else 0,
             "monument_count": monument_count_row["cnt"] if monument_count_row else 0,
+            "annotation_count": annotation_count_row["cnt"] if annotation_count_row else 0,
+            "legend_count": legend_counts.get("legende", 0),
+            "inexplique_count": legend_counts.get("inexplique", 0),
         }
 
     def get_growth_leaders(self, filters: dict[str, str | None]) -> list[dict[str, Any]]:

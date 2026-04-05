@@ -1,7 +1,21 @@
 {% extends 'web/base.html' %}
 
 {% block hero_title %}
-<img src="{{ url_for('static', filename='images/ccs-logo_text.png') }}" alt="Central City Scrutinizer" class="hero-logo">
+<div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; width:100%;">
+    <img src="{{ url_for('static', filename='images/ccs-logo_text.png') }}" alt="Central City Scrutinizer" class="hero-logo">
+    <div style="display:flex; gap:1rem; margin-left:auto; flex-wrap:wrap;">
+        <div style="text-align:center; padding:.3rem .8rem; border:1px solid var(--border,#ddd); border-radius:8px; background:var(--card-bg,#fff);">
+            <small style="display:block; font-size:.75em; opacity:.7;">Année la plus récente</small>
+            <strong style="font-size:1.3em;">{{ metrics.latest_year }}</strong>
+            <small style="display:block; font-size:.7em; opacity:.6;">moy. {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</small>
+        </div>
+        <div style="text-align:center; padding:.3rem .8rem; border:1px solid var(--border,#ddd); border-radius:8px; background:var(--card-bg,#fff);">
+            <small style="display:block; font-size:.75em; opacity:.7;">Population agrégée</small>
+            <strong style="font-size:1.3em;">{{ '{:,}'.format(metrics.total_population).replace(',', ' ') }}</strong>
+            <small style="display:block; font-size:.7em; opacity:.6;">dernière année disponible</small>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -37,32 +51,27 @@
 
 <section class="metrics-grid metrics-grid-dash">
     <article class="metric-card">
-        <span>Villes</span>
-        <strong>{{ metrics.city_count }}</strong>
-        <small>dans le périmètre actif</small>
-    </article>
-    <article class="metric-card">
-        <span>Pays</span>
+        <span>🌍 Pays</span>
         <strong><img class="flag-icon" src="{{ flag_url('Canada') }}" alt="CA" style="width:32px"> <img class="flag-icon" src="{{ flag_url('United States') }}" alt="US" style="width:32px"> {{ metrics.country_count }}</strong>
         <small>source analytique couverte</small>
     </article>
     <article class="metric-card">
-        <span>Régions</span>
+        <span>🗺️ Régions</span>
         <strong>{{ metrics.region_count }}</strong>
         <small>dans la base de données</small>
     </article>
     <article class="metric-card">
-        <span>Année la plus récente</span>
-        <strong>{{ metrics.latest_year }}</strong>
-        <small>moyenne {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</small>
+        <span>🏙️ Villes</span>
+        <strong>{{ metrics.city_count }}</strong>
+        <small>dans le périmètre actif</small>
     </article>
     <article class="metric-card">
-        <span>Population agrégée</span>
-        <strong>{{ '{:,}'.format(metrics.total_population).replace(',', ' ') }}</strong>
-        <small>dernière année disponible</small>
+        <span>📌 Annotations</span>
+        <strong>{{ metrics.annotation_count }}</strong>
+        <small>dans la base de données</small>
     </article>
     <article class="metric-card">
-        <span>Événements historiques</span>
+        <span>📅 Événements historiques</span>
         <strong>{{ metrics.event_count }}</strong>
         <small>dans la base de données</small>
     </article>
@@ -74,6 +83,16 @@
     <article class="metric-card">
         <span>🏛️ Monuments</span>
         <strong>{{ metrics.monument_count }}</strong>
+        <small>dans la base de données</small>
+    </article>
+    <article class="metric-card">
+        <span>📜 Légendes</span>
+        <strong>{{ metrics.legend_count }}</strong>
+        <small>dans la base de données</small>
+    </article>
+    <article class="metric-card">
+        <span>🔮 Faits inexpliqués</span>
+        <strong>{{ metrics.inexplique_count }}</strong>
         <small>dans la base de données</small>
     </article>
 </section>
