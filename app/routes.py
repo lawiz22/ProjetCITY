@@ -7703,3 +7703,279 @@ def admin_logs_export() -> Response:
     output = si.getvalue()
     return Response(output, mimetype="text/csv",
                     headers={"Content-Disposition": "attachment; filename=audit_logs.csv"})
+
+
+# ---------------------------------------------------------------------------
+# Photo Gallery
+# ---------------------------------------------------------------------------
+
+@web.route("/gallery")
+def photo_gallery():
+    """Unified photo gallery — all photos from all entity types."""
+    from .db import get_db
+
+    conn = get_db()
+
+    photos: list[dict] = []
+
+    # ── City photos ──
+    rows = conn.execute("""
+        SELECT cp.photo_id AS id, cp.filename, cp.caption, cp.source_url,
+               cp.attribution, cp.is_primary, cp.created_at, cp.photo_date,
+               cp.exif_date, cp.exif_camera,
+               c.city_name AS entity_name, c.city_slug AS entity_slug
+        FROM dim_city_photo cp
+        JOIN dim_city c ON c.city_id = cp.city_id
+    """).fetchall()
+    for r in rows:
+        photos.append({
+            "id": r["id"], "table": "dim_city_photo", "pk": "photo_id",
+            "category": "city", "category_label": "Ville", "category_emoji": "🏙️",
+            "filename": r["filename"],
+            "path": f"images/cities/{r['entity_slug']}/{r['filename']}",
+            "caption": r["caption"] or "",
+            "source_url": r["source_url"] or "",
+            "attribution": r["attribution"] or "",
+            "is_primary": r["is_primary"],
+            "photo_date": r["photo_date"] or r["exif_date"] or "",
+            "exif_camera": r["exif_camera"] or "",
+            "created_at": str(r["created_at"] or ""),
+            "entity_name": r["entity_name"],
+            "entity_slug": r["entity_slug"],
+            "entity_url": f"/cities/{r['entity_slug']}",
+        })
+
+    # ── Event photos ──
+    rows = conn.execute("""
+        SELECT ep.event_photo_id AS id, ep.filename, ep.caption, ep.source_url,
+               ep.attribution, ep.is_primary, ep.created_at, ep.photo_date,
+               e.event_name AS entity_name, e.event_slug AS entity_slug
+        FROM dim_event_photo ep
+        JOIN dim_event e ON e.event_id = ep.event_id
+    """).fetchall()
+    for r in rows:
+        photos.append({
+            "id": r["id"], "table": "dim_event_photo", "pk": "event_photo_id",
+            "category": "event", "category_label": "Événement", "category_emoji": "📜",
+            "filename": r["filename"],
+            "path": f"images/events/{r['entity_slug']}/{r['filename']}",
+            "caption": r["caption"] or "",
+            "source_url": r["source_url"] or "",
+            "attribution": r["attribution"] or "",
+            "is_primary": r["is_primary"],
+            "photo_date": r["photo_date"] or "",
+            "exif_camera": "",
+            "created_at": str(r["created_at"] or ""),
+            "entity_name": r["entity_name"],
+            "entity_slug": r["entity_slug"],
+            "entity_url": f"/events/{r['entity_slug']}",
+        })
+
+    # ── Person photos ──
+    rows = conn.execute("""
+        SELECT pp.person_photo_id AS id, pp.filename, pp.caption, pp.source_url,
+               pp.attribution, pp.is_primary, pp.created_at, pp.photo_date,
+               p.person_name AS entity_name, p.person_slug AS entity_slug
+        FROM dim_person_photo pp
+        JOIN dim_person p ON p.person_id = pp.person_id
+    """).fetchall()
+    for r in rows:
+        photos.append({
+            "id": r["id"], "table": "dim_person_photo", "pk": "person_photo_id",
+            "category": "person", "category_label": "Personnage", "category_emoji": "🧑",
+            "filename": r["filename"],
+            "path": f"images/persons/{r['entity_slug']}/{r['filename']}",
+            "caption": r["caption"] or "",
+            "source_url": r["source_url"] or "",
+            "attribution": r["attribution"] or "",
+            "is_primary": r["is_primary"],
+            "photo_date": r["photo_date"] or "",
+            "exif_camera": "",
+            "created_at": str(r["created_at"] or ""),
+            "entity_name": r["entity_name"],
+            "entity_slug": r["entity_slug"],
+            "entity_url": f"/persons/{r['entity_slug']}",
+        })
+
+    # ── Monument photos ──
+    rows = conn.execute("""
+        SELECT mp.monument_photo_id AS id, mp.filename, mp.caption, mp.source_url,
+               mp.attribution, mp.is_primary, mp.created_at, mp.photo_date,
+               m.monument_name AS entity_name, m.monument_slug AS entity_slug
+        FROM dim_monument_photo mp
+        JOIN dim_monument m ON m.monument_id = mp.monument_id
+    """).fetchall()
+    for r in rows:
+        photos.append({
+            "id": r["id"], "table": "dim_monument_photo", "pk": "monument_photo_id",
+            "category": "monument", "category_label": "Monument", "category_emoji": "🏛️",
+            "filename": r["filename"],
+            "path": f"images/monuments/{r['entity_slug']}/{r['filename']}",
+            "caption": r["caption"] or "",
+            "source_url": r["source_url"] or "",
+            "attribution": r["attribution"] or "",
+            "is_primary": r["is_primary"],
+            "photo_date": r["photo_date"] or "",
+            "exif_camera": "",
+            "created_at": str(r["created_at"] or ""),
+            "entity_name": r["entity_name"],
+            "entity_slug": r["entity_slug"],
+            "entity_url": f"/monuments/{r['entity_slug']}",
+        })
+
+    # ── Country photos ──
+    rows = conn.execute("""
+        SELECT cp.photo_id AS id, cp.filename, cp.caption, cp.source_url,
+               cp.attribution, cp.is_primary, cp.created_at, cp.photo_date,
+               c.country_name AS entity_name, c.country_slug AS entity_slug
+        FROM dim_country_photo cp
+        JOIN dim_country c ON c.country_id = cp.country_id
+    """).fetchall()
+    for r in rows:
+        photos.append({
+            "id": r["id"], "table": "dim_country_photo", "pk": "photo_id",
+            "category": "country", "category_label": "Pays", "category_emoji": "🌍",
+            "filename": r["filename"],
+            "path": f"images/countries/{r['entity_slug']}/{r['filename']}",
+            "caption": r["caption"] or "",
+            "source_url": r["source_url"] or "",
+            "attribution": r["attribution"] or "",
+            "is_primary": r["is_primary"],
+            "photo_date": r["photo_date"] or "",
+            "exif_camera": "",
+            "created_at": str(r["created_at"] or ""),
+            "entity_name": r["entity_name"],
+            "entity_slug": r["entity_slug"],
+            "entity_url": f"/countries/{r['entity_slug']}",
+        })
+
+    # ── Region photos ──
+    rows = conn.execute("""
+        SELECT rp.photo_id AS id, rp.filename, rp.caption, rp.source_url,
+               rp.attribution, rp.is_primary, rp.created_at, rp.photo_date,
+               r.region_name AS entity_name, r.region_slug AS entity_slug
+        FROM dim_region_photo rp
+        JOIN dim_region r ON r.region_id = rp.region_id
+    """).fetchall()
+    for r in rows:
+        photos.append({
+            "id": r["id"], "table": "dim_region_photo", "pk": "photo_id",
+            "category": "region", "category_label": "Région", "category_emoji": "📍",
+            "filename": r["filename"],
+            "path": f"images/regions/{r['entity_slug']}/{r['filename']}",
+            "caption": r["caption"] or "",
+            "source_url": r["source_url"] or "",
+            "attribution": r["attribution"] or "",
+            "is_primary": r["is_primary"],
+            "photo_date": r["photo_date"] or "",
+            "exif_camera": "",
+            "created_at": str(r["created_at"] or ""),
+            "entity_name": r["entity_name"],
+            "entity_slug": r["entity_slug"],
+            "entity_url": f"/regions/{r['entity_slug']}",
+        })
+
+    # Sort by newest first by default
+    photos.sort(key=lambda p: p["created_at"], reverse=True)
+
+    user = getattr(g, "user", None)
+    is_admin = bool(user and user.get("role") == "admin")
+
+    return render_template("web/gallery.html", photos=photos, total=len(photos), is_admin=is_admin)
+
+
+@web.route("/gallery/photo/update", methods=["POST"])
+@editor_required
+def gallery_photo_update():
+    """Update a single photo's metadata (caption, attribution, photo_date, etc.)."""
+    from .db import get_db
+
+    data = request.get_json(silent=True) or {}
+    table = data.get("table", "")
+    pk_col = data.get("pk", "")
+    photo_id = data.get("id")
+
+    # Whitelist of allowed tables/pk combos
+    ALLOWED = {
+        ("dim_city_photo", "photo_id"),
+        ("dim_event_photo", "event_photo_id"),
+        ("dim_person_photo", "person_photo_id"),
+        ("dim_monument_photo", "monument_photo_id"),
+        ("dim_country_photo", "photo_id"),
+        ("dim_region_photo", "photo_id"),
+    }
+    if (table, pk_col) not in ALLOWED or not photo_id:
+        return jsonify({"success": False, "error": "Paramètres invalides."}), 400
+
+    conn = get_db()
+    sets: list[str] = []
+    vals: list = []
+    for field in ("caption", "attribution", "source_url", "photo_date"):
+        if field in data:
+            sets.append(f"{field} = ?")
+            vals.append(data[field])
+
+    if not sets:
+        return jsonify({"success": False, "error": "Aucun champ à modifier."})
+
+    vals.append(photo_id)
+    conn.execute(
+        f"UPDATE {table} SET {', '.join(sets)} WHERE {pk_col} = ?",
+        vals,
+    )
+    conn.commit()
+    return jsonify({"success": True})
+
+
+@web.route("/gallery/photo/delete", methods=["POST"])
+@admin_required
+def gallery_photo_delete():
+    """Delete a photo from the gallery (admin only). Removes DB row + file on disk."""
+    from .db import get_db
+
+    data = request.get_json(silent=True) or {}
+    table = data.get("table", "")
+    pk_col = data.get("pk", "")
+    photo_id = data.get("id")
+    entity_slug = data.get("entity_slug", "")
+
+    ALLOWED = {
+        ("dim_city_photo", "photo_id"),
+        ("dim_event_photo", "event_photo_id"),
+        ("dim_person_photo", "person_photo_id"),
+        ("dim_monument_photo", "monument_photo_id"),
+        ("dim_country_photo", "photo_id"),
+        ("dim_region_photo", "photo_id"),
+    }
+    if (table, pk_col) not in ALLOWED or not photo_id or not entity_slug:
+        return jsonify({"success": False, "error": "Paramètres invalides."}), 400
+
+    conn = get_db()
+
+    # Dispatch to existing delete helpers per entity type
+    deleted = False
+    if table == "dim_city_photo":
+        from .services.city_photos import delete_photo_from_library
+        deleted = delete_photo_from_library(conn, photo_id, entity_slug)
+    elif table == "dim_event_photo":
+        from .services.event_service import delete_event_photo
+        delete_event_photo(conn, photo_id, entity_slug)
+        deleted = True
+    elif table == "dim_person_photo":
+        from .services.person_service import delete_person_photo
+        delete_person_photo(conn, photo_id, entity_slug)
+        deleted = True
+    elif table == "dim_monument_photo":
+        from .services.monument_service import delete_monument_photo
+        delete_monument_photo(conn, photo_id, entity_slug)
+        deleted = True
+    elif table == "dim_country_photo":
+        from .services.city_photos import delete_country_photo_from_library
+        deleted = delete_country_photo_from_library(conn, photo_id, entity_slug)
+    elif table == "dim_region_photo":
+        from .services.city_photos import delete_region_photo_from_library
+        deleted = delete_region_photo_from_library(conn, photo_id, entity_slug)
+
+    if deleted:
+        log_action("delete_photo", table, entity_slug, f"Photo #{photo_id} supprimée via galerie ({table})")
+    return jsonify({"success": True})

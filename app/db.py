@@ -520,6 +520,15 @@ def run_migrations(config: Mapping[str, Any]) -> None:
             if not cur.fetchone():
                 cur.execute(f"ALTER TABLE {ptbl} ADD COLUMN image_url TEXT DEFAULT ''")
 
+        # --- Add photo_date column to all photo tables ---
+        for ptbl in _photo_tables:
+            cur.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = %s AND column_name = 'photo_date'",
+                (ptbl,),
+            )
+            if not cur.fetchone():
+                cur.execute(f"ALTER TABLE {ptbl} ADD COLUMN photo_date TEXT DEFAULT ''")
+
         if admin_row:
             admin_id = admin_row[0]
             for tbl in _tracking_tables:

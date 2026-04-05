@@ -1,0 +1,465 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>📸 Galerie de photos</h2>
+            <span id="gallery-count">{{ total }} photo{% if total != 1 %}s{% endif %}</span>
+        </div>
+        <div class="dir-controls">
+            <div class="dir-filter">
+                <select id="gal-filter-category">
+                    <option value="">Toutes catégories</option>
+                    <option value="city">🏙️ Villes</option>
+                    <option value="event">📜 Événements</option>
+                    <option value="person">🧑 Personnages</option>
+                    <option value="monument">🏛️ Monuments</option>
+                    <option value="country">🌍 Pays</option>
+                    <option value="region">📍 Régions</option>
+                </select>
+            </div>
+            <div class="dir-filter">
+                <input type="text" id="gal-filter-search" placeholder="Rechercher…">
+            </div>
+            <div class="dir-sort">
+                <label for="gal-sort-select">Trier par</label>
+                <select id="gal-sort-select">
+                    <option value="created-desc">Ajouté ↓ (récent)</option>
+                    <option value="created-asc">Ajouté ↑ (ancien)</option>
+                    <option value="date-desc">Date photo ↓ (récent)</option>
+                    <option value="date-asc">Date photo ↑ (ancien)</option>
+                    <option value="entity-asc">Entité A → Z</option>
+                    <option value="entity-desc">Entité Z → A</option>
+                </select>
+            </div>
+            <div class="dir-filter">
+                <label class="gal-toggle-label">
+                    <input type="checkbox" id="gal-only-dated"> Avec date uniquement
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination top -->
+    <div class="dir-pager" id="gal-pager-top">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Photos par page:</span>
+            <select id="gal-per-page-select">
+                <option value="40">40</option>
+                <option value="80" selected>80</option>
+                <option value="160">160</option>
+                <option value="all">Toutes</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="gal-pager-info-top"></span>
+            <button class="dir-pager-arrow gal-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow gal-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow gal-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow gal-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    <div class="gallery-mosaic" id="gallery-mosaic">
+        {% for p in photos %}
+        <div class="gal-thumb gal-cat-{{ p.category }}"
+             data-idx="{{ loop.index0 }}"
+             data-category="{{ p.category }}"
+             data-entity="{{ p.entity_name|lower }}"
+             data-date="{{ p.photo_date }}"
+             data-created="{{ p.created_at }}">
+            <img src="/static/{{ p.path }}" alt="" loading="lazy">
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination bottom -->
+    <div class="dir-pager" id="gal-pager-bottom">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Photos par page:</span>
+            <select class="gal-per-page-mirror">
+                <option value="40">40</option>
+                <option value="80" selected>80</option>
+                <option value="160">160</option>
+                <option value="all">Toutes</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="gal-pager-info-bottom"></span>
+            <button class="dir-pager-arrow gal-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow gal-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow gal-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow gal-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
+    {% if not photos %}
+    <div class="empty-state">
+        <p>Aucune photo dans la base de données.</p>
+    </div>
+    {% endif %}
+</section>
+
+<!-- ═══════════ Photo Detail Modal ═══════════ -->
+<div class="gal-modal-backdrop" id="gal-modal-backdrop" style="display:none">
+    <button type="button" class="gal-modal-nav gal-modal-prev" id="gal-modal-prev">‹</button>
+    <button type="button" class="gal-modal-nav gal-modal-next" id="gal-modal-next">›</button>
+    <div class="gal-modal" id="gal-modal">
+        <button type="button" class="gal-modal-close" id="gal-modal-close">✕</button>
+        <div class="gal-modal-body">
+            <div class="gal-modal-img-wrap">
+                <img id="gal-modal-img" src="" alt="">
+            </div>
+            <div class="gal-modal-info">
+                <h3 id="gal-modal-entity"></h3>
+                <p id="gal-modal-category-badge"></p>
+                <div class="gal-modal-fields">
+                    <label>📅 Date de la photo
+                        <input type="text" id="gal-modal-date" placeholder="AAAA-MM-JJ">
+                    </label>
+                    <label>📝 Légende
+                        <input type="text" id="gal-modal-caption">
+                    </label>
+                    <label>©️ Attribution
+                        <input type="text" id="gal-modal-attribution">
+                    </label>
+                    <label>🔗 Source URL
+                        <input type="text" id="gal-modal-source">
+                    </label>
+                    <p class="gal-modal-meta" id="gal-modal-meta"></p>
+                </div>
+                <div class="gal-modal-actions">
+                    <button type="button" class="primary-button" id="gal-modal-save">💾 Enregistrer</button>
+                    <a id="gal-modal-link" href="#" target="_blank" class="secondary-button">Voir l'entité →</a>
+                    {% if is_admin %}
+                    <button type="button" class="danger-button" id="gal-modal-delete">🗑️ Supprimer</button>
+                    {% endif %}
+                </div>
+                <div id="gal-modal-status" class="gal-modal-status"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+(function() {
+    var photos = {{ photos | tojson }};
+    var visibleIdxs = [];
+    var currentModalIdx = -1;
+    var currentPage = 1;
+
+    var mosaic = document.getElementById('gallery-mosaic');
+    var thumbs = mosaic.querySelectorAll('.gal-thumb');
+    var countEl = document.getElementById('gallery-count');
+    var filterCat = document.getElementById('gal-filter-category');
+    var filterSearch = document.getElementById('gal-filter-search');
+    var sortSelect = document.getElementById('gal-sort-select');
+    var onlyDated = document.getElementById('gal-only-dated');
+    var perPageSelect = document.getElementById('gal-per-page-select');
+
+    /* ── Per-page mirror sync ── */
+    var mirrors = document.querySelectorAll('.gal-per-page-mirror');
+    mirrors.forEach(function(m) {
+        m.value = perPageSelect.value;
+        m.addEventListener('change', function() {
+            perPageSelect.value = m.value;
+            currentPage = 1;
+            renderPage();
+        });
+    });
+    perPageSelect.addEventListener('change', function() {
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+        currentPage = 1;
+        renderPage();
+    });
+
+    function getPerPage() {
+        var v = perPageSelect.value;
+        return v === 'all' ? visibleIdxs.length || 1 : parseInt(v, 10);
+    }
+    function totalPages() {
+        return Math.max(1, Math.ceil(visibleIdxs.length / getPerPage()));
+    }
+
+    var backdrop = document.getElementById('gal-modal-backdrop');
+    var modal = document.getElementById('gal-modal');
+    var modalImg = document.getElementById('gal-modal-img');
+    var modalEntity = document.getElementById('gal-modal-entity');
+    var modalCatBadge = document.getElementById('gal-modal-category-badge');
+    var modalDate = document.getElementById('gal-modal-date');
+    var modalCaption = document.getElementById('gal-modal-caption');
+    var modalAttribution = document.getElementById('gal-modal-attribution');
+    var modalSource = document.getElementById('gal-modal-source');
+    var modalMeta = document.getElementById('gal-modal-meta');
+    var modalSave = document.getElementById('gal-modal-save');
+    var modalLink = document.getElementById('gal-modal-link');
+    var modalStatus = document.getElementById('gal-modal-status');
+    var modalClose = document.getElementById('gal-modal-close');
+    var modalPrev = document.getElementById('gal-modal-prev');
+    var modalNext = document.getElementById('gal-modal-next');
+
+    /* ── Sort helpers ── */
+    var sortedOrder = photos.map(function(_, i) { return i; });
+
+    function applySortAndFilter() {
+        var cat = filterCat.value;
+        var q = filterSearch.value.trim().toLowerCase();
+        var dated = onlyDated.checked;
+
+        var order = photos.map(function(_, i) { return i; });
+        var sortVal = sortSelect.value;
+        order.sort(function(a, b) {
+            var pa = photos[a], pb = photos[b];
+            if (!pa && !pb) return 0;
+            if (!pa) return 1;
+            if (!pb) return -1;
+            switch (sortVal) {
+                case 'created-desc': return (pb.created_at || '').localeCompare(pa.created_at || '');
+                case 'created-asc': return (pa.created_at || '').localeCompare(pb.created_at || '');
+                case 'date-desc': return (pb.photo_date || '').localeCompare(pa.photo_date || '');
+                case 'date-asc': return (pa.photo_date || '').localeCompare(pb.photo_date || '');
+                case 'entity-asc': return (pa.entity_name || '').localeCompare(pb.entity_name || '');
+                case 'entity-desc': return (pb.entity_name || '').localeCompare(pa.entity_name || '');
+            }
+            return 0;
+        });
+
+        visibleIdxs = [];
+        order.forEach(function(i) {
+            var p = photos[i];
+            if (!p) return; /* deleted */
+            var show = true;
+            if (cat && p.category !== cat) show = false;
+            if (q && (p.entity_name || '').toLowerCase().indexOf(q) === -1 &&
+                     (p.caption || '').toLowerCase().indexOf(q) === -1) show = false;
+            if (dated && !p.photo_date) show = false;
+            if (show) {
+                visibleIdxs.push(i);
+            }
+        });
+        countEl.textContent = visibleIdxs.length + ' photo' + (visibleIdxs.length !== 1 ? 's' : '');
+        currentPage = 1;
+        renderPage();
+    }
+
+    /* ── Pagination rendering ── */
+    function renderPage() {
+        var pp = getPerPage();
+        var tp = totalPages();
+        if (currentPage > tp) currentPage = tp;
+        var start = (currentPage - 1) * pp;
+        var end = Math.min(start + pp, visibleIdxs.length);
+
+        /* update header counter with range */
+        if (visibleIdxs.length <= pp) {
+            countEl.textContent = visibleIdxs.length + ' photo' + (visibleIdxs.length !== 1 ? 's' : '');
+        } else {
+            countEl.textContent = (start + 1) + '–' + end + ' sur ' + visibleIdxs.length + ' photos';
+        }
+
+        /* hide all, then show only current page's visible thumbs */
+        thumbs.forEach(function(t) { t.style.display = 'none'; });
+        visibleIdxs.slice(start, end).forEach(function(i) {
+            thumbs[i].style.display = '';
+        });
+
+        /* update pager info / arrows */
+        var infoText = 'Page ' + currentPage + ' de ' + tp;
+        ['gal-pager-info-top', 'gal-pager-info-bottom'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = infoText;
+        });
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+
+        var isFirst = currentPage <= 1;
+        var isLast = currentPage >= tp;
+        var showPager = tp > 1;
+        document.querySelectorAll('#gal-pager-top, #gal-pager-bottom').forEach(function(pager) {
+            pager.style.display = showPager ? '' : 'none';
+            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+                var d = btn.dataset.dir;
+                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
+            });
+        });
+    }
+
+    /* ── Arrow clicks ── */
+    document.querySelectorAll('.gal-pager-arrow').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var tp = totalPages();
+            switch (btn.dataset.dir) {
+                case 'first': currentPage = 1; break;
+                case 'prev':  if (currentPage > 1) currentPage--; break;
+                case 'next':  if (currentPage < tp) currentPage++; break;
+                case 'last':  currentPage = tp; break;
+            }
+            renderPage();
+            mosaic.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    filterCat.addEventListener('change', applySortAndFilter);
+    filterSearch.addEventListener('input', applySortAndFilter);
+    sortSelect.addEventListener('change', applySortAndFilter);
+    onlyDated.addEventListener('change', applySortAndFilter);
+    applySortAndFilter();
+
+    /* ── Thumbnail click → open modal ── */
+    mosaic.addEventListener('click', function(e) {
+        var thumb = e.target.closest('.gal-thumb');
+        if (!thumb) return;
+        var idx = Number(thumb.getAttribute('data-idx'));
+        openModal(idx);
+    });
+
+    function openModal(idx) {
+        currentModalIdx = idx;
+        var p = photos[idx];
+        modalImg.src = '/static/' + p.path;
+        modalEntity.textContent = p.category_emoji + ' ' + p.entity_name;
+        modalCatBadge.innerHTML = '<span class="gal-badge gal-badge-' + p.category + '">' + p.category_label + '</span>';
+        modalDate.value = p.photo_date || '';
+        modalCaption.value = p.caption || '';
+        modalAttribution.value = p.attribution || '';
+        modalSource.value = p.source_url || '';
+        modalLink.href = p.entity_url;
+        var metaParts = [];
+        if (p.is_primary) metaParts.push('⭐ Photo principale');
+        if (p.exif_camera) metaParts.push('📷 ' + p.exif_camera);
+        if (p.created_at) metaParts.push('Ajoutée : ' + p.created_at.substring(0, 10));
+        modalMeta.textContent = metaParts.join(' · ');
+        modalStatus.textContent = '';
+        backdrop.style.display = '';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        backdrop.style.display = 'none';
+        document.body.style.overflow = '';
+        currentModalIdx = -1;
+    }
+
+    function navigateModal(delta) {
+        if (currentModalIdx === -1) return;
+        var posInVisible = visibleIdxs.indexOf(currentModalIdx);
+        if (posInVisible === -1) return;
+        var newPos = posInVisible + delta;
+        if (newPos < 0) newPos = visibleIdxs.length - 1;
+        if (newPos >= visibleIdxs.length) newPos = 0;
+        openModal(visibleIdxs[newPos]);
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', function(e) {
+        if (e.target === backdrop) closeModal();
+    });
+    modalPrev.addEventListener('click', function() { navigateModal(-1); });
+    modalNext.addEventListener('click', function() { navigateModal(1); });
+
+    document.addEventListener('keydown', function(e) {
+        if (backdrop.style.display === 'none') return;
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'ArrowLeft') navigateModal(-1);
+        if (e.key === 'ArrowRight') navigateModal(1);
+    });
+
+    /* ── Save photo metadata ── */
+    modalSave.addEventListener('click', function() {
+        if (currentModalIdx === -1) return;
+        var p = photos[currentModalIdx];
+        modalSave.disabled = true;
+        modalSave.textContent = '⏳ Enregistrement…';
+        modalStatus.textContent = '';
+
+        fetch('/gallery/photo/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                table: p.table,
+                pk: p.pk,
+                id: p.id,
+                photo_date: modalDate.value.trim(),
+                caption: modalCaption.value.trim(),
+                attribution: modalAttribution.value.trim(),
+                source_url: modalSource.value.trim()
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            modalSave.disabled = false;
+            modalSave.textContent = '💾 Enregistrer';
+            if (data.success) {
+                modalStatus.className = 'gal-modal-status gal-status-ok';
+                modalStatus.textContent = '✅ Enregistré';
+                /* Update local data */
+                p.photo_date = modalDate.value.trim();
+                p.caption = modalCaption.value.trim();
+                p.attribution = modalAttribution.value.trim();
+                p.source_url = modalSource.value.trim();
+                /* Update data-date on thumb */
+                thumbs[currentModalIdx].setAttribute('data-date', p.photo_date);
+            } else {
+                modalStatus.className = 'gal-modal-status gal-status-err';
+                modalStatus.textContent = '❌ ' + (data.error || 'Erreur');
+            }
+        })
+        .catch(function(err) {
+            modalSave.disabled = false;
+            modalSave.textContent = '💾 Enregistrer';
+            modalStatus.className = 'gal-modal-status gal-status-err';
+            modalStatus.textContent = '❌ ' + err.message;
+        });
+    });
+
+    /* ── Delete photo (admin) ── */
+    var modalDelete = document.getElementById('gal-modal-delete');
+    if (modalDelete) {
+        modalDelete.addEventListener('click', function() {
+            if (currentModalIdx === -1) return;
+            var p = photos[currentModalIdx];
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette photo ?\n' + p.entity_name)) return;
+            modalDelete.disabled = true;
+            modalDelete.textContent = '⏳ Suppression…';
+            fetch('/gallery/photo/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    table: p.table,
+                    pk: p.pk,
+                    id: p.id,
+                    entity_slug: p.entity_slug
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                modalDelete.disabled = false;
+                modalDelete.textContent = '🗑️ Supprimer';
+                if (data.success) {
+                    /* Mark as deleted — hide thumb, null the data */
+                    thumbs[currentModalIdx].style.display = 'none';
+                    thumbs[currentModalIdx].classList.add('gal-deleted');
+                    photos[currentModalIdx] = null;
+                    closeModal();
+                    applySortAndFilter();
+                } else {
+                    modalStatus.className = 'gal-modal-status gal-status-err';
+                    modalStatus.textContent = '❌ ' + (data.error || 'Erreur');
+                }
+            })
+            .catch(function(err) {
+                modalDelete.disabled = false;
+                modalDelete.textContent = '🗑️ Supprimer';
+                modalStatus.className = 'gal-modal-status gal-status-err';
+                modalStatus.textContent = '❌ ' + err.message;
+            });
+        });
+    }
+})();
+</script>
+{% endblock %}
