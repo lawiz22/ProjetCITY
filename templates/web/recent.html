@@ -26,10 +26,40 @@
         {% endfor %}
     </div>
 
+    <!-- Search -->
+    <div style="margin-bottom:.8rem;">
+        <input type="text" id="recent-search" placeholder="Rechercher…" value=""
+               style="padding:.35rem .6rem; border-radius:6px; border:1px solid var(--border,#ccc); font-size:.9em; width:100%; max-width:300px;">
+    </div>
+
+    <!-- Pagination top -->
+    <div class="dir-pager" id="recent-pager-top">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Par page:</span>
+            <select id="recent-per-page">
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="all">Tous</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="recent-pager-info-top"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
+    </div>
+
     <!-- Items list -->
-    <div class="recent-list">
+    <div class="recent-list" id="recent-list">
         {% for item in items %}
-        <a class="recent-item" href="{{ item.detail_url }}">
+        <a class="recent-item" href="{{ item.detail_url }}"
+           data-name="{{ item.entity_name }}"
+           data-type="{{ item.entity_type }}"
+           data-author="{{ item.created_by_name or '' }}"
+           data-desc="{{ (item.description or '')[:200] }}">
             <div class="recent-item-photo">
                 {% if item.photo_path %}
                 <img src="{{ url_for('static', filename=item.photo_path|thumb_url) }}" alt="" loading="lazy">
@@ -61,6 +91,26 @@
             </div>
         </a>
         {% endfor %}
+    </div>
+
+    <!-- Pagination bottom -->
+    <div class="dir-pager" id="recent-pager-bottom">
+        <div class="dir-pager-left">
+            <span class="dir-pager-label">Par page:</span>
+            <select class="recent-per-page-mirror">
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="all">Tous</option>
+            </select>
+        </div>
+        <div class="dir-pager-right">
+            <span class="dir-pager-info" id="recent-pager-info-bottom"></span>
+            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+        </div>
     </div>
 
     {% if not items %}
@@ -158,5 +208,123 @@
     .recent-item-title { font-size: .9rem; }
 }
 </style>
+
+<script>
+(function() {
+    var list = document.getElementById('recent-list');
+    var countSpan = document.getElementById('recent-count');
+    var perPageSelect = document.getElementById('recent-per-page');
+    var searchInput = document.getElementById('recent-search');
+    if (!list || !perPageSelect) return;
+
+    var mirrors = document.querySelectorAll('.recent-per-page-mirror');
+    mirrors.forEach(function(m) {
+        m.value = perPageSelect.value;
+        m.addEventListener('change', function() {
+            perPageSelect.value = m.value;
+            currentPage = 1;
+            render();
+        });
+    });
+
+    var allItems = Array.prototype.slice.call(list.querySelectorAll('.recent-item'));
+    var filtered = allItems.slice();
+    var currentPage = 1;
+
+    /* ---- Filtering ---- */
+    function applyFilters() {
+        var search = (searchInput.value || '').trim().toLowerCase();
+        if (!search) {
+            filtered = allItems.slice();
+        } else {
+            filtered = allItems.filter(function(el) {
+                var name = (el.dataset.name || '').toLowerCase();
+                var author = (el.dataset.author || '').toLowerCase();
+                var desc = (el.dataset.desc || '').toLowerCase();
+                return name.indexOf(search) !== -1
+                    || author.indexOf(search) !== -1
+                    || desc.indexOf(search) !== -1;
+            });
+        }
+        currentPage = 1;
+        render();
+    }
+
+    var searchTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilters, 200);
+    });
+
+    /* ---- Pagination helpers ---- */
+    function getPerPage() {
+        var v = perPageSelect.value;
+        return v === 'all' ? (filtered.length || 1) : parseInt(v, 10);
+    }
+
+    function totalPages() {
+        return Math.max(1, Math.ceil(filtered.length / getPerPage()));
+    }
+
+    /* ---- Render ---- */
+    function render() {
+        var pp = getPerPage();
+        var total = totalPages();
+        if (currentPage > total) currentPage = total;
+        var start = (currentPage - 1) * pp;
+        var end = start + pp;
+
+        allItems.forEach(function(el) { el.style.display = 'none'; });
+        filtered.slice(start, end).forEach(function(el) { el.style.display = ''; });
+        // Reorder DOM
+        filtered.forEach(function(el) { list.appendChild(el); });
+
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+
+        var n = filtered.length;
+        countSpan.textContent = n + ' élément' + (n !== 1 ? 's' : '');
+
+        var infoText = 'Page ' + currentPage + ' de ' + total;
+        document.querySelectorAll('#recent-pager-top .dir-pager-info, #recent-pager-bottom .dir-pager-info')
+            .forEach(function(el) { el.textContent = infoText; });
+
+        var isFirst = currentPage <= 1;
+        var isLast = currentPage >= total;
+        var showPager = total > 1;
+
+        [document.getElementById('recent-pager-top'), document.getElementById('recent-pager-bottom')].forEach(function(pager) {
+            if (!pager) return;
+            pager.style.display = showPager ? '' : 'none';
+            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
+                var d = btn.dataset.dir;
+                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
+            });
+        });
+    }
+
+    // Arrow clicks
+    document.querySelectorAll('#recent-pager-top .dir-pager-arrow, #recent-pager-bottom .dir-pager-arrow').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var total = totalPages();
+            switch (btn.dataset.dir) {
+                case 'first': currentPage = 1; break;
+                case 'prev':  if (currentPage > 1) currentPage--; break;
+                case 'next':  if (currentPage < total) currentPage++; break;
+                case 'last':  currentPage = total; break;
+            }
+            render();
+            list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    perPageSelect.addEventListener('change', function() {
+        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
+        currentPage = 1;
+        render();
+    });
+
+    render();
+})();
+</script>
 
 {% endblock %}
