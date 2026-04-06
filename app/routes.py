@@ -662,6 +662,21 @@ def country_detail(country_slug: str) -> str:
     flag_path = f"images/flags/countries/{country_slug}.png"
     flag_full = os.path.join(current_app.static_folder, flag_path.replace("/", os.sep))
     country["flag_path"] = flag_path if os.path.exists(flag_full) else None
+    # Primary photo
+    photo_row = conn.execute(
+        "SELECT filename FROM dim_country_photo "
+        "WHERE country_id = ? AND is_primary = TRUE LIMIT 1",
+        (country["country_id"],),
+    ).fetchone()
+    if not photo_row:
+        photo_row = conn.execute(
+            "SELECT filename FROM dim_country_photo "
+            "WHERE country_id = ? ORDER BY photo_id LIMIT 1",
+            (country["country_id"],),
+        ).fetchone()
+    country["photo_path"] = (
+        f"images/countries/{country_slug}/{photo_row['filename']}" if photo_row else None
+    )
     # Trend
     if len(pop_data) >= 2:
         delta = pop_data[-1]["population"] - pop_data[-2]["population"]

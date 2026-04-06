@@ -22,8 +22,13 @@
     </div>
 </section>
 
-<section class="city-header" style="--city-accent: {{ country.country_color or '#2f6fed' }}; background: {{ country.country_color or '#2f6fed' }}22;{% if country.photo_path %} background-image: url('{{ url_for('static', filename=country.photo_path) }}'); background-size: cover; background-position: center;{% endif %}">
+<section class="city-header" style="--city-accent: {{ country.country_color or '#2f6fed' }};{% if country.photo_path %} --city-hero-image: url('{{ url_for('static', filename=country.photo_path) }}');{% endif %} background: {{ country.country_color or '#2f6fed' }}22;{% if country.photo_path %} background-image: url('{{ url_for('static', filename=country.photo_path) }}'); background-size: cover; background-position: center;{% endif %}">
     <div class="city-header-overlay"></div>
+    {% if country.flag_path %}
+    <div style="position:absolute; top:1rem; right:1rem; z-index:2;">
+        <img src="{{ url_for('static', filename=country.flag_path) }}" alt="Drapeau de {{ country.country_name }}" style="height:48px; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,.35); border:2px solid rgba(255,255,255,.5);">
+    </div>
+    {% endif %}
     <article class="city-header-content">
         <p class="eyebrow">Pays</p>
         <h2>{{ country.country_name }}</h2>
@@ -83,11 +88,6 @@
             {% endif %}
         </div>
     </article>
-    {% if country.flag_path %}
-    <div class="city-header-flag" style="display:flex;align-items:center;justify-content:center;padding:2rem;">
-        <img src="{{ url_for('static', filename=country.flag_path) }}" alt="Drapeau de {{ country.country_name }}" style="max-height:120px;max-width:200px;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.2);">
-    </div>
-    {% endif %}
 </section>
 
 {% if pop_data %}
