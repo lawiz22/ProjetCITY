@@ -3020,12 +3020,11 @@ dt {
 
 /* ── Annotation Spotlight Panel ────────────────────────────── */
 
-/* When spotlight is active, lock the panel to viewport height */
+/* When spotlight is active, stack map + panel, allow page scroll */
 .map-panel-full.spotlight-active {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    overflow: visible;
 }
 .map-panel-full.spotlight-active .map-reading-strip,
 .map-panel-full.spotlight-active .map-density-legend,
@@ -3037,18 +3036,15 @@ dt {
     flex-shrink: 0;
 }
 .map-panel-full.spotlight-active .map-canvas {
-    height: 52vh !important;
-    min-height: 300px !important;
     flex-shrink: 0;
 }
 .map-panel-full.spotlight-active .spotlight-panel {
-    flex: 1;
     display: flex !important;
     flex-direction: column;
     margin-top: 0;
     border-radius: 0;
     overflow: hidden;
-    min-height: 0;
+    min-height: 600px;
 }
 .map-panel-full.spotlight-active .spotlight-row {
     flex: 1;
@@ -3056,6 +3052,7 @@ dt {
 }
 .map-panel-full.spotlight-active .spotlight-block {
     max-height: none;
+    min-height: 500px;
 }
 
 .spotlight-panel {
@@ -3109,7 +3106,6 @@ dt {
 .spotlight-block {
     padding: 20px;
     overflow-y: auto;
-    max-height: 700px;
 }
 .spotlight-city-block {
     border-right: 1px solid var(--line);
