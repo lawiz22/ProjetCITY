@@ -40,6 +40,8 @@
                     <option value="name-desc">Nom Z → A</option>
                     <option value="year-desc">Année ↓ (récent)</option>
                     <option value="year-asc">Année ↑ (ancien)</option>
+                    <option value="created-desc">Ajout ↓ (récent)</option>
+                    <option value="created-asc">Ajout ↑ (ancien)</option>
                 </select>
             </div>
             <!-- View switcher -->
@@ -89,7 +91,8 @@
            data-evt-year="{{ ev.event_year or 0 }}"
            data-evt-category="{{ ev.event_category }}"
            data-evt-level="{{ ev.event_level }}"
-           data-evt-locations="{{ ev.location_names or '' }}">
+           data-evt-locations="{{ ev.location_names or '' }}"
+           data-evt-created="{{ ev.entity_created_at or '' }}">
             {% if ev.primary_photo %}
             <div class="event-card-thumb">
                 <img src="{{ url_for('static', filename=ev.primary_photo|thumb_url) }}" alt="" loading="lazy">
@@ -225,6 +228,10 @@
             if (field === 'name') {
                 var va = (a.dataset.evtName || '').toLowerCase();
                 var vb = (b.dataset.evtName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else if (field === 'created') {
+                var va = a.dataset.evtCreated || '';
+                var vb = b.dataset.evtCreated || '';
                 return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
             } else {
                 var va = parseInt(a.dataset.evtYear, 10) || 0;

@@ -69,6 +69,8 @@
                     <option value="name-desc">Nom Z → A</option>
                     <option value="year-desc">Année ↓ (récent)</option>
                     <option value="year-asc">Année ↑ (ancien)</option>
+                    <option value="created-desc">Ajout ↓ (récent)</option>
+                    <option value="created-asc">Ajout ↑ (ancien)</option>
                 </select>
             </div>
             <!-- View switcher -->
@@ -119,7 +121,8 @@
            data-leg-year="{{ lg.year_reported or 0 }}"
            data-leg-category="{{ lg.legend_category }}"
            data-leg-type="{{ lg.legend_type }}"
-           data-leg-level="{{ lg.legend_level }}">
+           data-leg-level="{{ lg.legend_level }}"
+           data-leg-created="{{ lg.entity_created_at or '' }}">
             {% if lg.primary_photo %}
             <div class="event-card-thumb">
                 <img src="{{ url_for('static', filename=lg.primary_photo) }}" alt="" loading="lazy">
@@ -290,6 +293,10 @@
             if (field === 'name') {
                 var va = (a.dataset.legName || '').toLowerCase();
                 var vb = (b.dataset.legName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else if (field === 'created') {
+                var va = a.dataset.legCreated || '';
+                var vb = b.dataset.legCreated || '';
                 return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
             } else {
                 var va = parseInt(a.dataset.legYear, 10) || 0;

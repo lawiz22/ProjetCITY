@@ -40,6 +40,8 @@
                     <option value="name-desc">Nom Z → A</option>
                     <option value="year-desc">Construction ↓ (récent)</option>
                     <option value="year-asc">Construction ↑ (ancien)</option>
+                    <option value="created-desc">Ajout ↓ (récent)</option>
+                    <option value="created-asc">Ajout ↑ (ancien)</option>
                 </select>
             </div>
             <!-- View switcher -->
@@ -89,7 +91,8 @@
            data-mon-name="{{ m.monument_name }}"
            data-mon-year="{{ m.construction_year or 0 }}"
            data-mon-category="{{ m.monument_category }}"
-           data-mon-level="{{ m.monument_level }}">
+           data-mon-level="{{ m.monument_level }}"
+           data-mon-created="{{ m.entity_created_at or '' }}">
             {% if m.primary_photo %}
             <div class="event-card-thumb">
                 <img src="{{ url_for('static', filename=m.primary_photo|thumb_url) }}" alt="" loading="lazy">
@@ -226,6 +229,10 @@
             if (field === 'name') {
                 var va = (a.dataset.monName || '').toLowerCase();
                 var vb = (b.dataset.monName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else if (field === 'created') {
+                var va = a.dataset.monCreated || '';
+                var vb = b.dataset.monCreated || '';
                 return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
             } else {
                 var va = parseInt(a.dataset.monYear, 10) || 0;

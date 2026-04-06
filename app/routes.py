@@ -4639,8 +4639,8 @@ def geo_coverage() -> str:
         region_data[key]["cities"].append({
             "city_name": r["city_name"],
             "city_slug": r["city_slug"],
-            "peak_pop": r["peak_pop"],
-            "data_points": r["data_points"],
+            "peak_pop": r["peak_pop"] or 0,
+            "data_points": r["data_points"] or 0,
         })
 
     # Build country summaries

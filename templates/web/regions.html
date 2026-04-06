@@ -21,6 +21,8 @@
                     <option value="pop-desc">Population ↓</option>
                     <option value="pop-asc">Population ↑</option>
                     <option value="country-asc">Pays A → Z</option>
+                    <option value="created-desc">Ajout ↓ (récent)</option>
+                    <option value="created-asc">Ajout ↑ (ancien)</option>
                 </select>
             </div>
             <!-- View switcher -->
@@ -64,7 +66,7 @@
 
     <div class="city-grid city-grid-photo city-grid-{{ view_mode }}" id="dir-grid">
         {% for region in regions %}
-        <div class="city-card-wrap" style="position:relative;" data-region-name="{{ region.region_name }}" data-region-country="{{ region.country_name }}" data-region-pop="{{ region.latest_population or 0 }}">
+        <div class="city-card-wrap" style="position:relative;" data-region-name="{{ region.region_name }}" data-region-country="{{ region.country_name }}" data-region-pop="{{ region.latest_population or 0 }}" data-region-created="{{ region.entity_created_at or '' }}">
         <a class="city-card city-card-photo city-card-{{ view_mode }}"
            href="{{ url_for('web.region_detail', region_slug=region.region_slug) }}">
             <div class="city-card-media">
@@ -215,6 +217,10 @@
                 var va = (a.dataset.regionCountry || '').toLowerCase();
                 var vb = (b.dataset.regionCountry || '').toLowerCase();
                 return va.localeCompare(vb);
+            } else if (field === 'created') {
+                var va = a.dataset.regionCreated || '';
+                var vb = b.dataset.regionCreated || '';
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
             } else {
                 var va = parseInt(a.dataset.regionPop, 10) || 0;
                 var vb = parseInt(b.dataset.regionPop, 10) || 0;

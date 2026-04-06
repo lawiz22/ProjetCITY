@@ -44,6 +44,8 @@
                     <option value="pop-asc">Population ↑</option>
                     <option value="density-desc">Densité ↓</option>
                     <option value="density-asc">Densité ↑</option>
+                    <option value="created-desc">Ajout ↓ (récent)</option>
+                    <option value="created-asc">Ajout ↑ (ancien)</option>
                 </select>
             </div>
             <!-- View switcher -->
@@ -94,7 +96,8 @@
            data-city-pop="{{ city.population }}"
            data-city-country="{{ city.country }}"
            data-city-region="{{ city.region }}"
-           data-city-density="{{ city.density or 0 }}">
+           data-city-density="{{ city.density or 0 }}"
+           data-city-created="{{ city.entity_created_at or '' }}">
             <div class="city-card-media">
                 <img src="{{ url_for('static', filename=city.photo_path|thumb_url) }}" alt="Vue de {{ city.city_name }}" loading="lazy">
                 <div class="city-card-overlay"></div>
@@ -292,6 +295,10 @@
                 var va = parseFloat(a.dataset.cityDensity) || 0;
                 var vb = parseFloat(b.dataset.cityDensity) || 0;
                 return dir === 'asc' ? va - vb : vb - va;
+            } else if (field === 'created') {
+                var va = a.dataset.cityCreated || '';
+                var vb = b.dataset.cityCreated || '';
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
             } else {
                 var va = parseInt(a.dataset.cityPop, 10) || 0;
                 var vb = parseInt(b.dataset.cityPop, 10) || 0;

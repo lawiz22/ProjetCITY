@@ -40,6 +40,8 @@
                     <option value="name-desc">Nom Z → A</option>
                     <option value="year-desc">Naissance ↓ (récent)</option>
                     <option value="year-asc">Naissance ↑ (ancien)</option>
+                    <option value="created-desc">Ajout ↓ (récent)</option>
+                    <option value="created-asc">Ajout ↑ (ancien)</option>
                 </select>
             </div>
             <!-- View switcher -->
@@ -88,7 +90,8 @@
            data-per-name="{{ p.person_name }}"
            data-per-year="{{ p.birth_year or 0 }}"
            data-per-category="{{ p.person_category }}"
-           data-per-level="{{ p.person_level }}">
+           data-per-level="{{ p.person_level }}"
+           data-per-created="{{ p.entity_created_at or '' }}">
             {% if p.primary_photo %}
             <div class="event-card-thumb">
                 <img src="{{ url_for('static', filename=p.primary_photo|thumb_url) }}" alt="" loading="lazy">
@@ -220,6 +223,10 @@
             if (field === 'name') {
                 var va = (a.dataset.perName || '').toLowerCase();
                 var vb = (b.dataset.perName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else if (field === 'created') {
+                var va = a.dataset.perCreated || '';
+                var vb = b.dataset.perCreated || '';
                 return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
             } else {
                 var va = parseInt(a.dataset.perYear, 10) || 0;

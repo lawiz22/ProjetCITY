@@ -20,6 +20,8 @@
                     <option value="name-desc">Nom Z → A</option>
                     <option value="pop-desc">Population ↓</option>
                     <option value="pop-asc">Population ↑</option>
+                    <option value="created-desc">Ajout ↓ (récent)</option>
+                    <option value="created-asc">Ajout ↑ (ancien)</option>
                 </select>
             </div>
             <!-- View switcher -->
@@ -71,7 +73,8 @@
         <a class="city-card city-card-photo city-card-{{ view_mode }}"
            href="{{ url_for('web.country_detail', country_slug=country.country_slug) }}"
            data-country-name="{{ country.country_name }}"
-           data-country-pop="{{ country.latest_population or 0 }}">
+           data-country-pop="{{ country.latest_population or 0 }}"
+           data-country-created="{{ country.entity_created_at or '' }}">
             <div class="city-card-media">
                 {% if country.flag_path %}
                 <img src="{{ url_for('static', filename=country.flag_path) }}" alt="Drapeau de {{ country.country_name }}" loading="lazy" style="object-fit: contain; background:#f4f4f4;">
@@ -208,6 +211,10 @@
             if (field === 'name') {
                 var va = (a.dataset.countryName || '').toLowerCase();
                 var vb = (b.dataset.countryName || '').toLowerCase();
+                return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+            } else if (field === 'created') {
+                var va = a.dataset.countryCreated || '';
+                var vb = b.dataset.countryCreated || '';
                 return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
             } else {
                 var va = parseInt(a.dataset.countryPop, 10) || 0;
