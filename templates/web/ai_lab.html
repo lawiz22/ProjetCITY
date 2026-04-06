@@ -984,37 +984,42 @@
         <section class="panel">
             <h3 class="panel-title">🔬 Raffiner</h3>
             <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-                <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
-                    <div class="ai-lab-field" style="flex:0 0 auto;">
-                        <label class="opt-label" for="refine-event-type">Type de raffinement</label>
-                        <select id="refine-event-type" class="opt-input opt-input-model">
-                            <option value="enrich">✨ Enrichir et valider</option>
-                            <option value="correct">🔧 Corriger les erreurs</option>
-                            <option value="expand">➕ Ajouter de la nouvelle info</option>
-                        </select>
-                    </div>
-                </div>
                 <div class="ai-lab-field" style="margin-bottom:1rem;">
                     <label class="opt-label" for="refine-event-prompt">Instructions (modifiables)</label>
                     <textarea id="refine-event-prompt" class="opt-input opt-textarea" rows="8"
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_event }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-event-btn">🔬 Raffiner avec l'IA</button>
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-event-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
+                    <button type="button" class="opt-btn opt-btn-warning" id="refine-event-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
                 </div>
             </div>
         </section>
 
-        <!-- Result panel (hidden until AI responds) -->
+        <!-- Result panel: DIFF VIEW (hidden until AI responds) -->
         <div id="refine-event-result-wrap" style="display:none;">
             <section class="panel">
-                <h3 class="panel-title">🧬 Résultat de l'IA</h3>
+                <h3 class="panel-title">🧬 Comparaison original / raffiné</h3>
                 <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-                    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
-                        <button type="button" class="opt-btn" id="refine-copy-btn">📋 Copier</button>
+                    <div class="refine-diff-container">
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-old">📄 Original</div>
+                            <div class="refine-diff-body" id="refine-event-diff-old"></div>
+                        </div>
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-new">🧬 Version raffinée</div>
+                            <div class="refine-diff-body" id="refine-event-diff-new"></div>
+                        </div>
                     </div>
-                    <textarea id="refine-event-result" class="opt-input opt-textarea" rows="16"
-                        style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+
+                    <details style="margin-top:.75rem;">
+                        <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">📋 Texte brut de la version raffinée</summary>
+                        <textarea id="refine-event-result" class="opt-input opt-textarea" rows="12"
+                            style="width:100%;font-family:monospace;font-size:.8rem;margin-top:.5rem;"></textarea>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-copy-btn">📋 Copier</button>
+                        </div>
+                    </details>
 
                     <!-- 3 choices -->
                     <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
@@ -1092,37 +1097,42 @@
         <section class="panel">
             <h3 class="panel-title">🔬 Raffiner</h3>
             <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-                <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
-                    <div class="ai-lab-field" style="flex:0 0 auto;">
-                        <label class="opt-label" for="refine-person-type">Type de raffinement</label>
-                        <select id="refine-person-type" class="opt-input opt-input-model">
-                            <option value="enrich">✨ Enrichir et valider</option>
-                            <option value="correct">🔧 Corriger les erreurs</option>
-                            <option value="expand">➕ Ajouter de la nouvelle info</option>
-                        </select>
-                    </div>
-                </div>
                 <div class="ai-lab-field" style="margin-bottom:1rem;">
                     <label class="opt-label" for="refine-person-prompt">Instructions (modifiables)</label>
                     <textarea id="refine-person-prompt" class="opt-input opt-textarea" rows="8"
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_person }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-person-btn">🔬 Raffiner avec l'IA</button>
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-person-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
+                    <button type="button" class="opt-btn opt-btn-warning" id="refine-person-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
                 </div>
             </div>
         </section>
 
-        <!-- Result panel (hidden until AI responds) -->
+        <!-- Result panel: DIFF VIEW (hidden until AI responds) -->
         <div id="refine-person-result-wrap" style="display:none;">
             <section class="panel">
-                <h3 class="panel-title">🧬 Résultat de l'IA</h3>
+                <h3 class="panel-title">🧬 Comparaison original / raffiné</h3>
                 <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-                    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
-                        <button type="button" class="opt-btn" id="refine-person-copy-btn">📋 Copier</button>
+                    <div class="refine-diff-container">
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-old">📄 Original</div>
+                            <div class="refine-diff-body" id="refine-person-diff-old"></div>
+                        </div>
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-new">🧬 Version raffinée</div>
+                            <div class="refine-diff-body" id="refine-person-diff-new"></div>
+                        </div>
                     </div>
-                    <textarea id="refine-person-result" class="opt-input opt-textarea" rows="16"
-                        style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+
+                    <details style="margin-top:.75rem;">
+                        <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">📋 Texte brut de la version raffinée</summary>
+                        <textarea id="refine-person-result" class="opt-input opt-textarea" rows="12"
+                            style="width:100%;font-family:monospace;font-size:.8rem;margin-top:.5rem;"></textarea>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-person-copy-btn">📋 Copier</button>
+                        </div>
+                    </details>
 
                     <!-- 3 choices -->
                     <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
@@ -1200,37 +1210,42 @@
         <section class="panel">
             <h3 class="panel-title">🔬 Raffiner</h3>
             <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-                <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
-                    <div class="ai-lab-field" style="flex:0 0 auto;">
-                        <label class="opt-label" for="refine-monument-type">Type de raffinement</label>
-                        <select id="refine-monument-type" class="opt-input opt-input-model">
-                            <option value="enrich">✨ Enrichir et valider</option>
-                            <option value="correct">🔧 Corriger les erreurs</option>
-                            <option value="expand">➕ Ajouter de la nouvelle info</option>
-                        </select>
-                    </div>
-                </div>
                 <div class="ai-lab-field" style="margin-bottom:1rem;">
                     <label class="opt-label" for="refine-monument-prompt">Instructions (modifiables)</label>
                     <textarea id="refine-monument-prompt" class="opt-input opt-textarea" rows="8"
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_monument }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-monument-btn">🔬 Raffiner avec l'IA</button>
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-monument-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
+                    <button type="button" class="opt-btn opt-btn-warning" id="refine-monument-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
                 </div>
             </div>
         </section>
 
-        <!-- Result panel (hidden until AI responds) -->
+        <!-- Result panel: DIFF VIEW (hidden until AI responds) -->
         <div id="refine-monument-result-wrap" style="display:none;">
             <section class="panel">
-                <h3 class="panel-title">🧬 Résultat de l'IA</h3>
+                <h3 class="panel-title">🧬 Comparaison original / raffiné</h3>
                 <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-                    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
-                        <button type="button" class="opt-btn" id="refine-monument-copy-btn">📋 Copier</button>
+                    <div class="refine-diff-container">
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-old">📄 Original</div>
+                            <div class="refine-diff-body" id="refine-monument-diff-old"></div>
+                        </div>
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-new">🧬 Version raffinée</div>
+                            <div class="refine-diff-body" id="refine-monument-diff-new"></div>
+                        </div>
                     </div>
-                    <textarea id="refine-monument-result" class="opt-input opt-textarea" rows="16"
-                        style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+
+                    <details style="margin-top:.75rem;">
+                        <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">📋 Texte brut de la version raffinée</summary>
+                        <textarea id="refine-monument-result" class="opt-input opt-textarea" rows="12"
+                            style="width:100%;font-family:monospace;font-size:.8rem;margin-top:.5rem;"></textarea>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-monument-copy-btn">📋 Copier</button>
+                        </div>
+                    </details>
 
                     <!-- 3 choices -->
                     <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
@@ -1308,37 +1323,42 @@
         <section class="panel">
             <h3 class="panel-title">🔬 Raffiner</h3>
             <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-                <div class="ai-lab-top-row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
-                    <div class="ai-lab-field" style="flex:0 0 auto;">
-                        <label class="opt-label" for="refine-legend-type">Type de raffinement</label>
-                        <select id="refine-legend-type" class="opt-input opt-input-model">
-                            <option value="enrich">✨ Enrichir et valider</option>
-                            <option value="correct">🔧 Corriger les erreurs</option>
-                            <option value="expand">➕ Ajouter de la nouvelle info</option>
-                        </select>
-                    </div>
-                </div>
                 <div class="ai-lab-field" style="margin-bottom:1rem;">
                     <label class="opt-label" for="refine-legend-prompt">Instructions (modifiables)</label>
                     <textarea id="refine-legend-prompt" class="opt-input opt-textarea" rows="8"
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_legend }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-legend-btn">🔬 Raffiner avec l'IA</button>
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-legend-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
+                    <button type="button" class="opt-btn opt-btn-warning" id="refine-legend-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
                 </div>
             </div>
         </section>
 
-        <!-- Result panel (hidden until AI responds) -->
+        <!-- Result panel: DIFF VIEW (hidden until AI responds) -->
         <div id="refine-legend-result-wrap" style="display:none;">
             <section class="panel">
-                <h3 class="panel-title">🧬 Résultat de l'IA</h3>
+                <h3 class="panel-title">🧬 Comparaison original / raffiné</h3>
                 <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-                    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
-                        <button type="button" class="opt-btn" id="refine-legend-copy-btn">📋 Copier</button>
+                    <div class="refine-diff-container">
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-old">📄 Original</div>
+                            <div class="refine-diff-body" id="refine-legend-diff-old"></div>
+                        </div>
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-new">🧬 Version raffinée</div>
+                            <div class="refine-diff-body" id="refine-legend-diff-new"></div>
+                        </div>
                     </div>
-                    <textarea id="refine-legend-result" class="opt-input opt-textarea" rows="16"
-                        style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+
+                    <details style="margin-top:.75rem;">
+                        <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">📋 Texte brut de la version raffinée</summary>
+                        <textarea id="refine-legend-result" class="opt-input opt-textarea" rows="12"
+                            style="width:100%;font-family:monospace;font-size:.8rem;margin-top:.5rem;"></textarea>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-legend-copy-btn">📋 Copier</button>
+                        </div>
+                    </details>
 
                     <!-- 3 choices -->
                     <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
@@ -2640,16 +2660,110 @@
     /* =====================================================================
      * RAFFINEMENT TAB — Événement
      * ===================================================================== */
+
+    /* ---- Shared diff helper (LCS-based) ---- */
+    function _esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    /* Word-level diff for a modified line: returns {oldHtml, newHtml} */
+    function wordDiff(oldLine, newLine) {
+        var ow = oldLine.split(/(\s+)/), nw = newLine.split(/(\s+)/);
+        var m = ow.length, n = nw.length;
+        var dp = [];
+        for (var i = 0; i <= m; i++) { dp[i] = new Array(n+1).fill(0); }
+        for (var i = 1; i <= m; i++)
+            for (var j = 1; j <= n; j++)
+                dp[i][j] = (ow[i-1] === nw[j-1]) ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+        var ops = [], ii = m, jj = n;
+        while (ii > 0 || jj > 0) {
+            if (ii > 0 && jj > 0 && ow[ii-1] === nw[jj-1]) { ops.unshift({t:'s',o:ow[--ii],n:nw[--jj]}); }
+            else if (jj > 0 && (ii === 0 || dp[ii][jj-1] >= dp[ii-1][jj])) { ops.unshift({t:'a',n:nw[--jj]}); }
+            else { ops.unshift({t:'d',o:ow[--ii]}); }
+        }
+        var oh = '', nh = '';
+        for (var k = 0; k < ops.length; k++) {
+            var op = ops[k];
+            if (op.t === 's') { oh += _esc(op.o); nh += _esc(op.n); }
+            else if (op.t === 'd') { oh += '<mark class="diff-del">' + _esc(op.o) + '</mark>'; }
+            else { nh += '<mark class="diff-add">' + _esc(op.n) + '</mark>'; }
+        }
+        return { oldHtml: oh, newHtml: nh };
+    }
+
+    function buildDiffView(oldText, newText, diffOldEl, diffNewEl) {
+        var oldLines = oldText.split('\n');
+        var newLines = newText.split('\n');
+        var m = oldLines.length, n = newLines.length;
+
+        /* — LCS on lines — */
+        var dp = [];
+        for (var i = 0; i <= m; i++) { dp[i] = new Array(n+1).fill(0); }
+        for (var i = 1; i <= m; i++)
+            for (var j = 1; j <= n; j++)
+                dp[i][j] = (oldLines[i-1] === newLines[j-1]) ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+
+        /* backtrack → raw ops */
+        var raw = [], ii = m, jj = n;
+        while (ii > 0 || jj > 0) {
+            if (ii > 0 && jj > 0 && oldLines[ii-1] === newLines[jj-1]) {
+                raw.unshift({ t:'s', o: oldLines[ii-1], n: newLines[jj-1] }); ii--; jj--;
+            } else if (jj > 0 && (ii === 0 || dp[ii][jj-1] >= dp[ii-1][jj])) {
+                raw.unshift({ t:'a', n: newLines[--jj] });
+            } else {
+                raw.unshift({ t:'d', o: oldLines[--ii] });
+            }
+        }
+
+        /* Group consecutive del/add into "change blocks" and pair them */
+        var ops = [];
+        var idx = 0;
+        while (idx < raw.length) {
+            if (raw[idx].t === 's') { ops.push(raw[idx]); idx++; continue; }
+            var dels = [], adds = [];
+            while (idx < raw.length && raw[idx].t !== 's') {
+                if (raw[idx].t === 'd') dels.push(raw[idx].o);
+                else adds.push(raw[idx].n);
+                idx++;
+            }
+            var paired = Math.min(dels.length, adds.length);
+            for (var p = 0; p < paired; p++) ops.push({ t:'m', o: dels[p], n: adds[p] }); /* modified */
+            for (var p = paired; p < dels.length; p++) ops.push({ t:'d', o: dels[p] });
+            for (var p = paired; p < adds.length; p++) ops.push({ t:'a', n: adds[p] });
+        }
+
+        /* Render */
+        var oldHtml = '', newHtml = '';
+        for (var k = 0; k < ops.length; k++) {
+            var op = ops[k];
+            if (op.t === 's') {
+                var e = _esc(op.o);
+                oldHtml += '<span class="refine-diff-line-same">' + e + '</span>';
+                newHtml += '<span class="refine-diff-line-same">' + e + '</span>';
+            } else if (op.t === 'd') {
+                oldHtml += '<span class="refine-diff-line-removed">' + _esc(op.o) + '</span>';
+            } else if (op.t === 'a') {
+                newHtml += '<span class="refine-diff-line-added">' + _esc(op.n) + '</span>';
+            } else if (op.t === 'm') {
+                var wd = wordDiff(op.o, op.n);
+                oldHtml += '<span class="refine-diff-line-modified">' + wd.oldHtml + '</span>';
+                newHtml += '<span class="refine-diff-line-modified">' + wd.newHtml + '</span>';
+            }
+        }
+        diffOldEl.innerHTML = oldHtml;
+        diffNewEl.innerHTML = newHtml;
+    }
+
     var refineEventSelect   = document.getElementById('refine-event-select');
     var refineEventLoading  = document.getElementById('refine-event-loading');
     var refineEventCard     = document.getElementById('refine-event-card');
     var refineEventCardContent = document.getElementById('refine-event-card-content');
     var refineEventSourceText  = document.getElementById('refine-event-source-text');
-    var refineEventType     = document.getElementById('refine-event-type');
     var refineEventPrompt   = document.getElementById('refine-event-prompt');
     var refineEventBtn      = document.getElementById('refine-event-btn');
+    var refineEventCorrectBtn = document.getElementById('refine-event-correct-btn');
     var refineEventResultWrap = document.getElementById('refine-event-result-wrap');
     var refineEventResult   = document.getElementById('refine-event-result');
+    var refineEventDiffOld  = document.getElementById('refine-event-diff-old');
+    var refineEventDiffNew  = document.getElementById('refine-event-diff-new');
     var refineSaveResult    = document.getElementById('refine-save-result');
     var refineSynthWrap     = document.getElementById('refine-synth-wrap');
     var refineSynthResult   = document.getElementById('refine-synth-result');
@@ -2663,20 +2777,16 @@
     /* Default prompt instructions per refinement type */
     var _baseRefinePrompt = {{ prompt_refine_event | tojson }};
     var refinePrompts = {
-        enrich: _baseRefinePrompt,
-        correct: _baseRefinePrompt.replace(
+        enrich: _baseRefinePrompt.replace(
             'Enrichis et valide la fiche',
-            'Corrige les erreurs dans la fiche'
+            'Enrichis la fiche et ajoute de nouvelles informations détaillées'
+        ),
+        validate: _baseRefinePrompt.replace(
+            'Enrichis et valide la fiche',
+            'Valide et corrige la fiche : vérifie l\'exactitude des informations et corrige les erreurs'
         ).replace(
             'Ajoute des détails précis manquants : chiffres exacts, dates précises, noms de personnages clés, causes profondes et conséquences documentées.',
-            'Identifie et corrige les informations incorrectes (dates erronées, chiffres faux, lieux inexacts).'
-        ),
-        expand: _baseRefinePrompt.replace(
-            'Enrichis et valide la fiche',
-            'Ajoute de la nouvelle information à la fiche'
-        ).replace(
-            'Corrige les informations incorrectes si nécessaire.',
-            'Ne modifie pas les informations existantes déjà correctes, ajoute seulement de nouvelles informations.'
+            'Vérifie chaque fait, date et chiffre. Identifie et corrige les informations incorrectes (dates erronées, chiffres faux, lieux inexacts). Ne modifie que ce qui est factuellement incorrect.'
         )
     };
 
@@ -2690,14 +2800,14 @@
         if (!slug) {
             refineEventCard.style.display = 'none';
             refineEventResultWrap.style.display = 'none';
-            refineSynthWrap.style.display = 'none';
+            if (refineSynthWrap) refineSynthWrap.style.display = 'none';
             currentEventSlug = '';
             return;
         }
         refineEventLoading.style.display = '';
         refineEventCard.style.display = 'none';
         refineEventResultWrap.style.display = 'none';
-        refineSynthWrap.style.display = 'none';
+        if (refineSynthWrap) refineSynthWrap.style.display = 'none';
 
         var url = refineLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
         fetch(url)
@@ -2730,23 +2840,23 @@
             });
     });
 
-    /* ---- Update prompt when refinement type changes ---- */
-    refineEventType.addEventListener('change', function() {
-        refineEventPrompt.value = refinePrompts[refineEventType.value] || refinePrompts.enrich;
-    });
-
-    /* ---- Raffiner button ---- */
-    refineEventBtn.addEventListener('click', function() {
+    /* ---- Shared generate handler triggered by any of the 3 buttons ---- */
+    function triggerEventRefine(mode, clickedBtn) {
         if (!currentEventSlug) { alert('Choisissez un événement.'); return; }
+        /* Update prompt to match the selected mode */
+        refineEventPrompt.value = refinePrompts[mode] || refinePrompts.enrich;
         var promptText = refineEventPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        refineEventBtn.disabled = true;
-        refineEventBtn.textContent = '⏳ Raffinement en cours…';
+        var allBtns = [refineEventBtn, refineEventCorrectBtn];
+        allBtns.forEach(function(b) { b.disabled = true; });
+        clickedBtn.textContent = '⏳ Raffinement en cours…';
         refineEventResultWrap.style.display = '';
-        refineSynthWrap.style.display = 'none';
+        if (refineSynthWrap) refineSynthWrap.style.display = 'none';
         refineSaveResult.style.display = 'none';
         refineEventResult.value = 'Interrogation de ' + modelSelect.value + '…';
+        refineEventDiffOld.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+        refineEventDiffNew.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
 
         var fd = new FormData();
         fd.append('event_slug', currentEventSlug);
@@ -2756,21 +2866,33 @@
         fetch(refineGenUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                refineEventBtn.disabled = false;
-                refineEventBtn.textContent = '🔬 Raffiner avec l\'IA';
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineEventBtn.textContent = '✨ Enrichir et ajouter';
+                refineEventCorrectBtn.textContent = '✅ Valider et corriger';
                 if (data.success) {
                     refineEventResult.value = data.reply;
+                    buildDiffView(refineEventSourceText.value, data.reply, refineEventDiffOld, refineEventDiffNew);
                     if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    var synthBtn = document.getElementById('refine-synth-btn');
+                    if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
                 } else {
                     refineEventResult.value = '❌ ERREUR : ' + data.error;
+                    refineEventDiffOld.innerHTML = '';
+                    refineEventDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
                 }
             })
             .catch(function(err) {
-                refineEventBtn.disabled = false;
-                refineEventBtn.textContent = '🔬 Raffiner avec l\'IA';
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineEventBtn.textContent = '✨ Enrichir et ajouter';
+                refineEventCorrectBtn.textContent = '✅ Valider et corriger';
                 refineEventResult.value = '❌ Erreur réseau : ' + err.message;
+                refineEventDiffOld.innerHTML = '';
+                refineEventDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
             });
-    });
+    }
+
+    refineEventBtn.addEventListener('click', function() { triggerEventRefine('enrich', refineEventBtn); });
+    refineEventCorrectBtn.addEventListener('click', function() { triggerEventRefine('validate', refineEventCorrectBtn); });
 
     /* ---- Copy refined result ---- */
     document.getElementById('refine-copy-btn').addEventListener('click', function() {
@@ -2933,11 +3055,13 @@
     var refinePersonCard        = document.getElementById('refine-person-card');
     var refinePersonCardContent = document.getElementById('refine-person-card-content');
     var refinePersonSourceText  = document.getElementById('refine-person-source-text');
-    var refinePersonType        = document.getElementById('refine-person-type');
     var refinePersonPrompt      = document.getElementById('refine-person-prompt');
     var refinePersonBtn         = document.getElementById('refine-person-btn');
+    var refinePersonCorrectBtn  = document.getElementById('refine-person-correct-btn');
     var refinePersonResultWrap  = document.getElementById('refine-person-result-wrap');
     var refinePersonResult      = document.getElementById('refine-person-result');
+    var refinePersonDiffOld     = document.getElementById('refine-person-diff-old');
+    var refinePersonDiffNew     = document.getElementById('refine-person-diff-new');
     var refinePersonSaveResult  = document.getElementById('refine-person-save-result');
     var refinePersonSynthWrap   = document.getElementById('refine-person-synth-wrap');
     var refinePersonSynthResult = document.getElementById('refine-person-synth-result');
@@ -2950,14 +3074,13 @@
 
     var _baseRefinePersonPrompt = {{ prompt_refine_person | tojson }};
     var refinePersonPrompts = {
-        enrich: _baseRefinePersonPrompt,
-        correct: _baseRefinePersonPrompt.replace(
+        enrich: _baseRefinePersonPrompt.replace(
             'Enrichis et valide la fiche',
-            'Corrige les erreurs dans la fiche'
+            'Enrichis la fiche et ajoute de nouvelles informations détaillées'
         ),
-        expand: _baseRefinePersonPrompt.replace(
+        validate: _baseRefinePersonPrompt.replace(
             'Enrichis et valide la fiche',
-            'Ajoute de la nouvelle information à la fiche'
+            'Valide et corrige la fiche : vérifie l\'exactitude des informations et corrige les erreurs'
         )
     };
 
@@ -2971,14 +3094,14 @@
         if (!slug) {
             refinePersonCard.style.display = 'none';
             refinePersonResultWrap.style.display = 'none';
-            refinePersonSynthWrap.style.display = 'none';
+            if (refinePersonSynthWrap) refinePersonSynthWrap.style.display = 'none';
             currentPersonSlug = '';
             return;
         }
         refinePersonLoading.style.display = '';
         refinePersonCard.style.display = 'none';
         refinePersonResultWrap.style.display = 'none';
-        refinePersonSynthWrap.style.display = 'none';
+        if (refinePersonSynthWrap) refinePersonSynthWrap.style.display = 'none';
 
         var url = refinePersonLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
         fetch(url)
@@ -3010,23 +3133,22 @@
             });
     });
 
-    /* ---- Update prompt when refinement type changes ---- */
-    refinePersonType.addEventListener('change', function() {
-        refinePersonPrompt.value = refinePersonPrompts[refinePersonType.value] || refinePersonPrompts.enrich;
-    });
-
-    /* ---- Raffiner button ---- */
-    refinePersonBtn.addEventListener('click', function() {
+    /* ---- Shared generate handler for person ---- */
+    function triggerPersonRefine(mode, clickedBtn) {
         if (!currentPersonSlug) { alert('Choisissez un personnage.'); return; }
+        refinePersonPrompt.value = refinePersonPrompts[mode] || refinePersonPrompts.enrich;
         var promptText = refinePersonPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        refinePersonBtn.disabled = true;
-        refinePersonBtn.textContent = '⏳ Raffinement en cours…';
+        var allBtns = [refinePersonBtn, refinePersonCorrectBtn];
+        allBtns.forEach(function(b) { b.disabled = true; });
+        clickedBtn.textContent = '⏳ Raffinement en cours…';
         refinePersonResultWrap.style.display = '';
-        refinePersonSynthWrap.style.display = 'none';
+        if (refinePersonSynthWrap) refinePersonSynthWrap.style.display = 'none';
         refinePersonSaveResult.style.display = 'none';
         refinePersonResult.value = 'Interrogation de ' + modelSelect.value + '…';
+        refinePersonDiffOld.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+        refinePersonDiffNew.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
 
         var fd = new FormData();
         fd.append('person_slug', currentPersonSlug);
@@ -3036,21 +3158,33 @@
         fetch(refinePersonGenUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                refinePersonBtn.disabled = false;
-                refinePersonBtn.textContent = '🔬 Raffiner avec l\'IA';
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refinePersonBtn.textContent = '✨ Enrichir et ajouter';
+                refinePersonCorrectBtn.textContent = '✅ Valider et corriger';
                 if (data.success) {
                     refinePersonResult.value = data.reply;
+                    buildDiffView(refinePersonSourceText.value, data.reply, refinePersonDiffOld, refinePersonDiffNew);
                     if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    var synthBtn = document.getElementById('refine-person-synth-btn');
+                    if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
                 } else {
                     refinePersonResult.value = '❌ ERREUR : ' + data.error;
+                    refinePersonDiffOld.innerHTML = '';
+                    refinePersonDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
                 }
             })
             .catch(function(err) {
-                refinePersonBtn.disabled = false;
-                refinePersonBtn.textContent = '🔬 Raffiner avec l\'IA';
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refinePersonBtn.textContent = '✨ Enrichir et ajouter';
+                refinePersonCorrectBtn.textContent = '✅ Valider et corriger';
                 refinePersonResult.value = '❌ Erreur réseau : ' + err.message;
+                refinePersonDiffOld.innerHTML = '';
+                refinePersonDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
             });
-    });
+    }
+
+    refinePersonBtn.addEventListener('click', function() { triggerPersonRefine('enrich', refinePersonBtn); });
+    refinePersonCorrectBtn.addEventListener('click', function() { triggerPersonRefine('validate', refinePersonCorrectBtn); });
 
     /* ---- Copy refined person result ---- */
     document.getElementById('refine-person-copy-btn').addEventListener('click', function() {
@@ -3481,11 +3615,13 @@
     var refineMonumentCard        = document.getElementById('refine-monument-card');
     var refineMonumentCardContent = document.getElementById('refine-monument-card-content');
     var refineMonumentSourceText  = document.getElementById('refine-monument-source-text');
-    var refineMonumentType        = document.getElementById('refine-monument-type');
     var refineMonumentPrompt      = document.getElementById('refine-monument-prompt');
     var refineMonumentBtn         = document.getElementById('refine-monument-btn');
+    var refineMonumentCorrectBtn  = document.getElementById('refine-monument-correct-btn');
     var refineMonumentResultWrap  = document.getElementById('refine-monument-result-wrap');
     var refineMonumentResult      = document.getElementById('refine-monument-result');
+    var refineMonumentDiffOld     = document.getElementById('refine-monument-diff-old');
+    var refineMonumentDiffNew     = document.getElementById('refine-monument-diff-new');
     var refineMonumentSaveResult  = document.getElementById('refine-monument-save-result');
     var refineMonumentSynthWrap   = document.getElementById('refine-monument-synth-wrap');
     var refineMonumentSynthResult = document.getElementById('refine-monument-synth-result');
@@ -3498,14 +3634,13 @@
 
     var _baseRefineMonumentPrompt = {{ prompt_refine_monument | tojson }};
     var refineMonumentPrompts = {
-        enrich: _baseRefineMonumentPrompt,
-        correct: _baseRefineMonumentPrompt.replace(
+        enrich: _baseRefineMonumentPrompt.replace(
             'Enrichis et valide la fiche',
-            'Corrige les erreurs dans la fiche'
+            'Enrichis la fiche et ajoute de nouvelles informations détaillées'
         ),
-        expand: _baseRefineMonumentPrompt.replace(
+        validate: _baseRefineMonumentPrompt.replace(
             'Enrichis et valide la fiche',
-            'Ajoute de la nouvelle information à la fiche'
+            'Valide et corrige la fiche : vérifie l\'exactitude des informations et corrige les erreurs'
         )
     };
 
@@ -3519,14 +3654,14 @@
         if (!slug) {
             refineMonumentCard.style.display = 'none';
             refineMonumentResultWrap.style.display = 'none';
-            refineMonumentSynthWrap.style.display = 'none';
+            if (refineMonumentSynthWrap) refineMonumentSynthWrap.style.display = 'none';
             currentMonumentSlug = '';
             return;
         }
         refineMonumentLoading.style.display = '';
         refineMonumentCard.style.display = 'none';
         refineMonumentResultWrap.style.display = 'none';
-        refineMonumentSynthWrap.style.display = 'none';
+        if (refineMonumentSynthWrap) refineMonumentSynthWrap.style.display = 'none';
 
         var url = refineMonumentLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
         fetch(url)
@@ -3558,23 +3693,22 @@
             });
     });
 
-    /* ---- Update prompt when refinement type changes ---- */
-    refineMonumentType.addEventListener('change', function() {
-        refineMonumentPrompt.value = refineMonumentPrompts[refineMonumentType.value] || refineMonumentPrompts.enrich;
-    });
-
-    /* ---- Raffiner button ---- */
-    refineMonumentBtn.addEventListener('click', function() {
+    /* ---- Shared generate handler for monument ---- */
+    function triggerMonumentRefine(mode, clickedBtn) {
         if (!currentMonumentSlug) { alert('Choisissez un monument.'); return; }
+        refineMonumentPrompt.value = refineMonumentPrompts[mode] || refineMonumentPrompts.enrich;
         var promptText = refineMonumentPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        refineMonumentBtn.disabled = true;
-        refineMonumentBtn.textContent = '⏳ Raffinement en cours…';
+        var allBtns = [refineMonumentBtn, refineMonumentCorrectBtn];
+        allBtns.forEach(function(b) { b.disabled = true; });
+        clickedBtn.textContent = '⏳ Raffinement en cours…';
         refineMonumentResultWrap.style.display = '';
-        refineMonumentSynthWrap.style.display = 'none';
+        if (refineMonumentSynthWrap) refineMonumentSynthWrap.style.display = 'none';
         refineMonumentSaveResult.style.display = 'none';
         refineMonumentResult.value = 'Interrogation de ' + modelSelect.value + '…';
+        refineMonumentDiffOld.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+        refineMonumentDiffNew.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
 
         var fd = new FormData();
         fd.append('monument_slug', currentMonumentSlug);
@@ -3584,21 +3718,33 @@
         fetch(refineMonumentGenUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                refineMonumentBtn.disabled = false;
-                refineMonumentBtn.textContent = '🔬 Raffiner avec l\'IA';
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineMonumentBtn.textContent = '✨ Enrichir et ajouter';
+                refineMonumentCorrectBtn.textContent = '✅ Valider et corriger';
                 if (data.success) {
                     refineMonumentResult.value = data.reply;
+                    buildDiffView(refineMonumentSourceText.value, data.reply, refineMonumentDiffOld, refineMonumentDiffNew);
                     if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    var synthBtn = document.getElementById('refine-monument-synth-btn');
+                    if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
                 } else {
                     refineMonumentResult.value = '❌ ERREUR : ' + data.error;
+                    refineMonumentDiffOld.innerHTML = '';
+                    refineMonumentDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
                 }
             })
             .catch(function(err) {
-                refineMonumentBtn.disabled = false;
-                refineMonumentBtn.textContent = '🔬 Raffiner avec l\'IA';
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineMonumentBtn.textContent = '✨ Enrichir et ajouter';
+                refineMonumentCorrectBtn.textContent = '✅ Valider et corriger';
                 refineMonumentResult.value = '❌ Erreur réseau : ' + err.message;
+                refineMonumentDiffOld.innerHTML = '';
+                refineMonumentDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
             });
-    });
+    }
+
+    refineMonumentBtn.addEventListener('click', function() { triggerMonumentRefine('enrich', refineMonumentBtn); });
+    refineMonumentCorrectBtn.addEventListener('click', function() { triggerMonumentRefine('validate', refineMonumentCorrectBtn); });
 
     /* ---- Copy refined monument result ---- */
     document.getElementById('refine-monument-copy-btn').addEventListener('click', function() {
@@ -3744,11 +3890,13 @@
     var refineLegendCard        = document.getElementById('refine-legend-card');
     var refineLegendCardContent = document.getElementById('refine-legend-card-content');
     var refineLegendSourceText  = document.getElementById('refine-legend-source-text');
-    var refineLegendType        = document.getElementById('refine-legend-type');
     var refineLegendPrompt      = document.getElementById('refine-legend-prompt');
     var refineLegendBtn         = document.getElementById('refine-legend-btn');
+    var refineLegendCorrectBtn  = document.getElementById('refine-legend-correct-btn');
     var refineLegendResultWrap  = document.getElementById('refine-legend-result-wrap');
     var refineLegendResult      = document.getElementById('refine-legend-result');
+    var refineLegendDiffOld     = document.getElementById('refine-legend-diff-old');
+    var refineLegendDiffNew     = document.getElementById('refine-legend-diff-new');
     var refineLegendSaveResult  = document.getElementById('refine-legend-save-result');
     var refineLegendSynthWrap   = document.getElementById('refine-legend-synth-wrap');
     var refineLegendSynthResult = document.getElementById('refine-legend-synth-result');
@@ -3760,20 +3908,15 @@
 
     var _baseRefineLegendPrompt = {{ prompt_refine_legend | tojson }};
     var refineLegendPrompts = {
-        enrich: _baseRefineLegendPrompt,
-        correct: _baseRefineLegendPrompt.replace(
+        enrich: _baseRefineLegendPrompt.replace(
             'Enrichis et valide la fiche',
-            'Corrige les erreurs dans la fiche'
+            'Enrichis la fiche et ajoute de nouvelles informations détaillées'
         ),
-        expand: _baseRefineLegendPrompt.replace(
+        validate: _baseRefineLegendPrompt.replace(
             'Enrichis et valide la fiche',
-            'Ajoute de la nouvelle information à la fiche'
+            'Valide et corrige la fiche : vérifie l\'exactitude des informations et corrige les erreurs'
         )
     };
-
-    refineLegendType.addEventListener('change', function() {
-        refineLegendPrompt.value = refineLegendPrompts[refineLegendType.value] || _baseRefineLegendPrompt;
-    });
 
     refineLegendSelect.addEventListener('change', function() {
         var slug = refineLegendSelect.value;
@@ -3781,7 +3924,7 @@
         refineLegendLoading.style.display = '';
         refineLegendCard.style.display = 'none';
         refineLegendResultWrap.style.display = 'none';
-        refineLegendSynthWrap.style.display = 'none';
+        if (refineLegendSynthWrap) refineLegendSynthWrap.style.display = 'none';
 
         fetch(refineLegendLoadUrl.replace('__SLUG__', encodeURIComponent(slug)))
             .then(function(r) { return r.json(); })
@@ -3802,14 +3945,21 @@
             .catch(function() { refineLegendLoading.style.display = 'none'; });
     });
 
-    /* ---- Refine legend ---- */
-    refineLegendBtn.addEventListener('click', function() {
+    /* ---- Shared generate handler for legend ---- */
+    function triggerLegendRefine(mode, clickedBtn) {
         var slug = refineLegendSelect.value;
         if (!slug) { alert('Sélectionnez une légende.'); return; }
-        refineLegendBtn.disabled = true;
-        refineLegendBtn.textContent = '⏳ Raffinement en cours…';
-        refineLegendResultWrap.style.display = 'none';
-        refineLegendSynthWrap.style.display = 'none';
+        refineLegendPrompt.value = refineLegendPrompts[mode] || refineLegendPrompts.enrich;
+
+        var allBtns = [refineLegendBtn, refineLegendCorrectBtn];
+        allBtns.forEach(function(b) { b.disabled = true; });
+        clickedBtn.textContent = '⏳ Raffinement en cours…';
+        refineLegendResultWrap.style.display = '';
+        if (refineLegendSynthWrap) refineLegendSynthWrap.style.display = 'none';
+        refineLegendSaveResult.style.display = 'none';
+        refineLegendResult.value = 'Interrogation de ' + modelSelect.value + '…';
+        refineLegendDiffOld.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+        refineLegendDiffNew.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
 
         var fd = new FormData();
         fd.append('legend_slug', slug);
@@ -3819,22 +3969,34 @@
         fetch(refineLegendGenUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                refineLegendBtn.disabled = false;
-                refineLegendBtn.textContent = '🔬 Raffiner avec l\'IA';
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineLegendBtn.textContent = '✨ Enrichir et ajouter';
+                refineLegendCorrectBtn.textContent = '✅ Valider et corriger';
                 if (data.success) {
                     refineLegendResult.value = data.reply;
+                    buildDiffView(refineLegendSourceText.value, data.reply, refineLegendDiffOld, refineLegendDiffNew);
                     refineLegendResultWrap.style.display = '';
                     if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    var synthBtn = document.getElementById('refine-legend-synth-btn');
+                    if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
                 } else {
-                    alert('❌ ' + data.error);
+                    refineLegendResult.value = '❌ ERREUR : ' + data.error;
+                    refineLegendDiffOld.innerHTML = '';
+                    refineLegendDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
                 }
             })
             .catch(function(err) {
-                refineLegendBtn.disabled = false;
-                refineLegendBtn.textContent = '🔬 Raffiner avec l\'IA';
-                alert('❌ Erreur réseau : ' + err.message);
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineLegendBtn.textContent = '✨ Enrichir et ajouter';
+                refineLegendCorrectBtn.textContent = '✅ Valider et corriger';
+                refineLegendResult.value = '❌ Erreur réseau : ' + err.message;
+                refineLegendDiffOld.innerHTML = '';
+                refineLegendDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
             });
-    });
+    }
+
+    refineLegendBtn.addEventListener('click', function() { triggerLegendRefine('enrich', refineLegendBtn); });
+    refineLegendCorrectBtn.addEventListener('click', function() { triggerLegendRefine('validate', refineLegendCorrectBtn); });
 
     /* ---- Copy legend result ---- */
     document.getElementById('refine-legend-copy-btn').addEventListener('click', function() {

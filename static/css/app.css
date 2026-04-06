@@ -7311,3 +7311,124 @@ a.event-card.event-card-compact {
     .gal-modal-prev { left: 6px; }
     .gal-modal-next { right: 6px; }
 }
+
+/* ── Refinement action button variants ── */
+.opt-btn-primary { background: var(--accent); color: #fff; }
+.opt-btn-success { background: #16a34a; color: #fff; }
+.opt-btn-warning { background: #d97706; color: #fff; }
+.opt-btn-secondary { background: #6366f1; color: #fff; }
+
+/* ── Refinement diff view ── */
+.refine-diff-container {
+    display: flex;
+    gap: 1rem;
+}
+.refine-diff-col {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.refine-diff-header {
+    padding: .5rem .75rem;
+    font-size: .82rem;
+    font-weight: 700;
+    text-align: center;
+}
+.refine-diff-header-old {
+    background: #fef2f2;
+    color: #991b1b;
+    border-bottom: 1px solid #fca5a5;
+}
+.refine-diff-header-new {
+    background: #ecfdf5;
+    color: #065f46;
+    border-bottom: 1px solid #a7f3d0;
+}
+.dark .refine-diff-header-old {
+    background: rgba(239,68,68,.12);
+    color: #fca5a5;
+    border-color: rgba(239,68,68,.25);
+}
+.dark .refine-diff-header-new {
+    background: rgba(16,185,129,.12);
+    color: #6ee7b7;
+    border-color: rgba(16,185,129,.25);
+}
+.refine-diff-body {
+    padding: .5rem .75rem;
+    font-family: monospace;
+    font-size: .78rem;
+    line-height: 1.7;
+    max-height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.refine-diff-line-removed {
+    background: #fee2e2;
+    color: #991b1b;
+    text-decoration: line-through;
+    display: block;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin: 1px 0;
+}
+.refine-diff-line-added {
+    background: #dcfce7;
+    color: #166534;
+    display: block;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin: 1px 0;
+}
+.refine-diff-line-modified {
+    display: block;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin: 1px 0;
+    background: #fefce8;
+    color: var(--ink);
+}
+.refine-diff-line-same {
+    display: block;
+    color: var(--muted);
+    padding: 1px 4px;
+}
+mark.diff-del {
+    background: #fca5a5;
+    color: #7f1d1d;
+    text-decoration: line-through;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+mark.diff-add {
+    background: #86efac;
+    color: #14532d;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+.dark .refine-diff-line-removed {
+    background: rgba(239,68,68,.18);
+    color: #fca5a5;
+}
+.dark .refine-diff-line-added {
+    background: rgba(16,185,129,.18);
+    color: #6ee7b7;
+}
+.dark .refine-diff-line-modified {
+    background: rgba(234,179,8,.12);
+}
+.dark mark.diff-del {
+    background: rgba(239,68,68,.35);
+    color: #fca5a5;
+}
+.dark mark.diff-add {
+    background: rgba(16,185,129,.35);
+    color: #6ee7b7;
+}
+
+@media (max-width: 768px) {
+    .refine-diff-container { flex-direction: column; }
+}
