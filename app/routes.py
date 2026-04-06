@@ -2428,14 +2428,8 @@ _BACKUP_TABLES: list[dict] = [
      "conflict": "(setting_key)", "group": "shared"},
 ]
 
-# Export scope definitions
+# Export scope definitions (delta only — includes BD + photos)
 _EXPORT_SCOPES = {
-    "all":       {"label": "Tout", "groups": {"shared", "vrp", "event", "person", "monument", "legend"}},
-    "vrp":       {"label": "Villes / Régions / Pays", "groups": {"shared", "vrp"}},
-    "event":     {"label": "Événements", "groups": {"shared", "event"}},
-    "person":    {"label": "Personnages", "groups": {"shared", "person"}},
-    "monument":  {"label": "Monuments", "groups": {"shared", "monument"}},
-    "legend":    {"label": "Légendes", "groups": {"shared", "legend"}},
     "delta_all": {"label": "Derniers ajouts — Tout", "groups": {"shared", "vrp", "event", "person", "monument", "legend"}, "delta": True},
     "delta_vrp": {"label": "Derniers ajouts — V/R/P", "groups": {"shared", "vrp"}, "delta": True},
     "delta_event": {"label": "Derniers ajouts — Événements", "groups": {"shared", "event"}, "delta": True},
@@ -2508,6 +2502,51 @@ def _serialize_value(value: object) -> object:
         import base64
         return {"__bytes__": base64.b64encode(value).decode()}
     return str(value)
+
+
+@web.route("/sql-lab/backup/delta-counts")
+@editor_required
+def sql_lab_backup_delta_counts() -> Response:
+    """Return counts of new rows per entity group since last export."""
+    from .db import get_db
+    from .services.app_state import load_json_setting
+
+    conn = get_db()
+    export_state: dict = load_json_setting(
+        _EXPORT_STATE_KEY, {}, fallback_path=_EXPORT_STATE_FILE,
+    )
+
+    # Count new rows per group
+    group_counts: dict[str, int] = {}
+    for tdef in _BACKUP_TABLES:
+        table = tdef["name"]
+        pk = tdef["pk"]
+        group = tdef.get("group", "shared")
+        prev_max = export_state.get(table, {}).get("max_pk", 0)
+        if not isinstance(prev_max, (int, float)):
+            prev_max = 0
+        try:
+            if prev_max > 0:
+                row = conn.execute(
+                    f"SELECT COUNT(*) AS cnt FROM {table} WHERE {pk} > ?",
+                    (prev_max,),
+                ).fetchone()
+            else:
+                row = conn.execute(f"SELECT COUNT(*) AS cnt FROM {table}").fetchone()
+            cnt = row["cnt"] if row else 0
+        except Exception:
+            cnt = 0
+        group_counts[group] = group_counts.get(group, 0) + cnt
+
+    # Build per-scope totals
+    scope_counts: dict[str, int] = {}
+    for scope_key, scope_def in _EXPORT_SCOPES.items():
+        if not scope_def.get("delta"):
+            continue
+        total = sum(group_counts.get(g, 0) for g in scope_def["groups"])
+        scope_counts[scope_key] = total
+
+    return jsonify(scope_counts)
 
 
 @web.route("/sql-lab/backup/export")
@@ -2735,7 +2774,10 @@ def sql_lab_backup_import() -> Response:
 @web.route("/sql-lab/backup/import-stream", methods=["POST"])
 @editor_required
 def sql_lab_backup_import_stream() -> Response:
-    """Streaming import: sends SSE events so the frontend shows live progress."""
+    """Streaming import: sends SSE events so the frontend shows live progress.
+
+    Accepts both JSON (BD-only) and ZIP (BD + photos, from delta exports).
+    """
     import json as _json
 
     uploaded = request.files.get("backup_file")
@@ -2744,9 +2786,38 @@ def sql_lab_backup_import_stream() -> Response:
             yield 'data: ' + _json.dumps({"type": "error", "message": "Aucun fichier sélectionné."}) + '\n\n'
         return Response(_err(), mimetype="text/event-stream")
 
+    raw_bytes = uploaded.read()
+    filename = uploaded.filename or ""
+    is_zip = filename.lower().endswith(".zip") or raw_bytes[:4] == b"PK\x03\x04"
+
+    if is_zip:
+        # --- ZIP import (BD + photos) — delegate to full_backup.import_full_backup ---
+        db_url = current_app.config.get("DATABASE_URL", "")
+
+        def generate_zip():
+            from .db import _connect_postgres
+            from .services.full_backup import import_full_backup
+
+            conn = _connect_postgres(db_url)
+            try:
+                for evt in import_full_backup(conn, raw_bytes, _BACKUP_TABLES, _reset_all_sequences):
+                    yield 'data: ' + _json.dumps(evt, default=str) + '\n\n'
+                # Reload delta counts after import
+                try:
+                    log_action("import", "backup", None,
+                               f"Backup ZIP importé: {filename}")
+                except Exception:
+                    pass
+            except Exception as exc:
+                yield 'data: ' + _json.dumps({"type": "error", "message": str(exc)}) + '\n\n'
+            finally:
+                conn.close()
+
+        return Response(generate_zip(), mimetype="text/event-stream")
+
+    # --- JSON import (BD-only, legacy format) ---
     try:
-        raw = uploaded.read().decode("utf-8")
-        backup = _json.loads(raw)
+        backup = _json.loads(raw_bytes.decode("utf-8"))
     except Exception as exc:
         def _err2():
             yield 'data: ' + _json.dumps({"type": "error", "message": f"Fichier JSON invalide: {exc}"}) + '\n\n'
@@ -2906,6 +2977,53 @@ def backup_export_full() -> Response:
         conn = _connect_postgres(db_url)
         try:
             yield from export_full_backup_streaming(conn, _BACKUP_TABLES, scope_groups)
+        finally:
+            conn.close()
+
+    return Response(
+        generate(),
+        mimetype="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@web.route("/backup/export-delta")
+@editor_required
+def backup_export_delta() -> Response:
+    """Export delta (BD + photos) as a ZIP since the last export."""
+    from .db import _connect_postgres
+    from .services.app_state import load_json_setting, save_json_setting
+    from .services.full_backup import export_delta_backup_streaming
+
+    scope_key = request.args.get("scope", "delta_all")
+    scope = _EXPORT_SCOPES.get(scope_key)
+    if scope is None or not scope.get("delta"):
+        scope_key = "delta_all"
+        scope = _EXPORT_SCOPES["delta_all"]
+
+    db_url = current_app.config.get("DATABASE_URL", "")
+    export_state: dict = load_json_setting(
+        _EXPORT_STATE_KEY, {}, fallback_path=_EXPORT_STATE_FILE,
+    )
+
+    scope_suffix = scope_key.replace("_", "-")
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    filename = f"projetcity-{scope_suffix}-{timestamp}.zip"
+
+    def generate():
+        conn = _connect_postgres(db_url)
+        try:
+            yield from export_delta_backup_streaming(
+                conn, _BACKUP_TABLES, scope["groups"], export_state,
+                scope_key=scope_key, scope_label=scope["label"],
+            )
+            # Save the updated export state so next delta starts from here
+            new_state = getattr(export_delta_backup_streaming, "_last_new_state", None)
+            if new_state:
+                save_json_setting(
+                    _EXPORT_STATE_KEY, new_state,
+                    fallback_path=_EXPORT_STATE_FILE,
+                )
         finally:
             conn.close()
 

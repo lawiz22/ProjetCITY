@@ -114,6 +114,174 @@ def export_full_backup_streaming(conn: Any, backup_tables: list[dict], scope_gro
         yield chunk
 
 
+# Map backup group → list of entity types whose photos belong to that group
+_GROUP_TO_PHOTO_ENTITIES: dict[str, list[str]] = {
+    "vrp":      ["city", "country", "region"],
+    "event":    ["event"],
+    "person":   ["person"],
+    "monument": ["monument"],
+    "legend":   ["legend"],
+}
+
+
+def _collect_delta_photo_files(
+    conn: Any, allowed_groups: set[str], export_state: dict,
+) -> list[tuple[str, str, str]]:
+    """Return (subdir, slug, filename) for photos added since last export.
+
+    Only includes files that exist on disk AND whose photo DB row is new
+    (pk > previous max_pk for that photo table).
+    """
+    results: list[tuple[str, str, str]] = []
+    for group, etypes in _GROUP_TO_PHOTO_ENTITIES.items():
+        if group not in allowed_groups:
+            continue
+        for etype in etypes:
+            cfg = _PHOTO_ENTITIES.get(etype)
+            if cfg is None:
+                continue
+            photo_tbl, fk_col, slug_col, entity_tbl, subdir = cfg
+            # Determine the PK column for the photo table
+            pk_col = {
+                "dim_city_photo": "photo_id",
+                "dim_event_photo": "event_photo_id",
+                "dim_person_photo": "person_photo_id",
+                "dim_monument_photo": "monument_photo_id",
+                "dim_legend_photo": "legend_photo_id",
+                "dim_country_photo": "photo_id",
+                "dim_region_photo": "photo_id",
+            }.get(photo_tbl, "photo_id")
+            prev_max = export_state.get(photo_tbl, {}).get("max_pk", 0)
+            if not isinstance(prev_max, (int, float)):
+                prev_max = 0
+            try:
+                if prev_max > 0:
+                    rows = conn.execute(
+                        f"SELECT e.{slug_col} AS slug, p.filename "
+                        f"FROM {photo_tbl} p "
+                        f"JOIN {entity_tbl} e ON e.{fk_col} = p.{fk_col} "
+                        f"WHERE p.{pk_col} > ? ORDER BY p.{pk_col}",
+                        (prev_max,),
+                    ).fetchall()
+                else:
+                    rows = conn.execute(
+                        f"SELECT e.{slug_col} AS slug, p.filename "
+                        f"FROM {photo_tbl} p "
+                        f"JOIN {entity_tbl} e ON e.{fk_col} = p.{fk_col} "
+                        f"ORDER BY p.{pk_col}",
+                    ).fetchall()
+                for r in rows:
+                    slug = r["slug"] if hasattr(r, "__getitem__") and isinstance(r["slug"], str) else r[0]
+                    fname = r["filename"] if hasattr(r, "__getitem__") and isinstance(r["filename"], str) else r[1]
+                    filepath = IMAGES_ROOT / subdir / slug / fname
+                    if filepath.is_file():
+                        results.append((subdir, slug, fname))
+            except Exception:
+                pass
+    return results
+
+
+def export_delta_backup_streaming(
+    conn: Any,
+    backup_tables: list[dict],
+    scope_groups: set[str],
+    export_state: dict,
+    scope_key: str = "delta_all",
+    scope_label: str = "Derniers ajouts — Tout",
+) -> Generator[bytes, None, None]:
+    """Stream a ZIP containing delta db.json + delta photos.
+
+    Only includes DB rows and photos added since the last export
+    (determined by export_state).
+    Yields raw bytes for a streaming HTTP response.
+    """
+    buf = io.BytesIO()
+    new_state: dict = dict(export_state)  # carry forward previous state
+    total_rows = 0
+
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        # 1. Build db.json with only delta rows
+        db_data: dict[str, Any] = {
+            "_meta": {
+                "exported_at": datetime.utcnow().isoformat(),
+                "backend": "postgresql",
+                "scope": scope_key,
+                "scope_label": scope_label,
+                "is_delta": True,
+                "version": 2,
+                "includes_photos": True,
+            },
+            "tables": {},
+        }
+
+        for tdef in backup_tables:
+            tbl = tdef["name"]
+            group = tdef.get("group", "shared")
+            pk = tdef["pk"]
+            if group not in scope_groups:
+                continue
+
+            prev_max = export_state.get(tbl, {}).get("max_pk", 0)
+            if not isinstance(prev_max, (int, float)):
+                prev_max = 0
+            can_delta = prev_max > 0
+            try:
+                if can_delta:
+                    rows = conn.execute(
+                        f"SELECT * FROM {tbl} WHERE {pk} > ? ORDER BY {pk}",
+                        (prev_max,),
+                    ).fetchall()
+                else:
+                    rows = conn.execute(
+                        f"SELECT * FROM {tbl} ORDER BY {pk}",
+                    ).fetchall()
+            except Exception:
+                rows = []
+
+            serialized = [
+                {col: _serialize_value(val) for col, val in dict(r).items()}
+                for r in rows
+            ]
+            db_data["tables"][tbl] = serialized
+            total_rows += len(serialized)
+
+            # Update state with max pk from the FULL table (not just delta)
+            try:
+                full_row = conn.execute(
+                    f"SELECT MAX({pk}) AS mx FROM {tbl}"
+                ).fetchone()
+                full_max = full_row["mx"] if full_row and full_row["mx"] is not None else 0
+                current_max = full_max if isinstance(full_max, (int, float)) else 0
+            except Exception:
+                current_max = 0
+            new_state[tbl] = {"max_pk": current_max, "count": len(serialized)}
+
+        db_data["_meta"]["total_rows"] = total_rows
+        zf.writestr("db.json", json.dumps(db_data, ensure_ascii=False, indent=1))
+
+        # 2. Add delta photos
+        photo_files = _collect_delta_photo_files(conn, scope_groups, export_state)
+        for subdir, slug, fname in photo_files:
+            file_path = IMAGES_ROOT / subdir / slug / fname
+            arcname = f"photos/{subdir}/{slug}/{fname}"
+            zf.write(str(file_path), arcname)
+
+        db_data["_meta"]["photo_count"] = len(photo_files)
+
+    buf.seek(0)
+    while True:
+        chunk = buf.read(65536)
+        if not chunk:
+            break
+        yield chunk
+
+    # Return the new state via a generator attribute (caller reads it)
+    # We use a closure trick: attach to the generator itself isn't possible,
+    # so the caller will receive the new_state via a separate mechanism.
+    # We store it on a module-level variable that the caller reads immediately.
+    export_delta_backup_streaming._last_new_state = new_state  # type: ignore[attr-defined]
+
+
 def export_entity_photos_zip(conn: Any, entity_type: str) -> io.BytesIO | None:
     """Export ALL photos for a given entity type in one ZIP.
 

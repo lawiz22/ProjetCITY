@@ -29,32 +29,27 @@
             </p>
 
             <div class="backup-section" style="margin-top:1rem; padding:1rem; border:1px solid var(--border,#ddd); border-radius:8px;">
-                <h3 style="margin:0 0 .5rem">💾 Backup / Restore BD</h3>
+                <h3 style="margin:0 0 .5rem">🆕 Export derniers ajouts (BD + Photos)</h3>
                 <div class="button-row" style="gap:.5rem; flex-wrap:wrap; align-items:center;">
                     <select id="export-scope" style="padding:.35rem .5rem; border-radius:6px; border:1px solid var(--border,#ccc); font-size:.9em;">
-                        <option value="all">📦 Tout</option>
-                        <option value="vrp">🏙️ Villes / Régions / Pays</option>
-                        <option value="event">📅 Événements</option>
-                        <option value="person">🧑 Personnages</option>
-                        <option value="monument">🏛️ Monuments</option>
-                        <option value="legend">📜 Légendes</option>
-                        <option value="delta_all">🆕 Derniers ajouts — Tout</option>
-                        <option value="delta_vrp">🆕 Derniers ajouts — V/R/P</option>
-                        <option value="delta_event">🆕 Derniers ajouts — Événements</option>
-                        <option value="delta_person">🆕 Derniers ajouts — Personnages</option>
-                        <option value="delta_monument">🆕 Derniers ajouts — Monuments</option>
-                        <option value="delta_legend">🆕 Derniers ajouts — Légendes</option>
+                        <option value="delta_all" selected>📦 Tout</option>
+                        <option value="delta_vrp">🏙️ Villes / Régions / Pays</option>
+                        <option value="delta_event">📅 Événements</option>
+                        <option value="delta_person">🧑 Personnages</option>
+                        <option value="delta_monument">🏛️ Monuments</option>
+                        <option value="delta_legend">📜 Légendes</option>
                     </select>
-                    <a id="export-link" href="{{ url_for('web.sql_lab_backup_export') }}?scope=all" class="secondary-button" style="text-decoration:none; display:inline-flex; align-items:center; gap:.3rem;">
+                    <a id="export-link" href="{{ url_for('web.backup_export_delta') }}?scope=delta_all" class="secondary-button" style="text-decoration:none; display:inline-flex; align-items:center; gap:.3rem;">
                         📥 Exporter
                     </a>
+                    <span id="delta-badge" style="display:none; background:var(--accent,#2563eb); color:#fff; font-size:.8em; font-weight:600; padding:.15rem .5rem; border-radius:10px; margin-left:.2rem;"></span>
                     <label class="secondary-button" id="import-backup-btn" style="cursor:pointer; display:inline-flex; align-items:center; gap:.3rem;">
                         📤 Importer backup
-                        <input type="file" id="import-backup-file" accept=".json" style="display:none;">
+                        <input type="file" id="import-backup-file" accept=".json,.zip" style="display:none;">
                     </label>
                 </div>
                 <p class="helper-text" style="margin-top:.4rem; font-size:.85em;">
-                    L'export télécharge en JSON selon le scope choisi. « Derniers ajouts » exporte seulement les nouvelles lignes depuis le dernier export. L'import insère uniquement les lignes manquantes.
+                    Exporte un ZIP contenant la BD + les photos ajoutées depuis le dernier export. Après l'export, le compteur se remet à 0. L'import accepte les ZIP (BD + photos) et les JSON (BD seulement).
                 </p>
             </div>
 
@@ -240,10 +235,59 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Export scope dropdown ---
     const scopeSelect = document.getElementById('export-scope');
     const exportLink = document.getElementById('export-link');
-    const baseExportUrl = '{{ url_for("web.sql_lab_backup_export") }}';
+    const deltaBadge = document.getElementById('delta-badge');
+    const baseExportUrl = '{{ url_for("web.backup_export_delta") }}';
+    const deltaCountsUrl = '{{ url_for("web.sql_lab_backup_delta_counts") }}';
+    let deltaCounts = {};
+
+    function updateDeltaBadge() {
+        const scope = scopeSelect.value;
+        const count = deltaCounts[scope];
+        if (count !== undefined && count > 0) {
+            deltaBadge.textContent = count + ' nouveau' + (count > 1 ? 'x' : '');
+            deltaBadge.style.display = 'inline';
+            deltaBadge.style.background = 'var(--accent,#2563eb)';
+        } else if (count === 0) {
+            deltaBadge.textContent = '0 nouveau';
+            deltaBadge.style.display = 'inline';
+            deltaBadge.style.background = 'var(--muted,#888)';
+        } else {
+            deltaBadge.style.display = 'none';
+        }
+    }
+
+    function updateDeltaOptions() {
+        for (const opt of scopeSelect.options) {
+            const base = opt.textContent.replace(/\s*\(\d+\)\s*$/, '');
+            const cnt = deltaCounts[opt.value];
+            if (cnt !== undefined) {
+                opt.textContent = base + ' (' + cnt + ')';
+            }
+        }
+    }
+
+    async function loadDeltaCounts() {
+        try {
+            const resp = await fetch(deltaCountsUrl);
+            if (resp.ok) {
+                deltaCounts = await resp.json();
+                updateDeltaOptions();
+                updateDeltaBadge();
+            }
+        } catch(e) {}
+    }
+
     scopeSelect.addEventListener('change', function() {
         exportLink.href = baseExportUrl + '?scope=' + encodeURIComponent(this.value);
+        updateDeltaBadge();
     });
+
+    // After clicking export, reload counts (they reset to 0 after delta export)
+    exportLink.addEventListener('click', function() {
+        setTimeout(loadDeltaCounts, 3000);
+    });
+
+    loadDeltaCounts();
 
     const fileInput = document.getElementById('import-backup-file');
     const modal = document.getElementById('import-modal');
@@ -307,14 +351,25 @@ document.addEventListener('DOMContentLoaded', function() {
                             else addLine('   ⏭️  0/' + evt.row_count + ' (déjà présent)', 'info');
                         }
                         else if (evt.type === 'table_skip') addLine('   ⬜ ' + evt.table + ' — vide', 'info');
+                        else if (evt.type === 'photos_start') addLine('\n📷 Import de ' + evt.count + ' photo(s)…', 'info');
+                        else if (evt.type === 'photo_progress') {
+                            if (evt.current % 10 === 0 || evt.current === evt.total)
+                                addLine('   📷 ' + evt.current + '/' + evt.total + ' — ' + evt.file, 'info');
+                        }
+                        else if (evt.type === 'photos_done') addLine('   ✅ ' + evt.imported + ' photo(s) importée(s)', 'ok');
+                        else if (evt.type === 'photos_diag') addLine('   📁 IMAGES_ROOT: ' + evt.resolved_to + (evt.is_symlink ? ' (symlink)' : ''), 'info');
                         else if (evt.type === 'fk_start') addLine('\n🔗 Validation des clés étrangères…', 'info');
                         else if (evt.type === 'fk_ok') addLine('   ✅ ' + evt.relation, 'ok');
                         else if (evt.type === 'fk_issue') addLine('   ⚠️ ' + evt.detail, 'warn');
                         else if (evt.type === 'summary') {
                             addLine('\n' + evt.message, 'done');
-                            title.textContent = evt.inserted > 0
-                                ? '✅ Import terminé — ' + evt.inserted + ' ligne(s)'
+                            const parts = [];
+                            if (evt.inserted > 0) parts.push(evt.inserted + ' ligne(s) BD');
+                            if (evt.photos > 0) parts.push(evt.photos + ' photo(s)');
+                            title.textContent = parts.length > 0
+                                ? '✅ Import terminé — ' + parts.join(' + ')
                                 : '✅ BD déjà à jour';
+                            loadDeltaCounts();
                         }
                         else if (evt.type === 'error') { addLine('❌ ' + evt.message, 'err'); title.textContent = '❌ Erreur'; }
                     } catch(e) {}
