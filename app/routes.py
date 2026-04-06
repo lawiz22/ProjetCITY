@@ -290,6 +290,176 @@ def dashboard_pdf() -> Response:
     return response
 
 
+# ---------------------------------------------------------------------------
+#  Recent additions / Derniers ajouts
+# ---------------------------------------------------------------------------
+
+_RECENT_ENTITY_TYPES = {
+    "city": {"emoji": "🏙️", "label": "Ville", "color": "#2563eb"},
+    "event": {"emoji": "📅", "label": "Événement", "color": "#e67e22"},
+    "person": {"emoji": "🧑", "label": "Personnage", "color": "#8e44ad"},
+    "monument": {"emoji": "🏛️", "label": "Monument", "color": "#27ae60"},
+    "legend": {"emoji": "📜", "label": "Légende", "color": "#c0392b"},
+    "country": {"emoji": "🌍", "label": "Pays", "color": "#16a085"},
+    "region": {"emoji": "🗺️", "label": "Région", "color": "#2980b9"},
+}
+
+
+@web.route("/recent")
+def recent_additions() -> str:
+    from .db import get_db
+
+    conn = get_db()
+    category = request.args.get("category", "").strip()
+
+    # Build UNION query across all entity types
+    parts: list[str] = []
+    params: list[object] = []
+
+    entity_queries = [
+        ("city", """
+            SELECT 'city' AS entity_type, c.city_slug AS entity_slug,
+                   c.city_name AS entity_name, c.country AS location_label,
+                   NULL AS description,
+                   c.created_at, c.updated_at,
+                   COALESCE(au.display_name, au.username) AS created_by_name,
+                   (SELECT p.filename FROM dim_city_photo p WHERE p.city_id = c.city_id AND p.is_primary = TRUE LIMIT 1) AS photo_filename
+            FROM dim_city c
+            LEFT JOIN app_user au ON au.user_id = c.created_by_user_id
+        """),
+        ("event", """
+            SELECT 'event' AS entity_type, e.event_slug AS entity_slug,
+                   e.event_name AS entity_name,
+                   CAST(e.event_year AS TEXT) AS location_label,
+                   e.description,
+                   e.created_at, e.updated_at,
+                   COALESCE(au.display_name, au.username) AS created_by_name,
+                   (SELECT p.filename FROM dim_event_photo p WHERE p.event_id = e.event_id AND p.is_primary = TRUE LIMIT 1) AS photo_filename
+            FROM dim_event e
+            LEFT JOIN app_user au ON au.user_id = e.created_by_user_id
+        """),
+        ("person", """
+            SELECT 'person' AS entity_type, p.person_slug AS entity_slug,
+                   p.person_name AS entity_name,
+                   p.person_category AS location_label,
+                   p.summary AS description,
+                   p.created_at, p.updated_at,
+                   COALESCE(au.display_name, au.username) AS created_by_name,
+                   (SELECT ph.filename FROM dim_person_photo ph WHERE ph.person_id = p.person_id AND ph.is_primary = TRUE LIMIT 1) AS photo_filename
+            FROM dim_person p
+            LEFT JOIN app_user au ON au.user_id = p.created_by_user_id
+        """),
+        ("monument", """
+            SELECT 'monument' AS entity_type, m.monument_slug AS entity_slug,
+                   m.monument_name AS entity_name,
+                   m.monument_category AS location_label,
+                   m.summary AS description,
+                   m.created_at, m.updated_at,
+                   COALESCE(au.display_name, au.username) AS created_by_name,
+                   (SELECT ph.filename FROM dim_monument_photo ph WHERE ph.monument_id = m.monument_id AND ph.is_primary = TRUE LIMIT 1) AS photo_filename
+            FROM dim_monument m
+            LEFT JOIN app_user au ON au.user_id = m.created_by_user_id
+        """),
+        ("legend", """
+            SELECT 'legend' AS entity_type, l.legend_slug AS entity_slug,
+                   l.legend_name AS entity_name,
+                   l.legend_category AS location_label,
+                   l.summary AS description,
+                   l.created_at, l.updated_at,
+                   COALESCE(au.display_name, au.username) AS created_by_name,
+                   (SELECT ph.filename FROM dim_legend_photo ph WHERE ph.legend_id = l.legend_id AND ph.is_primary = TRUE LIMIT 1) AS photo_filename
+            FROM dim_legend l
+            LEFT JOIN app_user au ON au.user_id = l.created_by_user_id
+        """),
+        ("country", """
+            SELECT 'country' AS entity_type, co.country_slug AS entity_slug,
+                   co.country_name AS entity_name,
+                   NULL AS location_label,
+                   NULL AS description,
+                   co.created_at, co.updated_at,
+                   COALESCE(au.display_name, au.username) AS created_by_name,
+                   (SELECT ph.filename FROM dim_country_photo ph WHERE ph.country_id = co.country_id AND ph.is_primary = TRUE LIMIT 1) AS photo_filename
+            FROM dim_country co
+            LEFT JOIN app_user au ON au.user_id = co.created_by_user_id
+        """),
+        ("region", """
+            SELECT 'region' AS entity_type, r.region_slug AS entity_slug,
+                   r.region_name AS entity_name,
+                   r.country_name AS location_label,
+                   NULL AS description,
+                   r.created_at, r.updated_at,
+                   COALESCE(au.display_name, au.username) AS created_by_name,
+                   (SELECT ph.filename FROM dim_region_photo ph WHERE ph.region_id = r.region_id AND ph.is_primary = TRUE LIMIT 1) AS photo_filename
+            FROM dim_region r
+            LEFT JOIN app_user au ON au.user_id = r.created_by_user_id
+        """),
+    ]
+
+    for etype, sql in entity_queries:
+        if category and category != etype:
+            continue
+        parts.append(f"({sql})")
+
+    if not parts:
+        parts = [f"({sql})" for _, sql in entity_queries]
+
+    union_sql = " UNION ALL ".join(parts) + " ORDER BY created_at DESC NULLS LAST LIMIT 500"
+
+    rows = conn.execute(union_sql, params).fetchall()
+
+    # Photo subdirectory mapping
+    _PHOTO_SUBDIRS = {
+        "city": "cities", "event": "events", "person": "persons",
+        "monument": "monuments", "legend": "legends",
+        "country": "countries", "region": "regions",
+    }
+    _DETAIL_ROUTES = {
+        "city": "web.city_detail", "event": "web.event_detail",
+        "person": "web.person_detail", "monument": "web.monument_detail",
+        "legend": "web.legend_detail", "country": "web.country_detail",
+        "region": "web.region_detail",
+    }
+    _SLUG_PARAMS = {
+        "city": "city_slug", "event": "event_slug",
+        "person": "person_slug", "monument": "monument_slug",
+        "legend": "legend_slug", "country": "country_slug",
+        "region": "region_slug",
+    }
+
+    items = []
+    for r in rows:
+        d = dict(r)
+        et = d["entity_type"]
+        slug = d["entity_slug"]
+        fname = d.get("photo_filename")
+        d["photo_path"] = f"images/{_PHOTO_SUBDIRS[et]}/{slug}/{fname}" if fname else None
+        d["detail_url"] = url_for(_DETAIL_ROUTES[et], **{_SLUG_PARAMS[et]: slug})
+        d["type_info"] = _RECENT_ENTITY_TYPES.get(et, {})
+        items.append(d)
+
+    # Count per category for filter badges
+    count_row = conn.execute(
+        "SELECT "
+        "(SELECT COUNT(*) FROM dim_city) AS city_count, "
+        "(SELECT COUNT(*) FROM dim_event) AS event_count, "
+        "(SELECT COUNT(*) FROM dim_person) AS person_count, "
+        "(SELECT COUNT(*) FROM dim_monument) AS monument_count, "
+        "(SELECT COUNT(*) FROM dim_legend) AS legend_count, "
+        "(SELECT COUNT(*) FROM dim_country) AS country_count, "
+        "(SELECT COUNT(*) FROM dim_region) AS region_count"
+    ).fetchone()
+    counts = dict(count_row) if count_row else {}
+
+    return render_template(
+        "web/recent.html",
+        page_title="Derniers ajouts",
+        items=items,
+        category=category,
+        entity_types=_RECENT_ENTITY_TYPES,
+        counts=counts,
+    )
+
+
 @web.route("/cities")
 def city_directory() -> str:
     service = AnalyticsService()

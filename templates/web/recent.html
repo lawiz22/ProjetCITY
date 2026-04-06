@@ -1,0 +1,162 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h2>🕒 Derniers ajouts</h2>
+            <span id="recent-count">{{ items|length }} élément{% if items|length != 1 %}s{% endif %}</span>
+        </div>
+    </div>
+
+    <!-- Category filter pills -->
+    <div style="display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:1rem;">
+        <a href="{{ url_for('web.recent_additions') }}"
+           class="recent-pill{% if not category %} recent-pill-active{% endif %}">
+            Tout <span class="recent-pill-count">{{ counts.values()|sum }}</span>
+        </a>
+        {% for etype, info in entity_types.items() %}
+        <a href="{{ url_for('web.recent_additions', category=etype) }}"
+           class="recent-pill{% if category == etype %} recent-pill-active{% endif %}"
+           style="--pill-color: {{ info.color }};">
+            {{ info.emoji }} {{ info.label }}s
+            <span class="recent-pill-count">{{ counts.get(etype ~ '_count', 0) }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Items list -->
+    <div class="recent-list">
+        {% for item in items %}
+        <a class="recent-item" href="{{ item.detail_url }}">
+            <div class="recent-item-photo">
+                {% if item.photo_path %}
+                <img src="{{ url_for('static', filename=item.photo_path|thumb_url) }}" alt="" loading="lazy">
+                {% else %}
+                <div class="recent-item-photo-empty">{{ item.type_info.emoji }}</div>
+                {% endif %}
+            </div>
+            <div class="recent-item-body">
+                <div class="recent-item-header">
+                    <span class="recent-type-badge" style="background: {{ item.type_info.color }};">
+                        {{ item.type_info.emoji }} {{ item.type_info.label }}
+                    </span>
+                    {% if item.location_label %}
+                    <span class="recent-item-location">{{ item.location_label }}</span>
+                    {% endif %}
+                </div>
+                <h3 class="recent-item-title">{{ item.entity_name }}</h3>
+                {% if item.description %}
+                <p class="recent-item-desc">{{ item.description[:200] }}{% if item.description|length > 200 %}…{% endif %}</p>
+                {% endif %}
+                <div class="recent-item-meta">
+                    {% if item.created_by_name %}
+                    <span class="recent-item-author">👤 {{ item.created_by_name }}</span>
+                    {% endif %}
+                    {% if item.created_at %}
+                    <span class="recent-item-date">{{ (item.created_at|string)[:10] }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if not items %}
+    <div class="empty-state" style="padding:2rem; text-align:center;">
+        <p>Aucun élément trouvé.</p>
+    </div>
+    {% endif %}
+</section>
+
+<style>
+/* --- Filter pills --- */
+.recent-pill {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .3rem .7rem; border-radius: 20px;
+    font-size: .85em; font-weight: 500;
+    background: var(--bg-secondary, #f3f4f6); color: var(--text, #333);
+    text-decoration: none; border: 1px solid var(--border, #ddd);
+    transition: all .15s;
+}
+.recent-pill:hover { border-color: var(--accent, #2563eb); }
+.recent-pill-active {
+    background: var(--pill-color, var(--accent, #2563eb));
+    color: #fff; border-color: transparent;
+}
+.recent-pill-count {
+    background: rgba(255,255,255,.25); border-radius: 10px;
+    padding: 0 .4rem; font-size: .8em; min-width: 1.4em; text-align: center;
+}
+.recent-pill:not(.recent-pill-active) .recent-pill-count {
+    background: var(--bg-tertiary, #e5e7eb);
+}
+
+/* --- Items list --- */
+.recent-list { display: flex; flex-direction: column; gap: .5rem; }
+.recent-item {
+    display: flex; gap: .8rem; padding: .7rem;
+    border: 1px solid var(--border, #e5e7eb); border-radius: 10px;
+    text-decoration: none; color: inherit;
+    transition: border-color .15s, box-shadow .15s;
+    align-items: flex-start;
+}
+.recent-item:hover {
+    border-color: var(--accent, #2563eb);
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+/* Photo */
+.recent-item-photo {
+    width: 64px; height: 64px; min-width: 64px;
+    border-radius: 8px; overflow: hidden;
+    background: var(--bg-secondary, #f3f4f6);
+}
+.recent-item-photo img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.recent-item-photo-empty {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Body */
+.recent-item-body { flex: 1; min-width: 0; }
+.recent-item-header {
+    display: flex; align-items: center; gap: .4rem;
+    flex-wrap: wrap; margin-bottom: .15rem;
+}
+.recent-type-badge {
+    display: inline-flex; align-items: center; gap: .2rem;
+    padding: .1rem .5rem; border-radius: 12px;
+    font-size: .75em; font-weight: 600; color: #fff;
+    white-space: nowrap;
+}
+.recent-item-location {
+    font-size: .8em; color: var(--text-muted, #888);
+}
+.recent-item-title {
+    margin: 0; font-size: 1rem; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.recent-item-desc {
+    margin: .15rem 0 0; font-size: .85em; line-height: 1.3;
+    color: var(--text-muted, #666);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.recent-item-meta {
+    display: flex; gap: .6rem; margin-top: .25rem;
+    font-size: .8em; color: var(--text-muted, #888);
+}
+.recent-item-author { font-weight: 500; }
+
+/* Responsive */
+@media (max-width: 600px) {
+    .recent-item-photo { width: 48px; height: 48px; min-width: 48px; }
+    .recent-item-title { font-size: .9rem; }
+}
+</style>
+
+{% endblock %}
