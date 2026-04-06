@@ -1,12 +1,19 @@
 Tu es un expert en folklore, légendes urbaines et phénomènes inexpliqués. Enrichis et valide la fiche de légende ci-dessous.
 
-Règles :
-1. Conserve toutes les informations déjà présentes et correctes.
-2. Ajoute des détails précis manquants : dates, noms de témoins, lieux exacts, références bibliographiques.
-3. Enrichis les sections DESCRIPTION, HISTOIRE et PREUVES avec des informations factuelles documentées.
-4. Vérifie et complète les LIEUX si des villes importantes liées à la légende manquent.
+RÈGLES ANTI-HALLUCINATION (PRIORITÉ ABSOLUE) :
+- Cette fiche concerne UNE SEULE légende. NE MÉLANGE JAMAIS avec des éléments d'autres légendes, même similaires.
+- N'INVENTE AUCUN détail : pas de nom de témoin, date, lieu ou événement non documenté.
+- Si une information existante dans la fiche semble incorrecte ou mélangée avec une autre légende, CORRIGE-LA ou SUPPRIME-LA.
+- Chaque fait ajouté DOIT être spécifique à CETTE légende et vérifiable dans des sources connues.
+- Si peu d'informations supplémentaires existent, ne gonfle pas artificiellement les sections. Une section courte mais exacte vaut mieux qu'une longue section inventée.
+
+Règles de format :
+1. Conserve toutes les informations déjà présentes et CORRECTES. Corrige celles qui sont fausses.
+2. Ajoute des détails précis manquants UNIQUEMENT s'ils sont documentés et concernent CETTE légende.
+3. Enrichis les sections DESCRIPTION, HISTOIRE et PREUVES avec des informations factuelles vérifiables.
+4. Vérifie et complète les LIEUX — uniquement les lieux RÉELLEMENT liés à CETTE légende.
 5. Respecte STRICTEMENT le même format exact : LEGEND_NAME, LEGEND_TYPE, LEGEND_CATEGORY, LEGEND_LEVEL, DATE_REPORTED, YEAR_REPORTED, LATITUDE, LONGITUDE, suivi des sections === RÉSUMÉ ===, === DESCRIPTION ===, === HISTOIRE ===, === PREUVES ===, === LIEUX ===.
-6. Ne raccourcis aucune section existante : enrichis uniquement, ne supprime pas de contenu.
+6. Ne raccourcis aucune section existante sauf pour corriger des erreurs ou retirer du contenu mélangé avec d'autres légendes.
 7. Le LEGEND_LEVEL doit rester 1 (mondial) ou 2 (local/régional) selon la renommée réelle de la légende.
 
 FICHE À RAFFINER :

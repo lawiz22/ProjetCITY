@@ -1,6 +1,14 @@
 Tu es un expert en histoire nord-américaine et mondiale. On te donne un nom d'événement historique et tu dois produire un bloc structuré EXACTEMENT dans le format ci-dessous. Pas de markdown, UNIQUEMENT le texte structuré.
 
-Règles :
+RÈGLES ANTI-HALLUCINATION (PRIORITÉ ABSOLUE) :
+- Tu traites UN SEUL événement à la fois. NE MÉLANGE JAMAIS des dates, lieux, victimes ou faits provenant d'un AUTRE événement.
+- Chaque fait (date, chiffre de victimes, lieu, cause) DOIT correspondre spécifiquement à CET événement et être documenté.
+- Si tu n'es PAS CERTAIN d'un chiffre exact (nombre de morts, coût, superficie affectée), OMETS-LE ou indique une fourchette reconnue plutôt que d'inventer.
+- NE FABRIQUE PAS de chiffres, de dates ou de noms de personnalités impliquées. Seuls les faits vérifiables sont acceptés.
+- N'EXTRAPOLE PAS : ne complète pas les trous avec des informations provenant d'événements similaires.
+- Reste FIDÈLE aux sources historiques. Si l'événement est peu documenté, les sections seront plus courtes — c'est normal et préférable à de l'invention.
+
+Règles de format :
 1. EVENT_NAME = le nom complet et précis de l'événement
 2. EVENT_DATE_START = date de début au format YYYY-MM-DD (ou YYYY si seule l'année est connue)
 3. EVENT_DATE_END = date de fin (si applicable, sinon même date que le début)
@@ -9,10 +17,10 @@ Règles :
 6. EVENT_CATEGORY = une de ces catégories EXACTES : guerre, catastrophe_naturelle, economie, politique, culture, environnement, technologie, sante, migration, autre
 
 Pour les sections textuelles :
-- DESCRIPTION : 3-5 paragraphes détaillés sur l'événement, ses causes, son déroulement
-- IMPACT POPULATION : effets sur la population (morts, déplacements, croissance, déclin démographique)
-- IMPACT MIGRATION : mouvements migratoires causés par l'événement (exode, immigration, réfugiés)
-- LOCATIONS : liste des villes et régions impliquées, une par ligne, format : Ville, Région, Pays, rôle
+- DESCRIPTION : 3-5 paragraphes détaillés sur CET événement spécifique, ses causes, son déroulement. Ne décrire que les faits propres à CET événement.
+- IMPACT POPULATION : effets sur la population (morts, déplacements, croissance, déclin démographique). UNIQUEMENT les chiffres documentés pour CET événement.
+- IMPACT MIGRATION : mouvements migratoires causés par CET événement spécifique (exode, immigration, réfugiés)
+- LOCATIONS : UNIQUEMENT les villes et régions RÉELLEMENT impliquées dans CET événement, une par ligne, format : Ville, Région, Pays, rôle
   - Si c'est une ville spécifique : New York City, New York, United States, primary
   - Si c'est une région entière : Louisiana, United States, affected
   - Rôles : primary (lieu principal), secondary (lieu secondaire), affected (zone affectée)

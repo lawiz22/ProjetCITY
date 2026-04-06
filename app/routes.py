@@ -5587,12 +5587,16 @@ def ai_lab_suggest_event() -> Response:
     prompt = (
         f"{exclusion_block}"
         f"Suggère UN événement historique important {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
-        f"L'événement doit être réel, documenté, et significatif (guerre, catastrophe, révolution, découverte, traité, etc.).\n"
+        f"\nRÈGLES STRICTES :\n"
+        f"- L'événement DOIT être RÉEL et documenté dans des sources vérifiables (encyclopédies, archives).\n"
+        f"- N'INVENTE PAS d'événement. Ne combine PAS plusieurs événements distincts en un seul.\n"
+        f"- Le nom doit correspondre EXACTEMENT au nom historique connu de cet événement.\n"
+        f"- NE PAS mélanger des dates, lieux ou faits provenant d'événements différents.\n"
         f"Réponds UNIQUEMENT avec le nom court et clair de l'événement (en français ou en anglais selon l'usage courant).\n"
         f"Aucun autre texte, aucune explication."
     )
 
-    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.5)
     if result.get("success"):
         result["tokens_total"] = load_settings().get("tokens_used", 0)
     return jsonify(result)
@@ -6197,12 +6201,16 @@ def ai_lab_suggest_person() -> Response:
     prompt = (
         f"{exclusion_block}"
         f"Suggère UN personnage historique important {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
-        f"Le personnage doit être réel, documenté et historiquement significatif.\n"
+        f"\nRÈGLES STRICTES :\n"
+        f"- Le personnage DOIT être RÉEL et documenté dans des sources vérifiables (encyclopédies, biographies).\n"
+        f"- N'INVENTE PAS de personnage fictif ou composite.\n"
+        f"- Le nom doit correspondre EXACTEMENT au nom historique connu de cette personne.\n"
+        f"- NE PAS confondre des personnages homonymes ou mélanger des biographies distinctes.\n"
         f"Réponds UNIQUEMENT avec le nom complet du personnage (prénom + nom).\n"
         f"Aucun autre texte, aucune explication."
     )
 
-    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.5)
     if result.get("success"):
         result["tokens_total"] = load_settings().get("tokens_used", 0)
     return jsonify(result)
@@ -6778,12 +6786,16 @@ def ai_lab_suggest_monument() -> Response:
     prompt = (
         f"{exclusion_block}"
         f"Suggère UN monument ou bâtiment remarquable {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
-        f"Le monument doit être réel, documenté et architecturalement ou historiquement significatif.\n"
+        f"\nRÈGLES STRICTES :\n"
+        f"- Le monument DOIT être RÉEL et documenté dans des sources vérifiables.\n"
+        f"- N'INVENTE PAS de monument fictif. Ne combine PAS plusieurs monuments distincts.\n"
+        f"- Le nom doit correspondre EXACTEMENT au nom officiel ou couramment utilisé du monument.\n"
+        f"- NE PAS confondre des monuments homonymes situés dans des villes différentes.\n"
         f"Réponds UNIQUEMENT avec le nom complet du monument.\n"
         f"Aucun autre texte, aucune explication."
     )
 
-    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.5)
     if result.get("success"):
         result["tokens_total"] = load_settings().get("tokens_used", 0)
     return jsonify(result)
@@ -7082,21 +7094,25 @@ def ai_lab_suggest_legend() -> Response:
     no_result_note = ""
     if filter_city or filter_region:
         no_result_note = (
-            "\nSi aucune légende ou événement inexpliqué documenté n'est associé à ce lieu, "
+            "\nSi aucune légende ou événement inexpliqué RÉELLEMENT documenté n'est associé à ce lieu, "
             "réponds UNIQUEMENT : AUCUN_RESULTAT"
-            "\nNe fabrique pas de légende fictive.\n"
+            "\nNe fabrique PAS de légende fictive. Ne combine PAS plusieurs histoires différentes.\n"
         )
 
     prompt = (
         f"{exclusion_block}"
         f"Suggère UNE légende, un mythe, ou un événement inexpliqué {context_str} qui N'EST PAS déjà dans la liste ci-dessus.\n"
-        f"L'élément doit être documenté et avoir une certaine notoriété.\n"
+        f"\nRÈGLES STRICTES :\n"
+        f"- L'élément DOIT être RÉEL et documenté dans des sources vérifiables (livres, articles, archives).\n"
+        f"- N'INVENTE PAS de légende. Ne combine PAS des éléments de plusieurs histoires différentes.\n"
+        f"- Le nom doit correspondre EXACTEMENT au nom connu et référencé de cette légende.\n"
+        f"- NE PAS mélanger des créatures, lieux ou événements provenant de légendes distinctes.\n"
         f"{no_result_note}"
-        f"Réponds UNIQUEMENT avec le nom complet.\n"
+        f"Réponds UNIQUEMENT avec le nom complet de la légende.\n"
         f"Aucun autre texte, aucune explication."
     )
 
-    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.9)
+    result = generate_city(api_key, model, "", prompt, max_tokens=80, temperature=0.5)
     if result.get("success") and result.get("reply", "").strip().upper() == "AUCUN_RESULTAT":
         location_label = filter_city or filter_region or filter_country or "ce lieu"
         result["reply"] = ""

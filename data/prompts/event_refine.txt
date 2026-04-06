@@ -1,12 +1,19 @@
 Tu es un historien et vérificateur de faits. Enrichis et valide la fiche d'événement historique ci-dessous.
 
-Règles :
-1. Conserve toutes les informations déjà présentes et correctes.
-2. Ajoute des détails précis manquants : chiffres exacts, dates précises, noms de personnages clés, causes profondes et conséquences documentées.
+RÈGLES ANTI-HALLUCINATION (PRIORITÉ ABSOLUE) :
+- Cette fiche concerne UN SEUL événement. NE MÉLANGE JAMAIS avec des faits d'autres événements, même similaires ou contemporains.
+- N'INVENTE AUCUN détail : pas de chiffre de victimes, date, lieu ou cause non documenté.
+- Si une information existante dans la fiche semble incorrecte ou mélangée avec un autre événement, CORRIGE-LA ou SUPPRIME-LA.
+- Chaque fait ajouté DOIT être spécifique à CET événement et vérifiable dans des sources connues.
+- Si peu d'informations supplémentaires existent, ne gonfle pas artificiellement les sections. Une section courte mais exacte vaut mieux qu'une longue section inventée.
+
+Règles de format :
+1. Conserve toutes les informations déjà présentes et CORRECTES. Corrige celles qui sont fausses.
+2. Ajoute des détails précis manquants UNIQUEMENT s'ils sont documentés et concernent CET événement : chiffres exacts, dates précises, noms de personnages clés, causes profondes et conséquences documentées.
 3. Enrichis les sections DESCRIPTION, IMPACT POPULATION et IMPACT MIGRATION avec des informations factuelles vérifiables.
-4. Vérifie et complète les LOCATIONS si des lieux importants manquent.
+4. Vérifie et complète les LOCATIONS — uniquement les lieux RÉELLEMENT liés à CET événement.
 5. Respecte STRICTEMENT le même format exact : EVENT_NAME, EVENT_DATE_START, EVENT_DATE_END, EVENT_YEAR, EVENT_LEVEL, EVENT_CATEGORY, suivi des sections === DESCRIPTION ===, === IMPACT POPULATION ===, === IMPACT MIGRATION ===, === LOCATIONS ===.
-6. Ne raccourcis aucune section existante : enrichis uniquement, ne supprime pas de contenu.
+6. Ne raccourcis aucune section existante sauf pour corriger des erreurs ou retirer du contenu mélangé avec d'autres événements.
 7. L'EVENT_LEVEL doit rester 1 (mondial/continental) ou 2 (régional/national) selon l'ampleur réelle.
 
 FICHE À RAFFINER :
