@@ -36,7 +36,7 @@
     <div class="dir-pager" id="recent-pager-top">
         <div class="dir-pager-left">
             <span class="dir-pager-label">Par page:</span>
-            <select id="recent-per-page">
+            <select id="recent-per-page-select">
                 <option value="25">25</option>
                 <option value="50" selected>50</option>
                 <option value="100">100</option>
@@ -210,122 +210,46 @@
 </style>
 
 <script>
-(function() {
-    var list = document.getElementById('recent-list');
-    var countSpan = document.getElementById('recent-count');
-    var perPageSelect = document.getElementById('recent-per-page');
-    var searchInput = document.getElementById('recent-search');
-    if (!list || !perPageSelect) return;
-
-    var mirrors = document.querySelectorAll('.recent-per-page-mirror');
-    mirrors.forEach(function(m) {
-        m.value = perPageSelect.value;
-        m.addEventListener('change', function() {
-            perPageSelect.value = m.value;
-            currentPage = 1;
-            render();
-        });
+(function () {
+    var pager = initDirPager({
+        prefix: 'recent',
+        containerId: 'recent-list',
+        itemSelector: '.recent-item',
+        countElId: 'recent-count',
+        countSuffix: 'élément',
+        mirrorClass: 'recent-per-page-mirror',
+        scrollTarget: 'recent-list'
     });
 
-    var allItems = Array.prototype.slice.call(list.querySelectorAll('.recent-item'));
-    var filtered = allItems.slice();
-    var currentPage = 1;
+    /* ---- Search filter ---- */
+    var searchInput = document.getElementById('recent-search');
+    var allItems = pager.getAllItems();
+    var searchTimer;
 
-    /* ---- Filtering ---- */
     function applyFilters() {
         var search = (searchInput.value || '').trim().toLowerCase();
         if (!search) {
-            filtered = allItems.slice();
+            pager.setItems(allItems);
         } else {
-            filtered = allItems.filter(function(el) {
-                var name = (el.dataset.name || '').toLowerCase();
-                var author = (el.dataset.author || '').toLowerCase();
-                var desc = (el.dataset.desc || '').toLowerCase();
+            pager.setItems(allItems.filter(function (el) {
+                var name   = (el.getAttribute('data-name')   || '').toLowerCase();
+                var author = (el.getAttribute('data-author') || '').toLowerCase();
+                var desc   = (el.getAttribute('data-desc')   || '').toLowerCase();
                 return name.indexOf(search) !== -1
                     || author.indexOf(search) !== -1
                     || desc.indexOf(search) !== -1;
-            });
+            }));
         }
-        currentPage = 1;
-        render();
     }
 
-    var searchTimer;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(applyFilters, 200);
-    });
-
-    /* ---- Pagination helpers ---- */
-    function getPerPage() {
-        var v = perPageSelect.value;
-        return v === 'all' ? (filtered.length || 1) : parseInt(v, 10);
-    }
-
-    function totalPages() {
-        return Math.max(1, Math.ceil(filtered.length / getPerPage()));
-    }
-
-    /* ---- Render ---- */
-    function render() {
-        var pp = getPerPage();
-        var total = totalPages();
-        if (currentPage > total) currentPage = total;
-        var start = (currentPage - 1) * pp;
-        var end = start + pp;
-
-        allItems.forEach(function(el) { el.style.display = 'none'; });
-        filtered.slice(start, end).forEach(function(el) { el.style.display = ''; });
-        // Reorder DOM
-        filtered.forEach(function(el) { list.appendChild(el); });
-
-        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
-
-        var n = filtered.length;
-        countSpan.textContent = n + ' élément' + (n !== 1 ? 's' : '');
-
-        var infoText = 'Page ' + currentPage + ' de ' + total;
-        document.querySelectorAll('#recent-pager-top .dir-pager-info, #recent-pager-bottom .dir-pager-info')
-            .forEach(function(el) { el.textContent = infoText; });
-
-        var isFirst = currentPage <= 1;
-        var isLast = currentPage >= total;
-        var showPager = total > 1;
-
-        [document.getElementById('recent-pager-top'), document.getElementById('recent-pager-bottom')].forEach(function(pager) {
-            if (!pager) return;
-            var rightSide = pager.querySelector('.dir-pager-right');
-            if (rightSide) rightSide.style.display = showPager ? '' : 'none';
-            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
-                var d = btn.dataset.dir;
-                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
-            });
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(applyFilters, 200);
         });
     }
 
-    // Arrow clicks
-    document.querySelectorAll('#recent-pager-top .dir-pager-arrow, #recent-pager-bottom .dir-pager-arrow').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            var total = totalPages();
-            switch (btn.dataset.dir) {
-                case 'first': currentPage = 1; break;
-                case 'prev':  if (currentPage > 1) currentPage--; break;
-                case 'next':  if (currentPage < total) currentPage++; break;
-                case 'last':  currentPage = total; break;
-            }
-            render();
-            list.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    });
-
-    perPageSelect.addEventListener('change', function() {
-        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
-        currentPage = 1;
-        render();
-    });
-
-    render();
+    pager.render();
 })();
 </script>
 

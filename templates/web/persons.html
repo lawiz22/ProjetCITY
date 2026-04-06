@@ -165,29 +165,25 @@
 <!-- Persons directory sort, filter & pagination JS -->
 <script>
 (function() {
-    var grid = document.getElementById('per-dir-grid');
     var sortSelect = document.getElementById('per-sort-select');
-    var perPageSelect = document.getElementById('per-per-page-select');
-    var countSpan = document.getElementById('per-dir-count');
     var categorySelect = document.getElementById('per-filter-category');
     var levelSelect = document.getElementById('per-filter-level');
     var searchInput = document.getElementById('per-filter-search');
-    if (!grid || !sortSelect || !perPageSelect) return;
+    if (!sortSelect) return;
 
-    var mirrors = document.querySelectorAll('.per-per-page-mirror');
-    mirrors.forEach(function(m) {
-        m.value = perPageSelect.value;
-        m.addEventListener('change', function() {
-            perPageSelect.value = m.value;
-            currentPage = 1;
-            render();
-        });
+    var pager = initDirPager({
+        prefix: 'per',
+        containerId: 'per-dir-grid',
+        itemSelector: '.event-card',
+        countElId: 'per-dir-count',
+        countSuffix: 'personnage',
+        mirrorClass: 'per-per-page-mirror'
     });
+    if (!pager) return;
 
-    var allCards = Array.prototype.slice.call(grid.querySelectorAll('.event-card'));
+    var allCards = pager.getAllItems();
     var filtered = allCards.slice();
     var sorted = allCards.slice();
-    var currentPage = 1;
 
     function applyFilters() {
         var category = categorySelect.value;
@@ -214,15 +210,6 @@
         searchTimer = setTimeout(applyFilters, 200);
     });
 
-    function getPerPage() {
-        var v = perPageSelect.value;
-        return v === 'all' ? sorted.length || 1 : parseInt(v, 10);
-    }
-
-    function tp() {
-        return Math.max(1, Math.ceil(sorted.length / getPerPage()));
-    }
-
     function doSort(resetPage) {
         var val = sortSelect.value;
         var parts = val.split('-');
@@ -240,64 +227,11 @@
                 return dir === 'asc' ? va - vb : vb - va;
             }
         });
-        if (resetPage) currentPage = 1;
-        render();
+        if (resetPage) pager.resetPage();
+        pager.setItems(sorted);
     }
-
-    function render() {
-        var pp = getPerPage();
-        var total = tp();
-        if (currentPage > total) currentPage = total;
-        var start = (currentPage - 1) * pp;
-        var end = start + pp;
-
-        allCards.forEach(function(c) { c.style.display = 'none'; });
-        sorted.slice(start, end).forEach(function(c) { c.style.display = ''; });
-        sorted.forEach(function(c) { grid.appendChild(c); });
-
-        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
-
-        var n = sorted.length;
-        countSpan.textContent = n + ' personnage' + (n !== 1 ? 's' : '');
-
-        var infoText = 'Page ' + currentPage + ' de ' + total;
-        document.querySelectorAll('#per-pager-top .dir-pager-info, #per-pager-bottom .dir-pager-info').forEach(function(el) { el.textContent = infoText; });
-
-        var isFirst = currentPage <= 1;
-        var isLast = currentPage >= total;
-        var showPager = total > 1;
-
-        [document.getElementById('per-pager-top'), document.getElementById('per-pager-bottom')].forEach(function(pager) {
-            if (!pager) return;
-            pager.style.display = showPager ? '' : 'none';
-            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
-                var d = btn.dataset.dir;
-                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
-            });
-        });
-    }
-
-    document.querySelectorAll('#per-pager-top .dir-pager-arrow, #per-pager-bottom .dir-pager-arrow').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var total = tp();
-            switch (btn.dataset.dir) {
-                case 'first': currentPage = 1; break;
-                case 'prev':  if (currentPage > 1) currentPage--; break;
-                case 'next':  if (currentPage < total) currentPage++; break;
-                case 'last':  currentPage = total; break;
-            }
-            render();
-            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    });
 
     sortSelect.addEventListener('change', function() { doSort(true); });
-    perPageSelect.addEventListener('change', function() {
-        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
-        currentPage = 1;
-        render();
-    });
-
     doSort(false);
 })();
 </script>

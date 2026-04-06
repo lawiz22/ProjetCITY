@@ -196,44 +196,40 @@
 <!-- Legends directory sort, filter & pagination JS -->
 <script>
 (function() {
-    var grid = document.getElementById('leg-dir-grid');
     var sortSelect = document.getElementById('leg-sort-select');
-    var perPageSelect = document.getElementById('leg-per-page-select');
-    var countSpan = document.getElementById('leg-dir-count');
     var typeSelect = document.getElementById('leg-filter-type');
     var categorySelect = document.getElementById('leg-filter-category');
     var levelSelect = document.getElementById('leg-filter-level');
     var searchInput = document.getElementById('leg-filter-search');
     var countrySelect = document.getElementById('leg-filter-country');
     var regionSelect = document.getElementById('leg-filter-region');
-    if (!grid || !sortSelect || !perPageSelect) return;
+    if (!sortSelect) return;
+
+    var pager = initDirPager({
+        prefix: 'leg',
+        containerId: 'leg-dir-grid',
+        itemSelector: '.event-card',
+        countElId: 'leg-dir-count',
+        countSuffix: 'légende',
+        mirrorClass: 'leg-per-page-mirror'
+    });
+    if (!pager) return;
+
+    var allCards = pager.getAllItems();
+    var filtered = allCards.slice();
+    var sorted = allCards.slice();
 
     /* Server-side country/region filters — reload page with query params */
     function reloadWithServerFilters() {
         var params = new URLSearchParams(window.location.search);
         var country = countrySelect ? countrySelect.value : '';
         var region  = regionSelect ? regionSelect.value : '';
-        if (country) { params.set('country', country); } else { params.delete('country'); }
-        if (region)  { params.set('region', region); }  else { params.delete('region'); }
+        if (country) params.set('country', country); else params.delete('country');
+        if (region)  params.set('region', region);   else params.delete('region');
         window.location.search = params.toString();
     }
     if (countrySelect) countrySelect.addEventListener('change', reloadWithServerFilters);
     if (regionSelect)  regionSelect.addEventListener('change', reloadWithServerFilters);
-
-    var mirrors = document.querySelectorAll('.leg-per-page-mirror');
-    mirrors.forEach(function(m) {
-        m.value = perPageSelect.value;
-        m.addEventListener('change', function() {
-            perPageSelect.value = m.value;
-            currentPage = 1;
-            render();
-        });
-    });
-
-    var allCards = Array.prototype.slice.call(grid.querySelectorAll('.event-card'));
-    var filtered = allCards.slice();
-    var sorted = allCards.slice();
-    var currentPage = 1;
 
     /* Dynamic category filter: show only categories matching selected type */
     var categoriesByType = {{ categories_by_type | tojson }};
@@ -284,15 +280,6 @@
         searchTimer = setTimeout(applyFilters, 200);
     });
 
-    function getPerPage() {
-        var v = perPageSelect.value;
-        return v === 'all' ? sorted.length || 1 : parseInt(v, 10);
-    }
-
-    function tp() {
-        return Math.max(1, Math.ceil(sorted.length / getPerPage()));
-    }
-
     function doSort(resetPage) {
         var val = sortSelect.value;
         var parts = val.split('-');
@@ -310,64 +297,11 @@
                 return dir === 'asc' ? va - vb : vb - va;
             }
         });
-        if (resetPage) currentPage = 1;
-        render();
+        if (resetPage) pager.resetPage();
+        pager.setItems(sorted);
     }
-
-    function render() {
-        var pp = getPerPage();
-        var total = tp();
-        if (currentPage > total) currentPage = total;
-        var start = (currentPage - 1) * pp;
-        var end = start + pp;
-
-        allCards.forEach(function(c) { c.style.display = 'none'; });
-        sorted.slice(start, end).forEach(function(c) { c.style.display = ''; });
-        sorted.forEach(function(c) { grid.appendChild(c); });
-
-        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
-
-        var n = sorted.length;
-        countSpan.textContent = n + ' légende' + (n !== 1 ? 's' : '');
-
-        var infoText = 'Page ' + currentPage + ' de ' + total;
-        document.querySelectorAll('#leg-pager-top .dir-pager-info, #leg-pager-bottom .dir-pager-info').forEach(function(el) { el.textContent = infoText; });
-
-        var isFirst = currentPage <= 1;
-        var isLast = currentPage >= total;
-        var showPager = total > 1;
-
-        [document.getElementById('leg-pager-top'), document.getElementById('leg-pager-bottom')].forEach(function(pager) {
-            if (!pager) return;
-            pager.style.display = showPager ? '' : 'none';
-            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
-                var d = btn.dataset.dir;
-                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
-            });
-        });
-    }
-
-    document.querySelectorAll('#leg-pager-top .dir-pager-arrow, #leg-pager-bottom .dir-pager-arrow').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var total = tp();
-            switch (btn.dataset.dir) {
-                case 'first': currentPage = 1; break;
-                case 'prev':  if (currentPage > 1) currentPage--; break;
-                case 'next':  if (currentPage < total) currentPage++; break;
-                case 'last':  currentPage = total; break;
-            }
-            render();
-            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    });
 
     sortSelect.addEventListener('change', function() { doSort(true); });
-    perPageSelect.addEventListener('change', function() {
-        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
-        currentPage = 1;
-        render();
-    });
-
     doSort(false);
 
     /* Geocode missing legends */

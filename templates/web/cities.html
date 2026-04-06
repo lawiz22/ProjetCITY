@@ -65,10 +65,10 @@
     </div>
 
     <!-- Pagination top -->
-    <div class="dir-pager" id="dir-pager-top">
+    <div class="dir-pager" id="city-pager-top">
         <div class="dir-pager-left">
             <span class="dir-pager-label">Villes par page:</span>
-            <select id="dir-per-page-select">
+            <select id="city-per-page-select">
                 <option value="20">20</option>
                 <option value="40" selected>40</option>
                 <option value="80">80</option>
@@ -77,7 +77,7 @@
             </select>
         </div>
         <div class="dir-pager-right">
-            <span class="dir-pager-info" id="dir-pager-info-top"></span>
+            <span class="dir-pager-info" id="city-pager-info-top"></span>
             <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
             <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
             <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
@@ -171,10 +171,10 @@
     </div>
 
     <!-- Pagination bottom -->
-    <div class="dir-pager" id="dir-pager-bottom">
+    <div class="dir-pager" id="city-pager-bottom">
         <div class="dir-pager-left">
             <span class="dir-pager-label">Villes par page:</span>
-            <select class="dir-per-page-mirror">
+            <select class="city-per-page-mirror">
                 <option value="20">20</option>
                 <option value="40" selected>40</option>
                 <option value="80">80</option>
@@ -183,7 +183,7 @@
             </select>
         </div>
         <div class="dir-pager-right">
-            <span class="dir-pager-info" id="dir-pager-info-bottom"></span>
+            <span class="dir-pager-info" id="city-pager-info-bottom"></span>
             <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
             <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
             <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
@@ -195,32 +195,27 @@
 <!-- Directory sort, filter & pagination JS -->
 <script>
 (function() {
-    var grid = document.getElementById('dir-grid');
     var sortSelect = document.getElementById('dir-sort-select');
-    var perPageSelect = document.getElementById('dir-per-page-select');
-    var countSpan = document.getElementById('dir-count');
     var countrySelect = document.getElementById('dir-filter-country');
     var searchInput = document.getElementById('dir-filter-search');
     var regionToggle = document.getElementById('dir-region-toggle');
     var regionDropdown = document.getElementById('dir-region-dropdown');
     var regionList = document.getElementById('dir-region-list');
-    if (!grid || !sortSelect || !perPageSelect) return;
+    if (!sortSelect) return;
 
-    // Mirror selects (bottom pager syncs with top)
-    var mirrors = document.querySelectorAll('.dir-per-page-mirror');
-    mirrors.forEach(function(m) {
-        m.value = perPageSelect.value;
-        m.addEventListener('change', function() {
-            perPageSelect.value = m.value;
-            currentPage = 1;
-            render();
-        });
+    var pager = initDirPager({
+        prefix: 'city',
+        containerId: 'dir-grid',
+        itemSelector: '.city-card',
+        countElId: 'dir-count',
+        countSuffix: 'ville',
+        mirrorClass: 'city-per-page-mirror'
     });
+    if (!pager) return;
 
-    var allCards = Array.prototype.slice.call(grid.querySelectorAll('.city-card'));
+    var allCards = pager.getAllItems();
     var filtered = allCards.slice();
     var sorted = allCards.slice();
-    var currentPage = 1;
 
     /* ---- Filtering ---- */
     function getCheckedRegions() {
@@ -283,15 +278,6 @@
     });
 
     /* ---- Sorting ---- */
-    function getPerPage() {
-        var v = perPageSelect.value;
-        return v === 'all' ? sorted.length : parseInt(v, 10);
-    }
-
-    function tp() {
-        return Math.max(1, Math.ceil(sorted.length / getPerPage()));
-    }
-
     function doSort(resetPage) {
         var val = sortSelect.value;
         var field = val.split('-')[0];
@@ -312,67 +298,11 @@
                 return dir === 'asc' ? va - vb : vb - va;
             }
         });
-        if (resetPage) currentPage = 1;
-        render();
+        if (resetPage) pager.resetPage();
+        pager.setItems(sorted);
     }
-
-    /* ---- Render ---- */
-    function render() {
-        var pp = getPerPage();
-        var total = tp();
-        if (currentPage > total) currentPage = total;
-        var start = (currentPage - 1) * pp;
-        var end = start + pp;
-
-        allCards.forEach(function(c) { c.style.display = 'none'; });
-        sorted.slice(start, end).forEach(function(c) { c.style.display = ''; });
-        sorted.forEach(function(c) { grid.appendChild(c); });
-
-        // Sync mirror selects
-        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
-
-        // Update counter
-        countSpan.textContent = sorted.length + ' villes';
-
-        // Update pager info & arrows
-        var infoText = 'Page ' + currentPage + ' de ' + total;
-        document.querySelectorAll('.dir-pager-info').forEach(function(el) { el.textContent = infoText; });
-
-        var isFirst = currentPage <= 1;
-        var isLast = currentPage >= total;
-        var showPager = total > 1;
-
-        document.querySelectorAll('.dir-pager').forEach(function(pager) {
-            pager.style.display = showPager ? '' : 'none';
-            pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
-                var d = btn.dataset.dir;
-                btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
-            });
-        });
-    }
-
-    // Arrow clicks
-    document.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var total = tp();
-            switch (btn.dataset.dir) {
-                case 'first': currentPage = 1; break;
-                case 'prev':  if (currentPage > 1) currentPage--; break;
-                case 'next':  if (currentPage < total) currentPage++; break;
-                case 'last':  currentPage = total; break;
-            }
-            render();
-            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    });
 
     sortSelect.addEventListener('change', function() { doSort(true); });
-    perPageSelect.addEventListener('change', function() {
-        mirrors.forEach(function(m) { m.value = perPageSelect.value; });
-        currentPage = 1;
-        render();
-    });
-
     doSort(false);
 })();
 </script>
