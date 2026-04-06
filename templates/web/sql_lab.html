@@ -47,6 +47,7 @@
                         📤 Importer backup
                         <input type="file" id="import-backup-file" accept=".json,.zip" style="display:none;">
                     </label>
+                    <button type="button" id="reset-delta-btn" class="secondary-button" style="font-size:.85em; opacity:.7;" title="Remettre les compteurs à zéro">🔄 Reset compteurs</button>
                 </div>
                 <p class="helper-text" style="margin-top:.4rem; font-size:.85em;">
                     Exporte un ZIP contenant la BD + les photos ajoutées depuis le dernier export. Après l'export, le compteur se remet à 0. L'import accepte les ZIP (BD + photos) et les JSON (BD seulement).
@@ -286,6 +287,22 @@ document.addEventListener('DOMContentLoaded', function() {
     exportLink.addEventListener('click', function() {
         setTimeout(loadDeltaCounts, 3000);
     });
+
+    // Reset counter button
+    const resetBtn = document.getElementById('reset-delta-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', async function() {
+            if (!confirm('Remettre tous les compteurs delta à zéro ?')) return;
+            try {
+                const resp = await fetch('{{ url_for("web.sql_lab_backup_reset_delta") }}', {method: 'POST'});
+                if (resp.ok) {
+                    loadDeltaCounts();
+                } else {
+                    alert('Erreur lors du reset.');
+                }
+            } catch(e) { alert('Erreur réseau.'); }
+        });
+    }
 
     loadDeltaCounts();
 

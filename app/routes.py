@@ -2549,6 +2549,30 @@ def sql_lab_backup_delta_counts() -> Response:
     return jsonify(scope_counts)
 
 
+@web.route("/sql-lab/backup/reset-delta", methods=["POST"])
+@editor_required
+def sql_lab_backup_reset_delta() -> Response:
+    """Reset the delta export state so all counters go to 0."""
+    from .db import get_db
+
+    conn = get_db()
+    # Set max_pk to current max for each table → delta = 0
+    new_state: dict = {}
+    for tdef in _BACKUP_TABLES:
+        table = tdef["name"]
+        pk = tdef["pk"]
+        try:
+            row = conn.execute(f"SELECT MAX({pk}) AS mx FROM {table}").fetchone()
+            mx = row["mx"] if row and row["mx"] is not None else 0
+            new_state[table] = {"max_pk": mx if isinstance(mx, (int, float)) else 0, "count": 0}
+        except Exception:
+            pass
+
+    from .services.app_state import save_json_setting
+    save_json_setting(_EXPORT_STATE_KEY, new_state, fallback_path=_EXPORT_STATE_FILE)
+    return jsonify({"success": True})
+
+
 @web.route("/sql-lab/backup/export")
 @editor_required
 def sql_lab_backup_export() -> Response:
@@ -3011,27 +3035,13 @@ def backup_export_delta() -> Response:
     filename = f"projetcity-{scope_suffix}-{timestamp}.zip"
 
     def generate():
-        import json as _json
         conn = _connect_postgres(db_url)
         try:
             yield from export_delta_backup_streaming(
                 conn, _BACKUP_TABLES, scope["groups"], export_state,
                 scope_key=scope_key, scope_label=scope["label"],
+                export_state_key=_EXPORT_STATE_KEY,
             )
-            # Save the updated export state so next delta starts from here.
-            # NOTE: We write directly via conn instead of save_json_setting()
-            # because the Flask request context (g) is gone during streaming.
-            new_state = getattr(export_delta_backup_streaming, "_last_new_state", None)
-            if new_state:
-                payload = _json.dumps(new_state, ensure_ascii=False)
-                conn.execute(
-                    "INSERT INTO app_setting (setting_key, setting_value) "
-                    "VALUES (?, CAST(? AS JSONB)) "
-                    "ON CONFLICT (setting_key) DO UPDATE "
-                    "SET setting_value = EXCLUDED.setting_value, updated_at = NOW()",
-                    (_EXPORT_STATE_KEY, payload),
-                )
-                conn.commit()
         finally:
             conn.close()
 

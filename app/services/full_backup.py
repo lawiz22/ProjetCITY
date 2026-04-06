@@ -188,11 +188,14 @@ def export_delta_backup_streaming(
     export_state: dict,
     scope_key: str = "delta_all",
     scope_label: str = "Derniers ajouts — Tout",
+    export_state_key: str = "backup_export_state",
 ) -> Generator[bytes, None, None]:
     """Stream a ZIP containing delta db.json + delta photos.
 
     Only includes DB rows and photos added since the last export
     (determined by export_state).
+    Saves the new export state to DB **before** streaming begins,
+    so the counter resets even if the download is interrupted.
     Yields raw bytes for a streaming HTTP response.
     """
     buf = io.BytesIO()
@@ -268,18 +271,25 @@ def export_delta_backup_streaming(
 
         db_data["_meta"]["photo_count"] = len(photo_files)
 
+    # Save new export state to DB BEFORE streaming —
+    # ensures the counter resets even if the download is interrupted.
+    if new_state:
+        _payload = json.dumps(new_state, ensure_ascii=False)
+        conn.execute(
+            "INSERT INTO app_setting (setting_key, setting_value) "
+            "VALUES (?, CAST(? AS JSONB)) "
+            "ON CONFLICT (setting_key) DO UPDATE "
+            "SET setting_value = EXCLUDED.setting_value, updated_at = NOW()",
+            (export_state_key, _payload),
+        )
+        conn.commit()
+
     buf.seek(0)
     while True:
         chunk = buf.read(65536)
         if not chunk:
             break
         yield chunk
-
-    # Return the new state via a generator attribute (caller reads it)
-    # We use a closure trick: attach to the generator itself isn't possible,
-    # so the caller will receive the new_state via a separate mechanism.
-    # We store it on a module-level variable that the caller reads immediately.
-    export_delta_backup_streaming._last_new_state = new_state  # type: ignore[attr-defined]
 
 
 def export_entity_photos_zip(conn: Any, entity_type: str) -> io.BytesIO | None:
