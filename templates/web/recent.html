@@ -45,10 +45,10 @@
         </div>
         <div class="dir-pager-right">
             <span class="dir-pager-info" id="recent-pager-info-top"></span>
-            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
-            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
-            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
-            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+            <button type="button" class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button type="button" class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button type="button" class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button type="button" class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
         </div>
     </div>
 
@@ -106,10 +106,10 @@
         </div>
         <div class="dir-pager-right">
             <span class="dir-pager-info" id="recent-pager-info-bottom"></span>
-            <button class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
-            <button class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
-            <button class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
-            <button class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
+            <button type="button" class="dir-pager-arrow" data-dir="first" title="Première page">«</button>
+            <button type="button" class="dir-pager-arrow" data-dir="prev" title="Page précédente">‹</button>
+            <button type="button" class="dir-pager-arrow" data-dir="next" title="Page suivante">›</button>
+            <button type="button" class="dir-pager-arrow" data-dir="last" title="Dernière page">»</button>
         </div>
     </div>
 
@@ -294,7 +294,8 @@
 
         [document.getElementById('recent-pager-top'), document.getElementById('recent-pager-bottom')].forEach(function(pager) {
             if (!pager) return;
-            pager.style.display = showPager ? '' : 'none';
+            var rightSide = pager.querySelector('.dir-pager-right');
+            if (rightSide) rightSide.style.display = showPager ? '' : 'none';
             pager.querySelectorAll('.dir-pager-arrow').forEach(function(btn) {
                 var d = btn.dataset.dir;
                 btn.disabled = (d === 'first' || d === 'prev') ? isFirst : isLast;
@@ -304,7 +305,8 @@
 
     // Arrow clicks
     document.querySelectorAll('#recent-pager-top .dir-pager-arrow, #recent-pager-bottom .dir-pager-arrow').forEach(function(btn) {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
             var total = totalPages();
             switch (btn.dataset.dir) {
                 case 'first': currentPage = 1; break;
