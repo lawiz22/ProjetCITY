@@ -236,6 +236,14 @@ def run_migrations(config: Mapping[str, Any]) -> None:
     try:
         cur = conn.cursor()
 
+        # Acquire an advisory lock so only one worker runs migrations at a time.
+        # pg_try_advisory_lock returns True if the lock was acquired, False otherwise.
+        cur.execute("SELECT pg_try_advisory_lock(42)")
+        got_lock = cur.fetchone()[0]
+        if not got_lock:
+            # Another worker is already running migrations — skip.
+            return
+
         # --- app_user + audit_log tables ---
         cur.execute("""
             CREATE TABLE IF NOT EXISTS app_user (
@@ -713,4 +721,10 @@ def run_migrations(config: Mapping[str, Any]) -> None:
 
         conn.commit()
     finally:
+        # Release the advisory lock before closing
+        try:
+            conn.cursor().execute("SELECT pg_advisory_unlock(42)")
+            conn.commit()
+        except Exception:
+            pass
         conn.close()
