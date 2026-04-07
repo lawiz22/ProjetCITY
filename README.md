@@ -1,41 +1,72 @@
-# Central City Scrutinizer (CCS)
+# Central City Scrutinizer
 
-Urban Intelligence Analytic Platform — plateforme locale d'analyse urbaine pour villes canadiennes et américaines.
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.x-000000?logo=flask&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![PostGIS](https://img.shields.io/badge/PostGIS-3.4-5CAE58)
+![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)
+![Chart.js](https://img.shields.io/badge/Chart.js-4.x-FF6384?logo=chartdotjs&logoColor=white)
+![Railway](https://img.shields.io/badge/Deploy-Railway-0B0D0E?logo=railway&logoColor=white)
+![License](https://img.shields.io/badge/License-Private-red)
 
-310+ villes | 13 provinces/territoires | 51 états | Base SQLite en étoile | Flask + Chart.js + Leaflet | IA générative Mammouth | 66 drapeaux
+**Urban Intelligence Platform** — analyse démographique, cartographique et historique de 310+ villes nord-américaines, avec IA générative intégrée.
+
+---
+
+## Fonctionnalités
+
+| Module | Description |
+|--------|-------------|
+| **Dashboard** | KPIs, palmarès croissance/déclin, pics historiques, export PDF |
+| **Annuaire** | Vues blocs/liste, filtres pays/région/population, photos HD |
+| **Fiches ville** | Courbe interactive, annotations, timeline, périodes narratives, galerie photo, export PDF/PNG |
+| **Carte** | Bulles proportionnelles, 7 fonds de carte, couches thématiques, voyage dans le temps |
+| **Comparaison** | Courbes multi-villes superposées avec zoom/pan |
+| **Événements** | Catalogue historique (10 catégories, 2 niveaux), fiches détaillées, galerie photo |
+| **Pays & Régions** | Fiches détaillées avec populations, annotations, périodes, galerie photo |
+| **SQL Lab** | Requêtes SQL directes, snippets, historique, vues sauvegardées, export CSV |
+| **AI Lab** | Génération IA (Mammouth AI), raffinement, validation des sources, diff côte à côte |
+| **Géo-couverture** | Progression par province/état, villes de référence manquantes |
+| **Population ref.** | Couverture nationale/régionale, drapeaux, lien carte temps réel |
+
+---
+
+## Stack technique
+
+| Composant | Technologie |
+|-----------|-------------|
+| Backend | Flask (Python 3.12) |
+| Base de données | PostgreSQL 16 + PostGIS 3.4 |
+| ORM / DB | psycopg 3 (wrapper custom, schéma étoile) |
+| Templates | Jinja2 |
+| Graphiques | Chart.js |
+| Carte | Leaflet.js 1.9 |
+| PDF | ReportLab |
+| Images | Pillow, Wikipedia/Wikimedia Commons |
+| IA | API Mammouth AI (compatible OpenAI) |
+| Déploiement | Railway (Gunicorn, 2 workers gthread) |
 
 ---
 
 ## Démarrage rapide
 
-Sous Windows PowerShell:
-
 ```powershell
+# Cloner et installer
+git clone https://github.com/lawiz22/ProjetCITY.git
+cd ProjetCITY
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python scripts\build_city_database.py   # première fois seulement
+pip install -r requirements.txt
+
+# Lancer (PostgreSQL requis via Docker ou Railway)
+docker compose --env-file .env.postgres up -d
 python run_web.py
 # → http://127.0.0.1:5000
 ```
 
----
-
-## Test local PostgreSQL/PostGIS
-
-L'app reste SQLite par dÃ©faut, mais tu peux maintenant tester la migration sur un PostgreSQL local en parallÃ¨le.
-
-Sous Windows PowerShell:
+### Migration depuis SQLite
 
 ```powershell
-Copy-Item .env.postgres.example .env.postgres -Force   # optionnel si tu veux repartir du template
-docker compose --env-file .env.postgres up -d
-```
-
-La base Postgres/PostGIS sera disponible sur `127.0.0.1:5432`, avec le schÃ©ma [`sql/schema_postgres.sql`](sql/schema_postgres.sql) appliquÃ© automatiquement au premier dÃ©marrage du volume.
-
-Migration depuis la base SQLite actuelle:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
 Get-Content .env.postgres | ForEach-Object {
   if ($_ -match '^\s*([^#][^=]*)=(.*)$') {
     [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
@@ -44,296 +75,76 @@ Get-Content .env.postgres | ForEach-Object {
 python scripts\migrate_sqlite_to_postgres.py --pg-dsn "$env:PROJETCITY_DATABASE_URL" --truncate-target
 ```
 
-Ensuite tu peux lancer l'app en mode PostgreSQL:
-
-```powershell
-python run_web.py
-```
-
-Smoke test recommandÃ©:
-- ouvrir `/`, `/cities`, `/map`, `/events`, `/sql-lab`
-- tester une lecture SQL Lab
-- tester un import ou une modification simple sur une ville, un pays ou une rÃ©gion
-
-Pour arrÃªter la base:
-
-```powershell
-docker compose --env-file .env.postgres down
-```
-
-Pour repartir de zÃ©ro:
-
-```powershell
-docker compose --env-file .env.postgres down -v
-```
-
----
-
-## Pages principales
-
-### Dashboard (`/`)
-- Indicateurs clés : nombre de villes (avec drapeaux 🇨🇦🇺🇸), couverture temporelle, croissance moyenne
-- Palmarès croissance / déclin, pics historiques
-- Export PDF du dashboard complet
-
-### Annuaire des villes (`/cities`)
-- Double affichage : vue blocs illustrée (large, medium, small) et vue liste compacte
-- Filtres dynamiques par pays, région, population
-- Population récente, pic historique et photo HD pour chaque ville
-
-### Fiche détaillée (`/cities/<slug>`)
-- Header photo premium avec badges de synthèse et résumé narratif
-- Courbe démographique interactive avec annotations (bandes verticales colorées, filtres à cocher)
-- Timeline visuelle des périodes détaillées avec surbrillance croisée
-- Mode lecture guidée période par période (autoplay, barre flottante)
-- Navigation rapide par ancres (Courbe, Annotations, Timeline, Export)
-- Galerie photo avec badges EXIF (GPS, date, appareil), lightbox plein écran
-- Photos d'annotation avec recherche web intelligente et traduction anglaise automatique
-- Bouton « Voir sur la carte » pour localiser la ville directement sur la carte interactive
-- Export PDF enrichi avec photo et badges
-- Export PNG des graphiques
-
-### Comparaison multi-villes (`/compare`)
-- Sélection multiple de villes avec tableau comparatif
-- Courbes superposées avec zoom, pan et réinitialisation
-
-### Carte interactive (`/map`)
-- Bulles proportionnelles à la population récente
-- 7 fonds de carte : CARTO Voyager, Positron, Dark Matter, OpenStreetMap, Esri Satellite, Esri Topo, OpenTopoMap
-- Couches thématiques : population, croissance, déclin, pics, annotations, climat, densité
-- Filtres dynamiques (pays, région, population, recherche texte)
-- Sauvegarde de la vue par défaut (zoom, position, fond de carte, couche) via localStorage
-- Focus automatique sur une ville via paramètre URL `?focus=<slug>`
-- **Voyage dans le temps** : slider temporel avec lecture automatique (lent/normal/rapide)
-  - Bloc « Villes affichées » : tableau trié par population avec densité calculée dynamiquement
-  - Bloc « Chroniques des villes » : périodes historiques actives par ville, mises à jour en temps réel
-  - Entrée directe via URL `?tt=1&year=YEAR&country=COUNTRY&region=REGION` avec zoom automatique
-
-### SQL Lab (`/sql-lab`)
-- Requêtes SQL directes sur la base SQLite (lecture par défaut)
-- Snippets d'exemples, historique persistant (60 entrées), vues sauvegardées (80 max)
-- Export CSV des résultats
-- Mode écriture optionnel via `PROJETCITY_SQL_ENABLE_WRITE=1`
-
-### AI Lab (`/ai-lab`)
-- Génération de fiches ville complètes via API Mammouth AI en 3 étapes
-- Bouton « Générer les 3 étapes » avec retry automatique
-- Bouton « Suggérer une ville » intelligent avec filtres pays/région et priorité aux régions manquantes
-- Comparaison et fusion sélective avec les données existantes (population, annotations, périodes, fiche)
-- Import direct dans la base avec géocodage et photo automatiques
-- **Step 4 — Événements historiques** : génération et import d'événements avec description, impacts, lieux liés
-
-### Géo-couverture (`/geo-coverage`)
-- Couverture géographique par province canadienne et état américain
-- Base de 630 villes de référence (130 CA + 500 US) avec barres de progression par région
-- Tableau des villes de référence manquantes avec bouton « Générer » vers l'AI Lab
-- Bouton « Ajouter 20 villes » par région pour enrichir la base de référence via IA (prompts progressifs)
-- Onglets Canada / États-Unis avec recherche par région
-
-### Population de référence (`/reference-population`)
-- Couverture nationale et régionale (pop. de référence vs pop. dans la BD)
-- Filtres par pays, région/état, années (multi-select)
-- Drapeaux pour chaque pays et région/état (66 drapeaux : 2 pays + 13 provinces CA + 51 états US)
-- Bouton 🗺️ lien direct vers la carte en mode voyage dans le temps
-- Barres de progression colorées (vert/orange/rouge)
-
-### Événements historiques (`/events`)
-- Catalogue d'événements historiques majeurs liés aux villes (guerres, catastrophes, économie, politique, etc.)
-- 10 catégories avec badges colorés : guerre, catastrophe naturelle, économie, politique, culture, environnement, technologie, santé, migration, autre
-- 2 niveaux d'impact : ⭐ majeur (guerres mondiales, crashs) et 📌 significatif (ouragans régionaux, festivals)
-- Filtres par catégorie, niveau et recherche textuelle
-- Fiche détaillée par événement : description, impact sur la population, impact migratoire, lieux liés avec liens vers les fiches ville
-- Galerie photo par événement avec upload, suppression et photo principale
-- Texte source (AI) collapsible pour traçabilité
-- Intégration dans les fiches ville : section « Événements historiques liés » avec rôle (primary/secondary/affected)
-
-### Couverture des données (`/coverage`)
-- Villes sans fiche complète, sans photos, sans périodes détaillées
-- Décennies manquantes par ville
-- Export CSV de la couverture et des décennies manquantes
-
-### Options (`/options`)
-- Configuration API Mammouth AI (clé, modèle, test de connexion)
-- Suivi des tokens utilisés
-
----
-
-## Stack technique
-
-| Composant | Technologie |
-|-----------|-------------|
-| Backend | Flask (Python) |
-| Base de données | SQLite3 (schéma en étoile) |
-| Templates | Jinja2 |
-| Graphiques | Chart.js |
-| Carte | Leaflet.js 1.9.4 |
-| PDF | ReportLab |
-| Images | Pillow, Wikipedia / Wikimedia Commons (1280px HD) |
-| Analytics | Matplotlib, NumPy, Pandas |
-| IA | API Mammouth AI (compatible OpenAI) |
-
 ---
 
 ## Structure du projet
 
 ```
-run_web.py                          → point d'entrée Flask
+run_web.py                     Point d'entrée Flask
 app/
-  __init__.py                       → factory Flask
-  config.py                         → configuration (env vars)
-  db.py                             → connexion SQLite
-  routes.py                         → toutes les routes web + API
+  __init__.py                  Factory + auto-migrations
+  config.py                   Configuration (env vars)
+  db.py                       Connexion DB + migrations
+  routes.py                   Routes web + API
   services/
-    analytics.py                    → métriques, dashboard, exécution SQL
-    city_coordinates.py             → géocodage (cache + fallback web)
-    city_import.py                  → import population, périodes, fiches, photos
-    city_photos.py                  → recherche Wikipedia/Commons, galerie, EXIF
-    event_service.py                → événements historiques : parse, import, CRUD, photos
-    mammouth_ai.py                  → client API Mammouth AI, tokens
-    pdf_reports.py                  → génération PDF (dashboard, fiche ville)
+    analytics.py               Métriques, dashboard, SQL
+    city_import.py             Import population, périodes, fiches
+    city_photos.py             Photos Wikipedia/Commons, EXIF
+    event_service.py           Événements historiques CRUD
+    mammouth_ai.py             Client API Mammouth AI
+    pdf_reports.py             Génération PDF
 sql/
-  schema.sql                        → schéma complet (tables, vues, index)
-scripts/
-  build_city_database.py            → construction initiale de la base
-  build_ref_cities.py               → base de 630 villes de référence via IA
-  fetch_city_photos.py              → téléchargement batch des photos Wikipedia
-  import_city_period_details.py     → rechargement des périodes depuis les .txt
-  import_reference_population.py    → import données de population de référence
-  repair_city_dimension.py          → correction de base existante
-  validate_villestats.py            → validation villestats.py
-  validate_villestats_v2.py         → validation villestats_v2.py
-  validate_city_period_details.py   → validation des fichiers .txt
+  schema_postgres.sql          Schéma PostgreSQL/PostGIS
+scripts/                       Scripts de migration, import, validation
 data/
-  city_analysis.db                  → base SQLite générée
-  city_details/                     → 65+ fichiers .txt de périodes détaillées
-  ref_cities.json                   → villes de référence (630 entrées)
-  prompts/                          → prompts IA (city_data_step1-3.txt, event_data.txt)
-  saved_views.json                  → vues SQL sauvegardées
-  sql_lab_history.json              → historique SQL Lab
-templates/web/                      → 16 templates Jinja2
+  prompts/                     Prompts IA
+  city_details/                Fiches texte par ville
+templates/web/                 Templates Jinja2
 static/
-  css/app.css, leaflet.css          → styles de la plateforme
-  js/charts.js, leaflet.js,         → modules JS (graphiques, carte,
-     map.js, map_static.js,            SQL Lab, tables, thème)
-     sql_lab.js, tables.js, ui.js
-  images/cities/                    → photos HD par ville
-  images/events/                    → photos par événement
-  images/flags/                     → drapeaux (66 : pays + provinces/états)
-villestats.py                       → données source (séries historiques)
-villestats_v2.py                    → données source (format simplifié)
+  css/                         Styles
+  js/                          Modules JS
+  images/                      Photos, drapeaux, événements
 ```
 
 ---
 
-## Modèle de données (schéma en étoile)
+## Modèle de données
 
-### Tables
+Schéma en étoile avec tables de faits et dimensions :
 
 | Table | Rôle |
 |-------|------|
-| `fact_city_population` | Table de faits : ville, année, population, annotation |
-| `dim_city` | Dimension ville : nom, slug, région, pays, coordonnées, superficie, densité, couleur |
-| `dim_time` | Dimension temps : année, décennie, quart/demi-siècle, siècle, période historique |
-| `dim_annotation` | Dimension annotation : label, couleur, type, photo |
-| `dim_city_period_detail` | Périodes narratives par ville (titre, dates, texte consolidé) |
-| `dim_city_period_detail_item` | Points de détail par période |
-| `dim_city_fiche` | Fiche complète par ville (texte brut + sections parsées) |
-| `dim_city_fiche_section` | Sections de fiche (emoji, titre, contenu JSON) |
-| `dim_city_photo` | Bibliothèque photo (fichier, légende, EXIF, attribution) |
-| `dim_event` | Événement historique : nom, slug, dates, niveau, catégorie, description, impacts |
-| `dim_event_location` | Lieux liés à un événement (ville optionnelle, région, pays, rôle) |
-| `dim_event_photo` | Photos par événement (fichier, légende, attribution) |
-| `ref_city` | Villes de référence par région (630 villes, 63 régions) |
-| `ref_population` | Population de référence par région/année |
+| `fact_city_population` | Faits : ville × année × population |
+| `fact_region_population` | Faits : région × année × population |
+| `fact_country_population` | Faits : pays × année × population |
+| `dim_city` | Villes (nom, coordonnées, superficie, densité) |
+| `dim_region` | Régions / provinces / états |
+| `dim_country` | Pays |
+| `dim_time` | Temps (année, décennie, siècle, période) |
+| `dim_annotation` | Annotations (label, couleur, photo) |
+| `dim_event` | Événements historiques |
 
-### Vues analytiques
-
-| Vue | Description |
-|-----|-------------|
-| `vw_city_population_analysis` | Vue complète avec ville + temps + annotations |
-| `vw_city_growth_by_decade` | Croissance absolue et relative par décennie |
-| `vw_city_peak_population` | Pic démographique par ville |
-| `vw_city_decline_periods` | Périodes de déclin entre observations |
-| `vw_city_rebound_periods` | Périodes de reprise après stagnation/recul |
-| `vw_annotated_events_by_period` | Événements annotés avec contexte temporel |
-| `vw_city_period_detail_analysis` | Lecture analytique des périodes détaillées |
-| `vw_city_period_detail_with_population` | Périodes avec population début/fin et variation |
-| `vw_city_period_detail_with_annotations` | Périodes avec annotations couvertes |
-| `vw_event_summary` | Événements avec compteurs de lieux/photos et noms des lieux |
+14 vues analytiques pré-calculées (croissance, pics, déclins, rebonds, couverture).
 
 ---
 
 ## Variables d'environnement
 
-| Variable | Défaut | Description |
-|----------|--------|-------------|
-| `PROJETCITY_DATABASE_PATH` | `data/city_analysis.db` | Chemin vers la base SQLite |
-| `PROJETCITY_SQL_QUERY_LIMIT` | `500` | Lignes max par requête SQL Lab |
-| `PROJETCITY_SQL_EXPORT_LIMIT` | `5000` | Lignes max en export CSV |
-| `PROJETCITY_SQL_HISTORY_PATH` | `data/sql_lab_history.json` | Fichier historique SQL |
-| `PROJETCITY_SQL_HISTORY_LIMIT` | `60` | Entrées max dans l'historique |
-| `PROJETCITY_SAVED_VIEWS_PATH` | `data/saved_views.json` | Fichier vues sauvegardées |
-| `PROJETCITY_SAVED_VIEWS_LIMIT` | `80` | Vues max sauvegardées |
-| `PROJETCITY_SQL_STATEMENT_LIMIT` | — | Instructions max par exécution |
-| `PROJETCITY_SQL_ENABLE_WRITE` | `0` | `1` pour activer les requêtes en écriture |
+| Variable | Description |
+|----------|-------------|
+| `PROJETCITY_DATABASE_URL` | DSN PostgreSQL |
+| `PROJETCITY_SQL_ENABLE_WRITE` | `1` pour activer l'écriture SQL Lab |
+| `PROJETCITY_SQL_QUERY_LIMIT` | Lignes max par requête (défaut: 500) |
+| `PROJETCITY_SQL_EXPORT_LIMIT` | Lignes max export CSV (défaut: 5000) |
 
 ---
 
 ## Scripts utilitaires
 
 ```powershell
-# Recharger la base complète
-python scripts\build_city_database.py
-
-# Recharger seulement les périodes détaillées
-python scripts\import_city_period_details.py
-
-# Valider les fichiers source
-python scripts\validate_villestats.py
-python scripts\validate_villestats_v2.py
-python scripts\validate_city_period_details.py
-
-# Corriger une base existante (ancien schéma)
-python scripts\repair_city_dimension.py
-
-# Télécharger les photos Wikipedia
-python scripts\fetch_city_photos.py
-
-# Télécharger les drapeaux (flagcdn.com + Wikimedia)
-python scripts\download_flags.py
+python scripts\build_city_database.py           # Construire la base initiale
+python scripts\migrate_sqlite_to_postgres.py     # Migrer SQLite → PostgreSQL
+python scripts\import_city_period_details.py     # Recharger les périodes
+python scripts\fetch_city_photos.py              # Télécharger photos Wikipedia
+python scripts\download_flags.py                 # Télécharger les drapeaux
 ```
-
----
-
-## Exemples de requêtes SQL
-
-```sql
-SELECT city_name, year, population, period_label, annotation_label
-FROM vw_city_population_analysis
-WHERE country = 'Canada'
-ORDER BY city_name, year;
-```
-
-```sql
-SELECT city_name, decade, absolute_growth, growth_pct
-FROM vw_city_growth_by_decade
-ORDER BY growth_pct DESC
-LIMIT 10;
-```
-
-```sql
-SELECT city_name, peak_year, peak_population
-FROM vw_city_peak_population
-ORDER BY peak_population DESC;
-```
-
----
-
-## Idées pour la suite
-
-- migrations interurbaines
-- déplacements domicile-travail
-- immobilier / loyers / prix
-- emploi et revenus
-- transport collectif
-- émissions et usage du sol
