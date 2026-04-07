@@ -7891,7 +7891,7 @@ def ai_lab_refine_city_save() -> Response:
         conn.rollback()
 
     # If validate mode, set the dim-level flag
-    if is_validate and sources_by_year:
+    if is_validate:
         try:
             conn.execute(
                 "UPDATE dim_city SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
@@ -7899,6 +7899,8 @@ def ai_lab_refine_city_save() -> Response:
             )
         except Exception:
             conn.rollback()
+
+    conn.commit()
 
     log_action("import", "city", city_slug,
                f"Ville raffinée sauvegardée: {city_row['city_name']} ({len(sources_by_year)} sources)")
@@ -8120,7 +8122,7 @@ def ai_lab_refine_region_save() -> Response:
     except Exception:
         conn.rollback()
 
-    if is_validate and sources_by_year:
+    if is_validate:
         try:
             conn.execute(
                 "UPDATE dim_region SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
@@ -8128,6 +8130,8 @@ def ai_lab_refine_region_save() -> Response:
             )
         except Exception:
             conn.rollback()
+
+    conn.commit()
 
     log_action("import", "region", region_slug,
                f"Région raffinée sauvegardée: {region_row['region_name']} ({len(sources_by_year)} sources)")
@@ -8347,7 +8351,7 @@ def ai_lab_refine_country_save() -> Response:
     except Exception:
         conn.rollback()
 
-    if is_validate and sources_by_year:
+    if is_validate:
         try:
             conn.execute(
                 "UPDATE dim_country SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
@@ -8355,6 +8359,8 @@ def ai_lab_refine_country_save() -> Response:
             )
         except Exception:
             conn.rollback()
+
+    conn.commit()
 
     log_action("import", "country", country_slug,
                f"Pays raffiné sauvegardé: {country_row['country_name']} ({len(sources_by_year)} sources)")
