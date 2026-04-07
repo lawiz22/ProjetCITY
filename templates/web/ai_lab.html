@@ -1737,9 +1737,18 @@
     var cityInput   = document.getElementById('ai-city-input');
     var modelSelect = document.getElementById('ai-model-select');
 
-    /* Pre-fill city from URL ?city=... */
+    /* Pre-fill city from URL ?city=... and switch to Ville tab */
     var urlCity = new URLSearchParams(window.location.search).get('city');
-    if (urlCity) { cityInput.value = urlCity; }
+    if (urlCity) {
+        cityInput.value = urlCity;
+        /* activate Ville tab */
+        document.querySelectorAll('.ailab-tab').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.ailab-tab-content').forEach(function(c) { c.classList.remove('active'); });
+        var villeBtn = document.querySelector('.ailab-tab[data-ailab-tab="ville"]');
+        if (villeBtn) villeBtn.classList.add('active');
+        var villePane = document.getElementById('ailab-tab-ville');
+        if (villePane) villePane.classList.add('active');
+    }
     var tokenEl     = document.getElementById('token-mammouth');
     var resetBtn    = document.getElementById('token-reset-mammouth');
     var generateUrl = '{{ url_for("web.options_generate") }}';
