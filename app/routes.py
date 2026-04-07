@@ -7690,10 +7690,17 @@ def _reconstruct_city_source_text(conn, city_slug: str) -> tuple[dict | None, st
     if row is None:
         return None, ""
     city = dict(row)
-    pops = conn.execute(
-        "SELECT year, population, source_url, source_label FROM fact_city_population "
-        "WHERE city_id = ? ORDER BY year", (city["city_id"],)
-    ).fetchall()
+    try:
+        pops = conn.execute(
+            "SELECT year, population, source_url, source_label FROM fact_city_population "
+            "WHERE city_id = ? ORDER BY year", (city["city_id"],)
+        ).fetchall()
+    except Exception:
+        conn.rollback()
+        pops = conn.execute(
+            "SELECT year, population FROM fact_city_population "
+            "WHERE city_id = ? ORDER BY year", (city["city_id"],)
+        ).fetchall()
     annotations = conn.execute(
         "SELECT fcp.year, fcp.population, a.annotation_label, a.annotation_color "
         "FROM fact_city_population fcp "
@@ -7722,7 +7729,10 @@ def _reconstruct_city_source_text(conn, city_slug: str) -> tuple[dict | None, st
     lines.append("]")
 
     # Add existing sources if any
-    sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    try:
+        sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    except (KeyError, Exception):
+        sources = []
     if sources:
         lines.append("")
         lines.append("=== SOURCES ===")
@@ -7870,19 +7880,25 @@ def ai_lab_refine_city_save() -> Response:
                 continue
 
     # Update sources on existing population rows
-    for yr, src in sources_by_year.items():
-        conn.execute(
-            "UPDATE fact_city_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
-            "WHERE city_id = ? AND year = ?",
-            (src["source_url"] or None, src["source_label"] or None, city_id, yr),
-        )
+    try:
+        for yr, src in sources_by_year.items():
+            conn.execute(
+                "UPDATE fact_city_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
+                "WHERE city_id = ? AND year = ?",
+                (src["source_url"] or None, src["source_label"] or None, city_id, yr),
+            )
+    except Exception:
+        conn.rollback()
 
     # If validate mode, set the dim-level flag
     if is_validate and sources_by_year:
-        conn.execute(
-            "UPDATE dim_city SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-            "WHERE city_id = ?", (city_id,)
-        )
+        try:
+            conn.execute(
+                "UPDATE dim_city SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+                "WHERE city_id = ?", (city_id,)
+            )
+        except Exception:
+            conn.rollback()
 
     log_action("import", "city", city_slug,
                f"Ville raffinée sauvegardée: {city_row['city_name']} ({len(sources_by_year)} sources)")
@@ -7907,10 +7923,17 @@ def _reconstruct_region_source_text(conn, region_slug: str) -> tuple[dict | None
     if row is None:
         return None, ""
     region = dict(row)
-    pops = conn.execute(
-        "SELECT year, population, source_url, source_label FROM fact_region_population "
-        "WHERE region_id = ? ORDER BY year", (region["region_id"],)
-    ).fetchall()
+    try:
+        pops = conn.execute(
+            "SELECT year, population, source_url, source_label FROM fact_region_population "
+            "WHERE region_id = ? ORDER BY year", (region["region_id"],)
+        ).fetchall()
+    except Exception:
+        conn.rollback()
+        pops = conn.execute(
+            "SELECT year, population FROM fact_region_population "
+            "WHERE region_id = ? ORDER BY year", (region["region_id"],)
+        ).fetchall()
     annotations = conn.execute(
         "SELECT frp.year, frp.population, a.annotation_label, a.annotation_color "
         "FROM fact_region_population frp "
@@ -7938,7 +7961,10 @@ def _reconstruct_region_source_text(conn, region_slug: str) -> tuple[dict | None
     lines.extend(ann_lines)
     lines.append("]")
 
-    sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    try:
+        sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    except (KeyError, Exception):
+        sources = []
     if sources:
         lines.append("")
         lines.append("=== SOURCES ===")
@@ -8084,18 +8110,24 @@ def ai_lab_refine_region_save() -> Response:
             except (ValueError, TypeError):
                 continue
 
-    for yr, src in sources_by_year.items():
-        conn.execute(
-            "UPDATE fact_region_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
-            "WHERE region_id = ? AND year = ?",
-            (src["source_url"] or None, src["source_label"] or None, region_id, yr),
-        )
+    try:
+        for yr, src in sources_by_year.items():
+            conn.execute(
+                "UPDATE fact_region_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
+                "WHERE region_id = ? AND year = ?",
+                (src["source_url"] or None, src["source_label"] or None, region_id, yr),
+            )
+    except Exception:
+        conn.rollback()
 
     if is_validate and sources_by_year:
-        conn.execute(
-            "UPDATE dim_region SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-            "WHERE region_id = ?", (region_id,)
-        )
+        try:
+            conn.execute(
+                "UPDATE dim_region SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+                "WHERE region_id = ?", (region_id,)
+            )
+        except Exception:
+            conn.rollback()
 
     log_action("import", "region", region_slug,
                f"Région raffinée sauvegardée: {region_row['region_name']} ({len(sources_by_year)} sources)")
@@ -8120,10 +8152,17 @@ def _reconstruct_country_source_text(conn, country_slug: str) -> tuple[dict | No
     if row is None:
         return None, ""
     country = dict(row)
-    pops = conn.execute(
-        "SELECT year, population, source_url, source_label FROM fact_country_population "
-        "WHERE country_id = ? ORDER BY year", (country["country_id"],)
-    ).fetchall()
+    try:
+        pops = conn.execute(
+            "SELECT year, population, source_url, source_label FROM fact_country_population "
+            "WHERE country_id = ? ORDER BY year", (country["country_id"],)
+        ).fetchall()
+    except Exception:
+        conn.rollback()
+        pops = conn.execute(
+            "SELECT year, population FROM fact_country_population "
+            "WHERE country_id = ? ORDER BY year", (country["country_id"],)
+        ).fetchall()
     annotations = conn.execute(
         "SELECT fcp.year, fcp.population, a.annotation_label, a.annotation_color "
         "FROM fact_country_population fcp "
@@ -8150,7 +8189,10 @@ def _reconstruct_country_source_text(conn, country_slug: str) -> tuple[dict | No
     lines.extend(ann_lines)
     lines.append("]")
 
-    sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    try:
+        sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    except (KeyError, Exception):
+        sources = []
     if sources:
         lines.append("")
         lines.append("=== SOURCES ===")
@@ -8295,18 +8337,24 @@ def ai_lab_refine_country_save() -> Response:
             except (ValueError, TypeError):
                 continue
 
-    for yr, src in sources_by_year.items():
-        conn.execute(
-            "UPDATE fact_country_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
-            "WHERE country_id = ? AND year = ?",
-            (src["source_url"] or None, src["source_label"] or None, country_id, yr),
-        )
+    try:
+        for yr, src in sources_by_year.items():
+            conn.execute(
+                "UPDATE fact_country_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
+                "WHERE country_id = ? AND year = ?",
+                (src["source_url"] or None, src["source_label"] or None, country_id, yr),
+            )
+    except Exception:
+        conn.rollback()
 
     if is_validate and sources_by_year:
-        conn.execute(
-            "UPDATE dim_country SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-            "WHERE country_id = ?", (country_id,)
-        )
+        try:
+            conn.execute(
+                "UPDATE dim_country SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+                "WHERE country_id = ?", (country_id,)
+            )
+        except Exception:
+            conn.rollback()
 
     log_action("import", "country", country_slug,
                f"Pays raffiné sauvegardé: {country_row['country_name']} ({len(sources_by_year)} sources)")

@@ -687,6 +687,30 @@ def run_migrations(config: Mapping[str, Any]) -> None:
             except Exception:
                 pass  # table may not exist yet
 
+        # --- population source / validation columns ---
+        _pop_source_columns = [
+            ("dim_city", "population_validated", "BOOLEAN DEFAULT FALSE"),
+            ("dim_city", "population_validated_at", "TIMESTAMPTZ"),
+            ("dim_region", "population_validated", "BOOLEAN DEFAULT FALSE"),
+            ("dim_region", "population_validated_at", "TIMESTAMPTZ"),
+            ("dim_country", "population_validated", "BOOLEAN DEFAULT FALSE"),
+            ("dim_country", "population_validated_at", "TIMESTAMPTZ"),
+            ("fact_city_population", "source_url", "TEXT"),
+            ("fact_city_population", "source_label", "TEXT"),
+            ("fact_city_population", "validated_at", "TIMESTAMPTZ"),
+            ("fact_region_population", "source_url", "TEXT"),
+            ("fact_region_population", "source_label", "TEXT"),
+            ("fact_region_population", "validated_at", "TIMESTAMPTZ"),
+            ("fact_country_population", "source_url", "TEXT"),
+            ("fact_country_population", "source_label", "TEXT"),
+            ("fact_country_population", "validated_at", "TIMESTAMPTZ"),
+        ]
+        for tbl, col, col_type in _pop_source_columns:
+            try:
+                cur.execute(f"ALTER TABLE {tbl} ADD COLUMN IF NOT EXISTS {col} {col_type}")
+            except Exception:
+                pass
+
         conn.commit()
     finally:
         conn.close()
