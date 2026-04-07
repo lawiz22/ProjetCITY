@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
     {% block head_extra %}{% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=50">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=53">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0"></script>
@@ -37,6 +37,11 @@
                     <a href="{{ url_for('web.city_map') }}">Carte</a>
                     {% if current_user and current_user.role in ('admin', 'editeur', 'collaborateur') %}
                     <a href="{{ url_for('web.sql_lab') }}">SQL Lab</a>
+                    {% endif %}
+                    {% if current_user and current_user.role in ('admin', 'collaborateur') %}
+                    <a href="{{ url_for('web.ai_lab') }}">AI Lab</a>
+                    {% endif %}
+                    {% if current_user and current_user.role in ('admin', 'editeur', 'collaborateur') %}
                     <a href="{{ url_for('web.city_coverage') }}">Couverture</a>
                     <a href="{{ url_for('web.geo_coverage') }}">Géo-couverture</a>
                     {% endif %}
@@ -51,7 +56,6 @@
                     <a href="{{ url_for('web.add_city') }}">Ajout villes</a>
                     {% endif %}
                     {% if current_user and current_user.role in ('admin', 'collaborateur') %}
-                    <a href="{{ url_for('web.ai_lab') }}">AI Lab</a>
                     <a href="{{ url_for('web.options') }}">Options</a>
                     {% endif %}
                     {% if current_user and current_user.role == 'admin' %}

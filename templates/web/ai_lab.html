@@ -48,18 +48,19 @@
 
 <!-- AI Lab tabs -->
 <nav class="ailab-tabs">
-    <button class="ailab-tab active" data-ailab-tab="ville">🏙️ Ville</button>
+    <button class="ailab-tab active" data-ailab-tab="pays">🌍 Pays</button>
+    <button class="ailab-tab" data-ailab-tab="regions">📍 Régions</button>
+    <button class="ailab-tab" data-ailab-tab="ville">🏙️ Ville</button>
     <button class="ailab-tab" data-ailab-tab="evenement">📅 Événement</button>
     <button class="ailab-tab" data-ailab-tab="personnage">🧑 Personnage</button>
     <button class="ailab-tab" data-ailab-tab="monument">🏛️ Monument</button>
     <button class="ailab-tab" data-ailab-tab="legende">👻 Légende</button>
-    <button class="ailab-tab" data-ailab-tab="pays">🌍 Pays</button>
-    <button class="ailab-tab" data-ailab-tab="regions">📍 Régions</button>
-    <button class="ailab-tab" data-ailab-tab="raffinement">🔬 Raffinement</button>
+    <button class="ailab-tab" data-ailab-tab="raffinement">🔬 Raffinement et ajout</button>
+    <button class="ailab-tab" data-ailab-tab="validation">✅ Validation</button>
 </nav>
 
 <!-- ==================== TAB: Ville ==================== -->
-<div class="ailab-tab-content active" id="ailab-tab-ville">
+<div class="ailab-tab-content" id="ailab-tab-ville">
 
 <!-- Ville config -->
 <section class="panel">
@@ -643,7 +644,7 @@
 </div><!-- /ailab-tab-legende -->
 
 <!-- ==================== TAB: Pays ==================== -->
-<div class="ailab-tab-content" id="ailab-tab-pays">
+<div class="ailab-tab-content active" id="ailab-tab-pays">
 
 <!-- ===================== Pays — Configuration ===================== -->
 <section class="panel">
@@ -916,32 +917,15 @@
 <!-- ==================== TAB: Raffinement ==================== -->
 <div class="ailab-tab-content" id="ailab-tab-raffinement">
 
-<!-- Entity type selector -->
+<!-- Entity type selector — pills -->
 <section class="panel">
     <h3 class="panel-title">🔍 Type d'entité à raffiner</h3>
     <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-        <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;">
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
-                <input type="radio" name="refine-entity-type" value="evenement" checked> 📅 Événement
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
-                <input type="radio" name="refine-entity-type" value="personnage"> 🧑 Personnage
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
-                <input type="radio" name="refine-entity-type" value="monument"> 🏛️ Monument
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
-                <input type="radio" name="refine-entity-type" value="legende"> 👻 Légende
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
-                <input type="radio" name="refine-entity-type" value="ville"> 🏙️ Ville
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
-                <input type="radio" name="refine-entity-type" value="region"> 📍 Région
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
-                <input type="radio" name="refine-entity-type" value="pays"> 🌍 Pays
-            </label>
+        <div class="refine-pills">
+            <button class="refine-pill active" data-refine-entity="evenement">📅 Événement</button>
+            <button class="refine-pill" data-refine-entity="personnage">🧑 Personnage</button>
+            <button class="refine-pill" data-refine-entity="monument">🏛️ Monument</button>
+            <button class="refine-pill" data-refine-entity="legende">👻 Légende</button>
         </div>
     </div>
 </section>
@@ -990,8 +974,7 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_event }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-event-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
-                    <button type="button" class="opt-btn opt-btn-warning" id="refine-event-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-event-btn" data-refine-mode="enrich">✨ Enrichir et ajouter des infos</button>
                 </div>
             </div>
         </section>
@@ -1103,8 +1086,7 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_person }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-person-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
-                    <button type="button" class="opt-btn opt-btn-warning" id="refine-person-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-person-btn" data-refine-mode="enrich">✨ Enrichir et ajouter des infos</button>
                 </div>
             </div>
         </section>
@@ -1216,8 +1198,7 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_monument }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-monument-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
-                    <button type="button" class="opt-btn opt-btn-warning" id="refine-monument-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-monument-btn" data-refine-mode="enrich">✨ Enrichir et ajouter des infos</button>
                 </div>
             </div>
         </section>
@@ -1329,8 +1310,7 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_legend }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-legend-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
-                    <button type="button" class="opt-btn opt-btn-warning" id="refine-legend-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-legend-btn" data-refine-mode="enrich">✨ Enrichir et ajouter des infos</button>
                 </div>
             </div>
         </section>
@@ -1398,8 +1378,25 @@
 
 </div><!-- /refine-entity-legende -->
 
+</div><!-- /ailab-tab-raffinement -->
+
+<!-- ==================== TAB: Validation et correction ==================== -->
+<div class="ailab-tab-content" id="ailab-tab-validation">
+
+<!-- Entity type selector — pills -->
+<section class="panel">
+    <h3 class="panel-title">✅ Entité à valider</h3>
+    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+        <div class="refine-pills">
+            <button class="refine-pill active" data-validate-entity="ville">🏙️ Ville</button>
+            <button class="refine-pill" data-validate-entity="region">📍 Région</button>
+            <button class="refine-pill" data-validate-entity="pays">🌍 Pays</button>
+        </div>
+    </div>
+</section>
+
 <!-- VILLE (CITY) panel -->
-<div id="refine-entity-ville" style="display:none;">
+<div id="validate-entity-ville">
 
     <!-- City picker -->
     <section class="panel">
@@ -1432,9 +1429,9 @@
             </div>
         </section>
 
-        <!-- Refinement type + prompt + button -->
+        <!-- Validation prompt + button -->
         <section class="panel">
-            <h3 class="panel-title">🔬 Raffiner les populations</h3>
+            <h3 class="panel-title">✅ Valider et corriger les populations</h3>
             <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
                 <div class="ai-lab-field" style="margin-bottom:1rem;">
                     <label class="opt-label" for="refine-city-prompt">Instructions (modifiables)</label>
@@ -1442,7 +1439,6 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_city }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-city-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
                     <button type="button" class="opt-btn opt-btn-warning" id="refine-city-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
                 </div>
             </div>
@@ -1508,10 +1504,10 @@
 
     </div><!-- /refine-city-card -->
 
-</div><!-- /refine-entity-ville -->
+</div><!-- /validate-entity-ville -->
 
 <!-- REGION panel -->
-<div id="refine-entity-region" style="display:none;">
+<div id="validate-entity-region" style="display:none;">
 
     <section class="panel">
         <h3 class="panel-title">📍 Choisir une région</h3>
@@ -1543,7 +1539,7 @@
         </section>
 
         <section class="panel">
-            <h3 class="panel-title">🔬 Raffiner les populations</h3>
+            <h3 class="panel-title">✅ Valider et corriger les populations</h3>
             <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
                 <div class="ai-lab-field" style="margin-bottom:1rem;">
                     <label class="opt-label" for="refine-region-prompt">Instructions (modifiables)</label>
@@ -1551,7 +1547,6 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_region }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-region-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
                     <button type="button" class="opt-btn opt-btn-warning" id="refine-region-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
                 </div>
             </div>
@@ -1615,10 +1610,10 @@
 
     </div><!-- /refine-region-card -->
 
-</div><!-- /refine-entity-region -->
+</div><!-- /validate-entity-region -->
 
 <!-- PAYS (COUNTRY) panel -->
-<div id="refine-entity-pays" style="display:none;">
+<div id="validate-entity-pays" style="display:none;">
 
     <section class="panel">
         <h3 class="panel-title">🌍 Choisir un pays</h3>
@@ -1650,7 +1645,7 @@
         </section>
 
         <section class="panel">
-            <h3 class="panel-title">🔬 Raffiner les populations</h3>
+            <h3 class="panel-title">✅ Valider et corriger les populations</h3>
             <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
                 <div class="ai-lab-field" style="margin-bottom:1rem;">
                     <label class="opt-label" for="refine-country-prompt">Instructions (modifiables)</label>
@@ -1658,7 +1653,6 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_country }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-country-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
                     <button type="button" class="opt-btn opt-btn-warning" id="refine-country-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
                 </div>
             </div>
@@ -1722,9 +1716,9 @@
 
     </div><!-- /refine-country-card -->
 
-</div><!-- /refine-entity-pays -->
+</div><!-- /validate-entity-pays -->
 
-</div><!-- /ailab-tab-raffinement -->
+</div><!-- /ailab-tab-validation -->
 
 <script>
 (function() {
@@ -3085,7 +3079,6 @@
     var refineEventSourceText  = document.getElementById('refine-event-source-text');
     var refineEventPrompt   = document.getElementById('refine-event-prompt');
     var refineEventBtn      = document.getElementById('refine-event-btn');
-    var refineEventCorrectBtn = document.getElementById('refine-event-correct-btn');
     var refineEventResultWrap = document.getElementById('refine-event-result-wrap');
     var refineEventResult   = document.getElementById('refine-event-result');
     var refineEventDiffOld  = document.getElementById('refine-event-diff-old');
@@ -3174,7 +3167,7 @@
         var promptText = refineEventPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        var allBtns = [refineEventBtn, refineEventCorrectBtn];
+        var allBtns = [refineEventBtn];
         allBtns.forEach(function(b) { b.disabled = true; });
         clickedBtn.textContent = '⏳ Raffinement en cours…';
         refineEventResultWrap.style.display = '';
@@ -3193,8 +3186,7 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineEventBtn.textContent = '✨ Enrichir et ajouter';
-                refineEventCorrectBtn.textContent = '✅ Valider et corriger';
+                refineEventBtn.textContent = '✨ Enrichir et ajouter des infos';
                 if (data.success) {
                     refineEventResult.value = data.reply;
                     buildDiffView(refineEventSourceText.value, data.reply, refineEventDiffOld, refineEventDiffNew);
@@ -3209,8 +3201,7 @@
             })
             .catch(function(err) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineEventBtn.textContent = '✨ Enrichir et ajouter';
-                refineEventCorrectBtn.textContent = '✅ Valider et corriger';
+                refineEventBtn.textContent = '✨ Enrichir et ajouter des infos';
                 refineEventResult.value = '❌ Erreur réseau : ' + err.message;
                 refineEventDiffOld.innerHTML = '';
                 refineEventDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
@@ -3218,7 +3209,6 @@
     }
 
     refineEventBtn.addEventListener('click', function() { triggerEventRefine('enrich', refineEventBtn); });
-    refineEventCorrectBtn.addEventListener('click', function() { triggerEventRefine('validate', refineEventCorrectBtn); });
 
     /* ---- Copy refined result ---- */
     document.getElementById('refine-copy-btn').addEventListener('click', function() {
@@ -3357,25 +3347,38 @@
     });
 
     /* =====================================================================
-     * RAFFINEMENT — Entity type switching
+     * RAFFINEMENT — Entity type switching (pill buttons)
      * ===================================================================== */
-    document.querySelectorAll('input[name="refine-entity-type"]').forEach(function(radio) {
-        radio.addEventListener('change', function() {
-            var val = radio.value;
+    document.querySelectorAll('[data-refine-entity]').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+            document.querySelectorAll('[data-refine-entity]').forEach(function(p) { p.classList.remove('active'); });
+            pill.classList.add('active');
+            var val = pill.dataset.refineEntity;
             var panelEv  = document.getElementById('refine-entity-evenement');
             var panelPer = document.getElementById('refine-entity-personnage');
             var panelMon = document.getElementById('refine-entity-monument');
             var panelLeg = document.getElementById('refine-entity-legende');
-            var panelCit = document.getElementById('refine-entity-ville');
-            var panelReg = document.getElementById('refine-entity-region');
-            var panelCou = document.getElementById('refine-entity-pays');
             if (panelEv) panelEv.style.display = val === 'evenement' ? '' : 'none';
             if (panelPer) panelPer.style.display = val === 'personnage' ? '' : 'none';
             if (panelMon) panelMon.style.display = val === 'monument' ? '' : 'none';
             if (panelLeg) panelLeg.style.display = val === 'legende' ? '' : 'none';
-            if (panelCit) panelCit.style.display = val === 'ville' ? '' : 'none';
+        });
+    });
+
+    /* =====================================================================
+     * VALIDATION — Entity type switching (pill buttons)
+     * ===================================================================== */
+    document.querySelectorAll('[data-validate-entity]').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+            document.querySelectorAll('[data-validate-entity]').forEach(function(p) { p.classList.remove('active'); });
+            pill.classList.add('active');
+            var val = pill.dataset.validateEntity;
+            var panelVil = document.getElementById('validate-entity-ville');
+            var panelReg = document.getElementById('validate-entity-region');
+            var panelPay = document.getElementById('validate-entity-pays');
+            if (panelVil) panelVil.style.display = val === 'ville' ? '' : 'none';
             if (panelReg) panelReg.style.display = val === 'region' ? '' : 'none';
-            if (panelCou) panelCou.style.display = val === 'pays' ? '' : 'none';
+            if (panelPay) panelPay.style.display = val === 'pays' ? '' : 'none';
         });
     });
 
@@ -3389,7 +3392,6 @@
     var refinePersonSourceText  = document.getElementById('refine-person-source-text');
     var refinePersonPrompt      = document.getElementById('refine-person-prompt');
     var refinePersonBtn         = document.getElementById('refine-person-btn');
-    var refinePersonCorrectBtn  = document.getElementById('refine-person-correct-btn');
     var refinePersonResultWrap  = document.getElementById('refine-person-result-wrap');
     var refinePersonResult      = document.getElementById('refine-person-result');
     var refinePersonDiffOld     = document.getElementById('refine-person-diff-old');
@@ -3472,7 +3474,7 @@
         var promptText = refinePersonPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        var allBtns = [refinePersonBtn, refinePersonCorrectBtn];
+        var allBtns = [refinePersonBtn];
         allBtns.forEach(function(b) { b.disabled = true; });
         clickedBtn.textContent = '⏳ Raffinement en cours…';
         refinePersonResultWrap.style.display = '';
@@ -3491,8 +3493,7 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refinePersonBtn.textContent = '✨ Enrichir et ajouter';
-                refinePersonCorrectBtn.textContent = '✅ Valider et corriger';
+                refinePersonBtn.textContent = '✨ Enrichir et ajouter des infos';
                 if (data.success) {
                     refinePersonResult.value = data.reply;
                     buildDiffView(refinePersonSourceText.value, data.reply, refinePersonDiffOld, refinePersonDiffNew);
@@ -3507,8 +3508,7 @@
             })
             .catch(function(err) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refinePersonBtn.textContent = '✨ Enrichir et ajouter';
-                refinePersonCorrectBtn.textContent = '✅ Valider et corriger';
+                refinePersonBtn.textContent = '✨ Enrichir et ajouter des infos';
                 refinePersonResult.value = '❌ Erreur réseau : ' + err.message;
                 refinePersonDiffOld.innerHTML = '';
                 refinePersonDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
@@ -3516,7 +3516,6 @@
     }
 
     refinePersonBtn.addEventListener('click', function() { triggerPersonRefine('enrich', refinePersonBtn); });
-    refinePersonCorrectBtn.addEventListener('click', function() { triggerPersonRefine('validate', refinePersonCorrectBtn); });
 
     /* ---- Copy refined person result ---- */
     document.getElementById('refine-person-copy-btn').addEventListener('click', function() {
@@ -3949,7 +3948,6 @@
     var refineMonumentSourceText  = document.getElementById('refine-monument-source-text');
     var refineMonumentPrompt      = document.getElementById('refine-monument-prompt');
     var refineMonumentBtn         = document.getElementById('refine-monument-btn');
-    var refineMonumentCorrectBtn  = document.getElementById('refine-monument-correct-btn');
     var refineMonumentResultWrap  = document.getElementById('refine-monument-result-wrap');
     var refineMonumentResult      = document.getElementById('refine-monument-result');
     var refineMonumentDiffOld     = document.getElementById('refine-monument-diff-old');
@@ -4032,7 +4030,7 @@
         var promptText = refineMonumentPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        var allBtns = [refineMonumentBtn, refineMonumentCorrectBtn];
+        var allBtns = [refineMonumentBtn];
         allBtns.forEach(function(b) { b.disabled = true; });
         clickedBtn.textContent = '⏳ Raffinement en cours…';
         refineMonumentResultWrap.style.display = '';
@@ -4051,8 +4049,7 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineMonumentBtn.textContent = '✨ Enrichir et ajouter';
-                refineMonumentCorrectBtn.textContent = '✅ Valider et corriger';
+                refineMonumentBtn.textContent = '✨ Enrichir et ajouter des infos';
                 if (data.success) {
                     refineMonumentResult.value = data.reply;
                     buildDiffView(refineMonumentSourceText.value, data.reply, refineMonumentDiffOld, refineMonumentDiffNew);
@@ -4067,8 +4064,7 @@
             })
             .catch(function(err) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineMonumentBtn.textContent = '✨ Enrichir et ajouter';
-                refineMonumentCorrectBtn.textContent = '✅ Valider et corriger';
+                refineMonumentBtn.textContent = '✨ Enrichir et ajouter des infos';
                 refineMonumentResult.value = '❌ Erreur réseau : ' + err.message;
                 refineMonumentDiffOld.innerHTML = '';
                 refineMonumentDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
@@ -4076,7 +4072,6 @@
     }
 
     refineMonumentBtn.addEventListener('click', function() { triggerMonumentRefine('enrich', refineMonumentBtn); });
-    refineMonumentCorrectBtn.addEventListener('click', function() { triggerMonumentRefine('validate', refineMonumentCorrectBtn); });
 
     /* ---- Copy refined monument result ---- */
     document.getElementById('refine-monument-copy-btn').addEventListener('click', function() {
@@ -4224,7 +4219,6 @@
     var refineLegendSourceText  = document.getElementById('refine-legend-source-text');
     var refineLegendPrompt      = document.getElementById('refine-legend-prompt');
     var refineLegendBtn         = document.getElementById('refine-legend-btn');
-    var refineLegendCorrectBtn  = document.getElementById('refine-legend-correct-btn');
     var refineLegendResultWrap  = document.getElementById('refine-legend-result-wrap');
     var refineLegendResult      = document.getElementById('refine-legend-result');
     var refineLegendDiffOld     = document.getElementById('refine-legend-diff-old');
@@ -4283,7 +4277,7 @@
         if (!slug) { alert('Sélectionnez une légende.'); return; }
         refineLegendPrompt.value = refineLegendPrompts[mode] || refineLegendPrompts.enrich;
 
-        var allBtns = [refineLegendBtn, refineLegendCorrectBtn];
+        var allBtns = [refineLegendBtn];
         allBtns.forEach(function(b) { b.disabled = true; });
         clickedBtn.textContent = '⏳ Raffinement en cours…';
         refineLegendResultWrap.style.display = '';
@@ -4302,8 +4296,7 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineLegendBtn.textContent = '✨ Enrichir et ajouter';
-                refineLegendCorrectBtn.textContent = '✅ Valider et corriger';
+                refineLegendBtn.textContent = '✨ Enrichir et ajouter des infos';
                 if (data.success) {
                     refineLegendResult.value = data.reply;
                     buildDiffView(refineLegendSourceText.value, data.reply, refineLegendDiffOld, refineLegendDiffNew);
@@ -4319,8 +4312,7 @@
             })
             .catch(function(err) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineLegendBtn.textContent = '✨ Enrichir et ajouter';
-                refineLegendCorrectBtn.textContent = '✅ Valider et corriger';
+                refineLegendBtn.textContent = '✨ Enrichir et ajouter des infos';
                 refineLegendResult.value = '❌ Erreur réseau : ' + err.message;
                 refineLegendDiffOld.innerHTML = '';
                 refineLegendDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
@@ -4328,7 +4320,6 @@
     }
 
     refineLegendBtn.addEventListener('click', function() { triggerLegendRefine('enrich', refineLegendBtn); });
-    refineLegendCorrectBtn.addEventListener('click', function() { triggerLegendRefine('validate', refineLegendCorrectBtn); });
 
     /* ---- Copy legend result ---- */
     document.getElementById('refine-legend-copy-btn').addEventListener('click', function() {
@@ -4472,7 +4463,6 @@
     var refineCityCardContent = document.getElementById('refine-city-card-content');
     var refineCitySourceText  = document.getElementById('refine-city-source-text');
     var refineCityPrompt      = document.getElementById('refine-city-prompt');
-    var refineCityBtn         = document.getElementById('refine-city-btn');
     var refineCityCorrectBtn  = document.getElementById('refine-city-correct-btn');
     var refineCityResultWrap  = document.getElementById('refine-city-result-wrap');
     var refineCityResult      = document.getElementById('refine-city-result');
@@ -4542,7 +4532,7 @@
         var promptText = refineCityPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        var allBtns = [refineCityBtn, refineCityCorrectBtn];
+        var allBtns = [refineCityCorrectBtn];
         allBtns.forEach(function(b) { b.disabled = true; });
         clickedBtn.textContent = '⏳ Raffinement en cours…';
         refineCityResultWrap.style.display = '';
@@ -4561,7 +4551,6 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineCityBtn.textContent = '✨ Enrichir et ajouter';
                 refineCityCorrectBtn.textContent = '✅ Valider et corriger';
                 if (data.success) {
                     refineCityResult.value = data.reply;
@@ -4577,7 +4566,6 @@
             })
             .catch(function(err) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineCityBtn.textContent = '✨ Enrichir et ajouter';
                 refineCityCorrectBtn.textContent = '✅ Valider et corriger';
                 refineCityResult.value = '❌ Erreur réseau : ' + err.message;
                 refineCityDiffOld.innerHTML = '';
@@ -4585,7 +4573,6 @@
             });
     }
 
-    refineCityBtn.addEventListener('click', function() { triggerCityRefine('enrich', refineCityBtn); });
     refineCityCorrectBtn.addEventListener('click', function() { triggerCityRefine('validate', refineCityCorrectBtn); });
 
     document.getElementById('refine-city-copy-btn').addEventListener('click', function() {
@@ -4729,7 +4716,6 @@
     var refineRegionCardContent = document.getElementById('refine-region-card-content');
     var refineRegionSourceText  = document.getElementById('refine-region-source-text');
     var refineRegionPrompt      = document.getElementById('refine-region-prompt');
-    var refineRegionBtn         = document.getElementById('refine-region-btn');
     var refineRegionCorrectBtn  = document.getElementById('refine-region-correct-btn');
     var refineRegionResultWrap  = document.getElementById('refine-region-result-wrap');
     var refineRegionResult      = document.getElementById('refine-region-result');
@@ -4799,7 +4785,7 @@
         var promptText = refineRegionPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        var allBtns = [refineRegionBtn, refineRegionCorrectBtn];
+        var allBtns = [refineRegionCorrectBtn];
         allBtns.forEach(function(b) { b.disabled = true; });
         clickedBtn.textContent = '⏳ Raffinement en cours…';
         refineRegionResultWrap.style.display = '';
@@ -4818,7 +4804,6 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineRegionBtn.textContent = '✨ Enrichir et ajouter';
                 refineRegionCorrectBtn.textContent = '✅ Valider et corriger';
                 if (data.success) {
                     refineRegionResult.value = data.reply;
@@ -4834,7 +4819,6 @@
             })
             .catch(function(err) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineRegionBtn.textContent = '✨ Enrichir et ajouter';
                 refineRegionCorrectBtn.textContent = '✅ Valider et corriger';
                 refineRegionResult.value = '❌ Erreur réseau : ' + err.message;
                 refineRegionDiffOld.innerHTML = '';
@@ -4842,7 +4826,6 @@
             });
     }
 
-    refineRegionBtn.addEventListener('click', function() { triggerRegionRefine('enrich', refineRegionBtn); });
     refineRegionCorrectBtn.addEventListener('click', function() { triggerRegionRefine('validate', refineRegionCorrectBtn); });
 
     document.getElementById('refine-region-copy-btn').addEventListener('click', function() {
@@ -4986,7 +4969,6 @@
     var refineCountryCardContent = document.getElementById('refine-country-card-content');
     var refineCountrySourceText  = document.getElementById('refine-country-source-text');
     var refineCountryPrompt      = document.getElementById('refine-country-prompt');
-    var refineCountryBtn         = document.getElementById('refine-country-btn');
     var refineCountryCorrectBtn  = document.getElementById('refine-country-correct-btn');
     var refineCountryResultWrap  = document.getElementById('refine-country-result-wrap');
     var refineCountryResult      = document.getElementById('refine-country-result');
@@ -5055,7 +5037,7 @@
         var promptText = refineCountryPrompt.value.trim();
         if (!promptText) { alert('Le prompt est vide.'); return; }
 
-        var allBtns = [refineCountryBtn, refineCountryCorrectBtn];
+        var allBtns = [refineCountryCorrectBtn];
         allBtns.forEach(function(b) { b.disabled = true; });
         clickedBtn.textContent = '⏳ Raffinement en cours…';
         refineCountryResultWrap.style.display = '';
@@ -5074,7 +5056,6 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineCountryBtn.textContent = '✨ Enrichir et ajouter';
                 refineCountryCorrectBtn.textContent = '✅ Valider et corriger';
                 if (data.success) {
                     refineCountryResult.value = data.reply;
@@ -5090,7 +5071,6 @@
             })
             .catch(function(err) {
                 allBtns.forEach(function(b) { b.disabled = false; });
-                refineCountryBtn.textContent = '✨ Enrichir et ajouter';
                 refineCountryCorrectBtn.textContent = '✅ Valider et corriger';
                 refineCountryResult.value = '❌ Erreur réseau : ' + err.message;
                 refineCountryDiffOld.innerHTML = '';
@@ -5098,7 +5078,6 @@
             });
     }
 
-    refineCountryBtn.addEventListener('click', function() { triggerCountryRefine('enrich', refineCountryBtn); });
     refineCountryCorrectBtn.addEventListener('click', function() { triggerCountryRefine('validate', refineCountryCorrectBtn); });
 
     document.getElementById('refine-country-copy-btn').addEventListener('click', function() {

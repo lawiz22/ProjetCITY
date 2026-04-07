@@ -6300,39 +6300,73 @@ td {
     display: inline;
 }
 
-/* AI Lab Tabs */
+/* AI Lab Tabs — pill style */
 .ailab-tabs {
     display: flex;
     gap: 6px;
     margin-bottom: 1.5rem;
-    border-bottom: 2px solid var(--line);
-    padding-bottom: 0;
+    flex-wrap: wrap;
+    padding: 0;
+    align-items: center;
 }
 .ailab-tab {
-    padding: 10px 20px;
-    border: none;
-    border-bottom: 3px solid transparent;
-    background: transparent;
+    width: auto;
+    padding: 4px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg-2, #f5f5f5);
     color: var(--ink-2);
-    font-size: .9rem;
+    font-size: .72rem;
     font-family: inherit;
     font-weight: 600;
     cursor: pointer;
-    transition: color .2s, border-color .2s;
-    margin-bottom: -2px;
+    transition: background .2s, color .2s, border-color .2s;
+    white-space: nowrap;
 }
 .ailab-tab:hover {
     color: var(--ink);
+    border-color: var(--accent);
 }
 .ailab-tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
 }
 .ailab-tab-content {
     display: none;
 }
 .ailab-tab-content.active {
     display: block;
+}
+/* Sub-pills inside Raffinement / Validation tabs */
+.refine-pills {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.refine-pill {
+    width: auto;
+    padding: 3px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg-2, #f5f5f5);
+    color: var(--ink-2);
+    font-size: .72rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+    white-space: nowrap;
+}
+.refine-pill:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+}
+.refine-pill.active {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
 }
 
 /* Generate All button */
