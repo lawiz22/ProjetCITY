@@ -497,6 +497,7 @@ def city_detail(city_slug: str) -> str:
         ).fetchone()
         city["population_validated"] = _val_row["population_validated"] if _val_row else False
     except Exception:
+        get_db().rollback()
         city["population_validated"] = False
     try:
         pop_sources = [dict(r) for r in get_db().execute(
@@ -504,6 +505,7 @@ def city_detail(city_slug: str) -> str:
             "WHERE city_id = ? ORDER BY year", (city["city_id"],)
         ).fetchall()]
     except Exception:
+        get_db().rollback()
         pop_sources = []
 
     from .services.city_photos import get_city_photos, count_missing_photos
@@ -680,6 +682,7 @@ def country_detail(country_slug: str) -> str:
             "WHERE country_id = ? ORDER BY year", (country["country_id"],)
         ).fetchall()]
     except Exception:
+        conn.rollback()
         pop_sources = []
     # Flag
     flag_path = f"images/flags/countries/{country_slug}.png"
@@ -1441,6 +1444,7 @@ def region_detail(region_slug: str) -> str:
             "WHERE region_id = ? ORDER BY year", (region["region_id"],)
         ).fetchall()]
     except Exception:
+        conn.rollback()
         pop_sources = []
     # Trend
     if len(pop_data) >= 2:
@@ -5174,6 +5178,7 @@ def ai_lab() -> str:
             "FROM dim_city ORDER BY LOWER(city_name), city_name"
         ).fetchall()]
     except Exception:
+        conn.rollback()
         cities_for_refine = [dict(r) for r in conn.execute(
             "SELECT city_name, city_slug, country, region "
             "FROM dim_city ORDER BY LOWER(city_name), city_name"
@@ -5184,6 +5189,7 @@ def ai_lab() -> str:
             "FROM dim_region ORDER BY LOWER(region_name), region_name"
         ).fetchall()]
     except Exception:
+        conn.rollback()
         regions_for_refine = [dict(r) for r in conn.execute(
             "SELECT region_name, region_slug, country_name "
             "FROM dim_region ORDER BY LOWER(region_name), region_name"
@@ -5194,6 +5200,7 @@ def ai_lab() -> str:
             "FROM dim_country ORDER BY LOWER(country_name), country_name"
         ).fetchall()]
     except Exception:
+        conn.rollback()
         countries_for_refine = [dict(r) for r in conn.execute(
             "SELECT country_name, country_slug "
             "FROM dim_country ORDER BY LOWER(country_name), country_name"
