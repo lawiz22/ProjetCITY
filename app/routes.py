@@ -490,6 +490,15 @@ def city_detail(city_slug: str) -> str:
 
     from .db import get_db
     fiche = get_city_fiche(get_db(), city["city_id"])
+    # Population validation status
+    _val_row = get_db().execute(
+        "SELECT population_validated FROM dim_city WHERE city_id = ?", (city["city_id"],)
+    ).fetchone()
+    city["population_validated"] = _val_row["population_validated"] if _val_row else False
+    pop_sources = [dict(r) for r in get_db().execute(
+        "SELECT year, population, source_label, source_url FROM fact_city_population "
+        "WHERE city_id = ? ORDER BY year", (city["city_id"],)
+    ).fetchall()]
 
     from .services.city_photos import get_city_photos, count_missing_photos
     conn = get_db()
@@ -529,6 +538,7 @@ def city_detail(city_slug: str) -> str:
         periods=service.get_city_periods(city_slug, filters),
         annotations=service.get_city_annotations(city_slug, filters),
         chart_payload=service.get_city_chart_payload(city_slug, filters),
+        pop_sources=pop_sources,
     )
 
 
@@ -658,6 +668,10 @@ def country_detail(country_slug: str) -> str:
     country["peak_year"] = peak.get("year")
     country["first_year"] = first.get("year")
     country["first_population"] = first.get("population")
+    pop_sources = [dict(r) for r in conn.execute(
+        "SELECT year, population, source_label, source_url FROM fact_country_population "
+        "WHERE country_id = ? ORDER BY year", (country["country_id"],)
+    ).fetchall()]
     # Flag
     flag_path = f"images/flags/countries/{country_slug}.png"
     flag_full = os.path.join(current_app.static_folder, flag_path.replace("/", os.sep))
@@ -787,6 +801,7 @@ def country_detail(country_slug: str) -> str:
         annotations=annotations,
         country_photos=country_photos,
         missing_photos_count=missing_photos_count,
+        pop_sources=pop_sources,
     )
 
 
@@ -1411,6 +1426,10 @@ def region_detail(region_slug: str) -> str:
     region["peak_year"] = peak.get("year")
     region["first_year"] = first.get("year")
     region["first_population"] = first.get("population")
+    pop_sources = [dict(r) for r in conn.execute(
+        "SELECT year, population, source_label, source_url FROM fact_region_population "
+        "WHERE region_id = ? ORDER BY year", (region["region_id"],)
+    ).fetchall()]
     # Trend
     if len(pop_data) >= 2:
         delta = pop_data[-1]["population"] - pop_data[-2]["population"]
@@ -1522,6 +1541,7 @@ def region_detail(region_slug: str) -> str:
         annotations=annotations,
         region_photos=region_photos,
         missing_photos_count=missing_photos_count,
+        pop_sources=pop_sources,
     )
 
 
@@ -5132,6 +5152,22 @@ def ai_lab() -> str:
     cities_for_legend = [r["city_name"] for r in conn.execute(
         "SELECT city_name FROM dim_city ORDER BY LOWER(city_name), city_name"
     ).fetchall()]
+    # --- Refine: Ville / Région / Pays ---
+    prompt_refine_city = load_prompt("city_refine.txt")
+    prompt_refine_region = load_prompt("region_refine.txt")
+    prompt_refine_country = load_prompt("country_refine.txt")
+    cities_for_refine = [dict(r) for r in conn.execute(
+        "SELECT city_name, city_slug, country, region, population_validated "
+        "FROM dim_city ORDER BY LOWER(city_name), city_name"
+    ).fetchall()]
+    regions_for_refine = [dict(r) for r in conn.execute(
+        "SELECT region_name, region_slug, country_name, population_validated "
+        "FROM dim_region ORDER BY LOWER(region_name), region_name"
+    ).fetchall()]
+    countries_for_refine = [dict(r) for r in conn.execute(
+        "SELECT country_name, country_slug, population_validated "
+        "FROM dim_country ORDER BY LOWER(country_name), country_name"
+    ).fetchall()]
     return render_template(
         "web/ai_lab.html",
         page_title="AI Lab",
@@ -5178,6 +5214,12 @@ def ai_lab() -> str:
         countries_for_legend=countries_for_legend,
         regions_for_legend=regions_for_legend,
         cities_for_legend=cities_for_legend,
+        prompt_refine_city=prompt_refine_city,
+        prompt_refine_region=prompt_refine_region,
+        prompt_refine_country=prompt_refine_country,
+        cities_for_refine=cities_for_refine,
+        regions_for_refine=regions_for_refine,
+        countries_for_refine=countries_for_refine,
     )
 
 
@@ -7595,6 +7637,647 @@ def ai_lab_refine_legend_save() -> Response:
         "legend_slug": data["legend_slug"],
         "legend_id": legend_id,
         "redirect": url_for("web.legend_detail", legend_slug=data["legend_slug"]),
+    })
+
+
+# ---------------------------------------------------------------------------
+# Raffinement — Ville (City)
+# ---------------------------------------------------------------------------
+
+def _reconstruct_city_source_text(conn, city_slug: str) -> tuple[dict | None, str]:
+    """Load city + population data and reconstruct Python-format source text."""
+    row = conn.execute(
+        "SELECT city_id, city_name, city_slug, region, country, city_color, foundation_year "
+        "FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
+    if row is None:
+        return None, ""
+    city = dict(row)
+    pops = conn.execute(
+        "SELECT year, population, source_url, source_label FROM fact_city_population "
+        "WHERE city_id = ? ORDER BY year", (city["city_id"],)
+    ).fetchall()
+    annotations = conn.execute(
+        "SELECT fcp.year, fcp.population, a.annotation_label, a.annotation_color "
+        "FROM fact_city_population fcp "
+        "JOIN dim_annotation a ON fcp.annotation_id = a.annotation_id "
+        "WHERE fcp.city_id = ? AND fcp.annotation_id IS NOT NULL ORDER BY fcp.year",
+        (city["city_id"],)
+    ).fetchall()
+
+    years_list = ", ".join(str(p["year"]) for p in pops)
+    pop_list = ", ".join(str(p["population"]) for p in pops)
+    ann_lines = []
+    for a in annotations:
+        ann_lines.append(f'    ({a["year"]}, {a["population"]}, "{a["annotation_label"]}", \'{a["annotation_color"]}\')')
+
+    lines = [
+        f'CITY_NAME = "{city["city_name"]}"',
+        f'CITY_COLOR = \'{city["city_color"] or "#2f6fed"}\'',
+        f'fondation = {city.get("foundation_year") or "None"}',
+        "",
+        f"years = [{years_list}]",
+        f"population = [{pop_list}]",
+        "",
+        "annotations = [",
+    ]
+    lines.extend(ann_lines)
+    lines.append("]")
+
+    # Add existing sources if any
+    sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    if sources:
+        lines.append("")
+        lines.append("=== SOURCES ===")
+        for s in sources:
+            lines.append(f'year={s["year"]} | population={dict([(pp["year"], pp["population"]) for pp in pops]).get(s["year"], "")} | source={s["source_label"] or ""} | url={s["source_url"] or ""}')
+
+    return city, "\n".join(lines)
+
+
+@web.route("/ai-lab/refine/city/<city_slug>")
+@editor_required
+def ai_lab_refine_city_load(city_slug: str) -> Response:
+    """Load a city's current data as JSON for the Raffinement tab."""
+    from .db import get_db
+    conn = get_db()
+    city, source_text = _reconstruct_city_source_text(conn, city_slug)
+    if city is None:
+        return jsonify({"success": False, "error": "Ville introuvable."})
+
+    latest = conn.execute(
+        "SELECT year, population FROM fact_city_population WHERE city_id = ? ORDER BY year DESC LIMIT 1",
+        (city["city_id"],)
+    ).fetchone()
+    pop_count = conn.execute(
+        "SELECT COUNT(*) FROM fact_city_population WHERE city_id = ?", (city["city_id"],)
+    ).fetchone()[0]
+
+    return jsonify({
+        "success": True,
+        "city_name": city["city_name"],
+        "city_slug": city["city_slug"],
+        "country": city["country"],
+        "region": city["region"],
+        "latest_population": latest["population"] if latest else None,
+        "latest_year": latest["year"] if latest else None,
+        "pop_count": pop_count,
+        "source_text": source_text,
+    })
+
+
+@web.route("/ai-lab/refine/city/generate", methods=["POST"])
+@editor_required
+def ai_lab_refine_city_generate() -> Response:
+    """Generate a refined version of a city's population data via AI."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    city_slug = request.form.get("city_slug", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not city_slug:
+        return jsonify({"success": False, "error": "Ville non spécifiée."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    conn = get_db()
+    city, source_text = _reconstruct_city_source_text(conn, city_slug)
+    if city is None:
+        return jsonify({"success": False, "error": "Ville introuvable."})
+
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.3)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/city/synthesize", methods=["POST"])
+@editor_required
+def ai_lab_refine_city_synthesize() -> Response:
+    """Ask AI to reconcile the original and refined city versions."""
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    city_slug = request.form.get("city_slug", "").strip()
+    new_text = request.form.get("new_text", "").strip()
+
+    if not city_slug or not new_text:
+        return jsonify({"success": False, "error": "Données manquantes pour la synthèse."})
+
+    conn = get_db()
+    city, source_text = _reconstruct_city_source_text(conn, city_slug)
+    if city is None:
+        return jsonify({"success": False, "error": "Ville introuvable."})
+
+    prompt_text = load_prompt("city_refine.txt").replace("{NEW_TEXT}", new_text)
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.2)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/city/save", methods=["POST"])
+@editor_required
+def ai_lab_refine_city_save() -> Response:
+    """Save the refined city population data + sources to the database."""
+    from .db import get_db
+
+    text = request.form.get("city_text", "").strip()
+    is_validate = request.form.get("is_validate", "") == "1"
+    city_slug = request.form.get("city_slug", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+    if not city_slug:
+        return jsonify({"success": False, "error": "Ville non spécifiée."})
+
+    conn = get_db()
+    city_row = conn.execute("SELECT city_id, city_name FROM dim_city WHERE city_slug = ?", (city_slug,)).fetchone()
+    if city_row is None:
+        return jsonify({"success": False, "error": "Ville introuvable."})
+    city_id = city_row["city_id"]
+
+    # Parse the === SOURCES === section if present
+    sources_by_year: dict[int, dict] = {}
+    if "=== SOURCES ===" in text:
+        sources_section = text.split("=== SOURCES ===", 1)[1]
+        for line in sources_section.strip().splitlines():
+            line = line.strip()
+            if not line or "|" not in line:
+                continue
+            parts = {}
+            for segment in line.split("|"):
+                segment = segment.strip()
+                if "=" in segment:
+                    key, val = segment.split("=", 1)
+                    parts[key.strip()] = val.strip()
+            try:
+                yr = int(parts.get("year", ""))
+                sources_by_year[yr] = {
+                    "source_label": parts.get("source", ""),
+                    "source_url": parts.get("url", ""),
+                }
+            except (ValueError, TypeError):
+                continue
+
+    # Update sources on existing population rows
+    for yr, src in sources_by_year.items():
+        conn.execute(
+            "UPDATE fact_city_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
+            "WHERE city_id = ? AND year = ?",
+            (src["source_url"] or None, src["source_label"] or None, city_id, yr),
+        )
+
+    # If validate mode, set the dim-level flag
+    if is_validate and sources_by_year:
+        conn.execute(
+            "UPDATE dim_city SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+            "WHERE city_id = ?", (city_id,)
+        )
+
+    log_action("import", "city", city_slug,
+               f"Ville raffinée sauvegardée: {city_row['city_name']} ({len(sources_by_year)} sources)")
+    return jsonify({
+        "success": True,
+        "city_name": city_row["city_name"],
+        "city_slug": city_slug,
+        "sources_count": len(sources_by_year),
+    })
+
+
+# ---------------------------------------------------------------------------
+# Raffinement — Région
+# ---------------------------------------------------------------------------
+
+def _reconstruct_region_source_text(conn, region_slug: str) -> tuple[dict | None, str]:
+    """Load region + population data and reconstruct Python-format source text."""
+    row = conn.execute(
+        "SELECT region_id, region_name, region_slug, country_name, region_color "
+        "FROM dim_region WHERE region_slug = ?", (region_slug,)
+    ).fetchone()
+    if row is None:
+        return None, ""
+    region = dict(row)
+    pops = conn.execute(
+        "SELECT year, population, source_url, source_label FROM fact_region_population "
+        "WHERE region_id = ? ORDER BY year", (region["region_id"],)
+    ).fetchall()
+    annotations = conn.execute(
+        "SELECT frp.year, frp.population, a.annotation_label, a.annotation_color "
+        "FROM fact_region_population frp "
+        "JOIN dim_annotation a ON frp.annotation_id = a.annotation_id "
+        "WHERE frp.region_id = ? AND frp.annotation_id IS NOT NULL ORDER BY frp.year",
+        (region["region_id"],)
+    ).fetchall()
+
+    years_list = ", ".join(str(p["year"]) for p in pops)
+    pop_list = ", ".join(str(p["population"]) for p in pops)
+    ann_lines = []
+    for a in annotations:
+        ann_lines.append(f'    ({a["year"]}, {a["population"]}, "{a["annotation_label"]}", \'{a["annotation_color"]}\')')
+
+    lines = [
+        f'REGION_NAME = "{region["region_name"]}"',
+        f'REGION_COUNTRY = "{region["country_name"]}"',
+        f'REGION_COLOR = \'{region["region_color"] or "#2f6fed"}\'',
+        "",
+        f"years = [{years_list}]",
+        f"population = [{pop_list}]",
+        "",
+        "annotations = [",
+    ]
+    lines.extend(ann_lines)
+    lines.append("]")
+
+    sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    if sources:
+        lines.append("")
+        lines.append("=== SOURCES ===")
+        for s in sources:
+            lines.append(f'year={s["year"]} | population={dict([(pp["year"], pp["population"]) for pp in pops]).get(s["year"], "")} | source={s["source_label"] or ""} | url={s["source_url"] or ""}')
+
+    return region, "\n".join(lines)
+
+
+@web.route("/ai-lab/refine/region/<region_slug>")
+@editor_required
+def ai_lab_refine_region_load(region_slug: str) -> Response:
+    """Load a region's current data as JSON for the Raffinement tab."""
+    from .db import get_db
+    conn = get_db()
+    region, source_text = _reconstruct_region_source_text(conn, region_slug)
+    if region is None:
+        return jsonify({"success": False, "error": "Région introuvable."})
+
+    latest = conn.execute(
+        "SELECT year, population FROM fact_region_population WHERE region_id = ? ORDER BY year DESC LIMIT 1",
+        (region["region_id"],)
+    ).fetchone()
+    pop_count = conn.execute(
+        "SELECT COUNT(*) FROM fact_region_population WHERE region_id = ?", (region["region_id"],)
+    ).fetchone()[0]
+
+    return jsonify({
+        "success": True,
+        "region_name": region["region_name"],
+        "region_slug": region["region_slug"],
+        "country_name": region["country_name"],
+        "latest_population": latest["population"] if latest else None,
+        "latest_year": latest["year"] if latest else None,
+        "pop_count": pop_count,
+        "source_text": source_text,
+    })
+
+
+@web.route("/ai-lab/refine/region/generate", methods=["POST"])
+@editor_required
+def ai_lab_refine_region_generate() -> Response:
+    """Generate a refined version of a region's population data via AI."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    region_slug = request.form.get("region_slug", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not region_slug:
+        return jsonify({"success": False, "error": "Région non spécifiée."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    conn = get_db()
+    region, source_text = _reconstruct_region_source_text(conn, region_slug)
+    if region is None:
+        return jsonify({"success": False, "error": "Région introuvable."})
+
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.3)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/region/synthesize", methods=["POST"])
+@editor_required
+def ai_lab_refine_region_synthesize() -> Response:
+    """Ask AI to reconcile the original and refined region versions."""
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    region_slug = request.form.get("region_slug", "").strip()
+    new_text = request.form.get("new_text", "").strip()
+
+    if not region_slug or not new_text:
+        return jsonify({"success": False, "error": "Données manquantes pour la synthèse."})
+
+    conn = get_db()
+    region, source_text = _reconstruct_region_source_text(conn, region_slug)
+    if region is None:
+        return jsonify({"success": False, "error": "Région introuvable."})
+
+    prompt_text = load_prompt("region_refine.txt").replace("{NEW_TEXT}", new_text)
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.2)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/region/save", methods=["POST"])
+@editor_required
+def ai_lab_refine_region_save() -> Response:
+    """Save the refined region population data + sources to the database."""
+    from .db import get_db
+
+    text = request.form.get("region_text", "").strip()
+    is_validate = request.form.get("is_validate", "") == "1"
+    region_slug = request.form.get("region_slug", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+    if not region_slug:
+        return jsonify({"success": False, "error": "Région non spécifiée."})
+
+    conn = get_db()
+    region_row = conn.execute("SELECT region_id, region_name FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    if region_row is None:
+        return jsonify({"success": False, "error": "Région introuvable."})
+    region_id = region_row["region_id"]
+
+    # Parse the === SOURCES === section
+    sources_by_year: dict[int, dict] = {}
+    if "=== SOURCES ===" in text:
+        sources_section = text.split("=== SOURCES ===", 1)[1]
+        for line in sources_section.strip().splitlines():
+            line = line.strip()
+            if not line or "|" not in line:
+                continue
+            parts = {}
+            for segment in line.split("|"):
+                segment = segment.strip()
+                if "=" in segment:
+                    key, val = segment.split("=", 1)
+                    parts[key.strip()] = val.strip()
+            try:
+                yr = int(parts.get("year", ""))
+                sources_by_year[yr] = {
+                    "source_label": parts.get("source", ""),
+                    "source_url": parts.get("url", ""),
+                }
+            except (ValueError, TypeError):
+                continue
+
+    for yr, src in sources_by_year.items():
+        conn.execute(
+            "UPDATE fact_region_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
+            "WHERE region_id = ? AND year = ?",
+            (src["source_url"] or None, src["source_label"] or None, region_id, yr),
+        )
+
+    if is_validate and sources_by_year:
+        conn.execute(
+            "UPDATE dim_region SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+            "WHERE region_id = ?", (region_id,)
+        )
+
+    log_action("import", "region", region_slug,
+               f"Région raffinée sauvegardée: {region_row['region_name']} ({len(sources_by_year)} sources)")
+    return jsonify({
+        "success": True,
+        "region_name": region_row["region_name"],
+        "region_slug": region_slug,
+        "sources_count": len(sources_by_year),
+    })
+
+
+# ---------------------------------------------------------------------------
+# Raffinement — Pays (Country)
+# ---------------------------------------------------------------------------
+
+def _reconstruct_country_source_text(conn, country_slug: str) -> tuple[dict | None, str]:
+    """Load country + population data and reconstruct Python-format source text."""
+    row = conn.execute(
+        "SELECT country_id, country_name, country_slug, country_color "
+        "FROM dim_country WHERE country_slug = ?", (country_slug,)
+    ).fetchone()
+    if row is None:
+        return None, ""
+    country = dict(row)
+    pops = conn.execute(
+        "SELECT year, population, source_url, source_label FROM fact_country_population "
+        "WHERE country_id = ? ORDER BY year", (country["country_id"],)
+    ).fetchall()
+    annotations = conn.execute(
+        "SELECT fcp.year, fcp.population, a.annotation_label, a.annotation_color "
+        "FROM fact_country_population fcp "
+        "JOIN dim_annotation a ON fcp.annotation_id = a.annotation_id "
+        "WHERE fcp.country_id = ? AND fcp.annotation_id IS NOT NULL ORDER BY fcp.year",
+        (country["country_id"],)
+    ).fetchall()
+
+    years_list = ", ".join(str(p["year"]) for p in pops)
+    pop_list = ", ".join(str(p["population"]) for p in pops)
+    ann_lines = []
+    for a in annotations:
+        ann_lines.append(f'    ({a["year"]}, {a["population"]}, "{a["annotation_label"]}", \'{a["annotation_color"]}\')')
+
+    lines = [
+        f'COUNTRY_NAME = "{country["country_name"]}"',
+        f'COUNTRY_COLOR = \'{country["country_color"] or "#2f6fed"}\'',
+        "",
+        f"years = [{years_list}]",
+        f"population = [{pop_list}]",
+        "",
+        "annotations = [",
+    ]
+    lines.extend(ann_lines)
+    lines.append("]")
+
+    sources = [p for p in pops if p["source_url"] or p["source_label"]]
+    if sources:
+        lines.append("")
+        lines.append("=== SOURCES ===")
+        for s in sources:
+            lines.append(f'year={s["year"]} | population={dict([(pp["year"], pp["population"]) for pp in pops]).get(s["year"], "")} | source={s["source_label"] or ""} | url={s["source_url"] or ""}')
+
+    return country, "\n".join(lines)
+
+
+@web.route("/ai-lab/refine/country/<country_slug>")
+@editor_required
+def ai_lab_refine_country_load(country_slug: str) -> Response:
+    """Load a country's current data as JSON for the Raffinement tab."""
+    from .db import get_db
+    conn = get_db()
+    country, source_text = _reconstruct_country_source_text(conn, country_slug)
+    if country is None:
+        return jsonify({"success": False, "error": "Pays introuvable."})
+
+    latest = conn.execute(
+        "SELECT year, population FROM fact_country_population WHERE country_id = ? ORDER BY year DESC LIMIT 1",
+        (country["country_id"],)
+    ).fetchone()
+    pop_count = conn.execute(
+        "SELECT COUNT(*) FROM fact_country_population WHERE country_id = ?", (country["country_id"],)
+    ).fetchone()[0]
+
+    return jsonify({
+        "success": True,
+        "country_name": country["country_name"],
+        "country_slug": country["country_slug"],
+        "latest_population": latest["population"] if latest else None,
+        "latest_year": latest["year"] if latest else None,
+        "pop_count": pop_count,
+        "source_text": source_text,
+    })
+
+
+@web.route("/ai-lab/refine/country/generate", methods=["POST"])
+@editor_required
+def ai_lab_refine_country_generate() -> Response:
+    """Generate a refined version of a country's population data via AI."""
+    from .services.mammouth_ai import load_settings, generate_city
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    country_slug = request.form.get("country_slug", "").strip()
+    prompt_text = request.form.get("prompt_text", "").strip()
+
+    if not country_slug:
+        return jsonify({"success": False, "error": "Pays non spécifié."})
+    if not prompt_text:
+        return jsonify({"success": False, "error": "Le prompt est vide."})
+
+    conn = get_db()
+    country, source_text = _reconstruct_country_source_text(conn, country_slug)
+    if country is None:
+        return jsonify({"success": False, "error": "Pays introuvable."})
+
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.3)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/country/synthesize", methods=["POST"])
+@editor_required
+def ai_lab_refine_country_synthesize() -> Response:
+    """Ask AI to reconcile the original and refined country versions."""
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+    from .db import get_db
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API configurée."})
+
+    model = request.form.get("model", settings.get("model", "gpt-4.1-mini")).strip()
+    country_slug = request.form.get("country_slug", "").strip()
+    new_text = request.form.get("new_text", "").strip()
+
+    if not country_slug or not new_text:
+        return jsonify({"success": False, "error": "Données manquantes pour la synthèse."})
+
+    conn = get_db()
+    country, source_text = _reconstruct_country_source_text(conn, country_slug)
+    if country is None:
+        return jsonify({"success": False, "error": "Pays introuvable."})
+
+    prompt_text = load_prompt("country_refine.txt").replace("{NEW_TEXT}", new_text)
+    result = generate_city(api_key, model, source_text, prompt_text, max_tokens=4000, temperature=0.2)
+    if result.get("success"):
+        result["tokens_total"] = load_settings().get("tokens_used", 0)
+    return jsonify(result)
+
+
+@web.route("/ai-lab/refine/country/save", methods=["POST"])
+@editor_required
+def ai_lab_refine_country_save() -> Response:
+    """Save the refined country population data + sources to the database."""
+    from .db import get_db
+
+    text = request.form.get("country_text", "").strip()
+    is_validate = request.form.get("is_validate", "") == "1"
+    country_slug = request.form.get("country_slug", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Texte vide."})
+    if not country_slug:
+        return jsonify({"success": False, "error": "Pays non spécifié."})
+
+    conn = get_db()
+    country_row = conn.execute("SELECT country_id, country_name FROM dim_country WHERE country_slug = ?", (country_slug,)).fetchone()
+    if country_row is None:
+        return jsonify({"success": False, "error": "Pays introuvable."})
+    country_id = country_row["country_id"]
+
+    # Parse the === SOURCES === section
+    sources_by_year: dict[int, dict] = {}
+    if "=== SOURCES ===" in text:
+        sources_section = text.split("=== SOURCES ===", 1)[1]
+        for line in sources_section.strip().splitlines():
+            line = line.strip()
+            if not line or "|" not in line:
+                continue
+            parts = {}
+            for segment in line.split("|"):
+                segment = segment.strip()
+                if "=" in segment:
+                    key, val = segment.split("=", 1)
+                    parts[key.strip()] = val.strip()
+            try:
+                yr = int(parts.get("year", ""))
+                sources_by_year[yr] = {
+                    "source_label": parts.get("source", ""),
+                    "source_url": parts.get("url", ""),
+                }
+            except (ValueError, TypeError):
+                continue
+
+    for yr, src in sources_by_year.items():
+        conn.execute(
+            "UPDATE fact_country_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
+            "WHERE country_id = ? AND year = ?",
+            (src["source_url"] or None, src["source_label"] or None, country_id, yr),
+        )
+
+    if is_validate and sources_by_year:
+        conn.execute(
+            "UPDATE dim_country SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+            "WHERE country_id = ?", (country_id,)
+        )
+
+    log_action("import", "country", country_slug,
+               f"Pays raffiné sauvegardé: {country_row['country_name']} ({len(sources_by_year)} sources)")
+    return jsonify({
+        "success": True,
+        "country_name": country_row["country_name"],
+        "country_slug": country_slug,
+        "sources_count": len(sources_by_year),
     })
 
 

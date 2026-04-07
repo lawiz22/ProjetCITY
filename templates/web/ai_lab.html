@@ -933,14 +933,14 @@
             <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
                 <input type="radio" name="refine-entity-type" value="legende"> 👻 Légende
             </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
-                <input type="radio" name="refine-entity-type" value="ville" disabled> 🏙️ Ville
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
+                <input type="radio" name="refine-entity-type" value="ville"> 🏙️ Ville
             </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
-                <input type="radio" name="refine-entity-type" value="region" disabled> 📍 Région
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
+                <input type="radio" name="refine-entity-type" value="region"> 📍 Région
             </label>
-            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;opacity:.4;" title="Bientôt disponible">
-                <input type="radio" name="refine-entity-type" value="pays" disabled> 🌍 Pays
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-weight:600;">
+                <input type="radio" name="refine-entity-type" value="pays"> 🌍 Pays
             </label>
         </div>
     </div>
@@ -1397,6 +1397,332 @@
     </div><!-- /refine-legend-card -->
 
 </div><!-- /refine-entity-legende -->
+
+<!-- VILLE (CITY) panel -->
+<div id="refine-entity-ville" style="display:none;">
+
+    <!-- City picker -->
+    <section class="panel">
+        <h3 class="panel-title">🏙️ Choisir une ville</h3>
+        <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+            <div class="ai-lab-field" style="max-width:520px;">
+                <label class="opt-label" for="refine-city-select">Ville</label>
+                <select id="refine-city-select" class="opt-input">
+                    <option value="">— Choisir une ville —</option>
+                    {% for c in cities_for_refine %}
+                    <option value="{{ c.city_slug }}">{{ c.city_name }} ({{ c.region }}, {{ c.country }}){% if c.population_validated %} ✅{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="refine-city-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
+        </div>
+    </section>
+
+    <!-- Summary card (hidden until city selected) -->
+    <div id="refine-city-card" style="display:none;">
+        <section class="panel">
+            <h3 class="panel-title">📋 Données actuelles</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div id="refine-city-card-content" style="font-size:.9rem;line-height:1.7;"></div>
+                <details style="margin-top:.75rem;">
+                    <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">Voir le texte source complet</summary>
+                    <textarea id="refine-city-source-text" class="opt-input opt-textarea" rows="10"
+                        style="width:100%;font-family:monospace;font-size:.78rem;margin-top:.5rem;" readonly></textarea>
+                </details>
+            </div>
+        </section>
+
+        <!-- Refinement type + prompt + button -->
+        <section class="panel">
+            <h3 class="panel-title">🔬 Raffiner les populations</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div class="ai-lab-field" style="margin-bottom:1rem;">
+                    <label class="opt-label" for="refine-city-prompt">Instructions (modifiables)</label>
+                    <textarea id="refine-city-prompt" class="opt-input opt-textarea" rows="8"
+                        style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_city }}</textarea>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-city-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
+                    <button type="button" class="opt-btn opt-btn-warning" id="refine-city-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result panel: DIFF VIEW -->
+        <div id="refine-city-result-wrap" style="display:none;">
+            <section class="panel">
+                <h3 class="panel-title">🧬 Comparaison original / raffiné</h3>
+                <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                    <div class="refine-diff-container">
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-old">📄 Original</div>
+                            <div class="refine-diff-body" id="refine-city-diff-old"></div>
+                        </div>
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-new">🧬 Version raffinée</div>
+                            <div class="refine-diff-body" id="refine-city-diff-new"></div>
+                        </div>
+                    </div>
+
+                    <details style="margin-top:.75rem;">
+                        <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">📋 Texte brut de la version raffinée</summary>
+                        <textarea id="refine-city-result" class="opt-input opt-textarea" rows="12"
+                            style="width:100%;font-family:monospace;font-size:.8rem;margin-top:.5rem;"></textarea>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-city-copy-btn">📋 Copier</button>
+                        </div>
+                    </details>
+
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
+                        <span style="font-size:.85rem;color:var(--muted);font-weight:600;">Que faire ?</span>
+                        <button type="button" class="opt-btn" id="refine-city-keep-btn">↩️ Garder l'original</button>
+                        <button type="button" class="opt-btn opt-btn-success" id="refine-city-use-btn">✅ Utiliser la version raffinée</button>
+                        <button type="button" class="opt-btn opt-btn-primary" id="refine-city-synth-btn">⚗️ Synthèse IA des 2 versions</button>
+                    </div>
+
+                    <div id="refine-city-save-result" style="display:none;" class="opt-test-result"></div>
+                </div>
+            </section>
+
+            <!-- Synthesis result -->
+            <div id="refine-city-synth-wrap" style="display:none;">
+                <section class="panel">
+                    <h3 class="panel-title">⚗️ Synthèse IA</h3>
+                    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                        <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+                            L'IA a réconcilié les deux versions. Vérifiez le résultat et sauvegardez si satisfait.
+                        </p>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-city-synth-copy-btn">📋 Copier</button>
+                        </div>
+                        <textarea id="refine-city-synth-result" class="opt-input opt-textarea" rows="16"
+                            style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;align-items:center;">
+                            <button type="button" class="opt-btn opt-btn-success" id="refine-city-synth-save-btn">💾 Sauvegarder la synthèse</button>
+                        </div>
+                        <div id="refine-city-synth-save-result" style="display:none;" class="opt-test-result"></div>
+                    </div>
+                </section>
+            </div><!-- /refine-city-synth-wrap -->
+        </div><!-- /refine-city-result-wrap -->
+
+    </div><!-- /refine-city-card -->
+
+</div><!-- /refine-entity-ville -->
+
+<!-- REGION panel -->
+<div id="refine-entity-region" style="display:none;">
+
+    <section class="panel">
+        <h3 class="panel-title">📍 Choisir une région</h3>
+        <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+            <div class="ai-lab-field" style="max-width:520px;">
+                <label class="opt-label" for="refine-region-select">Région</label>
+                <select id="refine-region-select" class="opt-input">
+                    <option value="">— Choisir une région —</option>
+                    {% for r in regions_for_refine %}
+                    <option value="{{ r.region_slug }}">{{ r.region_name }} ({{ r.country_name }}){% if r.population_validated %} ✅{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="refine-region-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
+        </div>
+    </section>
+
+    <div id="refine-region-card" style="display:none;">
+        <section class="panel">
+            <h3 class="panel-title">📋 Données actuelles</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div id="refine-region-card-content" style="font-size:.9rem;line-height:1.7;"></div>
+                <details style="margin-top:.75rem;">
+                    <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">Voir le texte source complet</summary>
+                    <textarea id="refine-region-source-text" class="opt-input opt-textarea" rows="10"
+                        style="width:100%;font-family:monospace;font-size:.78rem;margin-top:.5rem;" readonly></textarea>
+                </details>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h3 class="panel-title">🔬 Raffiner les populations</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div class="ai-lab-field" style="margin-bottom:1rem;">
+                    <label class="opt-label" for="refine-region-prompt">Instructions (modifiables)</label>
+                    <textarea id="refine-region-prompt" class="opt-input opt-textarea" rows="8"
+                        style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_region }}</textarea>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-region-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
+                    <button type="button" class="opt-btn opt-btn-warning" id="refine-region-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
+                </div>
+            </div>
+        </section>
+
+        <div id="refine-region-result-wrap" style="display:none;">
+            <section class="panel">
+                <h3 class="panel-title">🧬 Comparaison original / raffiné</h3>
+                <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                    <div class="refine-diff-container">
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-old">📄 Original</div>
+                            <div class="refine-diff-body" id="refine-region-diff-old"></div>
+                        </div>
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-new">🧬 Version raffinée</div>
+                            <div class="refine-diff-body" id="refine-region-diff-new"></div>
+                        </div>
+                    </div>
+
+                    <details style="margin-top:.75rem;">
+                        <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">📋 Texte brut de la version raffinée</summary>
+                        <textarea id="refine-region-result" class="opt-input opt-textarea" rows="12"
+                            style="width:100%;font-family:monospace;font-size:.8rem;margin-top:.5rem;"></textarea>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-region-copy-btn">📋 Copier</button>
+                        </div>
+                    </details>
+
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
+                        <span style="font-size:.85rem;color:var(--muted);font-weight:600;">Que faire ?</span>
+                        <button type="button" class="opt-btn" id="refine-region-keep-btn">↩️ Garder l'original</button>
+                        <button type="button" class="opt-btn opt-btn-success" id="refine-region-use-btn">✅ Utiliser la version raffinée</button>
+                        <button type="button" class="opt-btn opt-btn-primary" id="refine-region-synth-btn">⚗️ Synthèse IA des 2 versions</button>
+                    </div>
+
+                    <div id="refine-region-save-result" style="display:none;" class="opt-test-result"></div>
+                </div>
+            </section>
+
+            <div id="refine-region-synth-wrap" style="display:none;">
+                <section class="panel">
+                    <h3 class="panel-title">⚗️ Synthèse IA</h3>
+                    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                        <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+                            L'IA a réconcilié les deux versions. Vérifiez le résultat et sauvegardez si satisfait.
+                        </p>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-region-synth-copy-btn">📋 Copier</button>
+                        </div>
+                        <textarea id="refine-region-synth-result" class="opt-input opt-textarea" rows="16"
+                            style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;align-items:center;">
+                            <button type="button" class="opt-btn opt-btn-success" id="refine-region-synth-save-btn">💾 Sauvegarder la synthèse</button>
+                        </div>
+                        <div id="refine-region-synth-save-result" style="display:none;" class="opt-test-result"></div>
+                    </div>
+                </section>
+            </div><!-- /refine-region-synth-wrap -->
+        </div><!-- /refine-region-result-wrap -->
+
+    </div><!-- /refine-region-card -->
+
+</div><!-- /refine-entity-region -->
+
+<!-- PAYS (COUNTRY) panel -->
+<div id="refine-entity-pays" style="display:none;">
+
+    <section class="panel">
+        <h3 class="panel-title">🌍 Choisir un pays</h3>
+        <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+            <div class="ai-lab-field" style="max-width:520px;">
+                <label class="opt-label" for="refine-country-select">Pays</label>
+                <select id="refine-country-select" class="opt-input">
+                    <option value="">— Choisir un pays —</option>
+                    {% for co in countries_for_refine %}
+                    <option value="{{ co.country_slug }}">{{ co.country_name }}{% if co.population_validated %} ✅{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="refine-country-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
+        </div>
+    </section>
+
+    <div id="refine-country-card" style="display:none;">
+        <section class="panel">
+            <h3 class="panel-title">📋 Données actuelles</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div id="refine-country-card-content" style="font-size:.9rem;line-height:1.7;"></div>
+                <details style="margin-top:.75rem;">
+                    <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">Voir le texte source complet</summary>
+                    <textarea id="refine-country-source-text" class="opt-input opt-textarea" rows="10"
+                        style="width:100%;font-family:monospace;font-size:.78rem;margin-top:.5rem;" readonly></textarea>
+                </details>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h3 class="panel-title">🔬 Raffiner les populations</h3>
+            <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                <div class="ai-lab-field" style="margin-bottom:1rem;">
+                    <label class="opt-label" for="refine-country-prompt">Instructions (modifiables)</label>
+                    <textarea id="refine-country-prompt" class="opt-input opt-textarea" rows="8"
+                        style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_country }}</textarea>
+                </div>
+                <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+                    <button type="button" class="opt-btn opt-btn-primary" id="refine-country-btn" data-refine-mode="enrich">✨ Enrichir et ajouter</button>
+                    <button type="button" class="opt-btn opt-btn-warning" id="refine-country-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
+                </div>
+            </div>
+        </section>
+
+        <div id="refine-country-result-wrap" style="display:none;">
+            <section class="panel">
+                <h3 class="panel-title">🧬 Comparaison original / raffiné</h3>
+                <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                    <div class="refine-diff-container">
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-old">📄 Original</div>
+                            <div class="refine-diff-body" id="refine-country-diff-old"></div>
+                        </div>
+                        <div class="refine-diff-col">
+                            <div class="refine-diff-header refine-diff-header-new">🧬 Version raffinée</div>
+                            <div class="refine-diff-body" id="refine-country-diff-new"></div>
+                        </div>
+                    </div>
+
+                    <details style="margin-top:.75rem;">
+                        <summary style="cursor:pointer;font-size:.85rem;color:var(--muted);font-weight:600;">📋 Texte brut de la version raffinée</summary>
+                        <textarea id="refine-country-result" class="opt-input opt-textarea" rows="12"
+                            style="width:100%;font-family:monospace;font-size:.8rem;margin-top:.5rem;"></textarea>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-country-copy-btn">📋 Copier</button>
+                        </div>
+                    </details>
+
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);align-items:center;">
+                        <span style="font-size:.85rem;color:var(--muted);font-weight:600;">Que faire ?</span>
+                        <button type="button" class="opt-btn" id="refine-country-keep-btn">↩️ Garder l'original</button>
+                        <button type="button" class="opt-btn opt-btn-success" id="refine-country-use-btn">✅ Utiliser la version raffinée</button>
+                        <button type="button" class="opt-btn opt-btn-primary" id="refine-country-synth-btn">⚗️ Synthèse IA des 2 versions</button>
+                    </div>
+
+                    <div id="refine-country-save-result" style="display:none;" class="opt-test-result"></div>
+                </div>
+            </section>
+
+            <div id="refine-country-synth-wrap" style="display:none;">
+                <section class="panel">
+                    <h3 class="panel-title">⚗️ Synthèse IA</h3>
+                    <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
+                        <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+                            L'IA a réconcilié les deux versions. Vérifiez le résultat et sauvegardez si satisfait.
+                        </p>
+                        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.5rem;">
+                            <button type="button" class="opt-btn" id="refine-country-synth-copy-btn">📋 Copier</button>
+                        </div>
+                        <textarea id="refine-country-synth-result" class="opt-input opt-textarea" rows="16"
+                            style="width:100%;font-family:monospace;font-size:.8rem;"></textarea>
+                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;align-items:center;">
+                            <button type="button" class="opt-btn opt-btn-success" id="refine-country-synth-save-btn">💾 Sauvegarder la synthèse</button>
+                        </div>
+                        <div id="refine-country-synth-save-result" style="display:none;" class="opt-test-result"></div>
+                    </div>
+                </section>
+            </div><!-- /refine-country-synth-wrap -->
+        </div><!-- /refine-country-result-wrap -->
+
+    </div><!-- /refine-country-card -->
+
+</div><!-- /refine-entity-pays -->
 
 </div><!-- /ailab-tab-raffinement -->
 
@@ -3040,10 +3366,16 @@
             var panelPer = document.getElementById('refine-entity-personnage');
             var panelMon = document.getElementById('refine-entity-monument');
             var panelLeg = document.getElementById('refine-entity-legende');
+            var panelCit = document.getElementById('refine-entity-ville');
+            var panelReg = document.getElementById('refine-entity-region');
+            var panelCou = document.getElementById('refine-entity-pays');
             if (panelEv) panelEv.style.display = val === 'evenement' ? '' : 'none';
             if (panelPer) panelPer.style.display = val === 'personnage' ? '' : 'none';
             if (panelMon) panelMon.style.display = val === 'monument' ? '' : 'none';
             if (panelLeg) panelLeg.style.display = val === 'legende' ? '' : 'none';
+            if (panelCit) panelCit.style.display = val === 'ville' ? '' : 'none';
+            if (panelReg) panelReg.style.display = val === 'region' ? '' : 'none';
+            if (panelCou) panelCou.style.display = val === 'pays' ? '' : 'none';
         });
     });
 
@@ -4128,6 +4460,776 @@
                 btn.textContent = '💾 Sauvegarder la synthèse';
                 refineLegendSynthSaveResult.className = 'opt-test-result opt-test-error';
                 refineLegendSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* =====================================================================
+     * RAFFINEMENT TAB — Ville (City)
+     * ===================================================================== */
+    var refineCitySelect      = document.getElementById('refine-city-select');
+    var refineCityLoading     = document.getElementById('refine-city-loading');
+    var refineCityCard        = document.getElementById('refine-city-card');
+    var refineCityCardContent = document.getElementById('refine-city-card-content');
+    var refineCitySourceText  = document.getElementById('refine-city-source-text');
+    var refineCityPrompt      = document.getElementById('refine-city-prompt');
+    var refineCityBtn         = document.getElementById('refine-city-btn');
+    var refineCityCorrectBtn  = document.getElementById('refine-city-correct-btn');
+    var refineCityResultWrap  = document.getElementById('refine-city-result-wrap');
+    var refineCityResult      = document.getElementById('refine-city-result');
+    var refineCityDiffOld     = document.getElementById('refine-city-diff-old');
+    var refineCityDiffNew     = document.getElementById('refine-city-diff-new');
+    var refineCitySaveResult  = document.getElementById('refine-city-save-result');
+    var refineCitySynthWrap   = document.getElementById('refine-city-synth-wrap');
+    var refineCitySynthResult = document.getElementById('refine-city-synth-result');
+    var refineCitySynthSaveResult = document.getElementById('refine-city-synth-save-result');
+
+    var refineCityLoadUrl  = '{{ url_for("web.ai_lab_refine_city_load", city_slug="__SLUG__") }}';
+    var refineCityGenUrl   = '{{ url_for("web.ai_lab_refine_city_generate") }}';
+    var refineCitySynthUrl = '{{ url_for("web.ai_lab_refine_city_synthesize") }}';
+    var refineCitySaveUrl  = '{{ url_for("web.ai_lab_refine_city_save") }}';
+
+    var _baseRefineCityPrompt = {{ prompt_refine_city | tojson }};
+    var refineCityPrompts = {
+        enrich: _baseRefineCityPrompt,
+        validate: _baseRefineCityPrompt
+    };
+
+    var currentCitySlug = '';
+    var currentCityRefineMode = 'enrich';
+
+    refineCitySelect.addEventListener('change', function() {
+        var slug = refineCitySelect.value;
+        if (!slug) {
+            refineCityCard.style.display = 'none';
+            refineCityResultWrap.style.display = 'none';
+            if (refineCitySynthWrap) refineCitySynthWrap.style.display = 'none';
+            currentCitySlug = '';
+            return;
+        }
+        refineCityLoading.style.display = '';
+        refineCityCard.style.display = 'none';
+        refineCityResultWrap.style.display = 'none';
+        if (refineCitySynthWrap) refineCitySynthWrap.style.display = 'none';
+
+        var url = refineCityLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineCityLoading.style.display = 'none';
+                if (!data.success) { alert('Erreur: ' + data.error); return; }
+                currentCitySlug = slug;
+
+                var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
+                    + '<span class="badge badge-year">🏙️ ' + (data.city_name || '—').replace(/</g,'&lt;') + '</span>'
+                    + '<span class="badge">' + (data.region || '—').replace(/</g,'&lt;') + ', ' + (data.country || '—').replace(/</g,'&lt;') + '</span>'
+                    + '<span class="badge badge-level">Pop: ' + (data.latest_population ? data.latest_population.toLocaleString() : '—') + ' (' + (data.latest_year || '?') + ')</span>'
+                    + '<span class="badge">' + (data.pop_count || 0) + ' année(s) de données</span>'
+                    + '</div>';
+                refineCityCardContent.innerHTML = html;
+                refineCitySourceText.value = data.source_text || '';
+                refineCityCard.style.display = '';
+            })
+            .catch(function(err) {
+                refineCityLoading.style.display = 'none';
+                alert('Erreur réseau: ' + err);
+            });
+    });
+
+    function triggerCityRefine(mode, clickedBtn) {
+        if (!currentCitySlug) { alert('Choisissez une ville.'); return; }
+        currentCityRefineMode = mode;
+        refineCityPrompt.value = refineCityPrompts[mode] || refineCityPrompts.enrich;
+        var promptText = refineCityPrompt.value.trim();
+        if (!promptText) { alert('Le prompt est vide.'); return; }
+
+        var allBtns = [refineCityBtn, refineCityCorrectBtn];
+        allBtns.forEach(function(b) { b.disabled = true; });
+        clickedBtn.textContent = '⏳ Raffinement en cours…';
+        refineCityResultWrap.style.display = '';
+        if (refineCitySynthWrap) refineCitySynthWrap.style.display = 'none';
+        refineCitySaveResult.style.display = 'none';
+        refineCityResult.value = 'Interrogation de ' + modelSelect.value + '…';
+        refineCityDiffOld.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+        refineCityDiffNew.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+
+        var fd = new FormData();
+        fd.append('city_slug', currentCitySlug);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', promptText);
+
+        fetch(refineCityGenUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineCityBtn.textContent = '✨ Enrichir et ajouter';
+                refineCityCorrectBtn.textContent = '✅ Valider et corriger';
+                if (data.success) {
+                    refineCityResult.value = data.reply;
+                    buildDiffView(refineCitySourceText.value, data.reply, refineCityDiffOld, refineCityDiffNew);
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    var synthBtn = document.getElementById('refine-city-synth-btn');
+                    if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
+                } else {
+                    refineCityResult.value = '❌ ERREUR : ' + data.error;
+                    refineCityDiffOld.innerHTML = '';
+                    refineCityDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                }
+            })
+            .catch(function(err) {
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineCityBtn.textContent = '✨ Enrichir et ajouter';
+                refineCityCorrectBtn.textContent = '✅ Valider et corriger';
+                refineCityResult.value = '❌ Erreur réseau : ' + err.message;
+                refineCityDiffOld.innerHTML = '';
+                refineCityDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
+            });
+    }
+
+    refineCityBtn.addEventListener('click', function() { triggerCityRefine('enrich', refineCityBtn); });
+    refineCityCorrectBtn.addEventListener('click', function() { triggerCityRefine('validate', refineCityCorrectBtn); });
+
+    document.getElementById('refine-city-copy-btn').addEventListener('click', function() {
+        refineCityResult.select();
+        navigator.clipboard.writeText(refineCityResult.value).then(function() {
+            var btn = document.getElementById('refine-city-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    document.getElementById('refine-city-keep-btn').addEventListener('click', function() {
+        refineCityResultWrap.style.display = 'none';
+        if (refineCitySynthWrap) refineCitySynthWrap.style.display = 'none';
+    });
+
+    document.getElementById('refine-city-use-btn').addEventListener('click', function() {
+        var text = refineCityResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-city-use-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineCitySaveResult.style.display = '';
+        refineCitySaveResult.className = 'opt-test-result opt-test-pending';
+        refineCitySaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('city_text', text);
+        fd.append('city_slug', currentCitySlug);
+        fd.append('is_validate', currentCityRefineMode === 'validate' ? '1' : '0');
+
+        fetch(refineCitySaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                if (data.success) {
+                    refineCitySaveResult.className = 'opt-test-result opt-test-success';
+                    refineCitySaveResult.innerHTML = '✅ <strong>' + data.city_name.replace(/</g,'&lt;') + '</strong> sauvegardée! (' + data.sources_count + ' sources mises à jour)';
+                } else {
+                    refineCitySaveResult.className = 'opt-test-result opt-test-error';
+                    refineCitySaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                refineCitySaveResult.className = 'opt-test-result opt-test-error';
+                refineCitySaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('refine-city-synth-btn').addEventListener('click', function() {
+        var newText = refineCityResult.value.trim();
+        if (!newText || newText.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        if (!currentCitySlug) { alert('Ville non chargée.'); return; }
+
+        var btn = document.getElementById('refine-city-synth-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Synthèse en cours…';
+        refineCitySynthWrap.style.display = '';
+        refineCitySynthResult.value = 'Synthèse IA en cours…';
+        refineCitySynthSaveResult.style.display = 'none';
+
+        var fd = new FormData();
+        fd.append('city_slug', currentCitySlug);
+        fd.append('model', modelSelect.value);
+        fd.append('new_text', newText);
+
+        fetch(refineCitySynthUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                if (data.success) {
+                    refineCitySynthResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    refineCitySynthWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    refineCitySynthResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                refineCitySynthResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('refine-city-synth-copy-btn').addEventListener('click', function() {
+        refineCitySynthResult.select();
+        navigator.clipboard.writeText(refineCitySynthResult.value).then(function() {
+            var btn = document.getElementById('refine-city-synth-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    document.getElementById('refine-city-synth-save-btn').addEventListener('click', function() {
+        var text = refineCitySynthResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-city-synth-save-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineCitySynthSaveResult.style.display = '';
+        refineCitySynthSaveResult.className = 'opt-test-result opt-test-pending';
+        refineCitySynthSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('city_text', text);
+        fd.append('city_slug', currentCitySlug);
+        fd.append('is_validate', currentCityRefineMode === 'validate' ? '1' : '0');
+
+        fetch(refineCitySaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                if (data.success) {
+                    refineCitySynthSaveResult.className = 'opt-test-result opt-test-success';
+                    refineCitySynthSaveResult.innerHTML = '✅ <strong>' + data.city_name.replace(/</g,'&lt;') + '</strong> sauvegardée! (' + data.sources_count + ' sources)';
+                } else {
+                    refineCitySynthSaveResult.className = 'opt-test-result opt-test-error';
+                    refineCitySynthSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                refineCitySynthSaveResult.className = 'opt-test-result opt-test-error';
+                refineCitySynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* =====================================================================
+     * RAFFINEMENT TAB — Région
+     * ===================================================================== */
+    var refineRegionSelect      = document.getElementById('refine-region-select');
+    var refineRegionLoading     = document.getElementById('refine-region-loading');
+    var refineRegionCard        = document.getElementById('refine-region-card');
+    var refineRegionCardContent = document.getElementById('refine-region-card-content');
+    var refineRegionSourceText  = document.getElementById('refine-region-source-text');
+    var refineRegionPrompt      = document.getElementById('refine-region-prompt');
+    var refineRegionBtn         = document.getElementById('refine-region-btn');
+    var refineRegionCorrectBtn  = document.getElementById('refine-region-correct-btn');
+    var refineRegionResultWrap  = document.getElementById('refine-region-result-wrap');
+    var refineRegionResult      = document.getElementById('refine-region-result');
+    var refineRegionDiffOld     = document.getElementById('refine-region-diff-old');
+    var refineRegionDiffNew     = document.getElementById('refine-region-diff-new');
+    var refineRegionSaveResult  = document.getElementById('refine-region-save-result');
+    var refineRegionSynthWrap   = document.getElementById('refine-region-synth-wrap');
+    var refineRegionSynthResult = document.getElementById('refine-region-synth-result');
+    var refineRegionSynthSaveResult = document.getElementById('refine-region-synth-save-result');
+
+    var refineRegionLoadUrl  = '{{ url_for("web.ai_lab_refine_region_load", region_slug="__SLUG__") }}';
+    var refineRegionGenUrl   = '{{ url_for("web.ai_lab_refine_region_generate") }}';
+    var refineRegionSynthUrl = '{{ url_for("web.ai_lab_refine_region_synthesize") }}';
+    var refineRegionSaveUrl  = '{{ url_for("web.ai_lab_refine_region_save") }}';
+
+    var _baseRefineRegionPrompt = {{ prompt_refine_region | tojson }};
+    var refineRegionPrompts = {
+        enrich: _baseRefineRegionPrompt,
+        validate: _baseRefineRegionPrompt
+    };
+
+    var currentRegionSlug = '';
+    var currentRegionRefineMode = 'enrich';
+
+    refineRegionSelect.addEventListener('change', function() {
+        var slug = refineRegionSelect.value;
+        if (!slug) {
+            refineRegionCard.style.display = 'none';
+            refineRegionResultWrap.style.display = 'none';
+            if (refineRegionSynthWrap) refineRegionSynthWrap.style.display = 'none';
+            currentRegionSlug = '';
+            return;
+        }
+        refineRegionLoading.style.display = '';
+        refineRegionCard.style.display = 'none';
+        refineRegionResultWrap.style.display = 'none';
+        if (refineRegionSynthWrap) refineRegionSynthWrap.style.display = 'none';
+
+        var url = refineRegionLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineRegionLoading.style.display = 'none';
+                if (!data.success) { alert('Erreur: ' + data.error); return; }
+                currentRegionSlug = slug;
+
+                var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
+                    + '<span class="badge badge-year">📍 ' + (data.region_name || '—').replace(/</g,'&lt;') + '</span>'
+                    + '<span class="badge">' + (data.country_name || '—').replace(/</g,'&lt;') + '</span>'
+                    + '<span class="badge badge-level">Pop: ' + (data.latest_population ? data.latest_population.toLocaleString() : '—') + ' (' + (data.latest_year || '?') + ')</span>'
+                    + '<span class="badge">' + (data.pop_count || 0) + ' année(s) de données</span>'
+                    + '</div>';
+                refineRegionCardContent.innerHTML = html;
+                refineRegionSourceText.value = data.source_text || '';
+                refineRegionCard.style.display = '';
+            })
+            .catch(function(err) {
+                refineRegionLoading.style.display = 'none';
+                alert('Erreur réseau: ' + err);
+            });
+    });
+
+    function triggerRegionRefine(mode, clickedBtn) {
+        if (!currentRegionSlug) { alert('Choisissez une région.'); return; }
+        currentRegionRefineMode = mode;
+        refineRegionPrompt.value = refineRegionPrompts[mode] || refineRegionPrompts.enrich;
+        var promptText = refineRegionPrompt.value.trim();
+        if (!promptText) { alert('Le prompt est vide.'); return; }
+
+        var allBtns = [refineRegionBtn, refineRegionCorrectBtn];
+        allBtns.forEach(function(b) { b.disabled = true; });
+        clickedBtn.textContent = '⏳ Raffinement en cours…';
+        refineRegionResultWrap.style.display = '';
+        if (refineRegionSynthWrap) refineRegionSynthWrap.style.display = 'none';
+        refineRegionSaveResult.style.display = 'none';
+        refineRegionResult.value = 'Interrogation de ' + modelSelect.value + '…';
+        refineRegionDiffOld.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+        refineRegionDiffNew.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+
+        var fd = new FormData();
+        fd.append('region_slug', currentRegionSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', promptText);
+
+        fetch(refineRegionGenUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineRegionBtn.textContent = '✨ Enrichir et ajouter';
+                refineRegionCorrectBtn.textContent = '✅ Valider et corriger';
+                if (data.success) {
+                    refineRegionResult.value = data.reply;
+                    buildDiffView(refineRegionSourceText.value, data.reply, refineRegionDiffOld, refineRegionDiffNew);
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    var synthBtn = document.getElementById('refine-region-synth-btn');
+                    if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
+                } else {
+                    refineRegionResult.value = '❌ ERREUR : ' + data.error;
+                    refineRegionDiffOld.innerHTML = '';
+                    refineRegionDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                }
+            })
+            .catch(function(err) {
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineRegionBtn.textContent = '✨ Enrichir et ajouter';
+                refineRegionCorrectBtn.textContent = '✅ Valider et corriger';
+                refineRegionResult.value = '❌ Erreur réseau : ' + err.message;
+                refineRegionDiffOld.innerHTML = '';
+                refineRegionDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
+            });
+    }
+
+    refineRegionBtn.addEventListener('click', function() { triggerRegionRefine('enrich', refineRegionBtn); });
+    refineRegionCorrectBtn.addEventListener('click', function() { triggerRegionRefine('validate', refineRegionCorrectBtn); });
+
+    document.getElementById('refine-region-copy-btn').addEventListener('click', function() {
+        refineRegionResult.select();
+        navigator.clipboard.writeText(refineRegionResult.value).then(function() {
+            var btn = document.getElementById('refine-region-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    document.getElementById('refine-region-keep-btn').addEventListener('click', function() {
+        refineRegionResultWrap.style.display = 'none';
+        if (refineRegionSynthWrap) refineRegionSynthWrap.style.display = 'none';
+    });
+
+    document.getElementById('refine-region-use-btn').addEventListener('click', function() {
+        var text = refineRegionResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-region-use-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineRegionSaveResult.style.display = '';
+        refineRegionSaveResult.className = 'opt-test-result opt-test-pending';
+        refineRegionSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('region_text', text);
+        fd.append('region_slug', currentRegionSlug);
+        fd.append('is_validate', currentRegionRefineMode === 'validate' ? '1' : '0');
+
+        fetch(refineRegionSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                if (data.success) {
+                    refineRegionSaveResult.className = 'opt-test-result opt-test-success';
+                    refineRegionSaveResult.innerHTML = '✅ <strong>' + data.region_name.replace(/</g,'&lt;') + '</strong> sauvegardée! (' + data.sources_count + ' sources mises à jour)';
+                } else {
+                    refineRegionSaveResult.className = 'opt-test-result opt-test-error';
+                    refineRegionSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                refineRegionSaveResult.className = 'opt-test-result opt-test-error';
+                refineRegionSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('refine-region-synth-btn').addEventListener('click', function() {
+        var newText = refineRegionResult.value.trim();
+        if (!newText || newText.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        if (!currentRegionSlug) { alert('Région non chargée.'); return; }
+
+        var btn = document.getElementById('refine-region-synth-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Synthèse en cours…';
+        refineRegionSynthWrap.style.display = '';
+        refineRegionSynthResult.value = 'Synthèse IA en cours…';
+        refineRegionSynthSaveResult.style.display = 'none';
+
+        var fd = new FormData();
+        fd.append('region_slug', currentRegionSlug);
+        fd.append('model', modelSelect.value);
+        fd.append('new_text', newText);
+
+        fetch(refineRegionSynthUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                if (data.success) {
+                    refineRegionSynthResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    refineRegionSynthWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    refineRegionSynthResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                refineRegionSynthResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('refine-region-synth-copy-btn').addEventListener('click', function() {
+        refineRegionSynthResult.select();
+        navigator.clipboard.writeText(refineRegionSynthResult.value).then(function() {
+            var btn = document.getElementById('refine-region-synth-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    document.getElementById('refine-region-synth-save-btn').addEventListener('click', function() {
+        var text = refineRegionSynthResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-region-synth-save-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineRegionSynthSaveResult.style.display = '';
+        refineRegionSynthSaveResult.className = 'opt-test-result opt-test-pending';
+        refineRegionSynthSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('region_text', text);
+        fd.append('region_slug', currentRegionSlug);
+        fd.append('is_validate', currentRegionRefineMode === 'validate' ? '1' : '0');
+
+        fetch(refineRegionSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                if (data.success) {
+                    refineRegionSynthSaveResult.className = 'opt-test-result opt-test-success';
+                    refineRegionSynthSaveResult.innerHTML = '✅ <strong>' + data.region_name.replace(/</g,'&lt;') + '</strong> sauvegardée! (' + data.sources_count + ' sources)';
+                } else {
+                    refineRegionSynthSaveResult.className = 'opt-test-result opt-test-error';
+                    refineRegionSynthSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                refineRegionSynthSaveResult.className = 'opt-test-result opt-test-error';
+                refineRegionSynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    /* =====================================================================
+     * RAFFINEMENT TAB — Pays (Country)
+     * ===================================================================== */
+    var refineCountrySelect      = document.getElementById('refine-country-select');
+    var refineCountryLoading     = document.getElementById('refine-country-loading');
+    var refineCountryCard        = document.getElementById('refine-country-card');
+    var refineCountryCardContent = document.getElementById('refine-country-card-content');
+    var refineCountrySourceText  = document.getElementById('refine-country-source-text');
+    var refineCountryPrompt      = document.getElementById('refine-country-prompt');
+    var refineCountryBtn         = document.getElementById('refine-country-btn');
+    var refineCountryCorrectBtn  = document.getElementById('refine-country-correct-btn');
+    var refineCountryResultWrap  = document.getElementById('refine-country-result-wrap');
+    var refineCountryResult      = document.getElementById('refine-country-result');
+    var refineCountryDiffOld     = document.getElementById('refine-country-diff-old');
+    var refineCountryDiffNew     = document.getElementById('refine-country-diff-new');
+    var refineCountrySaveResult  = document.getElementById('refine-country-save-result');
+    var refineCountrySynthWrap   = document.getElementById('refine-country-synth-wrap');
+    var refineCountrySynthResult = document.getElementById('refine-country-synth-result');
+    var refineCountrySynthSaveResult = document.getElementById('refine-country-synth-save-result');
+
+    var refineCountryLoadUrl  = '{{ url_for("web.ai_lab_refine_country_load", country_slug="__SLUG__") }}';
+    var refineCountryGenUrl   = '{{ url_for("web.ai_lab_refine_country_generate") }}';
+    var refineCountrySynthUrl = '{{ url_for("web.ai_lab_refine_country_synthesize") }}';
+    var refineCountrySaveUrl  = '{{ url_for("web.ai_lab_refine_country_save") }}';
+
+    var _baseRefineCountryPrompt = {{ prompt_refine_country | tojson }};
+    var refineCountryPrompts = {
+        enrich: _baseRefineCountryPrompt,
+        validate: _baseRefineCountryPrompt
+    };
+
+    var currentCountrySlug = '';
+    var currentCountryRefineMode = 'enrich';
+
+    refineCountrySelect.addEventListener('change', function() {
+        var slug = refineCountrySelect.value;
+        if (!slug) {
+            refineCountryCard.style.display = 'none';
+            refineCountryResultWrap.style.display = 'none';
+            if (refineCountrySynthWrap) refineCountrySynthWrap.style.display = 'none';
+            currentCountrySlug = '';
+            return;
+        }
+        refineCountryLoading.style.display = '';
+        refineCountryCard.style.display = 'none';
+        refineCountryResultWrap.style.display = 'none';
+        if (refineCountrySynthWrap) refineCountrySynthWrap.style.display = 'none';
+
+        var url = refineCountryLoadUrl.replace('__SLUG__', encodeURIComponent(slug));
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refineCountryLoading.style.display = 'none';
+                if (!data.success) { alert('Erreur: ' + data.error); return; }
+                currentCountrySlug = slug;
+
+                var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
+                    + '<span class="badge badge-year">🌍 ' + (data.country_name || '—').replace(/</g,'&lt;') + '</span>'
+                    + '<span class="badge badge-level">Pop: ' + (data.latest_population ? data.latest_population.toLocaleString() : '—') + ' (' + (data.latest_year || '?') + ')</span>'
+                    + '<span class="badge">' + (data.pop_count || 0) + ' année(s) de données</span>'
+                    + '</div>';
+                refineCountryCardContent.innerHTML = html;
+                refineCountrySourceText.value = data.source_text || '';
+                refineCountryCard.style.display = '';
+            })
+            .catch(function(err) {
+                refineCountryLoading.style.display = 'none';
+                alert('Erreur réseau: ' + err);
+            });
+    });
+
+    function triggerCountryRefine(mode, clickedBtn) {
+        if (!currentCountrySlug) { alert('Choisissez un pays.'); return; }
+        currentCountryRefineMode = mode;
+        refineCountryPrompt.value = refineCountryPrompts[mode] || refineCountryPrompts.enrich;
+        var promptText = refineCountryPrompt.value.trim();
+        if (!promptText) { alert('Le prompt est vide.'); return; }
+
+        var allBtns = [refineCountryBtn, refineCountryCorrectBtn];
+        allBtns.forEach(function(b) { b.disabled = true; });
+        clickedBtn.textContent = '⏳ Raffinement en cours…';
+        refineCountryResultWrap.style.display = '';
+        if (refineCountrySynthWrap) refineCountrySynthWrap.style.display = 'none';
+        refineCountrySaveResult.style.display = 'none';
+        refineCountryResult.value = 'Interrogation de ' + modelSelect.value + '…';
+        refineCountryDiffOld.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+        refineCountryDiffNew.innerHTML = '<span class="refine-diff-line-same">⏳ En attente…</span>';
+
+        var fd = new FormData();
+        fd.append('country_slug', currentCountrySlug);
+        fd.append('model', modelSelect.value);
+        fd.append('prompt_text', promptText);
+
+        fetch(refineCountryGenUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineCountryBtn.textContent = '✨ Enrichir et ajouter';
+                refineCountryCorrectBtn.textContent = '✅ Valider et corriger';
+                if (data.success) {
+                    refineCountryResult.value = data.reply;
+                    buildDiffView(refineCountrySourceText.value, data.reply, refineCountryDiffOld, refineCountryDiffNew);
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    var synthBtn = document.getElementById('refine-country-synth-btn');
+                    if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
+                } else {
+                    refineCountryResult.value = '❌ ERREUR : ' + data.error;
+                    refineCountryDiffOld.innerHTML = '';
+                    refineCountryDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                }
+            })
+            .catch(function(err) {
+                allBtns.forEach(function(b) { b.disabled = false; });
+                refineCountryBtn.textContent = '✨ Enrichir et ajouter';
+                refineCountryCorrectBtn.textContent = '✅ Valider et corriger';
+                refineCountryResult.value = '❌ Erreur réseau : ' + err.message;
+                refineCountryDiffOld.innerHTML = '';
+                refineCountryDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
+            });
+    }
+
+    refineCountryBtn.addEventListener('click', function() { triggerCountryRefine('enrich', refineCountryBtn); });
+    refineCountryCorrectBtn.addEventListener('click', function() { triggerCountryRefine('validate', refineCountryCorrectBtn); });
+
+    document.getElementById('refine-country-copy-btn').addEventListener('click', function() {
+        refineCountryResult.select();
+        navigator.clipboard.writeText(refineCountryResult.value).then(function() {
+            var btn = document.getElementById('refine-country-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    document.getElementById('refine-country-keep-btn').addEventListener('click', function() {
+        refineCountryResultWrap.style.display = 'none';
+        if (refineCountrySynthWrap) refineCountrySynthWrap.style.display = 'none';
+    });
+
+    document.getElementById('refine-country-use-btn').addEventListener('click', function() {
+        var text = refineCountryResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-country-use-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineCountrySaveResult.style.display = '';
+        refineCountrySaveResult.className = 'opt-test-result opt-test-pending';
+        refineCountrySaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('country_text', text);
+        fd.append('country_slug', currentCountrySlug);
+        fd.append('is_validate', currentCountryRefineMode === 'validate' ? '1' : '0');
+
+        fetch(refineCountrySaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                if (data.success) {
+                    refineCountrySaveResult.className = 'opt-test-result opt-test-success';
+                    refineCountrySaveResult.innerHTML = '✅ <strong>' + data.country_name.replace(/</g,'&lt;') + '</strong> sauvegardé! (' + data.sources_count + ' sources mises à jour)';
+                } else {
+                    refineCountrySaveResult.className = 'opt-test-result opt-test-error';
+                    refineCountrySaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '✅ Utiliser la version raffinée';
+                refineCountrySaveResult.className = 'opt-test-result opt-test-error';
+                refineCountrySaveResult.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('refine-country-synth-btn').addEventListener('click', function() {
+        var newText = refineCountryResult.value.trim();
+        if (!newText || newText.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        if (!currentCountrySlug) { alert('Pays non chargé.'); return; }
+
+        var btn = document.getElementById('refine-country-synth-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Synthèse en cours…';
+        refineCountrySynthWrap.style.display = '';
+        refineCountrySynthResult.value = 'Synthèse IA en cours…';
+        refineCountrySynthSaveResult.style.display = 'none';
+
+        var fd = new FormData();
+        fd.append('country_slug', currentCountrySlug);
+        fd.append('model', modelSelect.value);
+        fd.append('new_text', newText);
+
+        fetch(refineCountrySynthUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                if (data.success) {
+                    refineCountrySynthResult.value = data.reply;
+                    if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
+                    refineCountrySynthWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    refineCountrySynthResult.value = '❌ ERREUR : ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '⚗️ Synthèse IA des 2 versions';
+                refineCountrySynthResult.value = '❌ Erreur réseau : ' + err.message;
+            });
+    });
+
+    document.getElementById('refine-country-synth-copy-btn').addEventListener('click', function() {
+        refineCountrySynthResult.select();
+        navigator.clipboard.writeText(refineCountrySynthResult.value).then(function() {
+            var btn = document.getElementById('refine-country-synth-copy-btn');
+            btn.textContent = '✅ Copié!';
+            setTimeout(function() { btn.textContent = '📋 Copier'; }, 2000);
+        });
+    });
+
+    document.getElementById('refine-country-synth-save-btn').addEventListener('click', function() {
+        var text = refineCountrySynthResult.value.trim();
+        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
+        var btn = document.getElementById('refine-country-synth-save-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sauvegarde…';
+        refineCountrySynthSaveResult.style.display = '';
+        refineCountrySynthSaveResult.className = 'opt-test-result opt-test-pending';
+        refineCountrySynthSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('country_text', text);
+        fd.append('country_slug', currentCountrySlug);
+        fd.append('is_validate', currentCountryRefineMode === 'validate' ? '1' : '0');
+
+        fetch(refineCountrySaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                if (data.success) {
+                    refineCountrySynthSaveResult.className = 'opt-test-result opt-test-success';
+                    refineCountrySynthSaveResult.innerHTML = '✅ <strong>' + data.country_name.replace(/</g,'&lt;') + '</strong> sauvegardé! (' + data.sources_count + ' sources)';
+                } else {
+                    refineCountrySynthSaveResult.className = 'opt-test-result opt-test-error';
+                    refineCountrySynthSaveResult.textContent = '❌ ' + data.error;
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = '💾 Sauvegarder la synthèse';
+                refineCountrySynthSaveResult.className = 'opt-test-result opt-test-error';
+                refineCountrySynthSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
             });
     });
 

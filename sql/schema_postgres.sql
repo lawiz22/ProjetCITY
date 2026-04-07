@@ -118,6 +118,8 @@ CREATE TABLE IF NOT EXISTS dim_city (
     density DOUBLE PRECISION,
     foundation_year INTEGER,
     source_file TEXT NOT NULL,
+    population_validated BOOLEAN NOT NULL DEFAULT FALSE,
+    population_validated_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
@@ -166,6 +168,9 @@ CREATE TABLE IF NOT EXISTS fact_city_population (
     is_key_year BOOLEAN NOT NULL DEFAULT FALSE,
     annotation_id BIGINT REFERENCES dim_annotation(annotation_id),
     source_file TEXT NOT NULL,
+    source_url TEXT,
+    source_label TEXT,
+    validated_at TIMESTAMPTZ,
     UNIQUE (city_id, year)
 );
 
@@ -310,6 +315,8 @@ CREATE TABLE IF NOT EXISTS dim_country (
     country_color TEXT,
     boundary_geom GEOMETRY(MULTIPOLYGON, 4326),
     source_file TEXT NOT NULL DEFAULT 'manual',
+    population_validated BOOLEAN NOT NULL DEFAULT FALSE,
+    population_validated_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
@@ -325,6 +332,9 @@ CREATE TABLE IF NOT EXISTS fact_country_population (
     is_key_year BOOLEAN NOT NULL DEFAULT FALSE,
     annotation_id BIGINT REFERENCES dim_annotation(annotation_id),
     source_file TEXT NOT NULL DEFAULT 'manual',
+    source_url TEXT,
+    source_label TEXT,
+    validated_at TIMESTAMPTZ,
     UNIQUE (country_id, year)
 );
 
@@ -352,6 +362,8 @@ CREATE TABLE IF NOT EXISTS dim_region (
     region_color TEXT,
     boundary_geom GEOMETRY(MULTIPOLYGON, 4326),
     source_file TEXT NOT NULL DEFAULT 'manual',
+    population_validated BOOLEAN NOT NULL DEFAULT FALSE,
+    population_validated_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by_user_id BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
@@ -367,6 +379,9 @@ CREATE TABLE IF NOT EXISTS fact_region_population (
     is_key_year BOOLEAN NOT NULL DEFAULT FALSE,
     annotation_id BIGINT REFERENCES dim_annotation(annotation_id),
     source_file TEXT NOT NULL DEFAULT 'manual',
+    source_url TEXT,
+    source_label TEXT,
+    validated_at TIMESTAMPTZ,
     UNIQUE (region_id, year)
 );
 

@@ -472,7 +472,9 @@ def import_city_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
             foundation_year = COALESCE(excluded.foundation_year, dim_city.foundation_year),
             source_file = excluded.source_file,
             updated_by_user_id = excluded.updated_by_user_id,
-            updated_at = CURRENT_TIMESTAMP
+            updated_at = CURRENT_TIMESTAMP,
+            population_validated = FALSE,
+            population_validated_at = NULL
         RETURNING city_id
         """,
         (stats["city_name"], stats["city_slug"], stats["region"],
@@ -1164,7 +1166,9 @@ def import_country_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
             country_color = excluded.country_color,
             source_file = excluded.source_file,
             updated_by_user_id = excluded.updated_by_user_id,
-            updated_at = CURRENT_TIMESTAMP
+            updated_at = CURRENT_TIMESTAMP,
+            population_validated = FALSE,
+            population_validated_at = NULL
         RETURNING country_id
         """,
         (stats["country_name"], stats["country_slug"], stats["country_color"], "web-import",
@@ -1436,7 +1440,9 @@ def import_region_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
             region_color = excluded.region_color,
             source_file = excluded.source_file,
             updated_by_user_id = excluded.updated_by_user_id,
-            updated_at = CURRENT_TIMESTAMP
+            updated_at = CURRENT_TIMESTAMP,
+            population_validated = FALSE,
+            population_validated_at = NULL
         RETURNING region_id
         """,
         (stats["region_name"], stats["region_slug"], stats["region_country"],
