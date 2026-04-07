@@ -491,14 +491,20 @@ def city_detail(city_slug: str) -> str:
     from .db import get_db
     fiche = get_city_fiche(get_db(), city["city_id"])
     # Population validation status
-    _val_row = get_db().execute(
-        "SELECT population_validated FROM dim_city WHERE city_id = ?", (city["city_id"],)
-    ).fetchone()
-    city["population_validated"] = _val_row["population_validated"] if _val_row else False
-    pop_sources = [dict(r) for r in get_db().execute(
-        "SELECT year, population, source_label, source_url FROM fact_city_population "
-        "WHERE city_id = ? ORDER BY year", (city["city_id"],)
-    ).fetchall()]
+    try:
+        _val_row = get_db().execute(
+            "SELECT population_validated FROM dim_city WHERE city_id = ?", (city["city_id"],)
+        ).fetchone()
+        city["population_validated"] = _val_row["population_validated"] if _val_row else False
+    except Exception:
+        city["population_validated"] = False
+    try:
+        pop_sources = [dict(r) for r in get_db().execute(
+            "SELECT year, population, source_label, source_url FROM fact_city_population "
+            "WHERE city_id = ? ORDER BY year", (city["city_id"],)
+        ).fetchall()]
+    except Exception:
+        pop_sources = []
 
     from .services.city_photos import get_city_photos, count_missing_photos
     conn = get_db()
@@ -668,10 +674,13 @@ def country_detail(country_slug: str) -> str:
     country["peak_year"] = peak.get("year")
     country["first_year"] = first.get("year")
     country["first_population"] = first.get("population")
-    pop_sources = [dict(r) for r in conn.execute(
-        "SELECT year, population, source_label, source_url FROM fact_country_population "
-        "WHERE country_id = ? ORDER BY year", (country["country_id"],)
-    ).fetchall()]
+    try:
+        pop_sources = [dict(r) for r in conn.execute(
+            "SELECT year, population, source_label, source_url FROM fact_country_population "
+            "WHERE country_id = ? ORDER BY year", (country["country_id"],)
+        ).fetchall()]
+    except Exception:
+        pop_sources = []
     # Flag
     flag_path = f"images/flags/countries/{country_slug}.png"
     flag_full = os.path.join(current_app.static_folder, flag_path.replace("/", os.sep))
@@ -1426,10 +1435,13 @@ def region_detail(region_slug: str) -> str:
     region["peak_year"] = peak.get("year")
     region["first_year"] = first.get("year")
     region["first_population"] = first.get("population")
-    pop_sources = [dict(r) for r in conn.execute(
-        "SELECT year, population, source_label, source_url FROM fact_region_population "
-        "WHERE region_id = ? ORDER BY year", (region["region_id"],)
-    ).fetchall()]
+    try:
+        pop_sources = [dict(r) for r in conn.execute(
+            "SELECT year, population, source_label, source_url FROM fact_region_population "
+            "WHERE region_id = ? ORDER BY year", (region["region_id"],)
+        ).fetchall()]
+    except Exception:
+        pop_sources = []
     # Trend
     if len(pop_data) >= 2:
         delta = pop_data[-1]["population"] - pop_data[-2]["population"]
@@ -5156,18 +5168,36 @@ def ai_lab() -> str:
     prompt_refine_city = load_prompt("city_refine.txt")
     prompt_refine_region = load_prompt("region_refine.txt")
     prompt_refine_country = load_prompt("country_refine.txt")
-    cities_for_refine = [dict(r) for r in conn.execute(
-        "SELECT city_name, city_slug, country, region, population_validated "
-        "FROM dim_city ORDER BY LOWER(city_name), city_name"
-    ).fetchall()]
-    regions_for_refine = [dict(r) for r in conn.execute(
-        "SELECT region_name, region_slug, country_name, population_validated "
-        "FROM dim_region ORDER BY LOWER(region_name), region_name"
-    ).fetchall()]
-    countries_for_refine = [dict(r) for r in conn.execute(
-        "SELECT country_name, country_slug, population_validated "
-        "FROM dim_country ORDER BY LOWER(country_name), country_name"
-    ).fetchall()]
+    try:
+        cities_for_refine = [dict(r) for r in conn.execute(
+            "SELECT city_name, city_slug, country, region, population_validated "
+            "FROM dim_city ORDER BY LOWER(city_name), city_name"
+        ).fetchall()]
+    except Exception:
+        cities_for_refine = [dict(r) for r in conn.execute(
+            "SELECT city_name, city_slug, country, region "
+            "FROM dim_city ORDER BY LOWER(city_name), city_name"
+        ).fetchall()]
+    try:
+        regions_for_refine = [dict(r) for r in conn.execute(
+            "SELECT region_name, region_slug, country_name, population_validated "
+            "FROM dim_region ORDER BY LOWER(region_name), region_name"
+        ).fetchall()]
+    except Exception:
+        regions_for_refine = [dict(r) for r in conn.execute(
+            "SELECT region_name, region_slug, country_name "
+            "FROM dim_region ORDER BY LOWER(region_name), region_name"
+        ).fetchall()]
+    try:
+        countries_for_refine = [dict(r) for r in conn.execute(
+            "SELECT country_name, country_slug, population_validated "
+            "FROM dim_country ORDER BY LOWER(country_name), country_name"
+        ).fetchall()]
+    except Exception:
+        countries_for_refine = [dict(r) for r in conn.execute(
+            "SELECT country_name, country_slug "
+            "FROM dim_country ORDER BY LOWER(country_name), country_name"
+        ).fetchall()]
     return render_template(
         "web/ai_lab.html",
         page_title="AI Lab",
