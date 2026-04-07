@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -7858,8 +7859,12 @@ def ai_lab_refine_city_save() -> Response:
 
     # Parse the === SOURCES === section if present
     sources_by_year: dict[int, dict] = {}
-    if "=== SOURCES ===" in text:
-        sources_section = text.split("=== SOURCES ===", 1)[1]
+    # Strip markdown code fences that AI often wraps around output
+    clean_text = text.replace("```python", "").replace("```", "").strip()
+    # Normalize various source header formats
+    sources_match = re.search(r'={2,}\s*SOURCES\s*={2,}', clean_text)
+    if sources_match:
+        sources_section = clean_text[sources_match.end():]
         for line in sources_section.strip().splitlines():
             line = line.strip()
             if not line or "|" not in line:
@@ -7869,7 +7874,7 @@ def ai_lab_refine_city_save() -> Response:
                 segment = segment.strip()
                 if "=" in segment:
                     key, val = segment.split("=", 1)
-                    parts[key.strip()] = val.strip()
+                    parts[key.strip().lower()] = val.strip()
             try:
                 yr = int(parts.get("year", ""))
                 sources_by_year[yr] = {
@@ -8091,8 +8096,10 @@ def ai_lab_refine_region_save() -> Response:
 
     # Parse the === SOURCES === section
     sources_by_year: dict[int, dict] = {}
-    if "=== SOURCES ===" in text:
-        sources_section = text.split("=== SOURCES ===", 1)[1]
+    clean_text = text.replace("```python", "").replace("```", "").strip()
+    sources_match = re.search(r'={2,}\s*SOURCES\s*={2,}', clean_text)
+    if sources_match:
+        sources_section = clean_text[sources_match.end():]
         for line in sources_section.strip().splitlines():
             line = line.strip()
             if not line or "|" not in line:
@@ -8102,7 +8109,7 @@ def ai_lab_refine_region_save() -> Response:
                 segment = segment.strip()
                 if "=" in segment:
                     key, val = segment.split("=", 1)
-                    parts[key.strip()] = val.strip()
+                    parts[key.strip().lower()] = val.strip()
             try:
                 yr = int(parts.get("year", ""))
                 sources_by_year[yr] = {
@@ -8320,8 +8327,10 @@ def ai_lab_refine_country_save() -> Response:
 
     # Parse the === SOURCES === section
     sources_by_year: dict[int, dict] = {}
-    if "=== SOURCES ===" in text:
-        sources_section = text.split("=== SOURCES ===", 1)[1]
+    clean_text = text.replace("```python", "").replace("```", "").strip()
+    sources_match = re.search(r'={2,}\s*SOURCES\s*={2,}', clean_text)
+    if sources_match:
+        sources_section = clean_text[sources_match.end():]
         for line in sources_section.strip().splitlines():
             line = line.strip()
             if not line or "|" not in line:
@@ -8331,7 +8340,7 @@ def ai_lab_refine_country_save() -> Response:
                 segment = segment.strip()
                 if "=" in segment:
                     key, val = segment.split("=", 1)
-                    parts[key.strip()] = val.strip()
+                    parts[key.strip().lower()] = val.strip()
             try:
                 yr = int(parts.get("year", ""))
                 sources_by_year[yr] = {
