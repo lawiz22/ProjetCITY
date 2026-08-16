@@ -517,15 +517,20 @@ class AnalyticsService:
     # ── Dashboard chart helpers ──────────────────────────────────
 
     _COUNTRY_COLORS = {
-        "Canada": "#d62728",
-        "United States": "#1f77b4",
-        "États-Unis": "#1f77b4",
-        "France": "#2563eb",
+        "Brazil": "#009E73",
+        "Brasil": "#009E73",
+        "Brésil": "#009E73",
+        "Canada": "#D55E00",
+        "France": "#0072B2",
+        "Japan": "#CC79A7",
+        "Japon": "#CC79A7",
+        "United States": "#E69F00",
+        "États-Unis": "#E69F00",
     }
     _REGION_PALETTE = [
-        "#2f6fed", "#e45932", "#22c55e", "#f59e0b", "#8b5cf6",
-        "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
-        "#14b8a6", "#ef4444",
+        "#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00",
+        "#56B4E9", "#7A3E9D", "#8A6D1D", "#2F6B4F", "#B33C86",
+        "#4D4D4D", "#A63D40",
     ]
 
     def _country_color(self, country: str) -> str:
@@ -766,11 +771,12 @@ class AnalyticsService:
             by_country[r["country"]][r["decade"]] = r["cnt"]
         datasets = []
         for c in countries:
+            color = self._country_color(c)
             datasets.append({
                 "label": c,
                 "data": [by_country[c].get(d, 0) for d in decades],
-                "borderColor": self._COUNTRY_COLORS.get(c, "#999"),
-                "backgroundColor": self._COUNTRY_COLORS.get(c, "#999") + "33",
+                "borderColor": color,
+                "backgroundColor": color + "33",
                 "fill": True,
                 "tension": 0.3,
             })

@@ -38,6 +38,18 @@ class TestAnalyticsServiceWithApp:
             assert "country" in filters
             assert "search" in filters
 
+    def test_dashboard_country_colors_are_distinct(self):
+        from app.services.analytics import AnalyticsService
+
+        service = AnalyticsService()
+        countries = ["Brésil", "Canada", "France", "Japon", "États-Unis"]
+        colors = [service._country_color(country) for country in countries]
+
+        assert len(set(colors)) == len(countries)
+        assert service._country_color("Brazil") == service._country_color("Brésil")
+        assert service._country_color("Japan") == service._country_color("Japon")
+        assert service._country_color("United States") == service._country_color("États-Unis")
+
     def test_get_dashboard_metrics(self, app):
         with app.test_request_context():
             from app.services.analytics import AnalyticsService
