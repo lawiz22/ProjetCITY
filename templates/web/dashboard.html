@@ -1,24 +1,25 @@
 {% extends 'web/base.html' %}
 
 {% block hero_title %}
-<div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; width:100%;">
-    <img src="{{ url_for('static', filename='images/ccs-logo_text.png') }}" alt="Central City Scrutinizer" class="hero-logo">
-    <div style="display:flex; gap:1rem; margin-left:auto; flex-wrap:wrap;">
-        <div style="text-align:center; padding:.3rem .8rem; border:1px solid var(--border,#ddd); border-radius:8px; background:var(--card-bg,#fff);">
-            <small style="display:block; font-size:.75em; opacity:.7;">Année la plus récente</small>
-            <strong style="font-size:1.3em;">{{ metrics.latest_year }}</strong>
-            <small style="display:block; font-size:.7em; opacity:.6;">moy. {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</small>
+<div class="dashboard-hero">
+    <h1 class="dashboard-title">Central City Scrutinizer</h1>
+    <div class="dashboard-summary">
+        <div class="dashboard-summary-box">
+            <small>Année la plus récente</small>
+            <strong>{{ metrics.latest_year }}</strong>
+            <span>moy. {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</span>
         </div>
-        <div style="text-align:center; padding:.3rem .8rem; border:1px solid var(--border,#ddd); border-radius:8px; background:var(--card-bg,#fff);">
-            <small style="display:block; font-size:.75em; opacity:.7;">Population nationale agrégée</small>
-            <strong style="font-size:1.3em;">{{ '{:,}'.format(metrics.total_population).replace(',', ' ') }}</strong>
-            <small style="display:block; font-size:.7em; opacity:.6;">dernière année disponible</small>
+        <div class="dashboard-summary-box">
+            <small>Population nationale agrégée</small>
+            <strong>{{ '{:,}'.format(metrics.total_population).replace(',', ' ') }}</strong>
+            <span>dernière année disponible</span>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
+<div class="dashboard-canvas">
 <section class="dash-filters">
     <form method="get" action="{{ url_for('web.dashboard') }}" class="dash-filter-form" id="dash-filter-form">
         <input type="hidden" name="countries_applied" value="1">
@@ -130,54 +131,54 @@
 </section>
 
 <section class="metrics-grid metrics-grid-dash">
-    <article class="metric-card">
-        <span>🌍 Pays</span>
-        <strong>
+    <article class="metric-card dashboard-metric dashboard-metric--countries" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['countries']) }}')">
+        <div class="dashboard-metric-head"><span>Pays</span></div>
+        <strong class="dashboard-metric-value dashboard-metric-flags">
             {% for country in dashboard_countries %}
             <img class="flag-icon" src="{{ flag_url(country.value) }}" alt="{{ country.label }}" title="{{ country.label }}" style="width:32px">
             {% endfor %}
             {{ metrics.country_count }}
         </strong>
-            <small>sélectionnés dans les options</small>
+        <small>sélectionnés dans les options</small>
     </article>
-    <article class="metric-card">
-        <span>🗺️ Régions</span>
-        <strong>{{ metrics.region_count }}</strong>
+    <article class="metric-card dashboard-metric dashboard-metric--regions" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['regions']) }}')">
+        <div class="dashboard-metric-head"><span>Régions</span></div>
+        <strong class="dashboard-metric-value">{{ metrics.region_count }}</strong>
         <small>dans les pays sélectionnés</small>
     </article>
-    <article class="metric-card">
-        <span>🏙️ Villes</span>
-        <strong>{{ metrics.city_count }}</strong>
+    <article class="metric-card dashboard-metric dashboard-metric--cities" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['cities']) }}')">
+        <div class="dashboard-metric-head"><span>Villes</span></div>
+        <strong class="dashboard-metric-value">{{ metrics.city_count }}</strong>
         <small>avec données de population</small>
     </article>
-    <article class="metric-card">
-        <span>📌 Annotations</span>
-        <strong>{{ metrics.annotation_count }}</strong>
+    <article class="metric-card dashboard-metric dashboard-metric--annotations" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['annotations']) }}')">
+        <div class="dashboard-metric-head"><span>Annotations</span></div>
+        <strong class="dashboard-metric-value">{{ metrics.annotation_count }}</strong>
         <small>dans les pays sélectionnés</small>
     </article>
-    <article class="metric-card">
-        <span>📅 Événements historiques</span>
-        <strong>{{ metrics.event_count }}</strong>
+    <article class="metric-card dashboard-metric dashboard-metric--events" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['events']) }}')">
+        <div class="dashboard-metric-head"><span>Événements historiques</span></div>
+        <strong class="dashboard-metric-value">{{ metrics.event_count }}</strong>
         <small>dans les pays sélectionnés</small>
     </article>
-    <article class="metric-card">
-        <span>🧑 Personnages</span>
-        <strong>{{ metrics.person_count }}</strong>
+    <article class="metric-card dashboard-metric dashboard-metric--persons" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['persons']) }}')">
+        <div class="dashboard-metric-head"><span>Personnages</span></div>
+        <strong class="dashboard-metric-value">{{ metrics.person_count }}</strong>
         <small>dans les pays sélectionnés</small>
     </article>
-    <article class="metric-card">
-        <span>🏛️ Monuments</span>
-        <strong>{{ metrics.monument_count }}</strong>
+    <article class="metric-card dashboard-metric dashboard-metric--monuments" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['monuments']) }}')">
+        <div class="dashboard-metric-head"><span>Monuments</span></div>
+        <strong class="dashboard-metric-value">{{ metrics.monument_count }}</strong>
         <small>dans les pays sélectionnés</small>
     </article>
-    <article class="metric-card">
-        <span>📜 Légendes</span>
-        <strong>{{ metrics.legend_count }}</strong>
+    <article class="metric-card dashboard-metric dashboard-metric--legends" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['legends']) }}')">
+        <div class="dashboard-metric-head"><span>Légendes</span></div>
+        <strong class="dashboard-metric-value">{{ metrics.legend_count }}</strong>
         <small>dans les pays sélectionnés</small>
     </article>
-    <article class="metric-card">
-        <span>🔮 Faits inexpliqués</span>
-        <strong>{{ metrics.inexplique_count }}</strong>
+    <article class="metric-card dashboard-metric dashboard-metric--mysteries" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['mysteries']) }}')">
+        <div class="dashboard-metric-head"><span>Faits inexpliqués</span></div>
+        <strong class="dashboard-metric-value">{{ metrics.inexplique_count }}</strong>
         <small>dans les pays sélectionnés</small>
     </article>
 </section>
@@ -339,6 +340,8 @@
         </div>
     </article>
 </section>
+
+</div>
 
 <script>
 // Country modal multi-select

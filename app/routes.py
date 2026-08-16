@@ -136,6 +136,43 @@ def _dashboard_region_groups(country_options: list[dict[str, str]]) -> list[dict
     ]
 
 
+def _dashboard_photo_backgrounds(country_names: list[str]) -> dict[str, str]:
+    from .db import get_db
+
+    connection = get_db()
+    static_root = Path(current_app.static_folder or "")
+    queries = {
+        "countries": ("SELECT c.country_slug AS slug, p.filename FROM dim_country_photo p JOIN dim_country c ON c.country_id = p.country_id WHERE c.country_name = ANY(?) ORDER BY RANDOM() LIMIT 20", "countries"),
+        "regions": ("SELECT r.region_slug AS slug, p.filename FROM dim_region_photo p JOIN dim_region r ON r.region_id = p.region_id WHERE r.country_name = ANY(?) ORDER BY RANDOM() LIMIT 20", "regions"),
+        "cities": ("SELECT c.city_slug AS slug, p.filename FROM dim_city_photo p JOIN dim_city c ON c.city_id = p.city_id WHERE c.country = ANY(?) ORDER BY RANDOM() LIMIT 20", "cities"),
+        "events": ("SELECT e.event_slug AS slug, p.filename FROM dim_event_photo p JOIN dim_event e ON e.event_id = p.event_id JOIN dim_event_location l ON l.event_id = e.event_id WHERE l.country = ANY(?) ORDER BY RANDOM() LIMIT 20", "events"),
+        "persons": ("SELECT e.person_slug AS slug, p.filename FROM dim_person_photo p JOIN dim_person e ON e.person_id = p.person_id JOIN dim_person_location l ON l.person_id = e.person_id WHERE l.country = ANY(?) ORDER BY RANDOM() LIMIT 20", "persons"),
+        "monuments": ("SELECT e.monument_slug AS slug, p.filename FROM dim_monument_photo p JOIN dim_monument e ON e.monument_id = p.monument_id JOIN dim_monument_location l ON l.monument_id = e.monument_id WHERE l.country = ANY(?) ORDER BY RANDOM() LIMIT 20", "monuments"),
+        "legends": ("SELECT e.legend_slug AS slug, p.filename FROM dim_legend_photo p JOIN dim_legend e ON e.legend_id = p.legend_id LEFT JOIN dim_legend_location l ON l.legend_id = e.legend_id WHERE e.legend_type = 'legende' AND COALESCE(l.country, e.country) = ANY(?) ORDER BY RANDOM() LIMIT 20", "legends"),
+        "mysteries": ("SELECT e.legend_slug AS slug, p.filename FROM dim_legend_photo p JOIN dim_legend e ON e.legend_id = p.legend_id LEFT JOIN dim_legend_location l ON l.legend_id = e.legend_id WHERE e.legend_type = 'inexplique' AND COALESCE(l.country, e.country) = ANY(?) ORDER BY RANDOM() LIMIT 20", "legends"),
+    }
+    backgrounds: dict[str, str | None] = {}
+    for key, (query, directory) in queries.items():
+        rows = connection.execute(query, (country_names,)).fetchall() if country_names else []
+        backgrounds[key] = next((
+            f"images/{directory}/{row['slug']}/{row['filename']}"
+            for row in rows
+            if "flag" not in row["filename"].lower()
+            and (static_root / "images" / directory / row["slug"] / row["filename"]).is_file()
+        ), None)
+
+    annotation_rows = connection.execute(
+        "SELECT photo_filename AS filename FROM dim_annotation WHERE photo_filename IS NOT NULL ORDER BY RANDOM() LIMIT 20"
+    ).fetchall()
+    backgrounds["annotations"] = next((
+        f"images/annotations/{row['filename']}"
+        for row in annotation_rows
+        if (static_root / "images" / "annotations" / row["filename"]).is_file()
+    ), None)
+    fallback = backgrounds.get("cities") or "images/dashboard-cityscape.jpg"
+    return {key: value or fallback for key, value in backgrounds.items()}
+
+
 # ---------------------------------------------------------------------------
 # Auth routes
 # ---------------------------------------------------------------------------
@@ -364,6 +401,7 @@ def dashboard() -> str:
         active_country_options=active_options,
         region_groups=_dashboard_region_groups(active_options),
         dashboard_countries=active_options,
+        dashboard_photos=_dashboard_photo_backgrounds(filters["country_names"]),
         metrics=service.get_dashboard_metrics(filters),
         growth_leaders=service.get_growth_leaders(filters),
         decline_leaders=service.get_decline_leader_cities(filters),

@@ -137,7 +137,7 @@ class TestDashboard:
             response = client.get("/")
             assert response.status_code == 200
             html = response.get_data(as_text=True)
-            country_card = html.split('class="metric-card"', 2)[1]
+            country_card = html.split('dashboard-metric--countries', 1)[1].split("</article>", 1)[0]
             assert "France" in country_card
             assert ">3<" in country_card or "\n            3\n" in country_card
             assert '"label": "France"' in html
