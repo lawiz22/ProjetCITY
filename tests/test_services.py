@@ -42,11 +42,12 @@ class TestAnalyticsServiceWithApp:
         from app.services.analytics import AnalyticsService
 
         service = AnalyticsService()
-        countries = ["Brésil", "Canada", "France", "Japon", "États-Unis"]
+        countries = ["Allemagne", "Brésil", "Canada", "France", "Japon", "États-Unis"]
         colors = [service._country_color(country) for country in countries]
 
         assert len(set(colors)) == len(countries)
         assert service._country_color("Brazil") == service._country_color("Brésil")
+        assert service._country_color("Germany") == service._country_color("Allemagne")
         assert service._country_color("Japan") == service._country_color("Japon")
         assert service._country_color("United States") == service._country_color("États-Unis")
 

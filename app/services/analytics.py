@@ -522,11 +522,16 @@ class AnalyticsService:
         "Brésil": "#009E73",
         "Canada": "#D55E00",
         "France": "#0072B2",
+        "Germany": "#4D4D4D",
+        "Allemagne": "#4D4D4D",
         "Japan": "#CC79A7",
         "Japon": "#CC79A7",
         "United States": "#E69F00",
         "États-Unis": "#E69F00",
     }
+    _COUNTRY_FALLBACK_PALETTE = [
+        "#7A3E9D", "#8A6D1D", "#56B4E9", "#B33C86", "#2F6B4F", "#A63D40",
+    ]
     _REGION_PALETTE = [
         "#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00",
         "#56B4E9", "#7A3E9D", "#8A6D1D", "#2F6B4F", "#B33C86",
@@ -536,8 +541,8 @@ class AnalyticsService:
     def _country_color(self, country: str) -> str:
         if country in self._COUNTRY_COLORS:
             return self._COUNTRY_COLORS[country]
-        index = sum(ord(char) for char in country) % len(self._REGION_PALETTE)
-        return self._REGION_PALETTE[index]
+        index = sum(ord(char) for char in country) % len(self._COUNTRY_FALLBACK_PALETTE)
+        return self._COUNTRY_FALLBACK_PALETTE[index]
 
     def _top_pop_by_decade(self, filters: dict) -> dict[str, Any]:
         conn = get_db()
