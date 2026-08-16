@@ -21,6 +21,26 @@
         </div>
         {% endif %}
         <form id="options-form" method="POST" action="{{ url_for('web.options_save') }}">
+            <div class="opt-group">
+                <span class="opt-label">Pays affichés dans le dashboard principal</span>
+                <p class="opt-hint">Cochez les pays à inclure dans les indicateurs, graphiques et filtres du dashboard.</p>
+                <div class="opt-country-actions">
+                    <button type="button" class="secondary-button" data-country-action="all">Tout cocher</button>
+                    <button type="button" class="secondary-button" data-country-action="none">Tout décocher</button>
+                </div>
+                <div class="opt-country-grid" id="opt-country-grid">
+                    {% for country in countries %}
+                    <label class="opt-country-choice">
+                        <input type="checkbox" name="dashboard_country" value="{{ country.value }}" {% if country.value in dashboard_countries %}checked{% endif %}>
+                        <img src="{{ flag_url(country.value) }}" alt="" class="flag-icon">
+                        <span>{{ country.label }}</span>
+                    </label>
+                    {% else %}
+                    <p class="opt-hint">Aucun pays n'est encore enregistré.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
             <!-- API Key -->
             <div class="opt-group">
                 <label class="opt-label" for="opt-api-key">Clé API Mammouth</label>
@@ -64,6 +84,15 @@
     var modelSelect = document.getElementById('opt-model');
     var tokenEl = document.getElementById('token-mammouth');
     var resetBtn = document.getElementById('token-reset-mammouth');
+    var countryGrid = document.getElementById('opt-country-grid');
+
+    document.querySelectorAll('[data-country-action]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            countryGrid.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+                checkbox.checked = button.dataset.countryAction === 'all';
+            });
+        });
+    });
 
     resetBtn.addEventListener('click', function() {
         if (!confirm('Réinitialiser le compteur MAMMOUTH Token à 0 ?')) return;

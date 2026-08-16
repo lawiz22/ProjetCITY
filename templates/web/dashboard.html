@@ -10,7 +10,7 @@
             <small style="display:block; font-size:.7em; opacity:.6;">moy. {{ '{:,}'.format(metrics.avg_population).replace(',', ' ') }}</small>
         </div>
         <div style="text-align:center; padding:.3rem .8rem; border:1px solid var(--border,#ddd); border-radius:8px; background:var(--card-bg,#fff);">
-            <small style="display:block; font-size:.75em; opacity:.7;">Population agrégée</small>
+            <small style="display:block; font-size:.75em; opacity:.7;">Population nationale agrégée</small>
             <strong style="font-size:1.3em;">{{ '{:,}'.format(metrics.total_population).replace(',', ' ') }}</strong>
             <small style="display:block; font-size:.7em; opacity:.6;">dernière année disponible</small>
         </div>
@@ -52,55 +52,60 @@
 <section class="metrics-grid metrics-grid-dash">
     <article class="metric-card">
         <span>🌍 Pays</span>
-        <strong><img class="flag-icon" src="{{ flag_url('Canada') }}" alt="CA" style="width:32px"> <img class="flag-icon" src="{{ flag_url('United States') }}" alt="US" style="width:32px"> {{ metrics.country_count }}</strong>
-        <small>source analytique couverte</small>
+        <strong>
+            {% for country in dashboard_countries %}
+            <img class="flag-icon" src="{{ flag_url(country.value) }}" alt="{{ country.label }}" title="{{ country.label }}" style="width:32px">
+            {% endfor %}
+            {{ metrics.country_count }}
+        </strong>
+            <small>sélectionnés dans les options</small>
     </article>
     <article class="metric-card">
         <span>🗺️ Régions</span>
         <strong>{{ metrics.region_count }}</strong>
-        <small>dans la base de données</small>
+        <small>dans les pays sélectionnés</small>
     </article>
     <article class="metric-card">
         <span>🏙️ Villes</span>
         <strong>{{ metrics.city_count }}</strong>
-        <small>dans le périmètre actif</small>
+        <small>avec données de population</small>
     </article>
     <article class="metric-card">
         <span>📌 Annotations</span>
         <strong>{{ metrics.annotation_count }}</strong>
-        <small>dans la base de données</small>
+        <small>dans les pays sélectionnés</small>
     </article>
     <article class="metric-card">
         <span>📅 Événements historiques</span>
         <strong>{{ metrics.event_count }}</strong>
-        <small>dans la base de données</small>
+        <small>dans les pays sélectionnés</small>
     </article>
     <article class="metric-card">
         <span>🧑 Personnages</span>
         <strong>{{ metrics.person_count }}</strong>
-        <small>dans la base de données</small>
+        <small>dans les pays sélectionnés</small>
     </article>
     <article class="metric-card">
         <span>🏛️ Monuments</span>
         <strong>{{ metrics.monument_count }}</strong>
-        <small>dans la base de données</small>
+        <small>dans les pays sélectionnés</small>
     </article>
     <article class="metric-card">
         <span>📜 Légendes</span>
         <strong>{{ metrics.legend_count }}</strong>
-        <small>dans la base de données</small>
+        <small>dans les pays sélectionnés</small>
     </article>
     <article class="metric-card">
         <span>🔮 Faits inexpliqués</span>
         <strong>{{ metrics.inexplique_count }}</strong>
-        <small>dans la base de données</small>
+        <small>dans les pays sélectionnés</small>
     </article>
 </section>
 
 <section class="panel-grid panel-grid-2">
     <article class="panel">
         <div class="panel-head">
-            <h2>Évolution de la population agrégée</h2>
+            <h2>Évolution de la population nationale</h2>
             <div class="chart-view-tabs">
                 <button class="chart-view-tab active" data-swap-target="pop-country">Par pays</button>
                 <button class="chart-view-tab" data-swap-target="pop-region">Par région</button>

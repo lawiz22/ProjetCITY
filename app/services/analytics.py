@@ -207,69 +207,104 @@ class AnalyticsService:
         counts = connection.execute(
             f"""
             WITH {filtered_analysis_sql}
-            SELECT COUNT(DISTINCT city_slug) AS city_count, COUNT(DISTINCT country) AS country_count
+            SELECT COUNT(DISTINCT city_slug) AS city_count
             FROM filtered_analysis
             """,
             filtered_params,
         ).fetchone()
 
+        country_clause, country_params = self._dashboard_country_filter(filters, "dc.country_name")
         summary = connection.execute(
             f"""
-            WITH {filtered_analysis_sql},
-            latest_year AS (
-                SELECT city_slug, MAX(year) AS year
-                FROM filtered_analysis
-                GROUP BY city_slug
+            WITH latest_year AS (
+                SELECT f.country_id, MAX(f.year) AS year
+                FROM fact_country_population f
+                INNER JOIN dim_country dc ON dc.country_id = f.country_id
+                WHERE 1 = 1 {country_clause}
+                GROUP BY f.country_id
             )
             SELECT
-                COUNT(*) AS latest_city_count,
-                SUM(v.population) AS total_population,
-                AVG(v.population) AS avg_population,
-                MAX(v.year) AS latest_year
-            FROM filtered_analysis v
-            INNER JOIN latest_year ly
-                ON ly.city_slug = v.city_slug
-               AND ly.year = v.year
+                COUNT(*) AS latest_country_count,
+                SUM(f.population) AS total_population,
+                AVG(f.population) AS avg_population,
+                MAX(f.year) AS latest_year
+            FROM fact_country_population f
+            INNER JOIN latest_year ly ON ly.country_id = f.country_id AND ly.year = f.year
             """,
-            filtered_params,
+            country_params,
         ).fetchone()
 
-        # Event count
+        event_clause, event_params = self._dashboard_country_filter(filters, "el.country")
         event_count_row = connection.execute(
-            "SELECT COUNT(*) AS cnt FROM dim_event"
+            f"""SELECT COUNT(DISTINCT e.event_id) AS cnt
+                FROM dim_event e
+                INNER JOIN dim_event_location el ON el.event_id = e.event_id
+                WHERE 1 = 1 {event_clause}""",
+            event_params,
         ).fetchone()
 
-        # Person count
+        person_clause, person_params = self._dashboard_country_filter(filters, "pl.country")
         person_count_row = connection.execute(
-            "SELECT COUNT(*) AS cnt FROM dim_person"
+            f"""SELECT COUNT(DISTINCT p.person_id) AS cnt
+                FROM dim_person p
+                INNER JOIN dim_person_location pl ON pl.person_id = p.person_id
+                WHERE 1 = 1 {person_clause}""",
+            person_params,
         ).fetchone()
 
-        # Monument count
+        monument_clause, monument_params = self._dashboard_country_filter(filters, "ml.country")
         monument_count_row = connection.execute(
-            "SELECT COUNT(*) AS cnt FROM dim_monument"
+            f"""SELECT COUNT(DISTINCT m.monument_id) AS cnt
+                FROM dim_monument m
+                INNER JOIN dim_monument_location ml ON ml.monument_id = m.monument_id
+                WHERE 1 = 1 {monument_clause}""",
+            monument_params,
         ).fetchone()
 
-        # Region count
+        region_clause, region_params = self._dashboard_country_filter(filters, "country_name")
         region_count_row = connection.execute(
-            "SELECT COUNT(*) AS cnt FROM dim_region"
+            f"SELECT COUNT(*) AS cnt FROM dim_region WHERE 1 = 1 {region_clause}",
+            region_params,
         ).fetchone()
 
-        # Annotation count
+        city_annotation_clause, city_annotation_params = self._dashboard_country_filter(filters, "c.country")
+        region_annotation_clause, region_annotation_params = self._dashboard_country_filter(filters, "r.country_name")
+        country_annotation_clause, country_annotation_params = self._dashboard_country_filter(filters, "c.country_name")
         annotation_count_row = connection.execute(
-            "SELECT COUNT(*) AS cnt FROM dim_annotation"
+            f"""
+            SELECT COUNT(*) AS cnt FROM (
+                SELECT f.annotation_id FROM fact_city_population f
+                INNER JOIN dim_city c ON c.city_id = f.city_id
+                WHERE f.annotation_id IS NOT NULL {city_annotation_clause}
+                UNION
+                SELECT f.annotation_id FROM fact_region_population f
+                INNER JOIN dim_region r ON r.region_id = f.region_id
+                WHERE f.annotation_id IS NOT NULL {region_annotation_clause}
+                UNION
+                SELECT f.annotation_id FROM fact_country_population f
+                INNER JOIN dim_country c ON c.country_id = f.country_id
+                WHERE f.annotation_id IS NOT NULL {country_annotation_clause}
+            ) selected_annotations
+            """,
+            city_annotation_params + region_annotation_params + country_annotation_params,
         ).fetchone()
 
-        # Legend count (by type)
+        legend_clause, legend_params = self._dashboard_country_filter(filters, "COALESCE(ll.country, l.country)")
         legend_rows = connection.execute(
-            "SELECT legend_type, COUNT(*) AS cnt FROM dim_legend GROUP BY legend_type"
+            f"""SELECT l.legend_type, COUNT(DISTINCT l.legend_id) AS cnt
+                FROM dim_legend l
+                LEFT JOIN dim_legend_location ll ON ll.legend_id = l.legend_id
+                WHERE 1 = 1 {legend_clause}
+                GROUP BY l.legend_type""",
+            legend_params,
         ).fetchall()
         legend_counts = {r["legend_type"]: r["cnt"] for r in legend_rows}
 
         return {
             "city_count": counts["city_count"] or 0,
-            "country_count": counts["country_count"] or 0,
+            "country_count": filters.get("selected_country_count", 0),
             "region_count": region_count_row["cnt"] if region_count_row else 0,
-            "latest_city_count": summary["latest_city_count"] or 0,
+            "latest_country_count": summary["latest_country_count"] or 0,
             "total_population": summary["total_population"] or 0,
             "avg_population": round(summary["avg_population"] or 0),
             "latest_year": summary["latest_year"] or "n/a",
@@ -444,7 +479,7 @@ class AnalyticsService:
             region_colors = {r: self._REGION_PALETTE[i % len(self._REGION_PALETTE)] for i, r in enumerate(regions_seen)}
             bar_colors = [region_colors.get(row["region"] or "Autre", "#999") for row in rows]
         else:
-            bar_colors = [self._COUNTRY_COLORS.get(row["country"], "#999") for row in rows]
+            bar_colors = [self._country_color(row["country"]) for row in rows]
 
         return {
             "topPopulations": {
@@ -462,17 +497,28 @@ class AnalyticsService:
             "cityCount": self._city_count_evolution(filters),
             "cityCountRegion": self._city_count_by_region(filters),
             "topPopByDecade": self._top_pop_by_decade(filters),
-            "eventsByDecade": self._events_by_decade(),
+            "eventsByDecade": self._events_by_decade(filters),
         }
 
     # ── Dashboard chart helpers ──────────────────────────────────
 
-    _COUNTRY_COLORS = {"Canada": "#d62728", "United States": "#1f77b4"}
+    _COUNTRY_COLORS = {
+        "Canada": "#d62728",
+        "United States": "#1f77b4",
+        "États-Unis": "#1f77b4",
+        "France": "#2563eb",
+    }
     _REGION_PALETTE = [
         "#2f6fed", "#e45932", "#22c55e", "#f59e0b", "#8b5cf6",
         "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
         "#14b8a6", "#ef4444",
     ]
+
+    def _country_color(self, country: str) -> str:
+        if country in self._COUNTRY_COLORS:
+            return self._COUNTRY_COLORS[country]
+        index = sum(ord(char) for char in country) % len(self._REGION_PALETTE)
+        return self._REGION_PALETTE[index]
 
     def _top_pop_by_decade(self, filters: dict) -> dict[str, Any]:
         conn = get_db()
@@ -508,7 +554,7 @@ class AnalyticsService:
             region_colors = {rg: self._REGION_PALETTE[i % len(self._REGION_PALETTE)] for i, rg in enumerate(regions_seen)}
             bar_colors = [region_colors.get(r["region"] or "Autre", "#999") for r in rows]
         else:
-            bar_colors = [self._COUNTRY_COLORS.get(r["country"], "#999") for r in rows]
+            bar_colors = [self._country_color(r["country"]) for r in rows]
 
         return {
             "labels": [f"{r['decade']}s" for r in rows],
@@ -522,33 +568,38 @@ class AnalyticsService:
             ],
         }
 
-    def _events_by_decade(self) -> dict[str, Any]:
-        """Count events per decade, split by country (Canada vs United States)."""
+    def _events_by_decade(self, filters: dict[str, Any]) -> dict[str, Any]:
+        """Count events per decade, split by active dashboard country."""
         conn = get_db()
+        country_clause, params = self._dashboard_country_filter(filters, "el.country")
         rows = conn.execute(
-            """
+            f"""
             SELECT (e.event_year / 10) * 10 AS decade,
                    el.country,
                    COUNT(DISTINCT e.event_id) AS cnt
             FROM dim_event e
             JOIN dim_event_location el ON el.event_id = e.event_id
             WHERE e.event_year IS NOT NULL AND el.country IS NOT NULL
+              {country_clause}
             GROUP BY decade, el.country
             ORDER BY decade
-            """
+            """,
+            params,
         ).fetchall()
         decades = sorted({r["decade"] for r in rows})
         by_country: dict[str, dict[int, int]] = {}
+        country_labels = filters.get("country_labels", {})
         for r in rows:
-            by_country.setdefault(r["country"], {})[r["decade"]] = r["cnt"]
+            label = country_labels.get(r["country"], r["country"])
+            by_country.setdefault(label, {})[r["decade"]] = (
+                by_country.setdefault(label, {}).get(r["decade"], 0) + r["cnt"]
+            )
         datasets = []
-        for country in ("Canada", "United States"):
-            if country not in by_country:
-                continue
+        for country in sorted(by_country):
             datasets.append({
                 "label": country,
                 "data": [by_country[country].get(d, 0) for d in decades],
-                "backgroundColor": self._COUNTRY_COLORS.get(country, "#999"),
+                "backgroundColor": self._country_color(country),
             })
         return {
             "labels": [f"{d}s" for d in decades],
@@ -614,56 +665,56 @@ class AnalyticsService:
         }
 
     def _pop_evolution(self, filters: dict[str, str | None]) -> dict[str, Any]:
-        """Total aggregated population per decade, split by country."""
+        """National population by year, split by selected country."""
         conn = get_db()
+        country_clause, params = self._dashboard_country_filter(filters, "dc.country_name")
         rows = conn.execute(
             f"""
-            WITH {self._filtered_analysis_cte(filters)}
-            SELECT v.country, dt.decade, SUM(v.population) AS total
-            FROM filtered_analysis v
-            INNER JOIN dim_time dt ON dt.year = v.year
-            GROUP BY v.country, dt.decade
-            ORDER BY dt.decade
+            SELECT dc.country_name AS country, f.year, f.population AS total
+            FROM fact_country_population f
+            INNER JOIN dim_country dc ON dc.country_id = f.country_id
+            WHERE 1 = 1 {country_clause}
+            ORDER BY f.year, dc.country_name
             """,
-            self._analysis_filter_params(filters),
+            params,
         ).fetchall()
-        decades = sorted({r["decade"] for r in rows})
+        years = sorted({r["year"] for r in rows})
         countries = sorted({r["country"] for r in rows})
         by_country: dict[str, dict[int, int]] = {c: {} for c in countries}
         for r in rows:
-            by_country[r["country"]][r["decade"]] = r["total"]
+            by_country[r["country"]][r["year"]] = r["total"]
         datasets = []
         for c in countries:
+            color = self._country_color(c)
             datasets.append({
                 "label": c,
-                "data": [by_country[c].get(d, 0) for d in decades],
-                "borderColor": self._COUNTRY_COLORS.get(c, "#999"),
-                "backgroundColor": self._COUNTRY_COLORS.get(c, "#999") + "33",
+                "data": [by_country[c].get(year) for year in years],
+                "borderColor": color,
+                "backgroundColor": color + "33",
                 "fill": True,
                 "tension": 0.3,
             })
-        return {"labels": [str(d) for d in decades], "datasets": datasets}
+        return {"labels": [str(year) for year in years], "datasets": datasets}
 
     def _pop_evolution_by_region(self, filters: dict[str, str | None]) -> dict[str, Any]:
-        """Total aggregated population per decade, split by region (top 10)."""
+        """Regional population by year for the selected countries (top 10)."""
         conn = get_db()
+        country_clause, params = self._dashboard_country_filter(filters, "dr.country_name")
         rows = conn.execute(
             f"""
-            WITH {self._filtered_analysis_cte(filters)}
-            SELECT v.region, dt.decade, SUM(v.population) AS total
-            FROM filtered_analysis v
-            INNER JOIN dim_time dt ON dt.year = v.year
-            WHERE v.region IS NOT NULL
-            GROUP BY v.region, dt.decade
-            ORDER BY dt.decade
+            SELECT dr.region_name AS region, f.year, f.population AS total
+            FROM fact_region_population f
+            INNER JOIN dim_region dr ON dr.region_id = f.region_id
+            WHERE 1 = 1 {country_clause}
+            ORDER BY f.year
             """,
-            self._analysis_filter_params(filters),
+            params,
         ).fetchall()
-        decades = sorted({r["decade"] for r in rows})
+        years = sorted({r["year"] for r in rows})
         totals_by_region: dict[str, int] = {}
         by_region: dict[str, dict[int, int]] = {}
         for r in rows:
-            by_region.setdefault(r["region"], {})[r["decade"]] = r["total"]
+            by_region.setdefault(r["region"], {})[r["year"]] = r["total"]
             totals_by_region[r["region"]] = totals_by_region.get(r["region"], 0) + r["total"]
         top_regions = sorted(totals_by_region, key=totals_by_region.get, reverse=True)[:10]
         datasets = []
@@ -671,13 +722,13 @@ class AnalyticsService:
             color = self._REGION_PALETTE[i % len(self._REGION_PALETTE)]
             datasets.append({
                 "label": region,
-                "data": [by_region[region].get(d, 0) for d in decades],
+                "data": [by_region[region].get(year) for year in years],
                 "borderColor": color,
                 "backgroundColor": color + "33",
                 "fill": True,
                 "tension": 0.3,
             })
-        return {"labels": [str(d) for d in decades], "datasets": datasets}
+        return {"labels": [str(year) for year in years], "datasets": datasets}
 
     def _city_count_evolution(self, filters: dict[str, str | None]) -> dict[str, Any]:
         """Number of cities with data per decade, split by country."""
@@ -1575,6 +1626,15 @@ class AnalyticsService:
     def _region_in_clause(regions: list[str], col: str = "region") -> str:
         return f"AND {col} IN ({','.join('?' for _ in regions)})"
 
+    def _dashboard_country_filter(self, filters: dict, column: str) -> tuple[str, list[Any]]:
+        names = filters.get("country_names")
+        if names is None:
+            names = [filters["country"]] if filters.get("country") else filters.get("countries", [])
+        if not names:
+            return "AND 1 = 0", []
+        placeholders = ", ".join("?" for _ in names)
+        return f"AND {column} IN ({placeholders})", list(names)
+
     def _build_city_filter_clause(self, filters: dict) -> tuple[str, list[Any]]:
         clause_parts: list[str] = []
         params: list[Any] = []
@@ -1600,6 +1660,13 @@ class AnalyticsService:
         prefix = f"{alias}." if alias else ""
         if filters.get("country"):
             parts.append(f"AND {prefix}country = ?")
+        elif filters.get("countries") is not None:
+            countries = filters["countries"]
+            if countries:
+                placeholders = ", ".join("?" for _ in countries)
+                parts.append(f"AND {prefix}country IN ({placeholders})")
+            else:
+                parts.append("AND 1 = 0")
         if filters.get("region"):
             parts.append(self._region_in_clause(filters["region"], f"{prefix}region"))
         if include_city and filters.get("search"):
@@ -1612,6 +1679,8 @@ class AnalyticsService:
         params: list[Any] = []
         if filters.get("country"):
             params.append(filters["country"])
+        elif filters.get("countries") is not None:
+            params.extend(filters["countries"])
         if filters.get("region"):
             params.extend(filters["region"])
         if include_city and filters.get("search"):
@@ -1654,6 +1723,13 @@ class AnalyticsService:
         parts: list[str] = []
         if filters.get("country"):
             parts.append("AND decline.country = ?")
+        elif filters.get("countries") is not None:
+            countries = filters["countries"]
+            if countries:
+                placeholders = ", ".join("?" for _ in countries)
+                parts.append(f"AND decline.country IN ({placeholders})")
+            else:
+                parts.append("AND 1 = 0")
         if filters.get("region"):
             parts.append(self._region_in_clause(filters["region"], "city.region"))
         if filters.get("search"):
@@ -1666,6 +1742,8 @@ class AnalyticsService:
         params: list[Any] = []
         if filters.get("country"):
             params.append(filters["country"])
+        elif filters.get("countries") is not None:
+            params.extend(filters["countries"])
         if filters.get("region"):
             params.extend(filters["region"])
         if filters.get("search"):

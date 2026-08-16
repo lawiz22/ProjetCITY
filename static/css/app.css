@@ -7466,3 +7466,30 @@ mark.diff-add {
 @media (max-width: 768px) {
     .refine-diff-container { flex-direction: column; }
 }
+.opt-country-actions {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: .75rem;
+}
+.opt-country-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: .5rem;
+}
+.opt-country-choice {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-width: 0;
+    padding: .65rem .75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.opt-country-choice .flag-icon {
+    width: 28px;
+    flex: 0 0 auto;
+}
+.opt-country-choice span {
+    overflow-wrap: anywhere;
+}

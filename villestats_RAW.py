@@ -5,7 +5,7 @@
 # NE PAS MODIFIER MANUELLEMENT — les changements seront écrasés.
 # ================================================================
 #
-# Nombre de villes : 415
+# Nombre de villes : 455
 #
 
 # ============================================================
@@ -49,6 +49,34 @@ annotations = [
     (2000, 90000, "🚆 Amélioration des transports — liaison avec Toronto (2000)", 'teal'),
     (2010, 110000, "📈 Croissance soutenue — diversification économique (2010)", 'darkred'),
     (2020, 120000, "💻 Ville technologique — développement durable (2020)", 'gold'),
+]
+
+# ============================================================
+# Akron (United States)
+# ============================================================
+CITY_NAME = "Akron, Ohio"
+CITY_COLOR = '#005daa'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 400, 800, 1500, 3500, 6000, 12000, 22000, 47000, 96000, 142000, 208000, 240000, 
+    265000, 280000, 290000, 310000, 320000, 300000, 290000, 199000, 217000, 197000
+]
+
+annotations = [
+    (1870, 22000, "🏭 Début de l'industrie du caoutchouc — moteur économique (1870)", 'orange'),
+    (1890, 96000, "🚗 Expansion industrielle — Akron devient 'Capitale mondiale du caoutchouc' (1890)", 'green'),
+    (1910, 208000, "🏢 Croissance urbaine rapide — pic démographique (1910)", 'blue'),
+    (1920, 240000, "🛠️ Développement industriel continu — essor économique (1920)", 'red'),
+    (1940, 280000, "⚙️ Seconde Guerre mondiale — production accrue (1940)", 'purple'),
+    (1960, 310000, "🚀 Apogée démographique — population maximale (1960)", 'gold'),
+    (1980, 300000, "📉 Déclin industriel — début de la désindustrialisation (1980)", 'gray'),
+    (2000, 199000, "🏚️ Récession économique — baisse importante de la population (2000)", 'navy'),
+    (2010, 217000, "🌆 Revitalisation urbaine — efforts de redynamisation (2010)", 'teal'),
+    (2020, 197000, "🏘️ Stabilisation démographique — population stable (2020)", 'black'),
 ]
 
 # ============================================================
@@ -127,6 +155,35 @@ annotations = [
     (1990, 130000, "🔄 Revitalisation urbaine — efforts de rénovation (1990)", 'teal'),
     (2010, 120000, "🎭 Croissance culturelle — renouveau artistique (2010)", 'navy'),
     (2020, 125000, "🌿 Développement durable — initiatives écologiques (2020)", 'darkred'),
+]
+
+# ============================================================
+# Almonte (Canada)
+# ============================================================
+CITY_NAME = "Almonte, Ontario"
+CITY_COLOR = '#4B8BBE'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 50, 300, 800, 1500, 2500, 3500, 4200, 4800, 5200, 5400, 5600, 5700, 5800, 5900, 
+    6000, 6100, 6200, 6300, 6400, 6500, 6600
+]
+
+annotations = [
+    (1820, 50, "🏞️ Fondation de la communauté — début officiel d'Almonte (1820)", 'brown'),
+    (1850, 1500, "🏭 Développement industriel — essor des moulins à laine (1850)", 'orange'),
+    (1870, 3500, "🚂 Arrivée du chemin de fer — connexion au réseau national (1870)", 'green'),
+    (1880, 4200, "🏫 Construction d'écoles — développement éducatif (1880)", 'blue'),
+    (1900, 5200, "🏛️ Incorporation officielle comme ville — statut municipal (1900)", 'red'),
+    (1920, 5600, "⚙️ Expansion industrielle — diversification économique (1920)", 'purple'),
+    (1950, 5900, "🚗 Amélioration des infrastructures routières — modernisation (1950)", 'gray'),
+    (1980, 6200, "🏘️ Croissance résidentielle — développement des banlieues (1980)", 'gold'),
+    (2000, 6400, "🌳 Initiatives écologiques — protection des espaces verts (2000)", 'teal'),
+    (2010, 6500, "🎉 Célébration du bicentenaire — commémoration locale (2010)", 'navy'),
+    (2020, 6600, "💻 Développement numérique — intégration des technologies (2020)", 'black'),
 ]
 
 # ============================================================
@@ -673,6 +730,34 @@ annotations = [
     (2000, 2100, "🏥 Ouverture du centre de santé — soins locaux renforcés (2000)", 'red'),
     (2010, 2300, "🎉 Reconnaissance culturelle — promotion de la langue et traditions (2010)", 'purple'),
     (2020, 2500, "🌍 Initiatives environnementales — protection des terres ancestrales (2020)", 'navy'),
+]
+
+# ============================================================
+# Benson (United States)
+# ============================================================
+CITY_NAME = "Benson, North Carolina"
+CITY_COLOR = '#8B4513'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    50, 60, 70, 80, 90, 100, 120, 150, 200, 350, 600, 900, 1100, 1300, 1400, 1500, 1600, 
+    1800, 2100, 2500, 2800, 3000, 3200
+]
+
+annotations = [
+    (1890, 350, "🌾 Développement agricole — croissance liée au coton (1890)", 'green'),
+    (1900, 600, "🏫 Construction de la première école publique (1900)", 'blue'),
+    (1910, 900, "🚜 Introduction de la mécanisation agricole (1910)", 'orange'),
+    (1930, 1300, "🏥 Ouverture du premier hôpital local (1930)", 'red'),
+    (1950, 1500, "🚧 Amélioration des infrastructures routières (1950)", 'purple'),
+    (1970, 1800, "🏢 Expansion commerciale majeure (1970)", 'teal'),
+    (1990, 2500, "🏘️ Développement résidentiel important (1990)", 'navy'),
+    (2000, 2800, "🌐 Accès internet généralisé (2000)", 'gray'),
+    (2010, 3000, "🎉 125 ans de la ville — célébrations (2012)", 'gold'),
+    (2020, 3200, "🌿 Initiatives écologiques et durables (2020)", 'darkred'),
 ]
 
 # ============================================================
@@ -1479,6 +1564,31 @@ annotations = [
 ]
 
 # ============================================================
+# Cape Coral (United States)
+# ============================================================
+CITY_NAME = "Cape Coral, Florida"
+CITY_COLOR = '#008080'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000, 20000, 70000, 100000, 130000, 
+    154000, 194000
+]
+
+annotations = [
+    (1960, 3000, "🚧 Développement initial — premières infrastructures construites (1960)", 'orange'),
+    (1970, 20000, "🌉 Construction des canaux — expansion urbaine majeure (1970)", 'green'),
+    (1980, 70000, "🏘️ Croissance résidentielle rapide — boom immobilier (1980)", 'purple'),
+    (1990, 100000, "🏢 Développement commercial — diversification économique (1990)", 'brown'),
+    (2000, 130000, "🚗 Amélioration des transports — nouvelles routes et ponts (2000)", 'teal'),
+    (2010, 154000, "🌿 Initiatives écologiques — protection des zones humides (2010)", 'navy'),
+    (2020, 194000, "📈 Population en forte hausse — Cape Coral parmi les villes à plus forte croissance (2020)", 'red'),
+]
+
+# ============================================================
 # Carcross (Canada)
 # ============================================================
 CITY_NAME = "Carcross, Yukon"
@@ -1555,6 +1665,32 @@ annotations = [
 ]
 
 # ============================================================
+# Cary (United States)
+# ============================================================
+CITY_NAME = "Cary, North Carolina"
+CITY_COLOR = '#007A33'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    100, 120, 140, 160, 180, 200, 220, 250, 300, 350, 400, 450, 500, 550, 600, 700, 900, 
+    1500, 5000, 10000, 25000, 135000, 170000
+]
+
+annotations = [
+    (1880, 300, "🚆 Développement ferroviaire — arrivée du chemin de fer (1880)", 'orange'),
+    (1950, 700, "🏘️ Croissance modérée — petite communauté rurale (1950)", 'green'),
+    (1970, 1500, "🏙️ Début de l'urbanisation — début de la croissance rapide (1970)", 'blue'),
+    (1980, 5000, "🏢 Expansion résidentielle — développement des banlieues (1980)", 'red'),
+    (1990, 10000, "🌐 Croissance technologique — proximité de Research Triangle Park (1990)", 'purple'),
+    (2000, 25000, "🚀 Boom démographique — forte augmentation de la population (2000)", 'gray'),
+    (2010, 135000, "🏆 Cary devient la plus grande ville du comté de Wake (2010)", 'gold'),
+    (2020, 170000, "🌳 Développement durable — initiatives écologiques et urbaines (2020)", 'teal'),
+]
+
+# ============================================================
 # Casper (United States)
 # ============================================================
 CITY_NAME = "Casper, Wyoming"
@@ -1581,6 +1717,35 @@ annotations = [
     (2000, 32000, "🌆 Modernisation urbaine — rénovation du centre-ville (2000)", 'darkred'),
     (2010, 55000, "📈 Forte croissance démographique — attractivité économique renouvelée (2010)", 'orange'),
     (2020, 59000, "🌍 Développement durable — initiatives écologiques en ville (2020)", 'green'),
+]
+
+# ============================================================
+# Cedar Grove (United States)
+# ============================================================
+CITY_NAME = "Cedar Grove, New Jersey"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 220, 250, 300, 350, 400, 450, 500, 600, 700, 900, 1200, 1500, 2000, 2500, 4000, 
+    7000, 12000, 15000, 16000, 17000, 18000, 19000
+]
+
+annotations = [
+    (1900, 900, "🏡 Développement résidentiel initial — premières maisons construites (1900)", 'brown'),
+    (1920, 1500, "🚂 Arrivée du chemin de fer local — amélioration des transports (1920)", 'blue'),
+    (1940, 2500, "🏭 Croissance industrielle — ouverture d'usines locales (1940)", 'orange'),
+    (1950, 4000, "🚗 Expansion suburbain — boom de la population après-guerre (1950)", 'red'),
+    (1960, 7000, "🏫 Construction d'écoles publiques — développement communautaire (1960)", 'purple'),
+    (1970, 12000, "🛣️ Amélioration des infrastructures routières — accès facilité (1970)", 'teal'),
+    (1980, 15000, "🏢 Croissance économique — développement commercial (1980)", 'navy'),
+    (1990, 16000, "🌳 Protection des espaces verts — initiatives environnementales (1990)", 'darkred'),
+    (2000, 17000, "📈 Stabilisation démographique — population stable (2000)", 'gray'),
+    (2010, 18000, "🏘️ Rénovation urbaine — modernisation des quartiers (2010)", 'gold'),
+    (2020, 19000, "🌐 Connectivité numérique — déploiement de la fibre optique (2020)", 'black'),
 ]
 
 # ============================================================
@@ -1670,35 +1835,6 @@ annotations = [
 # ============================================================
 # Charleston (United States)
 # ============================================================
-CITY_NAME = "Charleston, South Carolina"
-CITY_COLOR = '#00416A'
-
-years = [
-    1670, 1700, 1750, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 
-    1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
-]
-population = [
-    300, 1500, 11000, 16000, 16951, 22495, 25891, 29810, 40000, 40390, 40457, 42148, 
-    40312, 54000, 49317, 56117, 59418, 60819, 58000, 70374, 69000, 70100, 66500, 120000, 
-    124000, 137000
-]
-
-annotations = [
-    (1670, 300, "🏗️ Fondation de Charleston — établissement initial (1670)", 'brown'),
-    (1700, 1500, "⚓ Port en développement — commerce colonial (1700)", 'blue'),
-    (1750, 11000, "🏛️ Croissance économique — centre commercial majeur (1750)", 'green'),
-    (1800, 16000, "🛡️ Guerre d'indépendance — siège et batailles (1780)", 'red'),
-    (1850, 40000, "🚢 Apogée portuaire — commerce d'esclaves et coton (1850)", 'orange'),
-    (1900, 54000, "🏭 Industrialisation — modernisation urbaine (1900)", 'purple'),
-    (1950, 58000, "⚓ Base navale importante — Seconde Guerre mondiale (1940s)", 'navy'),
-    (2000, 120000, "🎭 Renaissance culturelle — tourisme et arts (2000)", 'gold'),
-    (2010, 124000, "🌪️ Ouragan Hugo — reconstruction et résilience (1989)", 'darkred'),
-    (2020, 137000, "🌿 Croissance démographique — développement durable (2020)", 'teal'),
-]
-
-# ============================================================
-# Charleston (United States)
-# ============================================================
 CITY_NAME = "Charleston, West Virginia"
 CITY_COLOR = '#4B0082'
 
@@ -1723,6 +1859,35 @@ annotations = [
     (1990, 52000, "📉 Déclin industriel — perte d'emplois (1990)", 'teal'),
     (2010, 51000, "🏥 Diversification économique — secteur des services (2010)", 'navy'),
     (2020, 47000, "🌿 Défis démographiques — déclin de la population (2020)", 'darkred'),
+]
+
+# ============================================================
+# Charleston (United States)
+# ============================================================
+CITY_NAME = "Charleston, South Carolina"
+CITY_COLOR = '#00416A'
+
+years = [
+    1670, 1700, 1750, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 
+    1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    300, 1500, 11000, 16000, 16951, 22495, 25891, 29810, 40000, 40390, 40457, 42148, 
+    40312, 54000, 49317, 56117, 59418, 60819, 58000, 70374, 69000, 70100, 66500, 120000, 
+    124000, 137000
+]
+
+annotations = [
+    (1670, 300, "🏗️ Fondation de Charleston — établissement initial (1670)", 'brown'),
+    (1700, 1500, "⚓ Port en développement — commerce colonial (1700)", 'blue'),
+    (1750, 11000, "🏛️ Croissance économique — centre commercial majeur (1750)", 'green'),
+    (1800, 16000, "🛡️ Guerre d'indépendance — siège et batailles (1780)", 'red'),
+    (1850, 40000, "🚢 Apogée portuaire — commerce d'esclaves et coton (1850)", 'orange'),
+    (1900, 54000, "🏭 Industrialisation — modernisation urbaine (1900)", 'purple'),
+    (1950, 58000, "⚓ Base navale importante — Seconde Guerre mondiale (1940s)", 'navy'),
+    (2000, 120000, "🎭 Renaissance culturelle — tourisme et arts (2000)", 'gold'),
+    (2010, 124000, "🌪️ Ouragan Hugo — reconstruction et résilience (1989)", 'darkred'),
+    (2020, 137000, "🌿 Croissance démographique — développement durable (2020)", 'teal'),
 ]
 
 # ============================================================
@@ -1815,6 +1980,33 @@ annotations = [
     (1981, 37000, "🏙️ Incorporation ville — services (1968)", 'purple'),
     (1991, 41000, "🚧 Crise Oka — pont bloqué 78 jours (1990)", 'red'),
     (2021, 50000, "🏘️ Banlieue mature — identité francophone (2015)", 'blue'),
+]
+
+# ============================================================
+# Chattanooga (United States)
+# ============================================================
+CITY_NAME = "Chattanooga, Tennessee"
+CITY_COLOR = '#004b87'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 1500, 3500, 8000, 14000, 22000, 40000, 60000, 80000, 100000, 110000, 
+    120000, 130000, 140000, 150000, 155000, 160000, 170000, 180000
+]
+
+annotations = [
+    (1880, 14000, "🚂 Expansion ferroviaire — Chattanooga devient un carrefour ferroviaire (1880)", 'orange'),
+    (1900, 40000, "🏭 Industrialisation majeure — croissance économique rapide (1900)", 'green'),
+    (1920, 80000, "🏗️ Développement urbain — modernisation des infrastructures (1920)", 'blue'),
+    (1940, 110000, "🎖️ Seconde Guerre mondiale — boom industriel et démographique (1940)", 'purple'),
+    (1960, 130000, "✊ Mouvement des droits civiques — changements sociaux importants (1960)", 'navy'),
+    (1980, 150000, "🌉 Construction du pont Walnut Street — revitalisation urbaine (1980)", 'gold'),
+    (2000, 160000, "💧 Amélioration de la qualité de vie — projets environnementaux (2000)", 'teal'),
+    (2010, 170000, "🎉 Croissance culturelle — développement des arts et tourisme (2010)", 'darkred'),
+    (2020, 180000, "🦠 Pandémie COVID-19 — impact sanitaire et économique (2020)", 'black'),
 ]
 
 # ============================================================
@@ -1986,6 +2178,34 @@ annotations = [
 ]
 
 # ============================================================
+# Cobourg (Canada)
+# ============================================================
+CITY_NAME = "Cobourg, Ontario"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    120, 350, 900, 1800, 3200, 4800, 6200, 7500, 8200, 8700, 9200, 9600, 9800, 10200, 
+    10500, 11000, 11500, 12000, 12500, 13000, 13500, 14000, 15000
+]
+
+annotations = [
+    (1830, 1800, "🚂 Arrivée du chemin de fer — développement économique (1830)", 'orange'),
+    (1850, 4800, "🏫 Construction de l'Université Victoria College — éducation (1850)", 'green'),
+    (1870, 7500, "⚓ Développement du port de Cobourg — commerce maritime (1870)", 'blue'),
+    (1900, 9200, "🏥 Ouverture de l'hôpital général — santé publique (1900)", 'red'),
+    (1920, 9800, "🎭 Fondation du théâtre Capitol — culture locale (1920)", 'purple'),
+    (1950, 11000, "🚧 Modernisation des infrastructures routières — urbanisation (1950)", 'gray'),
+    (1980, 12500, "🏢 Expansion résidentielle majeure — croissance démographique (1980)", 'gold'),
+    (2000, 13500, "🌳 Création de parcs et espaces verts — qualité de vie (2000)", 'teal'),
+    (2010, 14000, "🎉 200 ans de Cobourg — célébrations historiques (2010)", 'navy'),
+    (2020, 15000, "💻 Développement du secteur technologique — économie moderne (2020)", 'darkred'),
+]
+
+# ============================================================
 # Coeur d'Alene (United States)
 # ============================================================
 CITY_NAME = "Coeur d'Alene, Idaho"
@@ -2013,6 +2233,35 @@ annotations = [
     (2000, 35000, "🏫 Expansion des institutions éducatives (2000)", 'brown'),
     (2010, 45000, "📈 Forte croissance démographique et urbaine (2010)", 'orange'),
     (2020, 52000, "🌟 Ville moderne et centre touristique majeur (2020)", 'green'),
+]
+
+# ============================================================
+# Collingwood (Canada)
+# ============================================================
+CITY_NAME = "Collingwood, Ontario"
+CITY_COLOR = '#1f4e79'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 300, 400, 600, 900, 1500, 3500, 7000, 9000, 11000, 13000, 14000, 15000, 16000, 
+    17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 26000
+]
+
+annotations = [
+    (1860, 3500, "🚢 Développement du port — début de l'industrie navale (1860)", 'blue'),
+    (1870, 7000, "🏭 Croissance industrielle — construction navale en plein essor (1870)", 'green'),
+    (1880, 9000, "🚂 Arrivée du chemin de fer — amélioration des transports (1882)", 'orange'),
+    (1900, 13000, "🏗️ Expansion urbaine — développement des infrastructures (1900)", 'purple'),
+    (1920, 15000, "⚓ Port actif — centre de commerce maritime régional (1920)", 'navy'),
+    (1940, 17000, "🛠️ Seconde Guerre mondiale — production industrielle accrue (1940)", 'red'),
+    (1960, 19000, "🏞️ Début du tourisme — attractivité des environs naturels (1960)", 'teal'),
+    (1980, 21000, "🏢 Modernisation urbaine — développement commercial (1980)", 'gray'),
+    (2000, 23000, "🌊 Réhabilitation du front de mer — attractivité touristique (2000)", 'gold'),
+    (2010, 24000, "🚴 Promotion des loisirs — pistes cyclables et parcs (2010)", 'darkred'),
+    (2020, 26000, "🌿 Croissance durable — initiatives écologiques (2020)", 'black'),
 ]
 
 # ============================================================
@@ -2120,6 +2369,34 @@ annotations = [
     (2000, 730000, "🌆 Revitalisation du centre-ville — renaissance urbaine (années 1990)", 'teal'),
     (2010, 790000, "🚀 Croissance technologique et démographique — 21e siècle (2010)", 'navy'),
     (2020, 900000, "🌍 Diversification culturelle accrue — population cosmopolite (2020)", 'darkred'),
+]
+
+# ============================================================
+# Columbus (United States)
+# ============================================================
+CITY_NAME = "Columbus, Georgia"
+CITY_COLOR = '#004080'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 500, 3500, 9000, 15000, 18000, 22000, 30000, 35000, 45000, 55000, 60000, 
+    65000, 70000, 90000, 110000, 130000, 150000, 180000, 190000, 195000
+]
+
+annotations = [
+    (1830, 500, "🌾 Développement agricole — croissance rapide (1830)", 'green'),
+    (1860, 15000, "⚔️ Avant la Guerre de Sécession — population en hausse (1860)", 'red'),
+    (1870, 18000, "🔧 Reconstruction post-guerre — reprise économique (1870)", 'orange'),
+    (1900, 35000, "🏭 Industrialisation — essor des usines textiles (1900)", 'blue'),
+    (1920, 55000, "🚂 Expansion ferroviaire — amélioration des transports (1920)", 'navy'),
+    (1950, 70000, "🚗 Boom automobile — développement urbain (1950)", 'purple'),
+    (1970, 110000, "🏢 Croissance urbaine — modernisation du centre-ville (1970)", 'teal'),
+    (2000, 180000, "🏞️ Développement des espaces verts — amélioration qualité de vie (2000)", 'green'),
+    (2010, 190000, "🎓 Expansion universitaire — impact économique (2010)", 'gold'),
+    (2020, 195000, "🌐 Modernisation numérique — ville connectée (2020)", 'black'),
 ]
 
 # ============================================================
@@ -2366,12 +2643,12 @@ CITY_NAME = "Dallas, Texas"
 CITY_COLOR = '#006400'
 
 years = [
-    1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 
-    1990, 2000, 2010, 2020
+    1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 
+    1980, 1990, 2000, 2010, 2020
 ]
 population = [
-    342, 678, 1200, 10358, 38067, 42638, 92104, 158976, 260475, 294734, 434462, 679684, 
-    844401, 904078, 1006877, 1188580, 1197816, 1304379
+    1, 342, 678, 1200, 10358, 38067, 42638, 92104, 158976, 260475, 294734, 434462, 
+    679684, 844401, 904078, 1006877, 1188580, 1197816, 1304379
 ]
 
 annotations = [
@@ -2645,6 +2922,34 @@ annotations = [
 ]
 
 # ============================================================
+# Dolbeau-Mistassini (Canada)
+# ============================================================
+CITY_NAME = "Dolbeau-Mistassini, Québec"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1500, 3500, 7000, 9000, 11000, 12000, 11500, 
+    11000, 10000, 9500
+]
+
+annotations = [
+    (1930, 1500, "🏭 Développement industriel — ouverture de la première usine de pâte à papier (1930)", 'orange'),
+    (1940, 3500, "🚂 Expansion ferroviaire — amélioration des liaisons de transport (1940)", 'green'),
+    (1950, 7000, "🏥 Construction du premier hôpital local — amélioration des services (1950)", 'blue'),
+    (1960, 9000, "🌲 Croissance économique liée à la foresterie — pic d'emploi (1960)", 'red'),
+    (1970, 11000, "🏫 Fusion avec Mistassini — création de Dolbeau-Mistassini (1976)", 'purple'),
+    (1980, 12000, "⚙️ Modernisation industrielle — diversification économique (1980)", 'gray'),
+    (1990, 11500, "📉 Déclin démographique — début de la baisse de population (1990)", 'gold'),
+    (2000, 11000, "🏞️ Développement touristique — valorisation du lac St-Jean (2000)", 'teal'),
+    (2010, 10000, "🏛️ Renforcement des services municipaux — amélioration qualité de vie (2010)", 'navy'),
+    (2020, 9500, "🌿 Transition écologique — initiatives environnementales locales (2020)", 'darkred'),
+]
+
+# ============================================================
 # Donnacona (Canada)
 # ============================================================
 CITY_NAME = "Donnacona, Québec"
@@ -2859,33 +3164,6 @@ annotations = [
 ]
 
 # ============================================================
-# Essex (United States)
-# ============================================================
-CITY_NAME = "Essex, Vermont"
-CITY_COLOR = '#1B5E20'
-
-years = [
-    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
-    1940, 1950, 1957, 1960, 1970, 1980, 1990, 2000, 2010, 2015, 2020, 2022
-]
-population = [
-    500, 1300, 1400, 1500, 1800, 2100, 2800, 2500, 3200, 3200, 3500, 4000, 3800, 5200, 
-    4500, 8500, 5000, 7500, 10951, 14392, 16498, 18626, 19587, 20000, 21378, 34000
-]
-
-annotations = [
-    (1800, 500, "🏞️ Township Nouvelle-Angleterre — Abénaquis (1763)", 'brown'),
-    (1860, 2800, "🚂 Vermont Central Railroad — Essex Junction (1849)", 'green'),
-    (1920, 3800, "👨‍👩‍👧 Communauté franco-américaine — paroisses (1910)", 'blue'),
-    (1940, 4500, "⚔️ Guerre — production agricole intensifiée (1940)", 'gray'),
-    (1957, 5000, "💻 IBM s'installe — tournant technologique (1957)", 'red'),
-    (1970, 10951, "🏘️ I-89 + IBM — suburbanisation massive (1960)", 'orange'),
-    (1990, 16498, "🛒 Taft Corners — développement commercial (1985)", 'purple'),
-    (2015, 20000, "🏭 GlobalFoundries reprend IBM (2015)", 'teal'),
-    (2022, 34000, "🏙️ Fusion Essex Town + Junction (2022)", 'red'),
-]
-
-# ============================================================
 # Essex (Canada)
 # ============================================================
 CITY_NAME = "Essex, Ontario"
@@ -2910,6 +3188,33 @@ annotations = [
     (1999, 18000, "🏙️ Fusion municipale — townships (1999)", 'red'),
     (2016, 20000, "🍷 Vignobles — agrotourisme — Point Pelee (2010)", 'green'),
     (2021, 20500, "🌉 Pont Gordie Howe — impact régional (2020)", 'blue'),
+]
+
+# ============================================================
+# Essex (United States)
+# ============================================================
+CITY_NAME = "Essex, Vermont"
+CITY_COLOR = '#1B5E20'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1957, 1960, 1970, 1980, 1990, 2000, 2010, 2015, 2020, 2022
+]
+population = [
+    500, 1300, 1400, 1500, 1800, 2100, 2800, 2500, 3200, 3200, 3500, 4000, 3800, 5200, 
+    4500, 8500, 5000, 7500, 10951, 14392, 16498, 18626, 19587, 20000, 21378, 34000
+]
+
+annotations = [
+    (1800, 500, "🏞️ Township Nouvelle-Angleterre — Abénaquis (1763)", 'brown'),
+    (1860, 2800, "🚂 Vermont Central Railroad — Essex Junction (1849)", 'green'),
+    (1920, 3800, "👨‍👩‍👧 Communauté franco-américaine — paroisses (1910)", 'blue'),
+    (1940, 4500, "⚔️ Guerre — production agricole intensifiée (1940)", 'gray'),
+    (1957, 5000, "💻 IBM s'installe — tournant technologique (1957)", 'red'),
+    (1970, 10951, "🏘️ I-89 + IBM — suburbanisation massive (1960)", 'orange'),
+    (1990, 16498, "🛒 Taft Corners — développement commercial (1985)", 'purple'),
+    (2015, 20000, "🏭 GlobalFoundries reprend IBM (2015)", 'teal'),
+    (2022, 34000, "🏙️ Fusion Essex Town + Junction (2022)", 'red'),
 ]
 
 # ============================================================
@@ -3104,6 +3409,34 @@ annotations = [
 ]
 
 # ============================================================
+# Fayetteville (United States)
+# ============================================================
+CITY_NAME = "Fayetteville, North Carolina"
+CITY_COLOR = '#004080'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    3500, 4200, 4800, 5200, 6000, 7200, 8500, 9000, 11000, 13000, 16000, 21000, 25000, 
+    30000, 35000, 45000, 60000, 80000, 100000, 120000, 145000, 180000, 210000
+]
+
+annotations = [
+    (1830, 5200, "🚂 Arrivée du chemin de fer — développement économique (1830)", 'orange'),
+    (1890, 13000, "🏭 Industrialisation — croissance urbaine (1890)", 'green'),
+    (1910, 21000, "🚜 Expansion agricole — boom démographique (1910)", 'blue'),
+    (1940, 35000, "✈️ Base militaire établie — Camp Bragg (1940)", 'purple'),
+    (1950, 45000, "🏙️ Urbanisation rapide — développement suburbain (1950)", 'teal'),
+    (1970, 80000, "🏢 Croissance économique — diversification industrielle (1970)", 'navy'),
+    (1990, 120000, "🎓 Expansion universitaire — Fayetteville State University (1990)", 'gold'),
+    (2000, 145000, "🚀 Croissance militaire continue — base élargie (2000)", 'black'),
+    (2010, 180000, "🌆 Modernisation urbaine — développement des infrastructures (2010)", 'darkred'),
+    (2020, 210000, "🌍 Fayetteville aujourd'hui — métropole régionale (2020)", 'gray'),
+]
+
+# ============================================================
 # Fermont (Canada)
 # ============================================================
 CITY_NAME = "Fermont, Québec"
@@ -3199,6 +3532,62 @@ annotations = [
     (1990, 140761, "🏭 Fermetures GM — 60 000 jobs perdus (1985)", 'red'),
     (2010, 102434, "☠️ Crise eau au plomb — scandale national (2014)", 'black'),
     (2020, 81252, "💧 Remplacement canalisations fédéral (2021)", 'blue'),
+]
+
+# ============================================================
+# Florence (United States)
+# ============================================================
+CITY_NAME = "Florence, Mississippi"
+CITY_COLOR = '#4B0082'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 150, 300, 450, 600, 550, 600, 700, 800, 900, 1000, 1200, 1300, 1500, 1700, 
+    1900, 2100, 2300, 2500, 2700, 2900
+]
+
+annotations = [
+    (1830, 150, "🏙️ Fondation officielle de Florence — création de la ville (1830)", 'brown'),
+    (1870, 550, "🏚️ Reconstruction post-guerre — ralentissement démographique (1870)", 'gray'),
+    (1900, 800, "🚂 Arrivée du chemin de fer — développement économique (1900)", 'green'),
+    (1920, 1000, "🏫 Construction d'écoles publiques — amélioration sociale (1920)", 'blue'),
+    (1940, 1300, "🏭 Industrialisation locale — croissance démographique (1940)", 'orange'),
+    (1960, 1700, "✊ Mouvement des droits civiques — changements sociaux (1960)", 'purple'),
+    (1980, 2100, "🏥 Ouverture d'un hôpital moderne — amélioration des services (1980)", 'teal'),
+    (2000, 2500, "💡 Modernisation des infrastructures — attractivité accrue (2000)", 'navy'),
+    (2020, 2900, "🌳 Développement durable et espaces verts — qualité de vie (2020)", 'darkred'),
+]
+
+# ============================================================
+# Fort Lauderdale (United States)
+# ============================================================
+CITY_NAME = "Fort Lauderdale, Florida"
+CITY_COLOR = '#0077be'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 300, 500, 2000, 8000, 12000, 25000, 60000, 130000, 
+    160000, 150000, 152000, 165000, 182000
+]
+
+annotations = [
+    (1900, 300, "🏞️ Petite communauté indigène et pionnière — premiers habitants (1900)", 'brown'),
+    (1920, 2000, "🌴 Boom touristique — développement du tourisme (1920)", 'orange'),
+    (1930, 8000, "🚤 Croissance du port et des loisirs nautiques — essor économique (1930)", 'green'),
+    (1950, 25000, "🏗️ Expansion urbaine après la Seconde Guerre mondiale — boom immobilier (1950)", 'blue'),
+    (1960, 60000, "🚀 Développement industriel et militaire — base aérienne (1960)", 'purple'),
+    (1970, 130000, "🌆 Croissance démographique rapide — urbanisation (1970)", 'gold'),
+    (1980, 160000, "🎉 Fort Lauderdale devient une destination majeure pour les croisières (1980)", 'teal'),
+    (1990, 150000, "🌪️ Impact de l’ouragan Andrew — reconstruction (1990)", 'darkred'),
+    (2000, 152000, "🏖️ Renforcement du tourisme et de la culture locale (2000)", 'navy'),
+    (2010, 165000, "🏙️ Modernisation urbaine et développement durable (2010)", 'black'),
+    (2020, 182000, "📈 Croissance continue malgré défis climatiques (2020)", 'gray'),
 ]
 
 # ============================================================
@@ -3301,33 +3690,6 @@ annotations = [
 ]
 
 # ============================================================
-# Fort Smith (United States)
-# ============================================================
-CITY_NAME = "Fort Smith, Arkansas"
-CITY_COLOR = '#4B5320'
-
-years = [
-    1817, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 
-    1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
-]
-population = [
-    0, 144, 554, 962, 2300, 1363, 9000, 3700, 4943, 12000, 13961, 17000, 26345, 25000, 
-    44449, 35000, 52382, 52000, 61550, 73000, 86000, 88000
-]
-
-annotations = [
-    (1817, 0, "🏰 Fondation du fort militaire — début de Fort Smith (1817)", 'brown'),
-    (1850, 2300, "🏙️ Incorporation de la ville — croissance initiale (1850)", 'green'),
-    (1870, 9000, "🚂 Arrivée du chemin de fer — essor économique (1870)", 'blue'),
-    (1920, 17000, "🎉 Boom démographique — croissance urbaine (1920)", 'purple'),
-    (1940, 25000, "✈️ Base aérienne militaire établie — impact sur la population (1940)", 'gray'),
-    (1960, 35000, "🏢 Expansion urbaine — modernisation (1960)", 'gold'),
-    (1980, 52000, "🏥 Développement des infrastructures — hôpitaux et écoles (1980)", 'teal'),
-    (2000, 73000, "📈 Croissance soutenue — diversification économique (2000)", 'navy'),
-    (2010, 86000, "🌆 Fort Smith aujourd'hui — ville régionale majeure (2010)", 'black'),
-]
-
-# ============================================================
 # Fort Smith (Canada)
 # ============================================================
 CITY_NAME = "Fort Smith, Northwest Territories"
@@ -3357,6 +3719,33 @@ annotations = [
     (2000, 4300, "🏞️ Développement touristique — valorisation du patrimoine (2000)", 'brown'),
     (2010, 4500, "♻️ Initiatives écologiques — durabilité (2010)", 'green'),
     (2020, 4700, "🏙️ Stabilisation démographique — population stable (2020)", 'blue'),
+]
+
+# ============================================================
+# Fort Smith (United States)
+# ============================================================
+CITY_NAME = "Fort Smith, Arkansas"
+CITY_COLOR = '#4B5320'
+
+years = [
+    1817, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 
+    1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 144, 554, 962, 2300, 1363, 9000, 3700, 4943, 12000, 13961, 17000, 26345, 25000, 
+    44449, 35000, 52382, 52000, 61550, 73000, 86000, 88000
+]
+
+annotations = [
+    (1817, 0, "🏰 Fondation du fort militaire — début de Fort Smith (1817)", 'brown'),
+    (1850, 2300, "🏙️ Incorporation de la ville — croissance initiale (1850)", 'green'),
+    (1870, 9000, "🚂 Arrivée du chemin de fer — essor économique (1870)", 'blue'),
+    (1920, 17000, "🎉 Boom démographique — croissance urbaine (1920)", 'purple'),
+    (1940, 25000, "✈️ Base aérienne militaire établie — impact sur la population (1940)", 'gray'),
+    (1960, 35000, "🏢 Expansion urbaine — modernisation (1960)", 'gold'),
+    (1980, 52000, "🏥 Développement des infrastructures — hôpitaux et écoles (1980)", 'teal'),
+    (2000, 73000, "📈 Croissance soutenue — diversification économique (2000)", 'navy'),
+    (2010, 86000, "🌆 Fort Smith aujourd'hui — ville régionale majeure (2010)", 'black'),
 ]
 
 # ============================================================
@@ -3466,6 +3855,33 @@ annotations = [
     (1980, 174000, "🏫 Expansion éducative — universités et écoles (1980)", 'navy'),
     (2000, 427652, "🌆 Diversification économique — services et industrie (2000)", 'black'),
     (2010, 494665, "🌎 Croissance multiculturelle — diversité accrue (2010)", 'darkred'),
+]
+
+# ============================================================
+# Gananoque (Canada)
+# ============================================================
+CITY_NAME = "Gananoque, Ontario"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    300, 350, 400, 450, 600, 900, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3200, 3400, 
+    3600, 3800, 4000, 4200, 4400, 4600, 4800, 5000
+]
+
+annotations = [
+    (1830, 450, "🚢 Développement du transport fluvial — commerce sur le Saint-Laurent (1830)", 'blue'),
+    (1850, 900, "🏭 Industrialisation — début des industries locales (1850)", 'orange'),
+    (1870, 1500, "🚂 Arrivée du chemin de fer — amélioration des connexions (1870)", 'green'),
+    (1900, 2400, "🏙️ Croissance urbaine — expansion résidentielle (1900)", 'purple'),
+    (1930, 3200, "📈 Développement économique — diversification des activités (1930)", 'teal'),
+    (1950, 3600, "🚗 Essor de l'automobile — modernisation des infrastructures (1950)", 'navy'),
+    (1970, 4000, "🎉 Tourisme en hausse — popularité des Mille-Îles (1970)", 'gold'),
+    (2000, 4600, "🌿 Protection environnementale — initiatives écologiques (2000)", 'darkred'),
+    (2020, 5000, "💻 Modernisation numérique — développement des services (2020)", 'black'),
 ]
 
 # ============================================================
@@ -3941,6 +4357,33 @@ annotations = [
 ]
 
 # ============================================================
+# Green Bay (United States)
+# ============================================================
+CITY_NAME = "Green Bay, Wisconsin"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 300, 500, 800, 1500, 3000, 6000, 10000, 16000, 22000, 29000, 35000, 40000, 
+    45000, 47000, 52000, 56000, 62000, 65000, 68000, 72000, 74000, 78000
+]
+
+annotations = [
+    (1800, 200, "🌾 Petite communauté agricole — début du développement (1800)", 'green'),
+    (1850, 3000, "🚂 Arrivée du chemin de fer — accélération de la croissance (1850)", 'orange'),
+    (1880, 16000, "🏭 Industrialisation — développement économique majeur (1880)", 'purple'),
+    (1900, 29000, "🏛️ Construction de bâtiments publics importants (1900)", 'navy'),
+    (1930, 45000, "📈 Croissance continue malgré la Grande Dépression (1930)", 'gray'),
+    (1950, 52000, "🚗 Expansion urbaine liée à l'automobile (1950)", 'red'),
+    (1970, 62000, "🏟️ Construction du Lambeau Field — symbole sportif (1975)", 'gold'),
+    (2000, 72000, "🌐 Modernisation et diversification économique (2000)", 'teal'),
+    (2020, 78000, "🌿 Initiatives écologiques et développement durable (2020)", 'darkred'),
+]
+
+# ============================================================
 # Greensboro (United States)
 # ============================================================
 CITY_NAME = "Greensboro, North Carolina"
@@ -3965,6 +4408,34 @@ annotations = [
     (2000, 230000, "🌆 Urbanisation — croissance démographique soutenue (2000)", 'gold'),
     (2010, 270000, "🚀 Innovation — développement du secteur technologique (2010)", 'darkred'),
     (2020, 296000, "🌍 Diversification — ville multiculturelle et économique (2020)", 'black'),
+]
+
+# ============================================================
+# Grimsby (Canada)
+# ============================================================
+CITY_NAME = "Grimsby, Ontario"
+CITY_COLOR = '#4B8BBE'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    150, 300, 450, 700, 1200, 2000, 3000, 4500, 6000, 7500, 9000, 11000, 13000, 15000, 
+    17000, 21000, 25000, 30000, 35000, 40000, 43000, 45000, 47000
+]
+
+annotations = [
+    (1830, 700, "🚂 Arrivée du chemin de fer — développement économique (1830)", 'orange'),
+    (1850, 2000, "🏫 Construction de la première école publique — éducation (1850)", 'green'),
+    (1870, 4500, "🏘️ Expansion résidentielle majeure — croissance démographique (1870)", 'blue'),
+    (1900, 9000, "🏭 Industrialisation locale — essor économique (1900)", 'red'),
+    (1930, 15000, "🚜 Développement agricole intensif — économie rurale (1930)", 'purple'),
+    (1950, 21000, "🚧 Modernisation des infrastructures — urbanisation (1950)", 'gray'),
+    (1970, 30000, "🏙️ Intégration dans la région du Niagara — métropolisation (1970)", 'gold'),
+    (1990, 40000, "🚗 Amélioration des transports — accessibilité accrue (1990)", 'teal'),
+    (2010, 45000, "🎉 Croissance culturelle et touristique — dynamisme local (2010)", 'navy'),
+    (2020, 47000, "🌿 Initiatives écologiques — développement durable (2020)", 'darkred'),
 ]
 
 # ============================================================
@@ -4571,12 +5042,12 @@ CITY_NAME = "Jackson, Mississippi"
 CITY_COLOR = '#0047AB'
 
 years = [
-    1822, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 
-    1960, 1970, 1980, 1990, 2000, 2010, 2020
+    1820, 1822, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 
+    1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
 ]
 population = [
-    400, 175, 1200, 4000, 8000, 10000, 10200, 15000, 17000, 29000, 29000, 52000, 52000, 
-    113000, 88000, 190000, 160000, 184256, 184256, 173514, 160628
+    1, 400, 175, 1200, 4000, 8000, 10000, 10200, 15000, 17000, 29000, 29000, 52000, 
+    52000, 113000, 88000, 190000, 160000, 184256, 184256, 173514, 160628
 ]
 
 annotations = [
@@ -5140,6 +5611,35 @@ annotations = [
 ]
 
 # ============================================================
+# Leamington (Canada)
+# ============================================================
+CITY_NAME = "Leamington, Ontario"
+CITY_COLOR = '#4a90e2'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    150, 180, 220, 300, 450, 600, 850, 1200, 1800, 2500, 3200, 4000, 5200, 6500, 7200, 
+    8300, 9000, 10500, 12000, 13500, 15000, 16000, 17000
+]
+
+annotations = [
+    (1880, 1800, "🚂 Arrivée du chemin de fer — développement économique (1880)", 'orange'),
+    (1900, 3200, "🍅 Début de la culture intensive de tomates — spécialité locale (1900)", 'green'),
+    (1910, 4000, "🏭 Construction de la première usine de transformation alimentaire (1910)", 'blue'),
+    (1920, 5200, "🚢 Expansion du port — commerce maritime accru (1920)", 'red'),
+    (1940, 7200, "⚙️ Croissance industrielle pendant la Seconde Guerre mondiale (1940)", 'purple'),
+    (1950, 8300, "🏫 Ouverture de nouvelles écoles — croissance démographique (1950)", 'gray'),
+    (1970, 10500, "🌳 Début des initiatives de conservation environnementale (1970)", 'gold'),
+    (1990, 13500, "🍅 Leamington devient la capitale mondiale de la tomate (1990)", 'teal'),
+    (2000, 15000, "🏥 Modernisation des infrastructures sanitaires (2000)", 'navy'),
+    (2010, 16000, "🌍 Diversification culturelle accrue — immigration importante (2010)", 'black'),
+    (2020, 17000, "⚡ Développement des énergies renouvelables locales (2020)", 'darkred'),
+]
+
+# ============================================================
 # Lethbridge (Canada)
 # ============================================================
 CITY_NAME = "Lethbridge, Alberta"
@@ -5246,26 +5746,6 @@ annotations = [
 ]
 
 # ============================================================
-# Lincoln (Canada)
-# ============================================================
-CITY_NAME = "Lincoln, Ontario"
-CITY_COLOR = '#722F37'
-
-years = [1800, 1851, 1881, 1906, 1921, 1941, 1961, 1971, 1981, 1991, 2001, 2011, 2021]
-population = [500, 3000, 5500, 6000, 7200, 8100, 10500, 12000, 14800, 17200, 19500, 22000, 25300]
-
-annotations = [
-    (1800, 500, "🌳 Loyalistes — villages lac Ontario (1790s)", 'brown'),
-    (1851, 3000, "🚂 Great Western Railway — accès marchés (1853)", 'blue'),
-    (1906, 6000, "🔬 Vineland Experimental Station (1906)", 'green'),
-    (1941, 8100, "⚔️ Production fruitière — effort de guerre (1940)", 'gray'),
-    (1971, 12000, "🏛️ Incorporation — fusion villages (1970)", 'purple'),
-    (1981, 14800, "🍷 Inniskillin — révolution viticole (1974)", 'darkred'),
-    (1991, 17200, "🥇 Icewine — Grand Prix Bordeaux (1991)", 'gold'),
-    (2021, 25300, "🍇 30+ domaines — capitale viticole Ontario (2020)", 'green'),
-]
-
-# ============================================================
 # Lincoln (United States)
 # ============================================================
 CITY_NAME = "Lincoln, Nebraska"
@@ -5290,6 +5770,26 @@ annotations = [
     (1970, 149518, "🏈 Cornhuskers — religion du Nebraska (1970)", 'red'),
     (2000, 225581, "🌍 Réfugiés — transformation démographique (1995)", 'blue'),
     (2020, 291082, "🏗️ Haymarket — renaissance urbaine (2013)", 'purple'),
+]
+
+# ============================================================
+# Lincoln (Canada)
+# ============================================================
+CITY_NAME = "Lincoln, Ontario"
+CITY_COLOR = '#722F37'
+
+years = [1800, 1851, 1881, 1906, 1921, 1941, 1961, 1971, 1981, 1991, 2001, 2011, 2021]
+population = [500, 3000, 5500, 6000, 7200, 8100, 10500, 12000, 14800, 17200, 19500, 22000, 25300]
+
+annotations = [
+    (1800, 500, "🌳 Loyalistes — villages lac Ontario (1790s)", 'brown'),
+    (1851, 3000, "🚂 Great Western Railway — accès marchés (1853)", 'blue'),
+    (1906, 6000, "🔬 Vineland Experimental Station (1906)", 'green'),
+    (1941, 8100, "⚔️ Production fruitière — effort de guerre (1940)", 'gray'),
+    (1971, 12000, "🏛️ Incorporation — fusion villages (1970)", 'purple'),
+    (1981, 14800, "🍷 Inniskillin — révolution viticole (1974)", 'darkred'),
+    (1991, 17200, "🥇 Icewine — Grand Prix Bordeaux (1991)", 'gold'),
+    (2021, 25300, "🍇 30+ domaines — capitale viticole Ontario (2020)", 'green'),
 ]
 
 # ============================================================
@@ -5751,6 +6251,34 @@ annotations = [
     (1930, 110637, "Krach 1929 ralentit", 'red'),
     (1960, 291688, "🇨🇺 Exil cubain", 'blue'),
     (2020, 442241, "🌴 Hub Amérique Latine", 'green'),
+]
+
+# ============================================================
+# Midland (Canada)
+# ============================================================
+CITY_NAME = "Midland, Ontario"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    150, 200, 300, 500, 800, 1200, 1800, 2500, 3500, 4800, 6200, 7500, 8900, 10500, 
+    11500, 13000, 14500, 16000, 17500, 19000, 21000, 23000, 25000
+]
+
+annotations = [
+    (1850, 1200, "🚢 Développement du port — commerce maritime accru (1850)", 'blue'),
+    (1870, 2500, "🚂 Arrivée du chemin de fer — connexion avec Toronto (1870)", 'orange'),
+    (1890, 4800, "🏭 Industrialisation locale — croissance économique (1890)", 'green'),
+    (1910, 7500, "🏥 Ouverture du premier hôpital — amélioration santé publique (1910)", 'red'),
+    (1930, 10500, "🎡 Expansion touristique — popularité des plages (1930)", 'purple'),
+    (1950, 13000, "🏫 Construction d'écoles secondaires — développement éducatif (1950)", 'navy'),
+    (1970, 16000, "🏢 Croissance résidentielle — urbanisation accrue (1970)", 'teal'),
+    (1990, 19000, "🚧 Modernisation des infrastructures — routes et services (1990)", 'gray'),
+    (2010, 23000, "🌳 Initiatives écologiques — développement durable (2010)", 'gold'),
+    (2020, 25000, "💻 Adoption des technologies numériques — ville connectée (2020)", 'darkred'),
 ]
 
 # ============================================================
@@ -6305,6 +6833,34 @@ annotations = [
 # ============================================================
 # Newark (United States)
 # ============================================================
+CITY_NAME = "Newark, Delaware"
+CITY_COLOR = '#0055a4'
+
+years = [
+    1700, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 
+    1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 1500, 3111, 3933, 4887, 10226, 3000, 45998, 81126, 140072, 181830, 6000, 273546, 
+    7500, 438776, 438776, 12000, 405561, 20000, 281731, 28000, 273546, 31000, 33000
+]
+
+annotations = [
+    (1700, 200, "🏞️ Fondation de Newark — première colonie (1700)", 'brown'),
+    (1800, 1500, "🚂 Arrivée du chemin de fer — développement économique (1800)", 'orange'),
+    (1850, 3000, "🏫 Création de l'Université du Delaware — éducation (1850)", 'green'),
+    (1900, 6000, "🏭 Industrialisation — croissance urbaine (1900)", 'blue'),
+    (1920, 7500, "🎉 Incorporation officielle de la ville (1920)", 'red'),
+    (1950, 12000, "🏠 Boom résidentiel d'après-guerre (1950)", 'purple'),
+    (1970, 20000, "🚧 Expansion des infrastructures (1970)", 'gray'),
+    (1990, 28000, "🎓 Expansion universitaire majeure (1990)", 'gold'),
+    (2010, 31000, "🌆 Modernisation urbaine et services (2010)", 'teal'),
+    (2020, 33000, "📈 Croissance démographique stable (2020)", 'navy'),
+]
+
+# ============================================================
+# Newark (United States)
+# ============================================================
 CITY_NAME = "Newark, New Jersey"
 CITY_COLOR = '#1E8449'
 
@@ -6329,34 +6885,6 @@ annotations = [
     (1990, 275221, "💊 Crise crack & criminalité", 'black'),
     (2010, 277140, "🔄 Légère stabilisation", 'teal'),
     (2020, 311549, "📈 Renaissance & gentrification", 'cyan'),
-]
-
-# ============================================================
-# Newark (United States)
-# ============================================================
-CITY_NAME = "Newark, Delaware"
-CITY_COLOR = '#0055a4'
-
-years = [
-    1700, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 
-    1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
-]
-population = [
-    200, 1500, 3111, 3933, 4887, 10226, 3000, 45998, 81126, 140072, 181830, 6000, 273546, 
-    7500, 438776, 438776, 12000, 405561, 20000, 281731, 28000, 273546, 31000, 33000
-]
-
-annotations = [
-    (1700, 200, "🏞️ Fondation de Newark — première colonie (1700)", 'brown'),
-    (1800, 1500, "🚂 Arrivée du chemin de fer — développement économique (1800)", 'orange'),
-    (1850, 3000, "🏫 Création de l'Université du Delaware — éducation (1850)", 'green'),
-    (1900, 6000, "🏭 Industrialisation — croissance urbaine (1900)", 'blue'),
-    (1920, 7500, "🎉 Incorporation officielle de la ville (1920)", 'red'),
-    (1950, 12000, "🏠 Boom résidentiel d'après-guerre (1950)", 'purple'),
-    (1970, 20000, "🚧 Expansion des infrastructures (1970)", 'gray'),
-    (1990, 28000, "🎓 Expansion universitaire majeure (1990)", 'gold'),
-    (2010, 31000, "🌆 Modernisation urbaine et services (2010)", 'teal'),
-    (2020, 33000, "📈 Croissance démographique stable (2020)", 'navy'),
 ]
 
 # ============================================================
@@ -6962,6 +7490,35 @@ annotations = [
 ]
 
 # ============================================================
+# Orillia (Canada)
+# ============================================================
+CITY_NAME = "Orillia, Ontario"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 250, 300, 400, 600, 900, 1200, 2500, 4000, 5500, 7200, 9000, 10500, 12000, 
+    13000, 14000, 15000, 16000, 17000, 18000, 19000, 21000, 31000
+]
+
+annotations = [
+    (1870, 2500, "🚂 Arrivée du chemin de fer — développement économique (1870)", 'orange'),
+    (1880, 4000, "🏫 Construction des premières écoles publiques — éducation (1880)", 'green'),
+    (1900, 7200, "🏥 Ouverture de l'hôpital général — santé publique (1900)", 'blue'),
+    (1910, 9000, "🏞️ Développement du tourisme lacustre — loisirs (1910)", 'purple'),
+    (1930, 12000, "🏭 Expansion industrielle locale — croissance économique (1930)", 'red'),
+    (1950, 14000, "🚗 Amélioration des routes et accès routiers — mobilité (1950)", 'gray'),
+    (1970, 16000, "🏢 Construction de nouveaux quartiers résidentiels — urbanisation (1970)", 'gold'),
+    (1990, 18000, "🎭 Ouverture du théâtre local — culture (1990)", 'teal'),
+    (2000, 19000, "🌳 Création de parcs et espaces verts — qualité de vie (2000)", 'navy'),
+    (2010, 21000, "🏙️ Croissance démographique soutenue — développement urbain (2010)", 'black'),
+    (2020, 31000, "💻 Développement des infrastructures numériques — modernisation (2020)", 'darkred'),
+]
+
+# ============================================================
 # Orlando (United States)
 # ============================================================
 CITY_NAME = "Orlando, Florida"
@@ -7046,6 +7603,33 @@ annotations = [
     (1970, 380000, "🗣️ Loi langues officielles — ville bilingue (1969)", 'purple'),
     (2000, 774072, "💻 Silicon Valley du Nord — crash Nortel (2001)", 'orange'),
     (2020, 1017449, "🚝 LRT inauguré — 1 million hab. (2019)", 'blue'),
+]
+
+# ============================================================
+# Overland Park (United States)
+# ============================================================
+CITY_NAME = "Overland Park, Kansas"
+CITY_COLOR = '#007A33'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 90, 150, 300, 500, 800, 1200, 8000, 31000, 90000, 
+    125000, 140000, 173000, 197000
+]
+
+annotations = [
+    (1920, 300, "🚂 Développement ferroviaire — croissance initiale (1920)", 'orange'),
+    (1950, 1200, "🏘️ Début de la suburbanisation — expansion résidentielle (1950)", 'green'),
+    (1960, 8000, "🏢 Construction du premier centre commercial majeur — attractivité économique (1960)", 'blue'),
+    (1970, 31000, "🚗 Expansion automobile — croissance rapide de la population (1970)", 'red'),
+    (1980, 90000, "🏫 Développement des infrastructures éducatives — universités et écoles (1980)", 'purple'),
+    (1990, 125000, "🏥 Amélioration des services de santé — hôpitaux modernes (1990)", 'gray'),
+    (2000, 140000, "🌳 Initiatives écologiques — création de parcs et espaces verts (2000)", 'gold'),
+    (2010, 173000, "💼 Croissance économique — siège de nombreuses entreprises (2010)", 'teal'),
+    (2020, 197000, "📈 Population record — ville la plus peuplée du Kansas (2020)", 'navy'),
 ]
 
 # ============================================================
@@ -7182,6 +7766,35 @@ annotations = [
     (1981, 23181, "🛤️ KVR fermé — ère automobile (1964)", 'gray'),
     (2001, 30985, "🍷 Révolution vinicole Okanagan (1990)", 'purple'),
     (2021, 35129, "🏗️ Boom immobilier — afflux Vancouverois (2015)", 'red'),
+]
+
+# ============================================================
+# Peoria (United States)
+# ============================================================
+CITY_NAME = "Peoria, Arizona"
+CITY_COLOR = '#d2691e'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 150, 300, 600, 900, 1200, 1500, 3500, 12000, 35000, 80000, 
+    110000, 140000, 160000, 175000
+]
+
+annotations = [
+    (1890, 150, "🏙️ Fondation officielle de Peoria — incorporation de la ville (1890)", 'brown'),
+    (1900, 300, "🚂 Arrivée du chemin de fer — développement économique (1900)", 'orange'),
+    (1920, 900, "💧 Construction du barrage de Bartlett — irrigation et agriculture (1920)", 'blue'),
+    (1950, 3500, "🏠 Début de la suburbanisation — croissance résidentielle (1950)", 'green'),
+    (1960, 12000, "🏫 Ouverture des premières écoles publiques — éducation (1960)", 'purple'),
+    (1970, 35000, "🛣️ Extension des routes majeures — meilleure accessibilité (1970)", 'navy'),
+    (1980, 80000, "🏢 Développement commercial important — expansion urbaine (1980)", 'red'),
+    (1990, 110000, "🌆 Peoria devient une ville majeure de la banlieue de Phoenix (1990)", 'darkred'),
+    (2000, 140000, "🎉 Croissance démographique rapide — boom immobilier (2000)", 'gold'),
+    (2010, 160000, "🚀 Développement technologique et économique (2010)", 'teal'),
+    (2020, 175000, "🌳 Initiatives écologiques et durables — urbanisme vert (2020)", 'gray'),
 ]
 
 # ============================================================
@@ -7380,6 +7993,34 @@ annotations = [
 ]
 
 # ============================================================
+# Plymouth (United States)
+# ============================================================
+CITY_NAME = "Plymouth, California"
+CITY_COLOR = '#6a4e42'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 150, 400, 800, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 
+    2100, 2300, 2500, 2700, 2900
+]
+
+annotations = [
+    (1880, 400, "🚂 Arrivée du chemin de fer — développement économique (1880)", 'orange'),
+    (1890, 800, "🌾 Expansion agricole — boom de la viticulture (1890)", 'green'),
+    (1900, 1200, "🏫 Construction de la première école publique (1900)", 'blue'),
+    (1920, 1400, "🏛️ Établissement de la mairie actuelle (1920)", 'red'),
+    (1940, 1600, "⚙️ Industrialisation locale — croissance modérée (1940)", 'purple'),
+    (1960, 1800, "🚜 Modernisation agricole — mécanisation accrue (1960)", 'gray'),
+    (1980, 2100, "🏡 Développement résidentiel — attractivité croissante (1980)", 'gold'),
+    (2000, 2500, "🌉 Amélioration des infrastructures — ponts et routes (2000)", 'teal'),
+    (2010, 2700, "🎉 Festival annuel de la ville — renforcement communautaire (2010)", 'navy'),
+    (2020, 2900, "📈 Croissance démographique stable — ville touristique (2020)", 'darkred'),
+]
+
+# ============================================================
 # Portage la Prairie (Canada)
 # ============================================================
 CITY_NAME = "Portage la Prairie, Manitoba"
@@ -7409,6 +8050,89 @@ annotations = [
     (2000, 19000, "💡 Innovations technologiques — transition économique (2000)", 'brown'),
     (2010, 21000, "🏥 Amélioration des infrastructures de santé — qualité de vie (2010)", 'orange'),
     (2020, 17000, "🦠 Pandémie COVID-19 — impact démographique (2020)", 'red'),
+]
+
+# ============================================================
+# Port Colborne (Canada)
+# ============================================================
+CITY_NAME = "Port Colborne, Ontario"
+CITY_COLOR = '#1f78b4'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 200, 800, 1500, 3000, 4500, 6000, 7500, 9000, 10500, 11000, 11500, 12000, 
+    12500, 13000, 13500, 14000, 14500, 15000, 15500
+]
+
+annotations = [
+    (1890, 6000, "🚂 Arrivée du chemin de fer — amélioration des transports (1890)", 'blue'),
+    (1910, 9000, "🏙️ Expansion urbaine — population en hausse (1910)", 'red'),
+    (1930, 11000, "⚓ Port actif sur le lac Érié — commerce maritime (1930)", 'purple'),
+    (1950, 12000, "🏭 Industrialisation accrue — emploi local (1950)", 'gray'),
+    (1970, 13000, "🏞️ Développement touristique — canal et patrimoine (1970)", 'gold'),
+    (1990, 14000, "🏢 Modernisation urbaine — infrastructures (1990)", 'teal'),
+    (2010, 15000, "🌿 Initiatives écologiques — développement durable (2010)", 'navy'),
+    (2020, 15500, "📈 Croissance démographique stable — communauté locale (2020)", 'black'),
+]
+
+# ============================================================
+# Porterville (United States)
+# ============================================================
+CITY_NAME = "Porterville, California"
+CITY_COLOR = '#4B8BBE'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1500, 3500, 6000, 9000, 12000, 15000, 20000, 25000, 35000, 
+    40000, 48000, 54000, 57000, 60000
+]
+
+annotations = [
+    (1890, 1500, "🚂 Arrivée du chemin de fer — développement économique (1890)", 'orange'),
+    (1910, 6000, "🌾 Expansion agricole — croissance démographique (1910)", 'green'),
+    (1930, 12000, "🏫 Construction d'écoles publiques — amélioration des infrastructures (1930)", 'blue'),
+    (1950, 20000, "🏥 Ouverture du premier hôpital majeur — progrès sanitaire (1950)", 'red'),
+    (1970, 35000, "🏢 Industrialisation accrue — diversification économique (1970)", 'purple'),
+    (1980, 40000, "🚧 Développement urbain important — extension des quartiers résidentiels (1980)", 'gray'),
+    (1990, 48000, "🛣️ Amélioration des routes et autoroutes — meilleure connectivité (1990)", 'gold'),
+    (2000, 54000, "🎓 Création de centres éducatifs supérieurs — attractivité locale (2000)", 'teal'),
+    (2010, 57000, "🌉 Construction de ponts et infrastructures modernes — modernisation (2010)", 'navy'),
+    (2020, 60000, "🌿 Initiatives écologiques et durables — développement durable (2020)", 'darkred'),
+]
+
+# ============================================================
+# Port Hope (Canada)
+# ============================================================
+CITY_NAME = "Port Hope, Ontario"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    300, 450, 800, 1200, 1800, 2500, 3500, 4800, 6200, 7600, 9000, 10500, 11500, 12000, 
+    12500, 13000, 13500, 14000, 14500, 15000, 15500, 16000, 17000
+]
+
+annotations = [
+    (1830, 1200, "🚢 Développement portuaire — commerce maritime accru (1830)", 'blue'),
+    (1850, 2500, "🚂 Arrivée du chemin de fer — croissance économique (1850)", 'orange'),
+    (1870, 4800, "🏭 Industrialisation — premières usines locales (1870)", 'gray'),
+    (1900, 9000, "🏛️ Incorporation officielle de la ville — statut municipal (1900)", 'green'),
+    (1920, 11500, "🎓 Ouverture d'institutions éducatives majeures (1920)", 'purple'),
+    (1940, 12500, "⚔️ Impact de la Seconde Guerre mondiale — mobilisation locale (1940)", 'darkred'),
+    (1960, 13500, "🏥 Expansion des infrastructures — hôpital régional (1960)", 'teal'),
+    (1980, 14500, "🌳 Initiatives environnementales — protection des rives (1980)", 'navy'),
+    (2000, 15500, "🏘️ Croissance résidentielle — nouveaux quartiers (2000)", 'red'),
+    (2010, 16000, "🎉 Festivals culturels annuels — rayonnement régional (2010)", 'gold'),
+    (2020, 17000, "🌐 Développement numérique — modernisation des services (2020)", 'black'),
 ]
 
 # ============================================================
@@ -7463,6 +8187,31 @@ annotations = [
     (1970, 65116, "📉 Suburbanisation — Old Port abandonné (1965)", 'red'),
     (1990, 64358, "🍺 Old Port renaissance — gastronomie (1985)", 'orange'),
     (2020, 68408, "🌍 New Mainers — meilleure ville gastro USA (2015)", 'purple'),
+]
+
+# ============================================================
+# Port St. Lucie (United States)
+# ============================================================
+CITY_NAME = "Port St. Lucie, Florida"
+CITY_COLOR = '#1E90FF'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 837, 15000, 47000, 88000, 164000, 
+    204851
+]
+
+annotations = [
+    (1950, 0, "🌾 Zone peu peuplée — prédominance des fermes et forêts (1950)", 'gray'),
+    (1970, 837, "🏞️ Développement des infrastructures routières — facilitant l'accès (1970)", 'teal'),
+    (1980, 15000, "🏗️ Expansion résidentielle majeure — développement de quartiers (1980)", 'orange'),
+    (1990, 47000, "🏫 Construction d'écoles et services publics — structuration urbaine (1990)", 'gold'),
+    (2000, 88000, "🏢 Urbanisation accrue — arrivée de commerces et services (2000)", 'navy'),
+    (2010, 164000, "🚀 Boom démographique — population doublée en 20 ans (2010)", 'red'),
+    (2020, 204851, "🌆 Ville mature — Port St. Lucie parmi les plus grandes de Floride (2020)", 'darkred'),
 ]
 
 # ============================================================
@@ -7939,6 +8688,35 @@ annotations = [
 # ============================================================
 # Rochester (United States)
 # ============================================================
+CITY_NAME = "Rochester, New York"
+CITY_COLOR = '#005daa'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 331, 1450, 7500, 31000, 72000, 108000, 140000, 160000, 162000, 210000, 230000, 
+    250000, 260000, 280000, 330000, 340000, 320000, 320000, 219000, 210000, 206000
+]
+
+annotations = [
+    (1820, 331, "💧 Développement autour des chutes de la rivière Genesee — moteur industriel (1820)", 'blue'),
+    (1850, 31000, "🏭 Croissance industrielle rapide — centre du commerce de farine (1850)", 'orange'),
+    (1870, 108000, "🚂 Expansion ferroviaire — connexion aux grands marchés (1870)", 'green'),
+    (1900, 162000, "🏢 Début de l'ère des grandes entreprises — Eastman Kodak fondée (1888)", 'purple'),
+    (1920, 230000, "📸 Kodak devient un géant mondial — essor économique (1920)", 'gold'),
+    (1950, 280000, "🏠 Boom résidentiel d'après-guerre — croissance démographique (1950)", 'teal'),
+    (1970, 340000, "🏭 Déclin industriel commence — pertes d'emplois (1970)", 'red'),
+    (1990, 320000, "🏙️ Efforts de revitalisation urbaine — rénovation du centre-ville (1990)", 'navy'),
+    (2000, 219000, "📉 Déclin démographique marqué — exode vers la banlieue (2000)", 'darkred'),
+    (2010, 210000, "🌱 Initiatives écologiques et culturelles — renaissance locale (2010)", 'green'),
+    (2020, 206000, "🦠 Impact de la pandémie COVID-19 — ralentissement économique (2020)", 'gray'),
+]
+
+# ============================================================
+# Rochester (United States)
+# ============================================================
 CITY_NAME = "Rochester, Minnesota"
 CITY_COLOR = '#004b87'
 
@@ -8187,6 +8965,61 @@ annotations = [
 ]
 
 # ============================================================
+# Saint-Donat (Canada)
+# ============================================================
+CITY_NAME = "Saint-Donat, Québec"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    50, 60, 80, 100, 150, 300, 450, 600, 750, 900, 1100, 1300, 1600, 2000, 2500, 3200, 
+    4000, 4500, 5200, 6000, 6800, 7200, 7500
+]
+
+annotations = [
+    (1870, 600, "🌲 Développement forestier — essor économique local (1870)", 'green'),
+    (1900, 1100, "🚂 Arrivée du chemin de fer — ouverture aux touristes (1900)", 'blue'),
+    (1930, 2000, "🏞️ Début du tourisme estival — popularité croissante (1930)", 'orange'),
+    (1950, 3200, "🏨 Construction d'hôtels — développement touristique (1950)", 'purple'),
+    (1970, 4500, "⛷️ Essor du ski alpin — station de sports d'hiver (1970)", 'red'),
+    (1990, 6000, "🌐 Amélioration des infrastructures — accès routier (1990)", 'navy'),
+    (2000, 6800, "🏡 Croissance résidentielle — nouvelles habitations (2000)", 'teal'),
+    (2010, 7200, "♻️ Initiatives écologiques — protection environnementale (2010)", 'darkred'),
+    (2020, 7500, "📈 Stabilisation démographique — attractivité maintenue (2020)", 'black'),
+]
+
+# ============================================================
+# Sainte-Agathe-des-Monts (Canada)
+# ============================================================
+CITY_NAME = "Sainte-Agathe-des-Monts, Québec"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    150, 200, 300, 450, 600, 1200, 1800, 2500, 3200, 4000, 4800, 6000, 7200, 8500, 9800, 
+    12000, 14000, 16000, 18000, 21000, 23000, 25000, 27000
+]
+
+annotations = [
+    (1850, 1200, "🌲 Fondation officielle — création de la municipalité (1850)", 'green'),
+    (1870, 2500, "🚂 Arrivée du chemin de fer — développement économique (1870)", 'blue'),
+    (1890, 4000, "🏥 Construction du premier hôpital — amélioration des soins (1890)", 'red'),
+    (1910, 6000, "🏫 Ouverture de la première école secondaire — éducation (1910)", 'purple'),
+    (1930, 8500, "🏨 Développement touristique — essor des hôtels (1930)", 'orange'),
+    (1950, 12000, "🚗 Amélioration des routes — accès facilité (1950)", 'brown'),
+    (1970, 16000, "🏘️ Expansion résidentielle — croissance démographique (1970)", 'teal'),
+    (1990, 21000, "🌳 Protection environnementale — création d'espaces verts (1990)", 'darkred'),
+    (2010, 25000, "📈 Croissance économique soutenue — diversification (2010)", 'navy'),
+    (2020, 27000, "💡 Modernisation urbaine — projets d'infrastructure (2020)", 'gold'),
+]
+
+# ============================================================
 # Sainte-Catherine (Canada)
 # ============================================================
 CITY_NAME = "Sainte-Catherine, Québec"
@@ -8325,6 +9158,33 @@ annotations = [
     (2000, 5500, "🏙️ Modernisation des infrastructures — développement urbain (2000)", 'gold'),
     (2010, 6000, "🎉 Fête du 240e anniversaire de la fondation — patrimoine (2010)", 'darkred'),
     (2020, 6500, "🦠 Pandémie COVID-19 — impact sanitaire et social (2020)", 'black'),
+]
+
+# ============================================================
+# Saint-Félicien (Canada)
+# ============================================================
+CITY_NAME = "Saint-Félicien, Québec"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 250, 300, 350, 400, 450, 600, 1200, 2500, 4000, 6000, 9000, 11000, 13000, 15000, 
+    17000, 19000, 21000, 23000, 25000, 27000, 29000, 31000
+]
+
+annotations = [
+    (1870, 1200, "🌲 Développement économique — début de l'exploitation forestière (1870)", 'green'),
+    (1880, 2500, "🚂 Arrivée du chemin de fer — amélioration des transports (1880)", 'blue'),
+    (1900, 6000, "🏥 Construction du premier hôpital — progrès sanitaire (1900)", 'red'),
+    (1920, 11000, "📈 Croissance démographique importante — boom agricole (1920)", 'orange'),
+    (1940, 15000, "⚙️ Industrialisation locale — développement des usines (1940)", 'purple'),
+    (1960, 19000, "🎓 Fondation du Cégep de Saint-Félicien — éducation supérieure (1960)", 'navy'),
+    (1980, 23000, "🌿 Création du Zoo sauvage de Saint-Félicien — attraction touristique (1980)", 'gold'),
+    (2000, 27000, "🏙️ Modernisation urbaine — développement des infrastructures (2000)", 'teal'),
+    (2020, 31000, "📊 Croissance stable — diversification économique (2020)", 'darkred'),
 ]
 
 # ============================================================
@@ -8573,6 +9433,33 @@ annotations = [
 ]
 
 # ============================================================
+# Saint-Pascal (Canada)
+# ============================================================
+CITY_NAME = "Saint-Pascal, Québec"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    150, 180, 220, 300, 450, 600, 850, 1200, 1600, 2100, 2700, 3200, 3700, 4200, 4600, 
+    5000, 5300, 5600, 5800, 6000, 6200, 6300, 6400
+]
+
+annotations = [
+    (1870, 1200, "🚂 Arrivée du chemin de fer — développement économique (1870)", 'orange'),
+    (1890, 2100, "🏫 Construction de la première école publique — éducation locale (1890)", 'green'),
+    (1910, 3200, "🏥 Ouverture du premier hôpital — amélioration des soins (1910)", 'blue'),
+    (1930, 4200, "⚙️ Industrialisation locale — croissance démographique (1930)", 'red'),
+    (1950, 5000, "🚜 Mécanisation agricole — modernisation rurale (1950)", 'purple'),
+    (1970, 5600, "🏛️ Amélioration des infrastructures municipales — urbanisation (1970)", 'gray'),
+    (1990, 6000, "📈 Croissance stable — développement résidentiel (1990)", 'gold'),
+    (2010, 6300, "🌳 Initiatives environnementales — qualité de vie (2010)", 'teal'),
+    (2020, 6400, "💻 Développement numérique — modernisation locale (2020)", 'navy'),
+]
+
+# ============================================================
 # Saint Paul (United States)
 # ============================================================
 CITY_NAME = "Saint Paul, Minnesota"
@@ -8664,6 +9551,34 @@ annotations = [
 # ============================================================
 # Salem (United States)
 # ============================================================
+CITY_NAME = "Salem, New York"
+CITY_COLOR = '#5D8AA8'
+
+years = [
+    1761, 1770, 1780, 1790, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 
+    1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    215, 342, 489, 652, 789, 921, 1056, 1234, 1456, 1678, 1892, 2015, 2134, 2203, 2187, 
+    2145, 2098, 2012, 1987, 1923, 1856, 1765, 1689, 1543, 1422, 1309, 1256
+]
+
+annotations = [
+    (1761, 215, "🏡 Fondation — Salem officiellement établie par des colons écossais-irlandais (1761)", 'brown'),
+    (1790, 652, "📜 Premier recensement — Population enregistrée après l'indépendance (1790)", 'navy'),
+    (1820, 1056, "🏭 Industrialisation — Développement des moulins et forges locales (1820)", 'gray'),
+    (1850, 1678, "🚂 Arrivée du chemin de fer — Liaison avec Albany et Troy (1850)", 'black'),
+    (1870, 2015, "🔥 Grand incendie — Destruction d'une partie du centre-ville (1869)", 'orange'),
+    (1900, 2187, "🏛️ Âge d'or — Apogée démographique et architecturale (1900)", 'gold'),
+    (1950, 1923, "🚗 Déclin rural — Exode vers les villes industrielles (1950)", 'purple'),
+    (1980, 1689, "🏞️ Tourisme — Développement des activités liées au lac Salem (1980)", 'green'),
+    (2010, 1309, "📉 Stabilisation — Population vieillissante et faible croissance (2010)", 'blue'),
+    (2020, 1256, "🌳 Préservation — Efforts pour maintenir le patrimoine historique (2020)", 'darkgreen'),
+]
+
+# ============================================================
+# Salem (United States)
+# ============================================================
 CITY_NAME = "Salem, Oregon"
 CITY_COLOR = '#4B5320'
 
@@ -8691,34 +9606,6 @@ annotations = [
     (1990, 115000, "🌳 Initiatives environnementales — protection des espaces verts (1990)", 'green'),
     (2010, 154000, "🏢 Expansion économique moderne — diversification des emplois (2010)", 'blue'),
     (2020, 175000, "🦠 Pandémie COVID-19 — impact sanitaire et social (2020)", 'red'),
-]
-
-# ============================================================
-# Salem (United States)
-# ============================================================
-CITY_NAME = "Salem, New York"
-CITY_COLOR = '#5D8AA8'
-
-years = [
-    1761, 1770, 1780, 1790, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 
-    1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
-]
-population = [
-    215, 342, 489, 652, 789, 921, 1056, 1234, 1456, 1678, 1892, 2015, 2134, 2203, 2187, 
-    2145, 2098, 2012, 1987, 1923, 1856, 1765, 1689, 1543, 1422, 1309, 1256
-]
-
-annotations = [
-    (1761, 215, "🏡 Fondation — Salem officiellement établie par des colons écossais-irlandais (1761)", 'brown'),
-    (1790, 652, "📜 Premier recensement — Population enregistrée après l'indépendance (1790)", 'navy'),
-    (1820, 1056, "🏭 Industrialisation — Développement des moulins et forges locales (1820)", 'gray'),
-    (1850, 1678, "🚂 Arrivée du chemin de fer — Liaison avec Albany et Troy (1850)", 'black'),
-    (1870, 2015, "🔥 Grand incendie — Destruction d'une partie du centre-ville (1869)", 'orange'),
-    (1900, 2187, "🏛️ Âge d'or — Apogée démographique et architecturale (1900)", 'gold'),
-    (1950, 1923, "🚗 Déclin rural — Exode vers les villes industrielles (1950)", 'purple'),
-    (1980, 1689, "🏞️ Tourisme — Développement des activités liées au lac Salem (1980)", 'green'),
-    (2010, 1309, "📉 Stabilisation — Population vieillissante et faible croissance (2010)", 'blue'),
-    (2020, 1256, "🌳 Préservation — Efforts pour maintenir le patrimoine historique (2020)", 'darkgreen'),
 ]
 
 # ============================================================
@@ -9651,6 +10538,33 @@ annotations = [
 # ============================================================
 # Stratford (Canada)
 # ============================================================
+CITY_NAME = "Stratford, Ontario"
+CITY_COLOR = '#4B8BBE'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 250, 300, 400, 600, 1200, 2500, 4500, 7000, 9500, 12000, 14000, 16000, 17500, 
+    18000, 19000, 21000, 23000, 25000, 28000, 30000, 31000, 32000
+]
+
+annotations = [
+    (1850, 1200, "🚂 Arrivée du chemin de fer — développement économique (1850)", 'orange'),
+    (1870, 4500, "🏭 Industrialisation — croissance rapide de la population (1870)", 'green'),
+    (1900, 12000, "🏛️ Construction de bâtiments publics majeurs — modernisation (1900)", 'blue'),
+    (1920, 16000, "🎭 Début du Festival de Stratford — rayonnement culturel (1920)", 'red'),
+    (1940, 18000, "⚙️ Expansion industrielle durant la guerre — emploi accru (1940)", 'purple'),
+    (1960, 21000, "🏫 Développement des infrastructures éducatives — attractivité (1960)", 'gray'),
+    (1980, 25000, "🎭 Festival de Stratford reconnu internationalement — tourisme accru (1980)", 'gold'),
+    (2000, 30000, "🏙️ Urbanisation et diversification économique — croissance stable (2000)", 'teal'),
+    (2020, 32000, "🌱 Initiatives écologiques et culturelles — développement durable (2020)", 'navy'),
+]
+
+# ============================================================
+# Stratford (Canada)
+# ============================================================
 CITY_NAME = "Stratford, Prince Edward Island"
 CITY_COLOR = '#1E90FF'
 
@@ -9890,6 +10804,34 @@ annotations = [
 ]
 
 # ============================================================
+# Tempe (United States)
+# ============================================================
+CITY_NAME = "Tempe, Arizona"
+CITY_COLOR = '#d35400'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 150, 500, 1000, 1500, 3000, 5000, 8000, 12000, 20000, 40000, 
+    70000, 90000, 120000, 160000, 160000, 190000
+]
+
+annotations = [
+    (1880, 500, "🚂 Arrivée du chemin de fer — développement économique (1880)", 'orange'),
+    (1910, 3000, "🌾 Agriculture florissante — irrigation et culture (1910)", 'green'),
+    (1920, 5000, "🏫 Fondation de l'Arizona State Normal School — éducation (1920)", 'blue'),
+    (1940, 12000, "🏭 Industrialisation accrue — base économique élargie (1940)", 'red'),
+    (1950, 20000, "🏠 Boom résidentiel d'après-guerre — croissance urbaine (1950)", 'purple'),
+    (1960, 40000, "🎓 Transformation en Arizona State University — expansion universitaire (1960)", 'navy'),
+    (1980, 90000, "🌆 Urbanisation rapide — développement des infrastructures (1980)", 'gold'),
+    (2000, 160000, "💻 Croissance technologique — Silicon Desert émergent (2000)", 'teal'),
+    (2010, 160000, "🚲 Développement durable — infrastructures cyclables (2010)", 'gray'),
+    (2020, 190000, "🌇 Modernisation urbaine — Tempe comme hub culturel (2020)", 'darkred'),
+]
+
+# ============================================================
 # Terrebonne (Canada)
 # ============================================================
 CITY_NAME = "Terrebonne, Québec"
@@ -10061,6 +11003,37 @@ annotations = [
 ]
 
 # ============================================================
+# Tonopah (United States)
+# ============================================================
+CITY_NAME = "Tonopah, Nevada"
+CITY_COLOR = '#a0522d'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1000, 5000, 4000, 3000, 2500, 2000, 1500, 1200, 1000, 
+    900, 850, 800, 750
+]
+
+annotations = [
+    (1900, 1000, "⛏️ Fondation officielle — découverte d'argent (1900)", 'brown'),
+    (1910, 5000, "💰 Boom minier — pic de population (1910)", 'gold'),
+    (1920, 4000, "🏚️ Déclin minier — début de la décroissance (1920)", 'gray'),
+    (1930, 3000, "🛤️ Arrivée du chemin de fer — amélioration des transports (1930)", 'blue'),
+    (1940, 2500, "⚒️ Dernières mines en activité — fin progressive (1940)", 'darkred'),
+    (1950, 2000, "🏜️ Transition vers tourisme désertique (1950)", 'orange'),
+    (1960, 1500, "🏨 Développement hôtelier — tourisme croissant (1960)", 'green'),
+    (1970, 1200, "🎰 Ouverture de casinos — diversification économique (1970)", 'purple'),
+    (1980, 1000, "📉 Stabilisation démographique (1980)", 'navy'),
+    (1990, 900, "🚗 Amélioration des routes — accès facilité (1990)", 'teal'),
+    (2000, 850, "🎥 Tournages de films — notoriété culturelle (2000)", 'red'),
+    (2010, 800, "🌵 Promotion du patrimoine historique (2010)", 'black'),
+    (2020, 750, "📊 Population stable — ville touristique (2020)", 'brown'),
+]
+
+# ============================================================
 # Topeka (United States)
 # ============================================================
 CITY_NAME = "Topeka, Kansas"
@@ -10111,6 +11084,35 @@ annotations = [
     (1971, 2300000, "🌆 Expansion urbaine importante — métropole en croissance (1971)", 'gray'),
     (2011, 2600000, "🏢 Développement du centre-ville — densification (2011)", 'teal'),
     (2020, 2930000, "🌍 Ville globale — diversité et innovation (2020)", 'navy'),
+]
+
+# ============================================================
+# Trois-Pistoles (Canada)
+# ============================================================
+CITY_NAME = "Trois-Pistoles, Québec"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1680, 1700, 1750, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 
+    1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 50, 200, 300, 400, 500, 1200, 1500, 1800, 2000, 2200, 2500, 2800, 3000, 3200, 
+    3500, 3600, 3800, 3900, 3700, 3600, 3500, 3400, 3300, 3130
+]
+
+annotations = [
+    (1680, 0, "🏞️ Territoire innu — avant l'arrivée des colons européens (1600)", 'brown'),
+    (1750, 50, "🛶 Début de la colonisation — pêche et commerce (1750)", 'orange'),
+    (1850, 1500, "🚂 Développement agricole — croissance démographique (1850)", 'blue'),
+    (1870, 2000, "🏫 Construction de l'église Saint-Louis-de-Gonzague (1870)", 'purple'),
+    (1900, 2800, "🌊 Essor du commerce maritime — port actif (1900)", 'teal'),
+    (1920, 3200, "🚗 Arrivée de l'automobile — modernisation (1920)", 'gray'),
+    (1940, 3600, "⚓ Seconde Guerre mondiale — ralentissement économique (1940)", 'navy'),
+    (1960, 3900, "🏗️ Développement des infrastructures locales (1960)", 'gold'),
+    (1980, 3600, "📉 Exode rural — déclin démographique (1980)", 'darkred'),
+    (2000, 3400, "🏖️ Tourisme estival — attractivité régionale (2000)", 'red'),
+    (2020, 3130, "🦠 Pandémie de COVID-19 — impact sur la communauté (2020)", 'black'),
 ]
 
 # ============================================================
@@ -10348,6 +11350,33 @@ annotations = [
 ]
 
 # ============================================================
+# Vancouver (United States)
+# ============================================================
+CITY_NAME = "Vancouver, Washington"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    200, 250, 300, 500, 800, 1200, 1500, 2000, 3500, 6000, 8000, 12000, 15000, 20000, 
+    25000, 35000, 50000, 70000, 90000, 105000, 130000, 160000, 190000
+]
+
+annotations = [
+    (1880, 3500, "🚂 Arrivée du chemin de fer transcontinental — développement économique (1880)", 'orange'),
+    (1900, 8000, "🏭 Industrialisation accrue — croissance démographique (1900)", 'red'),
+    (1910, 12000, "🏥 Construction du premier hôpital majeur (1910)", 'purple'),
+    (1940, 25000, "✈️ Base aérienne militaire établie — Seconde Guerre mondiale (1940)", 'darkred'),
+    (1950, 35000, "🏙️ Expansion urbaine post-guerre — boom démographique (1950)", 'blue'),
+    (1970, 70000, "🌉 Construction du pont Interstate 5 — meilleure connectivité (1970)", 'teal'),
+    (1990, 105000, "🏢 Croissance des entreprises technologiques (1990)", 'gold'),
+    (2010, 160000, "🌳 Développement durable et espaces verts renforcés (2010)", 'gray'),
+    (2020, 190000, "🦠 Gestion de la pandémie COVID-19 — impact social (2020)", 'black'),
+]
+
+# ============================================================
 # Vancouver (Canada)
 # ============================================================
 CITY_NAME = "Vancouver, British Columbia"
@@ -10573,6 +11602,36 @@ annotations = [
 ]
 
 # ============================================================
+# Wasaga Beach (Canada)
+# ============================================================
+CITY_NAME = "Wasaga Beach, Ontario"
+CITY_COLOR = '#1E90FF'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 50, 150, 300, 450, 600, 800, 1200, 2000, 3500, 5000, 7000, 12000, 
+    18000, 22000, 24000, 25000, 26000, 25000
+]
+
+annotations = [
+    (1850, 50, "🏞️ Fondation de Wasaga Beach — début de la communauté (1850)", 'brown'),
+    (1870, 300, "🚂 Arrivée du chemin de fer — développement économique (1870)", 'orange'),
+    (1900, 800, "🏖️ Popularisation des plages — tourisme naissant (1900)", 'green'),
+    (1920, 2000, "🏨 Construction des premiers hôtels — essor touristique (1920)", 'blue'),
+    (1950, 7000, "🚗 Expansion routière — accès facilité (1950)", 'red'),
+    (1960, 12000, "🎡 Ouverture des parcs d'attractions — attractivité accrue (1960)", 'purple'),
+    (1970, 18000, "🏘️ Croissance résidentielle rapide — urbanisation (1970)", 'gray'),
+    (1980, 22000, "🌊 Réhabilitation des plages — tourisme durable (1980)", 'gold'),
+    (1990, 24000, "🏢 Développement commercial — diversification économique (1990)", 'teal'),
+    (2000, 25000, "🚤 Activités nautiques populaires — attractivité touristique (2000)", 'navy'),
+    (2010, 26000, "🌿 Initiatives écologiques — protection environnementale (2010)", 'darkred'),
+    (2020, 25000, "🦠 Impact COVID-19 — baisse temporaire du tourisme (2020)", 'black'),
+]
+
+# ============================================================
 # Washington (United States)
 # ============================================================
 CITY_NAME = "Washington, District of Columbia"
@@ -10775,6 +11834,32 @@ annotations = [
     (2000, 344000, "🌆 Revitalisation urbaine — projets culturels (2000)", 'orange'),
     (2010, 382000, "🚗 Croissance des transports — amélioration (2010)", 'green'),
     (2020, 389000, "🦠 Pandémie COVID-19 — impact sanitaire (2020)", 'red'),
+]
+
+# ============================================================
+# Wilder (United States)
+# ============================================================
+CITY_NAME = "Wilder, Kentucky"
+CITY_COLOR = '#2E8B57'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1200, 2500, 3500, 4500, 5200, 6000, 
+    6700, 7000
+]
+
+annotations = [
+    (1950, 1200, "👷 Croissance post-Seconde Guerre mondiale — début de l'industrialisation locale (1950)", 'blue'),
+    (1960, 2500, "🏘️ Expansion résidentielle majeure — développement des quartiers (1960)", 'orange'),
+    (1970, 3500, "🚧 Amélioration des infrastructures — routes et services publics (1970)", 'brown'),
+    (1980, 4500, "🏫 Construction d'écoles et équipements publics (1980)", 'purple'),
+    (1990, 5200, "🏥 Développement des services de santé — hôpital local (1990)", 'red'),
+    (2000, 6000, "🌳 Mise en place d'espaces verts et parcs publics (2000)", 'teal'),
+    (2010, 6700, "📈 Croissance démographique stable — attractivité régionale (2010)", 'navy'),
+    (2020, 7000, "💡 Modernisation urbaine — projets de développement durable (2020)", 'darkred'),
 ]
 
 # ============================================================
@@ -11039,6 +12124,32 @@ annotations = [
     (2000, 16541, "💎 Mine Ekati — diamants canadiens (1998)", 'cyan'),
     (2010, 19234, "☠️ Giant Mine fermée — 237kt arsenic (2004)", 'gray'),
     (2020, 20340, "🔥 Évacuation totale — feux de forêt (2023)", 'orange'),
+]
+
+# ============================================================
+# Yonkers (United States)
+# ============================================================
+CITY_NAME = "Yonkers, New York"
+CITY_COLOR = '#0055a4'
+
+years = [
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 
+    1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020
+]
+population = [
+    2000, 2500, 3000, 4000, 6000, 10000, 15000, 30000, 50000, 70000, 90000, 110000, 
+    130000, 150000, 160000, 180000, 190000, 190000, 190000, 195000, 195000, 200000, 
+    200000
+]
+
+annotations = [
+    (1920, 130000, "🚢 Développement des industries portuaires — expansion économique (1920)", 'red'),
+    (1940, 160000, "🏠 Boom résidentiel d'après-guerre — croissance démographique (1940)", 'purple'),
+    (1960, 190000, "🚧 Construction massive d'infrastructures — modernisation (1960)", 'gray'),
+    (1980, 190000, "📉 Déclin industriel — stagnation démographique (1980)", 'gold'),
+    (2000, 195000, "🏢 Revitalisation urbaine — rénovation des quartiers (2000)", 'teal'),
+    (2010, 200000, "🌆 Diversification économique — renouveau urbain (2010)", 'navy'),
+    (2020, 200000, "🌍 Développement durable — initiatives écologiques (2020)", 'darkred'),
 ]
 
 # ============================================================

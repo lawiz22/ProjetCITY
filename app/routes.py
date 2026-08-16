@@ -42,6 +42,62 @@ from .services.audit import log_action
 web = Blueprint("web", __name__)
 
 
+def _dashboard_country_options() -> list[dict[str, str]]:
+    from .db import get_db
+    from .services.city_import import _COUNTRY_ISO2
+
+    connection = get_db()
+    dimension_names = [row["country_name"] for row in connection.execute(
+        "SELECT country_name FROM dim_country ORDER BY LOWER(country_name), country_name"
+    ).fetchall()]
+    city_names = [row["country"] for row in connection.execute(
+        "SELECT DISTINCT country FROM dim_city WHERE country IS NOT NULL ORDER BY country"
+    ).fetchall()]
+    city_name_by_iso = {
+        _COUNTRY_ISO2[name]: name for name in city_names if name in _COUNTRY_ISO2
+    }
+
+    options: list[dict[str, str]] = []
+    used_values: set[str] = set()
+    for label in dimension_names:
+        value = city_name_by_iso.get(_COUNTRY_ISO2.get(label), label)
+        if value not in used_values:
+            options.append({"value": value, "label": label})
+            used_values.add(value)
+    for name in city_names:
+        if name not in used_values:
+            options.append({"value": name, "label": name})
+    return options
+
+
+def _apply_dashboard_country_selection(filters: dict) -> tuple[list[dict[str, str]], list[str]]:
+    from .services.app_state import load_json_setting
+
+    options = _dashboard_country_options()
+    settings = load_json_setting("dashboard_settings", {"countries": None})
+    selected_values = settings.get("countries")
+    if selected_values is None:
+        selected_values = [option["value"] for option in options]
+    else:
+        selected_values = [str(country) for country in selected_values]
+
+    selected_options = [option for option in options if option["value"] in selected_values]
+    if filters.get("country"):
+        active_options = [option for option in selected_options if option["value"] == filters["country"]]
+    else:
+        active_options = selected_options
+
+    filters["countries"] = [option["value"] for option in selected_options]
+    filters["country_names"] = list(dict.fromkeys(
+        name for option in active_options for name in (option["value"], option["label"])
+    ))
+    filters["country_labels"] = {
+        name: option["label"] for option in active_options for name in (option["value"], option["label"])
+    }
+    filters["selected_country_count"] = len(active_options)
+    return selected_options, selected_values
+
+
 # ---------------------------------------------------------------------------
 # Auth routes
 # ---------------------------------------------------------------------------
@@ -257,14 +313,27 @@ def _parse_country_periods(details_text: str, pop_data: list[dict]) -> list[dict
 
 @web.route("/")
 def dashboard() -> str:
+    from .db import get_db
+
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
+    selected_options, selected_countries = _apply_dashboard_country_selection(filters)
     filter_options = service.get_filter_options()
+    filter_options["countries"] = [
+        country for country in filter_options["countries"] if country in selected_countries
+    ]
+    filter_options["regions"] = [row["region"] for row in get_db().execute(
+        "SELECT DISTINCT region FROM dim_city WHERE country = ANY(?) AND region IS NOT NULL ORDER BY region",
+        (selected_countries,),
+    ).fetchall()] if selected_countries else []
     return render_template(
         "web/dashboard.html",
         page_title="Dashboard",
         filters=filters,
         filter_options=filter_options,
+        dashboard_countries=[
+            option for option in selected_options if option["value"] in selected_countries
+        ],
         metrics=service.get_dashboard_metrics(filters),
         growth_leaders=service.get_growth_leaders(filters),
         decline_leaders=service.get_decline_leader_cities(filters),
@@ -279,6 +348,7 @@ def dashboard() -> str:
 def dashboard_pdf() -> Response:
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
+    _apply_dashboard_country_selection(filters)
     pdf_bytes = build_dashboard_pdf(
         filters,
         service.get_dashboard_metrics(filters),
@@ -5091,14 +5161,22 @@ def reference_population() -> str:
 @collaborator_required
 def options() -> str:
     from .services.mammouth_ai import load_settings, fetch_models
+    from .services.app_state import load_json_setting
 
     settings = load_settings()
     models = fetch_models()
+    countries = _dashboard_country_options()
+    dashboard_settings = load_json_setting("dashboard_settings", {"countries": None})
+    selected_countries = dashboard_settings.get("countries")
+    if selected_countries is None:
+        selected_countries = [country["value"] for country in countries]
     return render_template(
         "web/options.html",
         page_title="Options",
         settings=settings,
         models=models,
+        countries=countries,
+        dashboard_countries=selected_countries,
     )
 
 
@@ -5265,11 +5343,19 @@ def ai_lab() -> str:
 @collaborator_required
 def options_save() -> Response:
     from .services.mammouth_ai import load_settings, save_settings
+    from .services.app_state import save_json_setting
+    from .db import get_db
 
     settings = load_settings()
     settings["api_key"] = request.form.get("api_key", "").strip()
     settings["model"] = request.form.get("model", "gpt-4.1-mini").strip()
     save_settings(settings)
+    available_countries = {option["value"] for option in _dashboard_country_options()}
+    selected_countries = [
+        country for country in request.form.getlist("dashboard_country")
+        if country in available_countries
+    ]
+    save_json_setting("dashboard_settings", {"countries": selected_countries})
     log_action("update", "settings", None, "Paramètres AI sauvegardés")
     flash("Paramètres enregistrés.", "success")
     return redirect(url_for("web.options"))

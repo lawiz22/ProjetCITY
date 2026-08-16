@@ -12,6 +12,88 @@ class TestDashboard:
         resp = client.get("/?country=Canada")
         assert resp.status_code == 200
 
+    def test_saved_country_selection_filters_dashboard(self, client, db_conn):
+        from werkzeug.security import generate_password_hash
+
+        try:
+            user_id = db_conn.execute(
+                """
+                INSERT INTO app_user (username, email, password_hash, role, is_approved)
+                VALUES (%s, %s, %s, 'collaborateur', TRUE)
+                RETURNING user_id
+                """,
+                ("dashboard-options", "dashboard-options@example.com", generate_password_hash("test")),
+            ).fetchone()["user_id"]
+            db_conn.execute(
+                """
+                INSERT INTO dim_country (country_name, country_slug)
+                VALUES ('Canada', 'canada'), ('United States', 'united-states')
+                ON CONFLICT (country_slug) DO NOTHING
+                """
+            )
+            db_conn.commit()
+
+            with client.session_transaction() as session:
+                session["user_id"] = user_id
+
+            response = client.post("/options/save", data={
+                "api_key": "",
+                "model": "gpt-4.1-mini",
+                "dashboard_country": "Canada",
+            })
+            assert response.status_code == 302
+
+            response = client.get("/")
+            assert response.status_code == 200
+            assert b"Montr" in response.data
+            assert b"Boston" not in response.data
+            assert b"Canada" in response.data
+            assert b"United States" not in response.data
+        finally:
+            db_conn.execute("DELETE FROM app_setting WHERE setting_key IN ('dashboard_settings', 'mammouth_settings')")
+            db_conn.execute("DELETE FROM dim_country WHERE country_slug IN ('canada', 'united-states')")
+            db_conn.execute("DELETE FROM app_user WHERE username = 'dashboard-options'")
+            db_conn.commit()
+
+    def test_country_count_includes_selected_country_without_cities(self, client, db_conn):
+        try:
+            france_id = db_conn.execute(
+                """
+                INSERT INTO dim_country (country_name, country_slug)
+                VALUES ('France', 'france')
+                ON CONFLICT (country_slug) DO UPDATE SET country_name = EXCLUDED.country_name
+                RETURNING country_id
+                """
+            ).fetchone()["country_id"]
+            db_conn.execute(
+                """
+                INSERT INTO fact_country_population (country_id, time_id, year, population)
+                VALUES (%s, 8, 2020, 68000000)
+                ON CONFLICT (country_id, year) DO UPDATE SET population = EXCLUDED.population
+                """,
+                (france_id,),
+            )
+            db_conn.execute(
+                """
+                INSERT INTO app_setting (setting_key, setting_value)
+                VALUES ('dashboard_settings', '{"countries":["Canada","United States","France"]}'::jsonb)
+                ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
+                """
+            )
+            db_conn.commit()
+
+            response = client.get("/")
+            assert response.status_code == 200
+            html = response.get_data(as_text=True)
+            country_card = html.split('class="metric-card"', 2)[1]
+            assert "France" in country_card
+            assert ">3<" in country_card or "\n            3\n" in country_card
+            assert '"label": "France"' in html
+        finally:
+            db_conn.execute("DELETE FROM app_setting WHERE setting_key = 'dashboard_settings'")
+            db_conn.execute("DELETE FROM dim_country WHERE country_slug = 'france'")
+            db_conn.commit()
+
 
 class TestCityDirectory:
     def test_directory_loads(self, client):
@@ -97,11 +179,29 @@ class TestSqlLab:
 
 
 class TestDashboardPdf:
-    def test_pdf_export(self, client):
-        resp = client.get("/export/dashboard.pdf")
-        assert resp.status_code == 200
-        assert resp.content_type == "application/pdf"
-        assert resp.data[:4] == b"%PDF"
+    def test_pdf_export(self, client, db_conn):
+        from werkzeug.security import generate_password_hash
+
+        try:
+            user_id = db_conn.execute(
+                """
+                INSERT INTO app_user (username, email, password_hash, role, is_approved)
+                VALUES ('dashboard-pdf', 'dashboard-pdf@example.com', %s, 'collaborateur', TRUE)
+                RETURNING user_id
+                """,
+                (generate_password_hash("test"),),
+            ).fetchone()["user_id"]
+            db_conn.commit()
+            with client.session_transaction() as session:
+                session["user_id"] = user_id
+
+            resp = client.get("/export/dashboard.pdf")
+            assert resp.status_code == 200
+            assert resp.content_type == "application/pdf"
+            assert resp.data[:4] == b"%PDF"
+        finally:
+            db_conn.execute("DELETE FROM app_user WHERE username = 'dashboard-pdf'")
+            db_conn.commit()
 
 
 class TestCityPdf:
