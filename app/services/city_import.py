@@ -111,7 +111,13 @@ def slugify(value: str) -> str:
 def split_location(raw_city_name: str) -> tuple[str | None, str]:
     if "," in raw_city_name:
         parts = [part.strip() for part in raw_city_name.split(",")]
-        region = REGION_ALIASES.get(parts[-1], parts[-1])
+        country_hint = parts[-1] if len(parts) >= 3 and parts[-1] in _COUNTRY_ISO2 else None
+        region_name = parts[-2] if country_hint else parts[-1]
+        region = REGION_ALIASES.get(region_name, region_name)
+        if country_hint:
+            country_iso = _COUNTRY_ISO2[country_hint]
+            country = {"ca": "Canada", "us": "United States"}.get(country_iso, country_hint)
+            return region, country
         if region in CANADIAN_PROVINCES:
             return region, "Canada"
         if region in US_STATES:
@@ -434,6 +440,39 @@ def _ascii_name(name: str) -> str:
     return unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii").lower()
 
 
+def _resolve_import_location(conn: DbConnection, stats: dict[str, Any]) -> None:
+    """Resolve non-CA/US regions against dim_region before importing a city."""
+    region = stats.get("region")
+    if not region or stats.get("country") != "Unknown":
+        return
+
+    canonical_region = REGION_ALIASES.get(region, region)
+    region_aliases = {
+        label for label, value in REGION_ALIASES.items() if value == canonical_region
+    } | {region, canonical_region}
+    row = conn.execute(
+        """SELECT region_name, country_name
+           FROM dim_region
+           WHERE LOWER(region_name) = ANY(?)
+           ORDER BY region_id
+           LIMIT 1""",
+        ([name.casefold() for name in region_aliases],),
+    ).fetchone()
+    if not row:
+        return
+
+    stats["region"] = REGION_ALIASES.get(row["region_name"], row["region_name"])
+    country_label = row["country_name"]
+    country_iso = _COUNTRY_ISO2.get(country_label)
+    country_values = conn.execute(
+        "SELECT DISTINCT country FROM dim_city WHERE country IS NOT NULL"
+    ).fetchall()
+    stats["country"] = next(
+        (value["country"] for value in country_values if _COUNTRY_ISO2.get(value["country"]) == country_iso),
+        country_label,
+    )
+
+
 def _resolve_duplicate_slug(conn: DbConnection, stats: dict[str, Any]) -> None:
     """If a city with the same accent-stripped name already exists in the same
     region, reuse its slug and name so the UPSERT merges instead of creating a
@@ -454,6 +493,7 @@ def _resolve_duplicate_slug(conn: DbConnection, stats: dict[str, Any]) -> None:
 
 def import_city_stats(conn: DbConnection, stats: dict[str, Any]) -> int:
     """Insert/update dim_city + fact_city_population rows. Returns city_id."""
+    _resolve_import_location(conn, stats)
     _resolve_duplicate_slug(conn, stats)
     time_cache = _build_time_cache(conn)
 

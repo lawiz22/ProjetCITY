@@ -116,6 +116,125 @@ class TestDashboard:
             db_conn.commit()
 
 
+class TestGeoCoverage:
+    def test_lists_all_dimension_countries_and_regions(self, client, db_conn):
+        from werkzeug.security import generate_password_hash
+
+        try:
+            user_id = db_conn.execute(
+                """
+                INSERT INTO app_user (username, email, password_hash, role, is_approved)
+                VALUES ('geo-coverage', 'geo-coverage@example.com', %s, 'collaborateur', TRUE)
+                RETURNING user_id
+                """,
+                (generate_password_hash("test"),),
+            ).fetchone()["user_id"]
+            db_conn.execute(
+                """
+                INSERT INTO dim_country (country_name, country_slug)
+                VALUES ('Canada', 'canada'), ('États-Unis', 'etats-unis'), ('France', 'france')
+                ON CONFLICT (country_slug) DO UPDATE SET country_name = EXCLUDED.country_name
+                """
+            )
+            db_conn.execute(
+                """
+                INSERT INTO dim_region (region_name, region_slug, country_name)
+                VALUES ('Québec', 'quebec', 'Canada'),
+                       ('Massachusetts', 'massachusetts', 'États-Unis'),
+                       ('Bretagne', 'bretagne', 'France')
+                ON CONFLICT (region_slug) DO UPDATE SET country_name = EXCLUDED.country_name
+                """
+            )
+            db_conn.commit()
+
+            with client.session_transaction() as session:
+                session["user_id"] = user_id
+
+            response = client.get("/geo-coverage")
+
+            assert response.status_code == 200
+            html = response.get_data(as_text=True)
+            assert "Canada" in html
+            assert "États-Unis" in html
+            assert "France" in html
+            assert "Bretagne" in html
+            assert 'data-region="Bretagne" data-country="France"' in html
+            assert "Générer 20 villes majeures" in html
+        finally:
+            db_conn.execute("DELETE FROM app_user WHERE username = 'geo-coverage'")
+            db_conn.execute("DELETE FROM dim_region WHERE region_slug IN ('quebec', 'massachusetts', 'bretagne')")
+            db_conn.execute("DELETE FROM dim_country WHERE country_slug IN ('canada', 'etats-unis', 'france')")
+            db_conn.commit()
+
+    def test_initial_reference_request_fetches_major_cities(self, client, db_conn, monkeypatch):
+        import json
+        from werkzeug.security import generate_password_hash
+
+        captured = {}
+
+        def fake_generate_city(api_key, model, city_input, prompt, **kwargs):
+            captured["prompt"] = prompt
+            return {
+                "success": True,
+                "reply": json.dumps([
+                    {"city_name": "Rennes", "population": 225000, "rank": 1},
+                    {"city_name": "Brest", "population": 140000, "rank": 2},
+                ]),
+            }
+
+        monkeypatch.setattr("app.services.mammouth_ai.load_settings", lambda: {"api_key": "test", "model": "test"})
+        monkeypatch.setattr("app.services.mammouth_ai.generate_city", fake_generate_city)
+
+        try:
+            user_id = db_conn.execute(
+                """
+                INSERT INTO app_user (username, email, password_hash, role, is_approved)
+                VALUES ('geo-reference', 'geo-reference@example.com', %s, 'collaborateur', TRUE)
+                RETURNING user_id
+                """,
+                (generate_password_hash("test"),),
+            ).fetchone()["user_id"]
+            db_conn.commit()
+            with client.session_transaction() as session:
+                session["user_id"] = user_id
+
+            response = client.post("/geo-coverage/expand-ref", data={
+                "country": "France",
+                "region": "Bretagne",
+            })
+
+            assert response.status_code == 200
+            assert response.get_json()["inserted"] == 2
+            assert "20 villes les plus peuplées" in captured["prompt"]
+            rows = db_conn.execute(
+                "SELECT city_name, rank FROM ref_city WHERE country = 'France' AND region = 'Bretagne' ORDER BY rank"
+            ).fetchall()
+            assert [(row["city_name"], row["rank"]) for row in rows] == [("Rennes", 1), ("Brest", 2)]
+
+            db_conn.execute(
+                """
+                INSERT INTO ref_city (city_name, region, country, population, rank)
+                VALUES ('Los Angeles', 'Californie', 'États-Unis', 3800000, 1)
+                """
+            )
+            db_conn.commit()
+            captured.clear()
+
+            alias_response = client.post("/geo-coverage/expand-ref", data={
+                "country": "United States",
+                "region": "California",
+            })
+
+            assert alias_response.status_code == 200
+            assert "20 villes les plus peuplées" not in captured["prompt"]
+            assert "los angeles" in captured["prompt"]
+        finally:
+            db_conn.execute("DELETE FROM ref_city WHERE country = 'France' AND region = 'Bretagne'")
+            db_conn.execute("DELETE FROM ref_city WHERE country IN ('États-Unis', 'United States') AND region IN ('Californie', 'California')")
+            db_conn.execute("DELETE FROM app_user WHERE username = 'geo-reference'")
+            db_conn.commit()
+
+
 class TestCityDirectory:
     def test_directory_loads(self, client):
         resp = client.get("/cities")

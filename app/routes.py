@@ -4677,27 +4677,9 @@ def city_fiche_delete(city_slug: str) -> Response:
 @web.route("/geo-coverage")
 @editor_required
 def geo_coverage() -> str:
-    """Geographic coverage: which regions/states are in the DB vs total."""
+    """Geographic coverage for every country and region known to the database."""
     from .db import get_db
-
-    CA_REGIONS = [
-        "Alberta", "British Columbia", "Manitoba", "New Brunswick",
-        "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia",
-        "Nunavut", "Ontario", "Prince Edward Island", "Québec",
-        "Saskatchewan", "Yukon",
-    ]
-    US_STATES = [
-        "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
-        "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
-        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
-        "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
-        "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
-        "New Hampshire", "New Jersey", "New Mexico", "New York",
-        "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
-        "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
-        "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
-        "West Virginia", "Wisconsin", "Wyoming",
-    ]
+    from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2
 
     conn = get_db()
     rows = conn.execute(
@@ -4719,54 +4701,80 @@ def geo_coverage() -> str:
     except Exception:
         pass  # table may not exist yet
 
-    # Index ref cities by region
-    ref_by_region: dict[str, list[dict]] = {}
-    for rr in ref_rows:
-        key = f"{rr['country']}|{rr['region']}"
-        if key not in ref_by_region:
-            ref_by_region[key] = []
-        ref_by_region[key].append({
-            "city_name": rr["city_name"],
-            "population": rr["population"] or 0,
-            "rank": rr["rank"] or 0,
-        })
+    dimension_regions = conn.execute(
+        """SELECT country_name, region_name
+           FROM dim_region
+           WHERE country_name IS NOT NULL AND region_name IS NOT NULL
+           ORDER BY LOWER(country_name), LOWER(region_name)"""
+    ).fetchall()
 
-    # Index existing city names by region for matching
+    def _country_key(name: str) -> str:
+        return _COUNTRY_ISO2.get(name, name.casefold())
+
+    def _region_key(name: str) -> str:
+        return REGION_ALIASES.get(name, name).casefold()
+
     import unicodedata as _ud
 
     def _ascii(name: str) -> str:
         return _ud.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii").lower().strip()
 
-    existing_by_region: dict[str, set[str]] = {}
-    existing_ascii_by_region: dict[str, set[str]] = {}
+    def _city_match_key(name: str) -> str:
+        normalized = _ascii(name)
+        if normalized.endswith(" city"):
+            normalized = normalized[:-5].strip()
+        for prefix in ("city of ", "ville de "):
+            if normalized.startswith(prefix):
+                normalized = normalized[len(prefix):].strip()
+        return normalized
+
+    country_options = _dashboard_country_options()
+    option_by_key = {_country_key(option["value"]): option for option in country_options}
+    for option in country_options:
+        option_by_key[_country_key(option["label"])] = option
+
+    # Index ref cities by region
+    ref_by_region: dict[tuple[str, str], list[dict]] = {}
+    seen_ref_names: dict[tuple[str, str], set[str]] = {}
+    for rr in ref_rows:
+        key = (_country_key(rr["country"]), _region_key(rr["region"]))
+        name_key = _ascii(rr["city_name"])
+        if name_key in seen_ref_names.setdefault(key, set()):
+            continue
+        seen_ref_names[key].add(name_key)
+        ref_by_region.setdefault(key, []).append({
+            "city_name": rr["city_name"],
+            "population": rr["population"] or 0,
+            "rank": rr["rank"] or 0,
+        })
+
+    existing_by_region: dict[tuple[str, str], set[str]] = {}
+    existing_ascii_by_region: dict[tuple[str, str], set[str]] = {}
     for r in rows:
-        key = f"{r['country']}|{r['region']}"
+        if not r["region"]:
+            continue
+        key = (_country_key(r["country"]), _region_key(r["region"]))
         if key not in existing_by_region:
             existing_by_region[key] = set()
             existing_ascii_by_region[key] = set()
         existing_by_region[key].add(r["city_name"].lower().strip())
-        existing_ascii_by_region[key].add(_ascii(r["city_name"]))
+        existing_ascii_by_region[key].add(_city_match_key(r["city_name"]))
 
-    def _ref_in_db(ref_name: str, key: str) -> bool:
-        """Check if ref city matches a DB city (exact, accent-stripped, or substring)."""
+    def _ref_in_db(ref_name: str, key: tuple[str, str]) -> bool:
+        """Check if a reference city matches a DB city after conservative normalization."""
         names = existing_by_region.get(key, set())
         ascii_names = existing_ascii_by_region.get(key, set())
         rn = ref_name.lower().strip()
         if rn in names:
             return True
-        ra = _ascii(ref_name)
-        if ra in ascii_names:
-            return True
-        # Substring: "New York" matches "New York City"
-        for an in ascii_names:
-            if ra in an or an in ra:
-                return True
-        return False
+        return _city_match_key(ref_name) in ascii_names
 
     # Build per-region data
-    region_data: dict[str, dict] = {}  # key = "country|region"
+    region_data: dict[tuple[str, str], dict] = {}
     for r in rows:
-        key = f"{r['country']}|{r['region']}"
+        if not r["region"]:
+            continue
+        key = (_country_key(r["country"]), _region_key(r["region"]))
         if key not in region_data:
             region_data[key] = {
                 "country": r["country"],
@@ -4780,74 +4788,67 @@ def geo_coverage() -> str:
             "data_points": r["data_points"] or 0,
         })
 
-    # Build country summaries
-    ca_covered = set()
-    us_covered = set()
-    for key, rd in region_data.items():
-        if rd["country"] == "Canada":
-            if rd["region"] in CA_REGIONS:
-                ca_covered.add(rd["region"])
-        else:
-            if rd["region"] in US_STATES:
-                us_covered.add(rd["region"])
+    region_labels: dict[tuple[str, str], str] = {}
+    region_country_names: dict[tuple[str, str], str] = {}
+    for row in dimension_regions:
+        key = (_country_key(row["country_name"]), _region_key(row["region_name"]))
+        region_labels[key] = row["region_name"]
+        region_country_names[key] = row["country_name"]
+    for key, data in region_data.items():
+        region_labels.setdefault(key, data["region"] or "Sans région")
+        region_country_names.setdefault(key, data["country"])
+    for rr in ref_rows:
+        key = (_country_key(rr["country"]), _region_key(rr["region"]))
+        region_labels.setdefault(key, rr["region"])
+        region_country_names.setdefault(key, rr["country"])
 
-    ca_missing = sorted([r for r in CA_REGIONS if r not in ca_covered])
-    us_missing = sorted([s for s in US_STATES if s not in us_covered])
-
-    # Regions list with cities for template
-    ca_regions_list = []
-    for reg in CA_REGIONS:
-        key = f"Canada|{reg}"
-        cities = region_data.get(key, {}).get("cities", [])
-        ref_cities = ref_by_region.get(key, [])
-        ref_with_status = []
-        for rc in ref_cities:
-            ref_with_status.append({
-                **rc,
-                "in_db": _ref_in_db(rc["city_name"], key),
+    country_keys = list(dict.fromkeys(
+        [_country_key(option["value"]) for option in country_options]
+        + [key[0] for key in region_labels]
+    ))
+    countries = []
+    for country_key in country_keys:
+        option = option_by_key.get(country_key)
+        fallback_name = next(
+            (name for key, name in region_country_names.items() if key[0] == country_key),
+            country_key,
+        )
+        country = option or {"value": fallback_name, "label": fallback_name}
+        regions = []
+        for key, label in sorted(region_labels.items(), key=lambda item: item[1].casefold()):
+            if key[0] != country_key:
+                continue
+            cities = region_data.get(key, {}).get("cities", [])
+            ref_with_status = [
+                {**ref, "in_db": _ref_in_db(ref["city_name"], key)}
+                for ref in ref_by_region.get(key, [])
+            ]
+            regions.append({
+                "name": label,
+                "value": REGION_ALIASES.get(label, label),
+                "covered": bool(cities),
+                "city_count": len(cities),
+                "cities": cities,
+                "ref_cities": ref_with_status,
+                "ref_total": len(ref_with_status),
+                "ref_covered": sum(1 for ref in ref_with_status if ref["in_db"]),
             })
-        ref_total = len(ref_with_status)
-        ref_covered = sum(1 for r in ref_with_status if r["in_db"])
-        ca_regions_list.append({
-            "name": reg,
-            "covered": reg in ca_covered,
-            "city_count": len(cities),
-            "cities": cities,
-            "ref_cities": ref_with_status,
-            "ref_total": ref_total,
-            "ref_covered": ref_covered,
-        })
-
-    us_regions_list = []
-    for st in US_STATES:
-        key = f"United States|{st}"
-        cities = region_data.get(key, {}).get("cities", [])
-        ref_cities = ref_by_region.get(key, [])
-        ref_with_status = []
-        for rc in ref_cities:
-            ref_with_status.append({
-                **rc,
-                "in_db": _ref_in_db(rc["city_name"], key),
-            })
-        ref_total = len(ref_with_status)
-        ref_covered = sum(1 for r in ref_with_status if r["in_db"])
-        us_regions_list.append({
-            "name": st,
-            "covered": st in us_covered,
-            "city_count": len(cities),
-            "cities": cities,
-            "ref_cities": ref_with_status,
-            "ref_total": ref_total,
-            "ref_covered": ref_covered,
+        countries.append({
+            **country,
+            "regions": regions,
+            "region_total": len(regions),
+            "region_covered": sum(1 for region in regions if region["covered"]),
+            "missing_regions": [region["name"] for region in regions if not region["covered"]],
+            "city_count": sum(region["city_count"] for region in regions),
+            "ref_total": sum(region["ref_total"] for region in regions),
+            "ref_covered": sum(region["ref_covered"] for region in regions),
         })
 
     total_cities = len(rows)
-    ca_city_count = sum(1 for r in rows if r["country"] == "Canada")
-    us_city_count = sum(1 for r in rows if r["country"] != "Canada")
-    total_ref = len(ref_rows)
-    total_ref_covered = sum(
-        r["ref_covered"] for r in ca_regions_list + us_regions_list
-    )
+    total_ref = sum(len(refs) for refs in ref_by_region.values())
+    total_ref_covered = sum(country["ref_covered"] for country in countries)
+    total_regions = sum(country["region_total"] for country in countries)
+    total_regions_covered = sum(country["region_covered"] for country in countries)
 
     return render_template(
         "web/geo_coverage.html",
@@ -4855,16 +4856,9 @@ def geo_coverage() -> str:
         total_cities=total_cities,
         total_ref=total_ref,
         total_ref_covered=total_ref_covered,
-        ca_total=len(CA_REGIONS),
-        ca_covered=len(ca_covered),
-        ca_missing=ca_missing,
-        ca_city_count=ca_city_count,
-        ca_regions=ca_regions_list,
-        us_total=len(US_STATES),
-        us_covered=len(us_covered),
-        us_missing=us_missing,
-        us_city_count=us_city_count,
-        us_regions=us_regions_list,
+        total_regions=total_regions,
+        total_regions_covered=total_regions_covered,
+        countries=countries,
     )
 
 
@@ -4874,6 +4868,7 @@ def geo_coverage_expand_ref():
     """Add 20 more reference cities for a region via Mammouth AI."""
     import json as _json
     from .db import get_db
+    from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2
     from .services.mammouth_ai import load_settings, generate_city
 
     region = request.form.get("region", "").strip()
@@ -4881,23 +4876,35 @@ def geo_coverage_expand_ref():
     if not region or not country:
         return jsonify(success=False, error="Région et pays requis"), 400
 
+    country_iso = _COUNTRY_ISO2.get(country)
+    country_aliases = {
+        name for name, iso in _COUNTRY_ISO2.items() if country_iso and iso == country_iso
+    } | {country}
+    country_option = next(
+        (option for option in _dashboard_country_options() if option["value"] in country_aliases),
+        None,
+    )
+    if country_option:
+        country = country_option["value"]
+        country_aliases.add(country_option["label"])
+
+    canonical_region = REGION_ALIASES.get(region, region)
+    region_aliases = {
+        label for label, value in REGION_ALIASES.items() if value == canonical_region
+    } | {region, canonical_region}
+    region = canonical_region
+
     conn = get_db()
     existing_ref = conn.execute(
-        "SELECT city_name FROM ref_city WHERE region = ? AND country = ?",
-        (region, country),
+        "SELECT city_name, rank FROM ref_city WHERE region = ANY(?) AND country = ANY(?)",
+        (list(region_aliases), list(country_aliases)),
     ).fetchall()
-    existing_db = conn.execute(
-        "SELECT city_name FROM dim_city WHERE region = ? AND country = ?",
-        (region, country),
-    ).fetchall()
-
+    initial_request = not existing_ref
     known_names = set()
     for r in existing_ref:
         known_names.add(r["city_name"].lower().strip())
-    for r in existing_db:
-        known_names.add(r["city_name"].lower().strip())
 
-    current_max_rank = len(existing_ref)
+    current_max_rank = max((row["rank"] or 0 for row in existing_ref), default=0)
     exclusion_list = ", ".join(sorted(known_names))
 
     settings = load_settings()
@@ -4909,11 +4916,26 @@ def geo_coverage_expand_ref():
     new_cities: list[dict] = []
     TARGET = 20
 
-    # Try up to 4 rounds with progressively smaller city requests
-    prompts = [
+    if initial_request:
+        prompts = [
+            (
+                f"Liste les 20 villes les plus peuplées de {region} ({country}).\n\n"
+                f"Utilise la population de la ville ou municipalité, pas celle de l'aire métropolitaine. "
+                f"Inclus les villes déjà connues si elles font partie des 20 plus importantes.\n"
+                f"Réponds en JSON array: "
+                f'[] si aucune ville ne peut être identifiée, sinon '
+                f'[{{"city_name": "Nom", "population": 12345, "rank": 1}}].\n'
+                f"Trie par population décroissante, avec des rangs continus de 1 à 20. "
+                f"Utilise les noms courants français si applicable.\n"
+                f"UNIQUEMENT le JSON array, aucun markdown, aucun texte autour."
+            )
+        ]
+    else:
+        # Try progressively smaller settlements when extending an existing reference list.
+        prompts = [
         (
             f"Liste 30 villes et municipalités de {region} ({country}) "
-            f"qui ne sont PAS dans cette liste: [{exclusion_list}].\n\n"
+            f"qui ne sont PAS dans cette liste: [__EXCLUSIONS__].\n\n"
             f"Inclus des villes moyennes et petites (10 000 à 100 000 habitants), "
             f"pas seulement les grandes métropoles.\n"
             f"Réponds en JSON array: "
@@ -4925,7 +4947,7 @@ def geo_coverage_expand_ref():
         (
             f"Liste 30 petites villes et villages de {region} ({country}) "
             f"de moins de 50 000 habitants.\n\n"
-            f"NE PAS inclure ces villes déjà connues: [{exclusion_list}].\n\n"
+            f"NE PAS inclure ces villes déjà connues: [__EXCLUSIONS__].\n\n"
             f"Inclus des municipalités, villages, petites villes régionales.\n"
             f"Réponds en JSON array: "
             f'[{{"city_name": "Nom", "population": 5000, "rank": 1}}]\n'
@@ -4935,28 +4957,29 @@ def geo_coverage_expand_ref():
         (
             f"Donne-moi 30 localités/municipalités/villages de {region} ({country}) "
             f"qui sont moins connues, entre 1 000 et 30 000 habitants.\n\n"
-            f"EXCLURE absolument: [{exclusion_list}].\n\n"
+            f"EXCLURE absolument: [__EXCLUSIONS__].\n\n"
             f"Réponds en JSON array: "
             f'[{{"city_name": "Nom", "population": 3000, "rank": 1}}]\n'
             f"UNIQUEMENT le JSON array."
         ),
         (
             f"Nomme 30 autres communautés de {region} ({country}) "
-            f"qui ne sont dans aucune de ces listes: [{exclusion_list}].\n"
+            f"qui ne sont dans aucune de ces listes: [__EXCLUSIONS__].\n"
             f"Même les très petits villages de quelques centaines d'habitants.\n"
             f"JSON array: "
             f'[{{"city_name": "Nom", "population": 500, "rank": 1}}]\n'
             f"UNIQUEMENT le JSON array."
         ),
-    ]
+        ]
 
-    for prompt in prompts:
+    for prompt_template in prompts:
         if len(new_cities) >= TARGET:
             break
+        prompt = prompt_template.replace("__EXCLUSIONS__", exclusion_list)
 
         result = generate_city(
             api_key, model, "", prompt,
-            max_tokens=2000, temperature=0.7,
+            max_tokens=2000, temperature=0.2 if initial_request else 0.7,
         )
         if not result.get("success"):
             continue
@@ -5002,18 +5025,15 @@ def geo_coverage_expand_ref():
     # Insert into DB
     inserted = 0
     for c in new_cities[:TARGET]:
-        try:
-            conn.execute(
-                """INSERT INTO ref_city
-                   (city_name, region, country, population, rank)
-                   VALUES (?, ?, ?, ?, ?)
-                   ON CONFLICT (city_name, region, country) DO NOTHING""",
-                (c["city_name"], c["region"], c["country"],
-                 c["population"], c["rank"]),
-            )
-            inserted += 1
-        except Exception:
-            pass
+        result = conn.execute(
+            """INSERT INTO ref_city
+               (city_name, region, country, population, rank)
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT (city_name, region, country) DO NOTHING""",
+            (c["city_name"], c["region"], c["country"],
+             c["population"], c["rank"]),
+        )
+        inserted += max(result.rowcount, 0)
     conn.commit()
 
     if inserted:

@@ -2,6 +2,31 @@
 from __future__ import annotations
 
 
+class TestCityImportLocation:
+    def test_unknown_bretagne_resolves_to_france(self, app, db_conn):
+        from app.db import get_db
+        from app.services.city_import import _resolve_import_location
+
+        try:
+            db_conn.execute(
+                """
+                INSERT INTO dim_region (region_name, region_slug, country_name)
+                VALUES ('Bretagne', 'bretagne', 'France')
+                ON CONFLICT (region_slug) DO UPDATE SET country_name = EXCLUDED.country_name
+                """
+            )
+            db_conn.commit()
+            stats = {"region": "Bretagne", "country": "Unknown"}
+
+            with app.app_context():
+                _resolve_import_location(get_db(), stats)
+
+            assert stats == {"region": "Bretagne", "country": "France"}
+        finally:
+            db_conn.execute("DELETE FROM dim_region WHERE region_slug = 'bretagne'")
+            db_conn.commit()
+
+
 class TestAnalyticsServiceWithApp:
     """Tests that require the Flask app context (AnalyticsService uses get_db)."""
 

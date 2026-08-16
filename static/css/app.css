@@ -6648,8 +6648,16 @@ td {
     display: flex;
     gap: 8px;
     margin-bottom: 16px;
+    padding-bottom: 4px;
+    overflow-x: auto;
 }
 .geo-tab {
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    column-gap: 8px;
+    flex: 0 0 auto;
+    width: auto;
     padding: 10px 20px;
     font-size: .9rem;
     font-weight: 600;
@@ -6659,6 +6667,19 @@ td {
     color: var(--text-primary, #1f2937);
     cursor: pointer;
     transition: background .2s, border-color .2s;
+}
+.geo-tab .flag-icon {
+    width: 22px;
+    grid-row: 1 / span 2;
+}
+.geo-tab span,
+.geo-tab small {
+    text-align: left;
+}
+.geo-tab small {
+    font-size: .68rem;
+    font-weight: 500;
+    opacity: .75;
 }
 .geo-tab.is-active {
     background: var(--accent, #ef6c3d);
@@ -6676,11 +6697,16 @@ td {
     gap: 12px;
     flex-wrap: wrap;
 }
+.geo-search-input {
+    max-width: 400px;
+}
 .geo-sort-buttons {
     display: flex;
     gap: 4px;
+    flex-wrap: wrap;
 }
 .geo-sort-btn {
+    width: auto;
     padding: 4px 10px;
     border-radius: 8px;
     border: 1px solid var(--line);
@@ -6725,7 +6751,19 @@ td {
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
+    cursor: pointer;
 }
+.geo-region-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-weight: 800;
+}
+.geo-region-status.geo-ok { background: rgba(16, 185, 129, .12); color: #059669; }
+.geo-region-status.geo-nok { background: rgba(179, 57, 81, .12); color: var(--danger, #b33951); }
 .geo-region-header h4 {
     margin: 0;
     flex: 1;
@@ -6832,6 +6870,7 @@ td {
     flex-wrap: wrap;
 }
 .geo-expand-btn {
+    width: auto;
     font-size: .78rem;
     font-weight: 700;
     padding: 5px 14px;
@@ -7661,4 +7700,47 @@ mark.diff-add {
 }
 .opt-country-choice span {
     overflow-wrap: anywhere;
+}
+.geo-reference-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+.geo-empty-country {
+    color: var(--muted);
+    text-align: center;
+}
+@media (max-width: 680px) {
+    .geo-summary-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .geo-tab {
+        padding: 8px 12px;
+    }
+    .geo-search-input {
+        max-width: none;
+    }
+    .geo-region-header {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 6px 8px;
+    }
+    .geo-region-header h4 {
+        overflow-wrap: anywhere;
+    }
+    .geo-region-bar {
+        display: none;
+    }
+    .geo-ref-badge,
+    .geo-region-count {
+        grid-column: 2;
+    }
+    .geo-chevron {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+    }
+    .geo-region-body {
+        overflow-x: auto;
+    }
 }
