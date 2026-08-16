@@ -131,7 +131,7 @@
 </section>
 
 <section class="metrics-grid metrics-grid-dash">
-    <article class="metric-card dashboard-metric dashboard-metric--countries" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['countries']) }}')">
+    <a class="metric-card dashboard-metric dashboard-metric--countries" href="{{ url_for('web.country_directory') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['countries']) }}')">
         <div class="dashboard-metric-head"><span>Pays</span></div>
         <strong class="dashboard-metric-value dashboard-metric-flags">
             {% for country in dashboard_countries %}
@@ -140,47 +140,47 @@
             {{ metrics.country_count }}
         </strong>
         <small>sélectionnés dans les options</small>
-    </article>
-    <article class="metric-card dashboard-metric dashboard-metric--regions" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['regions']) }}')">
+    </a>
+    <a class="metric-card dashboard-metric dashboard-metric--regions" href="{{ url_for('web.region_directory') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['regions']) }}')">
         <div class="dashboard-metric-head"><span>Régions</span></div>
         <strong class="dashboard-metric-value">{{ metrics.region_count }}</strong>
         <small>dans les pays sélectionnés</small>
-    </article>
-    <article class="metric-card dashboard-metric dashboard-metric--cities" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['cities']) }}')">
+    </a>
+    <a class="metric-card dashboard-metric dashboard-metric--cities" href="{{ url_for('web.city_directory') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['cities']) }}')">
         <div class="dashboard-metric-head"><span>Villes</span></div>
         <strong class="dashboard-metric-value">{{ metrics.city_count }}</strong>
         <small>avec données de population</small>
-    </article>
-    <article class="metric-card dashboard-metric dashboard-metric--annotations" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['annotations']) }}')">
+    </a>
+    <a class="metric-card dashboard-metric dashboard-metric--annotations" href="{{ url_for('web.recent_additions') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['annotations']) }}')">
         <div class="dashboard-metric-head"><span>Annotations</span></div>
         <strong class="dashboard-metric-value">{{ metrics.annotation_count }}</strong>
         <small>dans les pays sélectionnés</small>
-    </article>
-    <article class="metric-card dashboard-metric dashboard-metric--events" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['events']) }}')">
+    </a>
+    <a class="metric-card dashboard-metric dashboard-metric--events" href="{{ url_for('web.events_list') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['events']) }}')">
         <div class="dashboard-metric-head"><span>Événements historiques</span></div>
         <strong class="dashboard-metric-value">{{ metrics.event_count }}</strong>
         <small>dans les pays sélectionnés</small>
-    </article>
-    <article class="metric-card dashboard-metric dashboard-metric--persons" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['persons']) }}')">
+    </a>
+    <a class="metric-card dashboard-metric dashboard-metric--persons" href="{{ url_for('web.persons_list') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['persons']) }}')">
         <div class="dashboard-metric-head"><span>Personnages</span></div>
         <strong class="dashboard-metric-value">{{ metrics.person_count }}</strong>
         <small>dans les pays sélectionnés</small>
-    </article>
-    <article class="metric-card dashboard-metric dashboard-metric--monuments" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['monuments']) }}')">
+    </a>
+    <a class="metric-card dashboard-metric dashboard-metric--monuments" href="{{ url_for('web.monuments_list') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['monuments']) }}')">
         <div class="dashboard-metric-head"><span>Monuments</span></div>
         <strong class="dashboard-metric-value">{{ metrics.monument_count }}</strong>
         <small>dans les pays sélectionnés</small>
-    </article>
-    <article class="metric-card dashboard-metric dashboard-metric--legends" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['legends']) }}')">
+    </a>
+    <a class="metric-card dashboard-metric dashboard-metric--legends" href="{{ url_for('web.legends_list', type='legende') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['legends']) }}')">
         <div class="dashboard-metric-head"><span>Légendes</span></div>
         <strong class="dashboard-metric-value">{{ metrics.legend_count }}</strong>
         <small>dans les pays sélectionnés</small>
-    </article>
-    <article class="metric-card dashboard-metric dashboard-metric--mysteries" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['mysteries']) }}')">
+    </a>
+    <a class="metric-card dashboard-metric dashboard-metric--mysteries" href="{{ url_for('web.legends_list', type='inexplique') }}" style="--metric-photo:url('{{ url_for('static', filename=dashboard_photos['mysteries']) }}')">
         <div class="dashboard-metric-head"><span>Faits inexpliqués</span></div>
         <strong class="dashboard-metric-value">{{ metrics.inexplique_count }}</strong>
         <small>dans les pays sélectionnés</small>
-    </article>
+    </a>
 </section>
 
 <section class="panel-grid panel-grid-2">
