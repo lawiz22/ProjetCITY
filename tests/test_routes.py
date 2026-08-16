@@ -12,6 +12,15 @@ class TestDashboard:
         resp = client.get("/?country=Canada")
         assert resp.status_code == 200
 
+    def test_dashboard_preserves_explicit_empty_region_selection(self, client):
+        response = client.get("/?regions_applied=1")
+
+        assert response.status_code == 200
+        html = response.get_data(as_text=True)
+        assert "Régions (0)" in html
+        assert 'class="dash-reset"' in html
+        assert "data-chart-lazy='{\"datasets\": [], \"labels\": []}'" in html
+
     def test_saved_country_selection_filters_dashboard(self, client, db_conn):
         from werkzeug.security import generate_password_hash
 
@@ -75,6 +84,13 @@ class TestDashboard:
             )
             db_conn.execute(
                 """
+                INSERT INTO dim_region (region_name, region_slug, country_name)
+                VALUES ('Bretagne', 'bretagne', 'France')
+                ON CONFLICT (region_slug) DO UPDATE SET country_name = EXCLUDED.country_name
+                """
+            )
+            db_conn.execute(
+                """
                 INSERT INTO app_setting (setting_key, setting_value)
                 VALUES ('dashboard_settings', '{"countries":["Canada","United States","France"]}'::jsonb)
                 ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
@@ -89,8 +105,13 @@ class TestDashboard:
             assert "France" in country_card
             assert ">3<" in country_card or "\n            3\n" in country_card
             assert '"label": "France"' in html
+            assert '<option value="France"' in html
+            assert '>France</option>' in html
+            assert 'value="Bretagne"' in html
+            assert "Régions du dashboard" in html
         finally:
             db_conn.execute("DELETE FROM app_setting WHERE setting_key = 'dashboard_settings'")
+            db_conn.execute("DELETE FROM dim_region WHERE region_slug = 'bretagne'")
             db_conn.execute("DELETE FROM dim_country WHERE country_slug = 'france'")
             db_conn.commit()
 

@@ -15,6 +15,7 @@ from flask import current_app
 
 from app.db import DatabaseError, get_db
 from app.services.app_state import load_raw_document
+from app.services.city_import import REGION_ALIASES
 from app.services.city_photos import get_city_photo
 
 
@@ -165,9 +166,16 @@ class AnalyticsService:
         country = self._clean_value(args.get("country"))
         raw_regions = args.getlist("region") if hasattr(args, "getlist") else []
         regions = [r for r in (self._clean_value(v) for v in raw_regions) if r]
+        region_selection_applied = str(args.get("regions_applied", "")) == "1"
         search = self._clean_value(args.get("search"))
         period = self._clean_value(args.get("period"))
-        return {"country": country, "region": regions, "search": search, "period": period}
+        return {
+            "country": country,
+            "region": regions,
+            "region_selection_applied": region_selection_applied,
+            "search": search,
+            "period": period,
+        }
 
     def normalize_slug_list(self, values: Iterable[str]) -> list[str]:
         cleaned: list[str] = []
@@ -262,9 +270,10 @@ class AnalyticsService:
         ).fetchone()
 
         region_clause, region_params = self._dashboard_country_filter(filters, "country_name")
+        selected_region_clause, selected_region_params = self._dimension_region_filter(filters, "region_name")
         region_count_row = connection.execute(
-            f"SELECT COUNT(*) AS cnt FROM dim_region WHERE 1 = 1 {region_clause}",
-            region_params,
+            f"SELECT COUNT(*) AS cnt FROM dim_region WHERE 1 = 1 {region_clause} {selected_region_clause}",
+            region_params + selected_region_params,
         ).fetchone()
 
         city_annotation_clause, city_annotation_params = self._dashboard_country_filter(filters, "c.country")
@@ -699,16 +708,17 @@ class AnalyticsService:
     def _pop_evolution_by_region(self, filters: dict[str, str | None]) -> dict[str, Any]:
         """Regional population by year for the selected countries (top 10)."""
         conn = get_db()
-        country_clause, params = self._dashboard_country_filter(filters, "dr.country_name")
+        country_clause, country_params = self._dashboard_country_filter(filters, "dr.country_name")
+        region_clause, region_params = self._dimension_region_filter(filters, "dr.region_name")
         rows = conn.execute(
             f"""
             SELECT dr.region_name AS region, f.year, f.population AS total
             FROM fact_region_population f
             INNER JOIN dim_region dr ON dr.region_id = f.region_id
-            WHERE 1 = 1 {country_clause}
+            WHERE 1 = 1 {country_clause} {region_clause}
             ORDER BY f.year
             """,
-            params,
+            country_params + region_params,
         ).fetchall()
         years = sorted({r["year"] for r in rows})
         totals_by_region: dict[str, int] = {}
@@ -1626,6 +1636,16 @@ class AnalyticsService:
     def _region_in_clause(regions: list[str], col: str = "region") -> str:
         return f"AND {col} IN ({','.join('?' for _ in regions)})"
 
+    def _dimension_region_filter(self, filters: dict, column: str) -> tuple[str, list[Any]]:
+        regions = filters.get("region", [])
+        if regions:
+            selected = set(regions)
+            names = selected | {label for label, value in REGION_ALIASES.items() if value in selected}
+            return self._region_in_clause(list(names), column), list(names)
+        if filters.get("region_selection_applied"):
+            return "AND 1 = 0", []
+        return "", []
+
     def _dashboard_country_filter(self, filters: dict, column: str) -> tuple[str, list[Any]]:
         names = filters.get("country_names")
         if names is None:
@@ -1669,6 +1689,8 @@ class AnalyticsService:
                 parts.append("AND 1 = 0")
         if filters.get("region"):
             parts.append(self._region_in_clause(filters["region"], f"{prefix}region"))
+        elif filters.get("region_selection_applied"):
+            parts.append("AND 1 = 0")
         if include_city and filters.get("search"):
             parts.append(f"AND LOWER({prefix}city_name) LIKE LOWER(?)")
         if filters.get("period"):
@@ -1701,6 +1723,8 @@ class AnalyticsService:
             parts.append("AND growth.country = ?")
         if filters.get("region"):
             parts.append(self._region_in_clause(filters["region"], "city.region"))
+        elif filters.get("region_selection_applied"):
+            parts.append("AND 1 = 0")
         if filters.get("search"):
             parts.append("AND LOWER(growth.city_name) LIKE LOWER(?)")
         if filters.get("period"):
@@ -1732,6 +1756,8 @@ class AnalyticsService:
                 parts.append("AND 1 = 0")
         if filters.get("region"):
             parts.append(self._region_in_clause(filters["region"], "city.region"))
+        elif filters.get("region_selection_applied"):
+            parts.append("AND 1 = 0")
         if filters.get("search"):
             parts.append("AND LOWER(decline.city_name) LIKE LOWER(?)")
         if filters.get("period"):

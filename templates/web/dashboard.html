@@ -21,31 +21,82 @@
 {% block content %}
 <section class="dash-filters">
     <form method="get" action="{{ url_for('web.dashboard') }}" class="dash-filter-form" id="dash-filter-form">
-        <select name="country" onchange="this.form.submit()">
-            <option value="">Tous les pays</option>
-            {% for c in filter_options.countries %}
-            <option value="{{ c }}" {% if filters.country == c %}selected{% endif %}>{{ c }}</option>
+        <input type="hidden" name="regions_applied" value="1" id="dash-regions-applied">
+        <select name="country" id="dash-country-select">
+            <option value="">Tous les pays sélectionnés</option>
+            {% for country in country_options %}
+            <option value="{{ country.value }}" {% if filters.country == country.value %}selected{% endif %}>{{ country.label }}</option>
             {% endfor %}
         </select>
-        <div class="dir-filter-region-wrap">
-            <button type="button" class="dir-region-toggle" id="dash-region-toggle">
-                {% if filters.region|length == 0 %}Toutes les régions{% elif filters.region|length == 1 %}{{ filters.region[0] }}{% else %}{{ filters.region|length }} régions{% endif %} <span class="dir-region-arrow">▾</span>
-            </button>
-            <div class="dir-region-dropdown" id="dash-region-dropdown">
-                <div class="dir-region-actions">
-                    <button type="button" data-dash-region-action="all">Tout cocher</button>
-                    <button type="button" data-dash-region-action="none">Tout décocher</button>
+        <button type="button" class="secondary-button dash-region-open" id="dash-region-open">
+            Régions{% if filters.region_selection_applied %} ({{ filters.region|length }}){% endif %}
+        </button>
+        {% if filters.country or filters.region or filters.region_selection_applied %}
+        <a href="{{ url_for('web.dashboard') }}" class="dash-reset" title="Réinitialiser">✕</a>
+        {% endif %}
+
+        <div class="photo-search-modal dash-region-modal" id="dash-region-modal" hidden>
+            <div class="photo-search-modal-backdrop" data-region-close></div>
+            <div class="photo-search-modal-content dash-region-modal-content" role="dialog" aria-modal="true" aria-labelledby="dash-region-title">
+                <div class="photo-search-modal-header">
+                    <div>
+                        <h3 id="dash-region-title">Régions du dashboard</h3>
+                        <p>Sélectionnez les régions à inclure pour les pays actifs.</p>
+                    </div>
+                    <button type="button" class="photo-search-modal-close" data-region-close aria-label="Fermer">×</button>
                 </div>
-                <div class="dir-region-list" id="dash-region-list">
-                    {% for r in filter_options.regions %}
-                    <label><input type="checkbox" name="region" value="{{ r }}" {% if not filters.region or r in filters.region %}checked{% endif %}> {{ r }}</label>
+                <div class="dash-region-toolbar">
+                    <button type="button" class="secondary-button" data-region-global="all">Tout cocher</button>
+                    <button type="button" class="secondary-button" data-region-global="none">Tout décocher</button>
+                </div>
+                {% if region_groups|length > 1 %}
+                <div class="dash-region-tabs" role="tablist" aria-label="Pays">
+                    {% for group in region_groups %}
+                    <button type="button" class="dash-region-tab{% if loop.first %} active{% endif %}"
+                            id="dash-region-tab-{{ loop.index }}" role="tab"
+                            aria-selected="{{ 'true' if loop.first else 'false' }}"
+                            aria-controls="dash-region-panel-{{ loop.index }}"
+                            data-region-tab="dash-region-panel-{{ loop.index }}">
+                        <img src="{{ flag_url(group.country.value) }}" alt="" class="flag-icon">
+                        <span>{{ group.country.label }}</span>
+                        <small data-region-tab-count></small>
+                    </button>
                     {% endfor %}
+                </div>
+                {% endif %}
+                <div class="photo-search-modal-body dash-region-groups" id="dash-region-groups">
+                    {% for group in region_groups %}
+                    <section class="dash-region-country" id="dash-region-panel-{{ loop.index }}"
+                             data-region-country role="tabpanel"
+                             aria-labelledby="dash-region-tab-{{ loop.index }}"
+                             {% if not loop.first %}hidden{% endif %}>
+                        <div class="dash-region-country-head">
+                            <h4><img src="{{ flag_url(group.country.value) }}" alt="" class="flag-icon"> {{ group.country.label }}</h4>
+                            <div>
+                                <button type="button" data-region-country-action="all">Tout</button>
+                                <button type="button" data-region-country-action="none">Aucun</button>
+                            </div>
+                        </div>
+                        <div class="dash-region-grid">
+                            {% for region in group.regions %}
+                            <label class="dash-region-choice">
+                                <input type="checkbox" name="region" value="{{ region.value }}" {% if (not filters.region_selection_applied and not filters.region) or region.value in filters.region %}checked{% endif %}>
+                                <span>{{ region.label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% else %}
+                    <p>Aucune région n'est enregistrée pour les pays sélectionnés.</p>
+                    {% endfor %}
+                </div>
+                <div class="photo-search-modal-footer dash-region-footer">
+                    <span id="dash-region-count"></span>
+                    <button type="button" class="secondary-button" data-region-close>Annuler</button>
+                    <button type="submit" class="primary-button">Appliquer</button>
                 </div>
             </div>
         </div>
-        {% if filters.country or filters.region %}
-        <a href="{{ url_for('web.dashboard') }}" class="dash-reset" title="Réinitialiser">✕</a>
-        {% endif %}
     </form>
 </section>
 
@@ -261,37 +312,93 @@
 </section>
 
 <script>
-// Region dropdown multi-select
+// Region modal multi-select
 (function(){
-    const btn = document.getElementById('dash-region-toggle');
-    const dd  = document.getElementById('dash-region-dropdown');
-    const list = document.getElementById('dash-region-list');
+    const btn = document.getElementById('dash-region-open');
+    const modal = document.getElementById('dash-region-modal');
+    const groups = document.getElementById('dash-region-groups');
+    const count = document.getElementById('dash-region-count');
     const form = document.getElementById('dash-filter-form');
-    if(!btn||!dd||!list||!form) return;
+    const countrySelect = document.getElementById('dash-country-select');
+    const regionsApplied = document.getElementById('dash-regions-applied');
+    let initialSelection = [];
+    if(!btn || !modal || !groups || !form) return;
 
-    btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.toggle('is-open'); });
-    document.addEventListener('click', e => {
-        if(!dd.contains(e.target) && e.target !== btn) dd.classList.remove('is-open');
-    });
-
-    function updateLabel(){
-        const total = list.querySelectorAll('input[type="checkbox"]').length;
-        const checked = list.querySelectorAll('input[type="checkbox"]:checked').length;
-        btn.firstChild.textContent = (checked === total || checked === 0) ? 'Toutes les régions ' : checked + ' région' + (checked > 1 ? 's' : '') + ' ';
+    function setOpen(open) {
+        if (open) {
+            initialSelection = Array.from(groups.querySelectorAll('input[type="checkbox"]'), input => input.checked);
+        }
+        modal.hidden = !open;
+        document.body.style.overflow = open ? 'hidden' : '';
+        if (open) modal.querySelector('.photo-search-modal-close').focus();
     }
 
-    list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => { updateLabel(); form.submit(); });
-    });
+    function cancelSelection() {
+        groups.querySelectorAll('input[type="checkbox"]').forEach((input, index) => {
+            input.checked = initialSelection[index];
+        });
+        updateCount();
+        setOpen(false);
+    }
 
-    document.querySelectorAll('[data-dash-region-action]').forEach(ab => {
-        ab.addEventListener('click', () => {
-            const check = ab.dataset.dashRegionAction === 'all';
-            list.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = check; });
-            updateLabel();
-            form.submit();
+    function updateCount() {
+        const total = groups.querySelectorAll('input[type="checkbox"]').length;
+        const checked = groups.querySelectorAll('input[type="checkbox"]:checked').length;
+        count.textContent = checked + ' région' + (checked !== 1 ? 's' : '') + ' sur ' + total;
+        modal.querySelectorAll('[data-region-tab]').forEach(tab => {
+            const panel = document.getElementById(tab.dataset.regionTab);
+            const selected = panel.querySelectorAll('input[type="checkbox"]:checked').length;
+            const tabCount = tab.querySelector('[data-region-tab-count]');
+            if (tabCount) tabCount.textContent = selected;
+        });
+    }
+
+    btn.addEventListener('click', () => setOpen(true));
+    countrySelect.addEventListener('change', () => {
+        regionsApplied.disabled = true;
+        groups.querySelectorAll('input[type="checkbox"]').forEach(input => { input.disabled = true; });
+        form.submit();
+    });
+    window.addEventListener('pageshow', () => {
+        regionsApplied.disabled = false;
+        groups.querySelectorAll('input[type="checkbox"]').forEach(input => { input.disabled = false; });
+    });
+    modal.querySelectorAll('[data-region-close]').forEach(close => {
+        close.addEventListener('click', cancelSelection);
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !modal.hidden) cancelSelection();
+    });
+    groups.addEventListener('change', updateCount);
+    modal.querySelectorAll('[data-region-global]').forEach(action => {
+        action.addEventListener('click', () => {
+            const checked = action.dataset.regionGlobal === 'all';
+            groups.querySelectorAll('input[type="checkbox"]').forEach(input => { input.checked = checked; });
+            updateCount();
         });
     });
+    modal.querySelectorAll('[data-region-tab]').forEach(tab => {
+        tab.addEventListener('click', () => {
+            modal.querySelectorAll('[data-region-tab]').forEach(item => {
+                const active = item === tab;
+                item.classList.toggle('active', active);
+                item.setAttribute('aria-selected', String(active));
+            });
+            groups.querySelectorAll('[data-region-country]').forEach(panel => {
+                panel.hidden = panel.id !== tab.dataset.regionTab;
+            });
+        });
+    });
+    groups.querySelectorAll('[data-region-country-action]').forEach(action => {
+        action.addEventListener('click', () => {
+            const checked = action.dataset.regionCountryAction === 'all';
+            action.closest('[data-region-country]').querySelectorAll('input[type="checkbox"]').forEach(input => {
+                input.checked = checked;
+            });
+            updateCount();
+        });
+    });
+    updateCount();
 })();
 // Chart view tabs (par pays / par région)
 document.querySelectorAll('.chart-view-tab').forEach(btn => {

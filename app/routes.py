@@ -98,6 +98,40 @@ def _apply_dashboard_country_selection(filters: dict) -> tuple[list[dict[str, st
     return selected_options, selected_values
 
 
+def _dashboard_region_groups(country_options: list[dict[str, str]]) -> list[dict[str, object]]:
+    from .db import get_db
+    from .services.city_import import REGION_ALIASES
+
+    if not country_options:
+        return []
+
+    labels = [option["label"] for option in country_options]
+    rows = get_db().execute(
+        """
+        SELECT country_name, region_name
+        FROM dim_region
+        WHERE country_name = ANY(?)
+        ORDER BY LOWER(country_name), LOWER(region_name), region_name
+        """,
+        (labels,),
+    ).fetchall()
+    regions_by_country: dict[str, list[dict[str, str]]] = {
+        label: [] for label in labels
+    }
+    for row in rows:
+        label = row["region_name"]
+        regions_by_country[row["country_name"]].append({
+            "label": label,
+            "value": REGION_ALIASES.get(label, label),
+        })
+
+    return [
+        {"country": option, "regions": regions_by_country[option["label"]]}
+        for option in country_options
+        if regions_by_country[option["label"]]
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Auth routes
 # ---------------------------------------------------------------------------
@@ -313,27 +347,23 @@ def _parse_country_periods(details_text: str, pop_data: list[dict]) -> list[dict
 
 @web.route("/")
 def dashboard() -> str:
-    from .db import get_db
-
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
     selected_options, selected_countries = _apply_dashboard_country_selection(filters)
+    region_country_options = selected_options
+    if filters.get("country"):
+        region_country_options = [
+            option for option in selected_options if option["value"] == filters["country"]
+        ]
     filter_options = service.get_filter_options()
-    filter_options["countries"] = [
-        country for country in filter_options["countries"] if country in selected_countries
-    ]
-    filter_options["regions"] = [row["region"] for row in get_db().execute(
-        "SELECT DISTINCT region FROM dim_city WHERE country = ANY(?) AND region IS NOT NULL ORDER BY region",
-        (selected_countries,),
-    ).fetchall()] if selected_countries else []
     return render_template(
         "web/dashboard.html",
         page_title="Dashboard",
         filters=filters,
         filter_options=filter_options,
-        dashboard_countries=[
-            option for option in selected_options if option["value"] in selected_countries
-        ],
+        country_options=selected_options,
+        region_groups=_dashboard_region_groups(region_country_options),
+        dashboard_countries=selected_options,
         metrics=service.get_dashboard_metrics(filters),
         growth_leaders=service.get_growth_leaders(filters),
         decline_leaders=service.get_decline_leader_cities(filters),
