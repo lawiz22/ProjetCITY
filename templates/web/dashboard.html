@@ -21,19 +21,48 @@
 {% block content %}
 <section class="dash-filters">
     <form method="get" action="{{ url_for('web.dashboard') }}" class="dash-filter-form" id="dash-filter-form">
+        <input type="hidden" name="countries_applied" value="1">
         <input type="hidden" name="regions_applied" value="1" id="dash-regions-applied">
-        <select name="country" id="dash-country-select">
-            <option value="">Tous les pays sélectionnés</option>
-            {% for country in country_options %}
-            <option value="{{ country.value }}" {% if filters.country == country.value %}selected{% endif %}>{{ country.label }}</option>
-            {% endfor %}
-        </select>
-        <button type="button" class="secondary-button dash-region-open" id="dash-region-open">
+        <button type="button" class="secondary-button dash-filter-trigger" id="dash-country-open">
+            Pays ({{ active_country_options|length }})
+        </button>
+        <button type="button" class="secondary-button dash-filter-trigger" id="dash-region-open">
             Régions{% if filters.region_selection_applied %} ({{ filters.region|length }}){% endif %}
         </button>
-        {% if filters.country or filters.region or filters.region_selection_applied %}
+        {% if filters.country_selection_applied or filters.region or filters.region_selection_applied %}
         <a href="{{ url_for('web.dashboard') }}" class="dash-reset" title="Réinitialiser">✕</a>
         {% endif %}
+
+        <div class="photo-search-modal dash-country-modal" id="dash-country-modal" hidden>
+            <div class="photo-search-modal-backdrop" data-country-close></div>
+            <div class="photo-search-modal-content dash-country-modal-content" role="dialog" aria-modal="true" aria-labelledby="dash-country-title">
+                <div class="photo-search-modal-header">
+                    <div>
+                        <h3 id="dash-country-title">Pays du dashboard</h3>
+                        <p>Sélectionnez un ou plusieurs pays à comparer.</p>
+                    </div>
+                    <button type="button" class="photo-search-modal-close" data-country-close aria-label="Fermer">×</button>
+                </div>
+                <div class="dash-region-toolbar">
+                    <button type="button" class="secondary-button" data-country-global="all">Tout cocher</button>
+                    <button type="button" class="secondary-button" data-country-global="none">Tout décocher</button>
+                </div>
+                <div class="photo-search-modal-body dash-country-grid" id="dash-country-grid">
+                    {% for country in country_options %}
+                    <label class="dash-country-choice">
+                        <input type="checkbox" name="country" value="{{ country.value }}" {% if country in active_country_options %}checked{% endif %}>
+                        <img src="{{ flag_url(country.value) }}" alt="" class="flag-icon">
+                        <span>{{ country.label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="photo-search-modal-footer dash-region-footer">
+                    <span id="dash-country-count"></span>
+                    <button type="button" class="secondary-button" data-country-close>Annuler</button>
+                    <button type="button" class="primary-button" id="dash-country-apply">Appliquer</button>
+                </div>
+            </div>
+        </div>
 
         <div class="photo-search-modal dash-region-modal" id="dash-region-modal" hidden>
             <div class="photo-search-modal-backdrop" data-region-close></div>
@@ -312,6 +341,56 @@
 </section>
 
 <script>
+// Country modal multi-select
+(function(){
+    const btn = document.getElementById('dash-country-open');
+    const modal = document.getElementById('dash-country-modal');
+    const grid = document.getElementById('dash-country-grid');
+    const count = document.getElementById('dash-country-count');
+    const apply = document.getElementById('dash-country-apply');
+    const form = document.getElementById('dash-filter-form');
+    const regionsApplied = document.getElementById('dash-regions-applied');
+    const regionGroups = document.getElementById('dash-region-groups');
+    let initialSelection = [];
+    if(!btn || !modal || !grid || !form) return;
+
+    function updateCount() {
+        const selected = grid.querySelectorAll('input[type="checkbox"]:checked').length;
+        count.textContent = selected + ' pays sélectionné' + (selected !== 1 ? 's' : '');
+    }
+    function setOpen(open) {
+        if (open) initialSelection = Array.from(grid.querySelectorAll('input[type="checkbox"]'), input => input.checked);
+        modal.hidden = !open;
+        document.body.style.overflow = open ? 'hidden' : '';
+        if (open) modal.querySelector('.photo-search-modal-close').focus();
+    }
+    function cancelSelection() {
+        grid.querySelectorAll('input[type="checkbox"]').forEach((input, index) => { input.checked = initialSelection[index]; });
+        updateCount();
+        setOpen(false);
+    }
+
+    btn.addEventListener('click', () => setOpen(true));
+    grid.addEventListener('change', updateCount);
+    modal.querySelectorAll('[data-country-close]').forEach(close => close.addEventListener('click', cancelSelection));
+    modal.querySelectorAll('[data-country-global]').forEach(action => {
+        action.addEventListener('click', () => {
+            const checked = action.dataset.countryGlobal === 'all';
+            grid.querySelectorAll('input[type="checkbox"]').forEach(input => { input.checked = checked; });
+            updateCount();
+        });
+    });
+    apply.addEventListener('click', () => {
+        regionsApplied.disabled = true;
+        regionGroups.querySelectorAll('input[type="checkbox"]').forEach(input => { input.disabled = true; });
+        form.submit();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !modal.hidden) cancelSelection();
+    });
+    updateCount();
+})();
+
 // Region modal multi-select
 (function(){
     const btn = document.getElementById('dash-region-open');
@@ -319,7 +398,6 @@
     const groups = document.getElementById('dash-region-groups');
     const count = document.getElementById('dash-region-count');
     const form = document.getElementById('dash-filter-form');
-    const countrySelect = document.getElementById('dash-country-select');
     const regionsApplied = document.getElementById('dash-regions-applied');
     let initialSelection = [];
     if(!btn || !modal || !groups || !form) return;
@@ -354,11 +432,6 @@
     }
 
     btn.addEventListener('click', () => setOpen(true));
-    countrySelect.addEventListener('change', () => {
-        regionsApplied.disabled = true;
-        groups.querySelectorAll('input[type="checkbox"]').forEach(input => { input.disabled = true; });
-        form.submit();
-    });
     window.addEventListener('pageshow', () => {
         regionsApplied.disabled = false;
         groups.querySelectorAll('input[type="checkbox"]').forEach(input => { input.disabled = false; });

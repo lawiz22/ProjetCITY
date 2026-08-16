@@ -12,6 +12,42 @@ class TestDashboard:
         resp = client.get("/?country=Canada")
         assert resp.status_code == 200
 
+    def test_dashboard_with_multiple_country_filters(self, client, db_conn):
+        try:
+            db_conn.execute(
+                """
+                INSERT INTO dim_country (country_name, country_slug)
+                VALUES ('Canada', 'canada'), ('États-Unis', 'etats-unis'), ('France', 'france')
+                ON CONFLICT (country_slug) DO UPDATE SET country_name = EXCLUDED.country_name
+                """
+            )
+            db_conn.execute(
+                """
+                INSERT INTO app_setting (setting_key, setting_value)
+                VALUES ('dashboard_settings', '{"countries":["Canada","United States","France"]}'::jsonb)
+                ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
+                """
+            )
+            db_conn.commit()
+
+            response = client.get("/?countries_applied=1&country=Canada&country=France")
+
+            assert response.status_code == 200
+            html = response.get_data(as_text=True)
+            assert "Canada" in html
+            assert "France" in html
+            assert "Boston" not in html
+        finally:
+            db_conn.execute("DELETE FROM app_setting WHERE setting_key = 'dashboard_settings'")
+            db_conn.execute("DELETE FROM dim_country WHERE country_slug IN ('canada', 'etats-unis', 'france')")
+            db_conn.commit()
+
+    def test_dashboard_preserves_explicit_empty_country_selection(self, client):
+        response = client.get("/?countries_applied=1")
+
+        assert response.status_code == 200
+        assert "Pays (0)" in response.get_data(as_text=True)
+
     def test_dashboard_preserves_explicit_empty_region_selection(self, client):
         response = client.get("/?regions_applied=1")
 
@@ -105,8 +141,7 @@ class TestDashboard:
             assert "France" in country_card
             assert ">3<" in country_card or "\n            3\n" in country_card
             assert '"label": "France"' in html
-            assert '<option value="France"' in html
-            assert '>France</option>' in html
+            assert 'name="country" value="France" checked' in html
             assert 'value="Bretagne"' in html
             assert "Régions du dashboard" in html
         finally:

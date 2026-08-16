@@ -863,11 +863,20 @@ button {
     flex-shrink: 0;
 }
 .dash-reset:hover { background: var(--accent); color: #fff; }
-.dash-region-open {
-    min-height: 32px;
+.dash-filter-trigger {
+    width: 112px;
+    min-height: 30px;
+    padding: .3rem .6rem;
+    font-size: .76rem;
+    white-space: nowrap;
 }
-.dash-region-modal[hidden] {
+.dash-region-modal[hidden],
+.dash-country-modal[hidden] {
     display: none;
+}
+.photo-search-modal-content.dash-country-modal-content {
+    width: min(92vw, 520px);
+    max-height: min(82vh, 580px);
 }
 .photo-search-modal-content.dash-region-modal-content {
     width: min(92vw, 720px);
@@ -877,6 +886,46 @@ button {
     margin: .25rem 0 0;
     color: var(--muted);
     font-size: .82rem;
+}
+.dash-country-modal .photo-search-modal-header p {
+    margin: .25rem 0 0;
+    color: var(--muted);
+    font-size: .82rem;
+}
+.dash-country-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .4rem;
+    padding: .8rem 1.2rem;
+}
+.dash-country-choice {
+    display: grid;
+    grid-template-columns: 16px 24px minmax(0, 1fr);
+    align-items: center;
+    gap: .55rem;
+    min-height: 40px;
+    padding: .4rem .6rem;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--panel);
+    cursor: pointer;
+}
+.dash-country-choice:hover {
+    border-color: var(--accent);
+}
+.dash-country-choice input {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    padding: 0;
+}
+.dash-country-choice .flag-icon {
+    width: 24px;
+}
+.dash-country-choice span {
+    min-width: 0;
+    font-size: .8rem;
+    line-height: 1.2;
 }
 .dash-region-toolbar {
     display: flex;
@@ -1015,6 +1064,7 @@ button {
     }
 }
 @media (max-width: 480px) {
+    .photo-search-modal-content.dash-country-modal-content,
     .photo-search-modal-content.dash-region-modal-content {
         width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
@@ -1026,6 +1076,9 @@ button {
         flex: 1;
     }
     .dash-region-grid {
+        grid-template-columns: 1fr;
+    }
+    .dash-country-grid {
         grid-template-columns: 1fr;
     }
     .dash-region-tabs + .dash-region-groups .dash-region-country-head h4 {

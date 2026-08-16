@@ -70,7 +70,7 @@ def _dashboard_country_options() -> list[dict[str, str]]:
     return options
 
 
-def _apply_dashboard_country_selection(filters: dict) -> tuple[list[dict[str, str]], list[str]]:
+def _apply_dashboard_country_selection(filters: dict) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     from .services.app_state import load_json_setting
 
     options = _dashboard_country_options()
@@ -82,12 +82,16 @@ def _apply_dashboard_country_selection(filters: dict) -> tuple[list[dict[str, st
         selected_values = [str(country) for country in selected_values]
 
     selected_options = [option for option in options if option["value"] in selected_values]
-    if filters.get("country"):
+    if filters.get("country_selection_applied"):
+        requested = set(filters.get("requested_countries", []))
+        active_options = [option for option in selected_options if option["value"] in requested]
+    elif filters.get("country"):
         active_options = [option for option in selected_options if option["value"] == filters["country"]]
     else:
         active_options = selected_options
 
-    filters["countries"] = [option["value"] for option in selected_options]
+    filters["country"] = None
+    filters["countries"] = [option["value"] for option in active_options]
     filters["country_names"] = list(dict.fromkeys(
         name for option in active_options for name in (option["value"], option["label"])
     ))
@@ -95,7 +99,7 @@ def _apply_dashboard_country_selection(filters: dict) -> tuple[list[dict[str, st
         name: option["label"] for option in active_options for name in (option["value"], option["label"])
     }
     filters["selected_country_count"] = len(active_options)
-    return selected_options, selected_values
+    return selected_options, active_options
 
 
 def _dashboard_region_groups(country_options: list[dict[str, str]]) -> list[dict[str, object]]:
@@ -349,12 +353,7 @@ def _parse_country_periods(details_text: str, pop_data: list[dict]) -> list[dict
 def dashboard() -> str:
     service = AnalyticsService()
     filters = service.normalize_filters(request.args)
-    selected_options, selected_countries = _apply_dashboard_country_selection(filters)
-    region_country_options = selected_options
-    if filters.get("country"):
-        region_country_options = [
-            option for option in selected_options if option["value"] == filters["country"]
-        ]
+    selected_options, active_options = _apply_dashboard_country_selection(filters)
     filter_options = service.get_filter_options()
     return render_template(
         "web/dashboard.html",
@@ -362,8 +361,9 @@ def dashboard() -> str:
         filters=filters,
         filter_options=filter_options,
         country_options=selected_options,
-        region_groups=_dashboard_region_groups(region_country_options),
-        dashboard_countries=selected_options,
+        active_country_options=active_options,
+        region_groups=_dashboard_region_groups(active_options),
+        dashboard_countries=active_options,
         metrics=service.get_dashboard_metrics(filters),
         growth_leaders=service.get_growth_leaders(filters),
         decline_leaders=service.get_decline_leader_cities(filters),

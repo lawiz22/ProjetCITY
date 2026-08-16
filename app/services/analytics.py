@@ -163,7 +163,10 @@ class AnalyticsService:
         return unique_items
 
     def normalize_filters(self, args: Any) -> dict[str, Any]:
-        country = self._clean_value(args.get("country"))
+        raw_countries = args.getlist("country") if hasattr(args, "getlist") else []
+        requested_countries = [c for c in (self._clean_value(v) for v in raw_countries) if c]
+        country = requested_countries[0] if requested_countries else self._clean_value(args.get("country"))
+        country_selection_applied = str(args.get("countries_applied", "")) == "1"
         raw_regions = args.getlist("region") if hasattr(args, "getlist") else []
         regions = [r for r in (self._clean_value(v) for v in raw_regions) if r]
         region_selection_applied = str(args.get("regions_applied", "")) == "1"
@@ -171,6 +174,8 @@ class AnalyticsService:
         period = self._clean_value(args.get("period"))
         return {
             "country": country,
+            "requested_countries": requested_countries,
+            "country_selection_applied": country_selection_applied,
             "region": regions,
             "region_selection_applied": region_selection_applied,
             "search": search,
@@ -479,7 +484,7 @@ class AnalyticsService:
         ).fetchall()
 
         # Color by country, or by region if filtered to a single country
-        if filters.get("country"):
+        if filters.get("selected_country_count") == 1:
             regions_seen: list[str] = []
             for row in rows:
                 r = row["region"] or "Autre"
@@ -554,7 +559,7 @@ class AnalyticsService:
             params,
         ).fetchall()
 
-        if filters.get("country"):
+        if filters.get("selected_country_count") == 1:
             regions_seen: list[str] = []
             for r in rows:
                 rg = r["region"] or "Autre"
