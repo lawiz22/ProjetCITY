@@ -2,6 +2,14 @@
 from __future__ import annotations
 
 
+def test_parse_grouped_int_accepts_unicode_spaces():
+    from app.services.analytics import _parse_grouped_int
+
+    assert _parse_grouped_int("4 460") == 4460
+    assert _parse_grouped_int("4\u00a0460") == 4460
+    assert _parse_grouped_int("4\u202f460") == 4460
+
+
 class TestCityImportLocation:
     def test_unknown_bretagne_resolves_to_france(self, app, db_conn):
         from app.db import get_db

@@ -43,6 +43,13 @@ class SqlExecutionError(RuntimeError):
     pass
 
 
+def _parse_grouped_int(value: str) -> int:
+    digits = re.sub(r"\D", "", value)
+    if not digits:
+        raise ValueError(f"Valeur numérique invalide : {value!r}")
+    return int(digits)
+
+
 def _get_city_origin_metadata(city_slug: str) -> dict[str, int | None]:
     # 0) Check dim_city.foundation_year first (AI-validated overrides)
     try:
@@ -1051,30 +1058,30 @@ class AnalyticsService:
                         if "superficie" in key or "area" in key:
                             m = num_re.search(val)
                             if m:
-                                area = int(m.group(1).replace(" ", "").replace("\u00a0", ""))
+                                area = _parse_grouped_int(m.group(1))
                         elif "densit" in key:
                             m = num_re.search(val)
                             if m:
-                                density = int(m.group(1).replace(" ", "").replace("\u00a0", ""))
+                                density = _parse_grouped_int(m.group(1))
                         elif "rivi" in key or "cours" in key or "lac" in key or "river" in key or "fleuve" in key:
                             river = val
                         elif "altitude" in key:
                             m = num_re.search(val)
                             if m:
-                                altitude = int(m.group(1).replace(" ", "").replace("\u00a0", ""))
+                                altitude = _parse_grouped_int(m.group(1))
                 elif block["type"] == "bullets":
                     bullets.extend(block.get("items", []))
                 elif block["type"] == "text":
                     text = block.get("value", "")
                     dm = _re.search(r"[Dd]ensit[eé].*?~?\s*([\d\s]+)\s*hab", text)
                     if dm:
-                        density = int(dm.group(1).replace(" ", "").replace("\u00a0", ""))
+                        density = _parse_grouped_int(dm.group(1))
                     am = _re.search(r"[Ss]uperficie.*?~?\s*([\d\s]+)\s*km", text)
                     if am:
-                        area = int(am.group(1).replace(" ", "").replace("\u00a0", ""))
+                        area = _parse_grouped_int(am.group(1))
                     hm = _re.search(r"[Aa]ltitude.*?~?\s*([\d\s]+)\s*m", text)
                     if hm:
-                        altitude = int(hm.group(1).replace(" ", "").replace("\u00a0", ""))
+                        altitude = _parse_grouped_int(hm.group(1))
 
             index[city_id] = {
                 "area_km2": area,
