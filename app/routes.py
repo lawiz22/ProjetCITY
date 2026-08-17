@@ -4727,7 +4727,19 @@ def geo_coverage() -> str:
     from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2
 
     conn = get_db()
-    rows = conn.execute(
+    dimension_regions = conn.execute(
+        """SELECT country_name, region_name
+           FROM dim_region
+           WHERE country_name IS NOT NULL AND region_name IS NOT NULL
+           ORDER BY LOWER(country_name), LOWER(region_name)"""
+    ).fetchall()
+    region_country_by_key = {
+        REGION_ALIASES.get(row["region_name"], row["region_name"]).casefold(): row["country_name"]
+        for row in dimension_regions
+        if _is_dashboard_country_name(row["country_name"])
+    }
+
+    raw_rows = conn.execute(
         """SELECT c.city_name, c.city_slug, c.region, c.country,
                   MAX(f.population) AS peak_pop,
                   COUNT(DISTINCT f.year) AS data_points
@@ -4736,6 +4748,14 @@ def geo_coverage() -> str:
            GROUP BY c.city_id
            ORDER BY c.country, c.region, c.city_name"""
     ).fetchall()
+    rows = []
+    for raw_row in raw_rows:
+        row = dict(raw_row)
+        if not _is_dashboard_country_name(row["country"]):
+            region_key = REGION_ALIASES.get(row["region"], row["region"]).casefold() if row["region"] else ""
+            row["country"] = region_country_by_key.get(region_key)
+        if _is_dashboard_country_name(row["country"]):
+            rows.append(row)
 
     # Load reference cities (if table exists)
     ref_rows: list = []
@@ -4743,15 +4763,13 @@ def geo_coverage() -> str:
         ref_rows = conn.execute(
             "SELECT city_name, region, country, population, rank FROM ref_city ORDER BY country, region, rank"
         ).fetchall()
+        ref_rows = [row for row in ref_rows if _is_dashboard_country_name(row["country"])]
     except Exception:
         pass  # table may not exist yet
 
-    dimension_regions = conn.execute(
-        """SELECT country_name, region_name
-           FROM dim_region
-           WHERE country_name IS NOT NULL AND region_name IS NOT NULL
-           ORDER BY LOWER(country_name), LOWER(region_name)"""
-    ).fetchall()
+    dimension_regions = [
+        row for row in dimension_regions if _is_dashboard_country_name(row["country_name"])
+    ]
 
     def _country_key(name: str) -> str:
         return _COUNTRY_ISO2.get(name, name.casefold())

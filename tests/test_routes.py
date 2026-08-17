@@ -172,6 +172,57 @@ class TestDashboard:
 
 
 class TestGeoCoverage:
+    def test_resolves_unknown_city_country_from_region(self, client, db_conn):
+        from werkzeug.security import generate_password_hash
+
+        try:
+            user_id = db_conn.execute(
+                """
+                INSERT INTO app_user (username, email, password_hash, role, is_approved)
+                VALUES ('geo-unknown', 'geo-unknown@example.com', %s, 'collaborateur', TRUE)
+                RETURNING user_id
+                """,
+                (generate_password_hash("test"),),
+            ).fetchone()["user_id"]
+            db_conn.execute(
+                """
+                INSERT INTO dim_country (country_name, country_slug)
+                VALUES ('Japon', 'japon')
+                ON CONFLICT (country_slug) DO UPDATE SET country_name = EXCLUDED.country_name
+                """
+            )
+            db_conn.execute(
+                """
+                INSERT INTO dim_region (region_name, region_slug, country_name)
+                VALUES ('Kanagawa', 'kanagawa', 'Japon')
+                ON CONFLICT (region_slug) DO UPDATE SET country_name = EXCLUDED.country_name
+                """
+            )
+            db_conn.execute(
+                """
+                INSERT INTO dim_city (city_name, city_slug, region, country, source_file)
+                VALUES ('Yokohama', 'yokohama-test', 'Kanagawa', 'Unknown', 'test')
+                """
+            )
+            db_conn.commit()
+            with client.session_transaction() as session:
+                session["user_id"] = user_id
+
+            response = client.get("/geo-coverage")
+
+            assert response.status_code == 200
+            html = response.get_data(as_text=True)
+            assert "Yokohama" in html
+            assert 'data-country="Japon"' in html
+            assert ">Unknown<" not in html
+            assert "/flags/countries/unknown.png" not in html
+        finally:
+            db_conn.execute("DELETE FROM dim_city WHERE city_slug = 'yokohama-test'")
+            db_conn.execute("DELETE FROM dim_region WHERE region_slug = 'kanagawa'")
+            db_conn.execute("DELETE FROM dim_country WHERE country_slug = 'japon'")
+            db_conn.execute("DELETE FROM app_user WHERE username = 'geo-unknown'")
+            db_conn.commit()
+
     def test_lists_all_dimension_countries_and_regions(self, client, db_conn):
         from werkzeug.security import generate_password_hash
 
