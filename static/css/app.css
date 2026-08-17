@@ -1608,6 +1608,64 @@ button {
     border: 1px solid rgba(27, 36, 48, 0.1);
 }
 
+.city-card-link {
+    display: contents;
+}
+
+.city-card-delete-form {
+    position: absolute;
+    z-index: 5;
+    top: 10px;
+    right: 10px;
+    margin: 0;
+}
+
+.city-card-delete-button,
+.city-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, .55);
+    background: rgba(174, 36, 50, .92);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(70, 10, 18, .28);
+}
+
+.city-card-delete-button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.city-card-delete-button:hover,
+.city-delete-button:hover {
+    background: #8f1f2e;
+}
+
+.city-card-delete-button:focus-visible,
+.city-delete-button:focus-visible {
+    outline: 3px solid #ffb6bf;
+    outline-offset: 2px;
+}
+
+.city-delete-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.city-delete-button {
+    min-height: 32px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: .74rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .city-card-trend-up {
     border-color: rgba(31, 157, 102, 0.34);
     box-shadow: 0 24px 56px rgba(31, 157, 102, 0.1), var(--shadow);

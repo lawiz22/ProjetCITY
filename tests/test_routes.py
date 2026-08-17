@@ -373,6 +373,79 @@ class TestCityDetail:
         assert b"population" in resp.data.lower()
 
 
+class TestCityDelete:
+    def test_non_admin_cannot_delete_city(self, client, db_conn):
+        from werkzeug.security import generate_password_hash
+
+        try:
+            user_id = db_conn.execute(
+                """
+                INSERT INTO app_user (username, email, password_hash, role, is_approved)
+                VALUES ('city-editor', 'city-editor@example.com', %s, 'editeur', TRUE)
+                RETURNING user_id
+                """,
+                (generate_password_hash("test"),),
+            ).fetchone()["user_id"]
+            db_conn.commit()
+            with client.session_transaction() as session:
+                session["user_id"] = user_id
+
+            response = client.post("/cities/montreal/delete")
+
+            assert response.status_code == 403
+            assert db_conn.execute(
+                "SELECT 1 FROM dim_city WHERE city_slug = 'montreal'"
+            ).fetchone()
+        finally:
+            db_conn.execute("DELETE FROM app_user WHERE username = 'city-editor'")
+            db_conn.commit()
+
+    def test_admin_deletes_city_and_related_population(self, client, db_conn):
+        from werkzeug.security import generate_password_hash
+
+        try:
+            user_id = db_conn.execute(
+                """
+                INSERT INTO app_user (username, email, password_hash, role, is_approved)
+                VALUES ('city-admin', 'city-admin@example.com', %s, 'admin', TRUE)
+                RETURNING user_id
+                """,
+                (generate_password_hash("test"),),
+            ).fetchone()["user_id"]
+            city_id = db_conn.execute(
+                """
+                INSERT INTO dim_city (city_name, city_slug, region, country, source_file)
+                VALUES ('Ville à supprimer', 'ville-a-supprimer', 'Québec', 'Canada', 'test')
+                RETURNING city_id
+                """
+            ).fetchone()["city_id"]
+            db_conn.execute(
+                """
+                INSERT INTO fact_city_population (city_id, time_id, year, population, source_file)
+                VALUES (%s, 8, 2020, 12345, 'test')
+                """,
+                (city_id,),
+            )
+            db_conn.commit()
+            with client.session_transaction() as session:
+                session["user_id"] = user_id
+
+            response = client.post("/cities/ville-a-supprimer/delete")
+
+            assert response.status_code == 302
+            assert response.headers["Location"].endswith("/cities")
+            assert db_conn.execute(
+                "SELECT 1 FROM dim_city WHERE city_id = %s", (city_id,)
+            ).fetchone() is None
+            assert db_conn.execute(
+                "SELECT 1 FROM fact_city_population WHERE city_id = %s", (city_id,)
+            ).fetchone() is None
+        finally:
+            db_conn.execute("DELETE FROM dim_city WHERE city_slug = 'ville-a-supprimer'")
+            db_conn.execute("DELETE FROM app_user WHERE username IN ('city-admin')")
+            db_conn.commit()
+
+
 class TestCompare:
     def test_compare_no_selection(self, client):
         resp = client.get("/compare")

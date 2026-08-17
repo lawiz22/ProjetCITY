@@ -90,14 +90,14 @@
     <div class="city-grid city-grid-photo city-grid-{{ view_mode }}" id="dir-grid">
         {% for city in cities %}
         {% set trend_state = 'up' if city.trend_label == 'En croissance' else 'down' if city.trend_label == 'En décroissance' else 'stable' %}
-        <a class="city-card city-card-photo city-card-{{ view_mode }} city-card-trend-{{ trend_state }}"
-           href="{{ url_for('web.city_detail', city_slug=city.city_slug) }}"
+        <article class="city-card city-card-photo city-card-{{ view_mode }} city-card-trend-{{ trend_state }}"
            data-city-name="{{ city.city_name }}"
            data-city-pop="{{ city.population }}"
            data-city-country="{{ city.country }}"
            data-city-region="{{ city.region }}"
            data-city-density="{{ city.density or 0 }}"
            data-city-created="{{ city.entity_created_at or '' }}">
+            <a class="city-card-link" href="{{ url_for('web.city_detail', city_slug=city.city_slug) }}" aria-label="Ouvrir {{ city.city_name }}">
             <div class="city-card-media">
                 <img src="{{ url_for('static', filename=city.photo_path|thumb_url) }}" alt="Vue de {{ city.city_name }}" loading="lazy">
                 <div class="city-card-overlay"></div>
@@ -169,7 +169,13 @@
                 </div>
                 {% endif %}
             </div>
-        </a>
+            </a>
+            {% if current_user and current_user.role == 'admin' %}
+            <form method="post" action="{{ url_for('web.city_delete', city_slug=city.city_slug) }}" class="city-card-delete-form" onsubmit="return confirm('Supprimer définitivement la ville {{ city.city_name|e }} et toutes ses données ?');">
+                <button type="submit" class="city-card-delete-button" aria-label="Supprimer {{ city.city_name }}" title="Supprimer cette ville">×</button>
+            </form>
+            {% endif %}
+        </article>
         {% endfor %}
     </div>
 

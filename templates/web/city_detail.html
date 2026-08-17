@@ -54,6 +54,11 @@
             {% else %}
             <span class="city-badge pop-sources-badge" style="background:#fff3cd;color:#856404;font-weight:700;cursor:pointer;" title="Cliquer pour voir les sources" onclick="document.getElementById('pop-sources-modal').style.display='flex'">⚠️ Source population non validées</span>
             {% endif %}
+            {% if current_user and current_user.role == 'admin' %}
+            <form method="post" action="{{ url_for('web.city_delete', city_slug=city.city_slug) }}" class="city-delete-form" onsubmit="return confirm('Supprimer définitivement la ville {{ city.city_name|e }} et toutes ses données ?');">
+                <button type="submit" class="city-delete-button" aria-label="Supprimer {{ city.city_name }}">× Supprimer la ville</button>
+            </form>
+            {% endif %}
         </div>
         <p class="city-narrative">
             {{ city.city_name }} présente une évolution urbaine suivie sur {{ periods|length }} période{% if periods|length > 1 %}s{% endif %},

@@ -696,6 +696,49 @@ def city_detail(city_slug: str) -> str:
     )
 
 
+@web.route("/cities/<city_slug>/delete", methods=["POST"])
+@admin_required
+def city_delete(city_slug: str) -> Response:
+    """Delete a city and its related records and local files."""
+    import shutil
+
+    from .db import get_db
+
+    conn = get_db()
+    city = conn.execute(
+        "SELECT city_id, city_name FROM dim_city WHERE city_slug = ?",
+        (city_slug,),
+    ).fetchone()
+    if not city:
+        flash("Ville introuvable.", "error")
+        return redirect(url_for("web.city_directory"))
+
+    try:
+        conn.execute("DELETE FROM dim_city WHERE city_id = ?", (city["city_id"],))
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        flash(f"Erreur lors de la suppression de la ville : {exc}", "error")
+        return redirect(url_for("web.city_detail", city_slug=city_slug))
+
+    static_root = Path(current_app.static_folder or "")
+    photo_dir = static_root / "images" / "cities" / city_slug
+    if photo_dir.exists():
+        shutil.rmtree(photo_dir)
+    data_root = Path(current_app.root_path).parent / "data"
+    delete_raw_document(
+        "city", city_slug, "period_detail",
+        fallback_path=data_root / "city_details" / f"{city_slug}.txt",
+    )
+    delete_raw_document(
+        "city", city_slug, "fiche",
+        fallback_path=data_root / "city_fiches" / f"{city_slug}.txt",
+    )
+    log_action("delete", "city", city_slug, f"Ville supprimée : {city['city_name']}")
+    flash(f"Ville supprimée : {city['city_name']}.", "success")
+    return redirect(url_for("web.city_directory"))
+
+
 @web.route("/cities/<city_slug>/export/pdf")
 @editor_required
 def city_detail_pdf(city_slug: str) -> Response:
