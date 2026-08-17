@@ -42,17 +42,24 @@ from .services.audit import log_action
 web = Blueprint("web", __name__)
 
 
+_UNKNOWN_COUNTRY_NAMES = {"", "-", "unknown", "inconnu", "n/a", "na", "none", "null"}
+
+
+def _is_dashboard_country_name(value: object) -> bool:
+    return isinstance(value, str) and value.strip().casefold() not in _UNKNOWN_COUNTRY_NAMES
+
+
 def _dashboard_country_options() -> list[dict[str, str]]:
     from .db import get_db
     from .services.city_import import _COUNTRY_ISO2
 
     connection = get_db()
-    dimension_names = [row["country_name"] for row in connection.execute(
+    dimension_names = [row["country_name"].strip() for row in connection.execute(
         "SELECT country_name FROM dim_country ORDER BY LOWER(country_name), country_name"
-    ).fetchall()]
-    city_names = [row["country"] for row in connection.execute(
+    ).fetchall() if _is_dashboard_country_name(row["country_name"])]
+    city_names = [row["country"].strip() for row in connection.execute(
         "SELECT DISTINCT country FROM dim_city WHERE country IS NOT NULL ORDER BY country"
-    ).fetchall()]
+    ).fetchall() if _is_dashboard_country_name(row["country"])]
     city_name_by_iso = {
         _COUNTRY_ISO2[name]: name for name in city_names if name in _COUNTRY_ISO2
     }

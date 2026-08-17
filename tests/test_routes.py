@@ -12,6 +12,26 @@ class TestDashboard:
         resp = client.get("/?country=Canada")
         assert resp.status_code == 200
 
+    def test_dashboard_excludes_unknown_country(self, client, db_conn):
+        try:
+            db_conn.execute(
+                """
+                INSERT INTO dim_city (city_name, city_slug, region, country, source_file)
+                VALUES ('Ville sans pays', 'ville-sans-pays', 'Unknown', 'Unknown', 'test')
+                """
+            )
+            db_conn.commit()
+
+            response = client.get("/")
+
+            assert response.status_code == 200
+            html = response.get_data(as_text=True)
+            assert 'name="country" value="Unknown"' not in html
+            assert 'alt="Unknown"' not in html
+        finally:
+            db_conn.execute("DELETE FROM dim_city WHERE city_slug = 'ville-sans-pays'")
+            db_conn.commit()
+
     def test_dashboard_with_multiple_country_filters(self, client, db_conn):
         try:
             db_conn.execute(
