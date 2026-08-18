@@ -112,6 +112,11 @@ def split_location(raw_city_name: str) -> tuple[str | None, str]:
     if "," in raw_city_name:
         parts = [part.strip() for part in raw_city_name.split(",")]
         country_hint = parts[-1] if len(parts) >= 3 and parts[-1] in _COUNTRY_ISO2 else None
+        # 2-part form "City, Country" (e.g. "Tokyo, Japan", "Alexandrie, Égypte")
+        if country_hint is None and len(parts) == 2 and parts[-1] in _COUNTRY_ISO2:
+            country_iso = _COUNTRY_ISO2[parts[-1]]
+            country = {"ca": "Canada", "us": "United States"}.get(country_iso, parts[-1])
+            return None, country
         region_name = parts[-2] if country_hint else parts[-1]
         region = REGION_ALIASES.get(region_name, region_name)
         if country_hint:
