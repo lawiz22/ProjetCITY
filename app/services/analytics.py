@@ -1144,6 +1144,7 @@ class AnalyticsService:
                 rebound.latest_rebound_year,
                 dc_track.created_at AS entity_created_at,
                 dc_track.updated_at AS entity_updated_at,
+                dc_track.population_validated AS population_validated,
                 COALESCE(au_c.display_name, au_c.username) AS created_by_name,
                 COALESCE(au_u.display_name, au_u.username) AS updated_by_name
             FROM filtered_analysis v

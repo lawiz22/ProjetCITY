@@ -1388,28 +1388,39 @@
     <h3 class="panel-title">✅ Entité à valider</h3>
     <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
         <div class="refine-pills">
-            <button class="refine-pill active" data-validate-entity="ville">🏙️ Ville</button>
+            <button class="refine-pill active" data-validate-entity="pays">🌍 Pays</button>
             <button class="refine-pill" data-validate-entity="region">📍 Région</button>
-            <button class="refine-pill" data-validate-entity="pays">🌍 Pays</button>
+            <button class="refine-pill" data-validate-entity="ville">🏙️ Ville</button>
         </div>
     </div>
 </section>
 
 <!-- VILLE (CITY) panel -->
-<div id="validate-entity-ville">
+<div id="validate-entity-ville" style="display:none;">
 
     <!-- City picker -->
     <section class="panel">
         <h3 class="panel-title">🏙️ Choisir une ville</h3>
         <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-            <div class="ai-lab-field" style="max-width:520px;">
-                <label class="opt-label" for="refine-city-select">Ville</label>
-                <select id="refine-city-select" class="opt-input">
-                    <option value="">— Choisir une ville —</option>
-                    {% for c in cities_for_refine %}
-                    <option value="{{ c.city_slug }}">{{ c.city_name }} ({{ c.region }}, {{ c.country }}){% if c.population_validated %} ✅{% endif %}</option>
-                    {% endfor %}
-                </select>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                <div class="ai-lab-field" style="min-width:200px;flex:1;">
+                    <label class="opt-label" for="refine-city-country-filter">Pays</label>
+                    <select id="refine-city-country-filter" class="opt-input">
+                        <option value="">— Tous les pays —</option>
+                    </select>
+                </div>
+                <div class="ai-lab-field" style="min-width:200px;flex:1;">
+                    <label class="opt-label" for="refine-city-region-filter">Région</label>
+                    <select id="refine-city-region-filter" class="opt-input">
+                        <option value="">— Toutes les régions —</option>
+                    </select>
+                </div>
+                <div class="ai-lab-field" style="min-width:260px;flex:2;">
+                    <label class="opt-label" for="refine-city-select">Ville</label>
+                    <select id="refine-city-select" class="opt-input" data-refine-city-source='{{ cities_for_refine | tojson }}'>
+                        <option value="">— Choisir une ville —</option>
+                    </select>
+                </div>
             </div>
             <div id="refine-city-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
         </div>
@@ -1514,14 +1525,19 @@
     <section class="panel">
         <h3 class="panel-title">📍 Choisir une région</h3>
         <div class="options-body ai-lab-body" style="padding:.75rem 1rem;">
-            <div class="ai-lab-field" style="max-width:520px;">
-                <label class="opt-label" for="refine-region-select">Région</label>
-                <select id="refine-region-select" class="opt-input">
-                    <option value="">— Choisir une région —</option>
-                    {% for r in regions_for_refine %}
-                    <option value="{{ r.region_slug }}">{{ r.region_name }} ({{ r.country_name }}){% if r.population_validated %} ✅{% endif %}</option>
-                    {% endfor %}
-                </select>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                <div class="ai-lab-field" style="min-width:220px;flex:1;">
+                    <label class="opt-label" for="refine-region-country-filter">Pays</label>
+                    <select id="refine-region-country-filter" class="opt-input">
+                        <option value="">— Tous les pays —</option>
+                    </select>
+                </div>
+                <div class="ai-lab-field" style="min-width:280px;flex:2;">
+                    <label class="opt-label" for="refine-region-select">Région</label>
+                    <select id="refine-region-select" class="opt-input" data-refine-region-source='{{ regions_for_refine | tojson }}'>
+                        <option value="">— Choisir une région —</option>
+                    </select>
+                </div>
             </div>
             <div id="refine-region-loading" style="display:none;margin-top:.5rem;font-size:.85rem;color:var(--muted);">⏳ Chargement…</div>
         </div>
@@ -1617,7 +1633,7 @@
 </div><!-- /validate-entity-region -->
 
 <!-- PAYS (COUNTRY) panel -->
-<div id="validate-entity-pays" style="display:none;">
+<div id="validate-entity-pays" style="">
 
     <section class="panel">
         <h3 class="panel-title">🌍 Choisir un pays</h3>
@@ -3398,6 +3414,115 @@
     });
 
     /* =====================================================================
+     * VALIDATION — Cascading dropdowns (country → region → city)
+     * ===================================================================== */
+    window._refineSources = window._refineSources || { cities: [], regions: [] };
+    window.updateRefineSourceValidated = function(kind, slug, validated) {
+        var arr = window._refineSources[kind] || [];
+        var key = kind === 'cities' ? 'city_slug' : 'region_slug';
+        arr.forEach(function(item) { if (item[key] === slug) item.population_validated = !!validated; });
+    };
+    (function() {
+        function buildOption(value, label, validated) {
+            var opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = label + (validated ? ' ✅' : '');
+            return opt;
+        }
+        function uniqueSorted(arr) {
+            var seen = {};
+            var out = [];
+            arr.forEach(function(v) { if (v && !seen[v]) { seen[v] = 1; out.push(v); } });
+            out.sort(function(a, b) { return a.localeCompare(b, 'fr', { sensitivity: 'base' }); });
+            return out;
+        }
+
+        // --- REGION panel: country filter → region select ---
+        var regSelect = document.getElementById('refine-region-select');
+        var regCountryFilter = document.getElementById('refine-region-country-filter');
+        if (regSelect && regCountryFilter) {
+            var regionsData = [];
+            try { regionsData = JSON.parse(regSelect.getAttribute('data-refine-region-source') || '[]'); } catch(e) {}
+            window._refineSources.regions = regionsData;
+            uniqueSorted(regionsData.map(function(r) { return r.country_name; })).forEach(function(country) {
+                regCountryFilter.appendChild(buildOption(country, country, false));
+            });
+            function renderRegions() {
+                var country = regCountryFilter.value;
+                var list = country ? regionsData.filter(function(r) { return r.country_name === country; }) : regionsData;
+                list = list.slice().sort(function(a, b) { return (a.region_name || '').localeCompare(b.region_name || '', 'fr', { sensitivity: 'base' }); });
+                var current = regSelect.value;
+                while (regSelect.options.length > 1) regSelect.remove(1);
+                list.forEach(function(r) {
+                    var label = r.region_name + ' (' + r.country_name + ')';
+                    regSelect.appendChild(buildOption(r.region_slug, label, !!r.population_validated));
+                });
+                if (Array.prototype.some.call(regSelect.options, function(o) { return o.value === current; })) {
+                    regSelect.value = current;
+                } else {
+                    regSelect.value = '';
+                    regSelect.dispatchEvent(new Event('change'));
+                }
+            }
+            regCountryFilter.addEventListener('change', renderRegions);
+            renderRegions();
+        }
+
+        // --- CITY panel: country + region filters → city select ---
+        var citySelect = document.getElementById('refine-city-select');
+        var cityCountryFilter = document.getElementById('refine-city-country-filter');
+        var cityRegionFilter = document.getElementById('refine-city-region-filter');
+        if (citySelect && cityCountryFilter && cityRegionFilter) {
+            var citiesData = [];
+            try { citiesData = JSON.parse(citySelect.getAttribute('data-refine-city-source') || '[]'); } catch(e) {}
+            window._refineSources.cities = citiesData;
+            uniqueSorted(citiesData.map(function(c) { return c.country; })).forEach(function(country) {
+                cityCountryFilter.appendChild(buildOption(country, country, false));
+            });
+            function renderCityRegions() {
+                var country = cityCountryFilter.value;
+                var current = cityRegionFilter.value;
+                while (cityRegionFilter.options.length > 1) cityRegionFilter.remove(1);
+                var pool = country ? citiesData.filter(function(c) { return c.country === country; }) : citiesData;
+                uniqueSorted(pool.map(function(c) { return c.region; })).forEach(function(region) {
+                    cityRegionFilter.appendChild(buildOption(region, region, false));
+                });
+                if (Array.prototype.some.call(cityRegionFilter.options, function(o) { return o.value === current; })) {
+                    cityRegionFilter.value = current;
+                } else {
+                    cityRegionFilter.value = '';
+                }
+            }
+            function renderCities() {
+                var country = cityCountryFilter.value;
+                var region = cityRegionFilter.value;
+                var list = citiesData.filter(function(c) {
+                    if (country && c.country !== country) return false;
+                    if (region && c.region !== region) return false;
+                    return true;
+                });
+                list.sort(function(a, b) { return (a.city_name || '').localeCompare(b.city_name || '', 'fr', { sensitivity: 'base' }); });
+                var current = citySelect.value;
+                while (citySelect.options.length > 1) citySelect.remove(1);
+                list.forEach(function(c) {
+                    var label = c.city_name + ' (' + (c.region || '—') + ', ' + (c.country || '—') + ')';
+                    citySelect.appendChild(buildOption(c.city_slug, label, !!c.population_validated));
+                });
+                if (Array.prototype.some.call(citySelect.options, function(o) { return o.value === current; })) {
+                    citySelect.value = current;
+                } else {
+                    citySelect.value = '';
+                    citySelect.dispatchEvent(new Event('change'));
+                }
+            }
+            cityCountryFilter.addEventListener('change', function() { renderCityRegions(); renderCities(); });
+            cityRegionFilter.addEventListener('change', renderCities);
+            renderCityRegions();
+            renderCities();
+        }
+    })();
+
+    /* =====================================================================
      * RAFFINEMENT TAB — Personnage
      * ===================================================================== */
     var refinePersonSelect      = document.getElementById('refine-person-select');
@@ -4653,7 +4778,10 @@
                     throw new Error(data.error);
                 }
                 setBtnStatus(targetBtn, 'done');
-                if (data.is_validated) markOptionValidated(refineCitySelect, currentCitySlug, true);
+                if (data.is_validated) {
+                    markOptionValidated(refineCitySelect, currentCitySlug, true);
+                    if (window.updateRefineSourceValidated) window.updateRefineSourceValidated('cities', currentCitySlug, true);
+                }
                 if (data.dates_done) setBtnStatus(refineCityDatesBtn, 'done');
                 refineCitySaveResult.className = 'opt-test-result opt-test-success';
                 refineCitySaveResult.innerHTML = '✅ <strong>' + data.city_name.replace(/</g,'&lt;') + '</strong> sauvegardée ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
@@ -4946,7 +5074,10 @@
                     throw new Error(data.error);
                 }
                 setBtnStatus(targetBtn, 'done');
-                if (data.is_validated) markOptionValidated(refineRegionSelect, currentRegionSlug, true);
+                if (data.is_validated) {
+                    markOptionValidated(refineRegionSelect, currentRegionSlug, true);
+                    if (window.updateRefineSourceValidated) window.updateRefineSourceValidated('regions', currentRegionSlug, true);
+                }
                 if (data.dates_done) setBtnStatus(refineRegionDatesBtn, 'done');
                 refineRegionSaveResult.className = 'opt-test-result opt-test-success';
                 refineRegionSaveResult.innerHTML = '✅ <strong>' + data.region_name.replace(/</g,'&lt;') + '</strong> sauvegardée ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';

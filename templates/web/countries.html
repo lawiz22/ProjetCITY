@@ -85,7 +85,7 @@
                 <div class="city-card-heading">
                     <span class="city-dot" style="background: {{ country.country_color or '#2f6fed' }}"></span>
                     <div class="city-card-heading-copy">
-                        <strong>{{ country.country_name }}</strong>
+                        <strong>{{ country.country_name }}{% if country.population_validated %} <span class="card-validated-badge" title="Population validée">✅</span>{% endif %}</strong>
                     </div>
                 </div>
             </div>

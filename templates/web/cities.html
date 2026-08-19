@@ -111,7 +111,7 @@
                             {{ city.trend_label }}{% if city.foundation_year %} · {{ city.foundation_year }}{% endif %}
                         </p>
                         {% endif %}
-                        <strong>{{ city.city_name }}</strong>
+                        <strong>{{ city.city_name }}{% if city.population_validated %} <span class="card-validated-badge" title="Population validée">✅</span>{% endif %}</strong>
                         <p>{{ city.region }}</p>
                     </div>
                 </div>
@@ -121,6 +121,7 @@
                     <span class="city-card-chip">{{ city.country }}</span>
                     <span class="city-card-chip city-card-chip-trend city-card-chip-trend-{{ 'up' if city.trend_label == 'En remontée' else 'down' if city.trend_label == 'En déclin' else 'stable' }}">{{ city.trend_label }}</span>
                     <span class="city-card-chip city-card-chip-muted">{{ 'Photo locale' if city.has_photo else 'Photo fallback' }}</span>
+                    {% if city.population_validated %}<span class="city-card-chip city-card-chip-validated" title="Population validée">✅ Validée</span>{% endif %}
                 </div>
                 <ul class="city-card-facts">
                     <li>

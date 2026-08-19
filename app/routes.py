@@ -799,6 +799,7 @@ def country_directory() -> str:
             dc.country_name,
             dc.country_slug,
             dc.country_color,
+            dc.population_validated,
             fcp.population AS latest_population,
             latest.year AS latest_year,
             peak.peak_population,
@@ -1548,6 +1549,7 @@ def region_directory() -> str:
             dr.region_slug,
             dr.country_name,
             dr.region_color,
+            dr.population_validated,
             frp.population AS latest_population,
             latest.year AS latest_year,
             peak.peak_population,
@@ -8353,9 +8355,11 @@ def ai_lab_refine_city_save() -> Response:
         return jsonify({"success": False, "error": f"Erreur DB : {exc}"})
 
     if is_validate:
+        uid = g.user["user_id"] if hasattr(g, "user") and g.user else None
         conn.execute(
-            "UPDATE dim_city SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-            "WHERE city_id = ?", (city_id,)
+            "UPDATE dim_city SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP, "
+            "updated_by_user_id = COALESCE(?, updated_by_user_id), updated_at = CURRENT_TIMESTAMP "
+            "WHERE city_id = ?", (uid, city_id)
         )
 
     conn.commit()
@@ -8370,7 +8374,14 @@ def ai_lab_refine_city_save() -> Response:
 
     log_action("import", "city", city_slug,
                f"Ville raffinée sauvegardée: {city_row['city_name']} "
-               f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
+               f"({len(stats['years'])} années, {len(sources_by_year)} sources)",
+               details={
+                   "is_validated": bool(is_validate),
+                   "years_count": len(stats["years"]),
+                   "sources_count": len(sources_by_year),
+                   "earliest_year": min(stats["years"]) if stats["years"] else None,
+                   "latest_year": max(stats["years"]) if stats["years"] else None,
+               })
     earliest_year = min(stats["years"]) if stats["years"] else None
     dates_done = bool(earliest_year is not None and earliest_year <= 1800 and 2026 in stats["years"])
     return jsonify({
@@ -8648,9 +8659,11 @@ def ai_lab_refine_region_save() -> Response:
         return jsonify({"success": False, "error": f"Erreur DB : {exc}"})
 
     if is_validate:
+        uid = g.user["user_id"] if hasattr(g, "user") and g.user else None
         conn.execute(
-            "UPDATE dim_region SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-            "WHERE region_id = ?", (region_id,)
+            "UPDATE dim_region SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP, "
+            "updated_by_user_id = COALESCE(?, updated_by_user_id), updated_at = CURRENT_TIMESTAMP "
+            "WHERE region_id = ?", (uid, region_id)
         )
 
     conn.commit()
@@ -8665,7 +8678,14 @@ def ai_lab_refine_region_save() -> Response:
 
     log_action("import", "region", region_slug,
                f"Région raffinée sauvegardée: {region_row['region_name']} "
-               f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
+               f"({len(stats['years'])} années, {len(sources_by_year)} sources)",
+               details={
+                   "is_validated": bool(is_validate),
+                   "years_count": len(stats["years"]),
+                   "sources_count": len(sources_by_year),
+                   "earliest_year": min(stats["years"]) if stats["years"] else None,
+                   "latest_year": max(stats["years"]) if stats["years"] else None,
+               })
     earliest_year = min(stats["years"]) if stats["years"] else None
     dates_done = bool(earliest_year is not None and earliest_year <= 1800 and 2026 in stats["years"])
     return jsonify({
@@ -8942,9 +8962,11 @@ def ai_lab_refine_country_save() -> Response:
         return jsonify({"success": False, "error": f"Erreur DB : {exc}"})
 
     if is_validate:
+        uid = g.user["user_id"] if hasattr(g, "user") and g.user else None
         conn.execute(
-            "UPDATE dim_country SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-            "WHERE country_id = ?", (country_id,)
+            "UPDATE dim_country SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP, "
+            "updated_by_user_id = COALESCE(?, updated_by_user_id), updated_at = CURRENT_TIMESTAMP "
+            "WHERE country_id = ?", (uid, country_id)
         )
 
     conn.commit()
@@ -8959,7 +8981,14 @@ def ai_lab_refine_country_save() -> Response:
 
     log_action("import", "country", country_slug,
                f"Pays raffiné sauvegardé: {country_row['country_name']} "
-               f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
+               f"({len(stats['years'])} années, {len(sources_by_year)} sources)",
+               details={
+                   "is_validated": bool(is_validate),
+                   "years_count": len(stats["years"]),
+                   "sources_count": len(sources_by_year),
+                   "earliest_year": min(stats["years"]) if stats["years"] else None,
+                   "latest_year": max(stats["years"]) if stats["years"] else None,
+               })
     earliest_year = min(stats["years"]) if stats["years"] else None
     dates_done = bool(earliest_year is not None and earliest_year <= 1800 and 2026 in stats["years"])
     return jsonify({
