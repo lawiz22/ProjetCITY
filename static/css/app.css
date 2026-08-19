@@ -7006,39 +7006,43 @@ td {
 
 /* Tabs */
 .geo-tabs {
-    display: flex;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 6px;
     margin-bottom: 16px;
     padding-bottom: 4px;
-    overflow-x: auto;
 }
 .geo-tab {
-    display: inline-grid;
-    grid-template-columns: auto auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     column-gap: 8px;
-    flex: 0 0 auto;
-    width: auto;
-    padding: 10px 20px;
-    font-size: .9rem;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: .78rem;
     font-weight: 600;
     border: 1px solid var(--card-border, #e5e7eb);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--card-bg, #fff);
     color: var(--text-primary, #1f2937);
     cursor: pointer;
     transition: background .2s, border-color .2s;
+    text-align: left;
 }
 .geo-tab .flag-icon {
-    width: 22px;
+    width: 18px;
     grid-row: 1 / span 2;
 }
 .geo-tab span,
 .geo-tab small {
     text-align: left;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .geo-tab small {
-    font-size: .68rem;
+    font-size: .62rem;
     font-weight: 500;
     opacity: .75;
 }
@@ -8076,8 +8080,13 @@ mark.diff-add {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
     }
+    .geo-tabs {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 4px;
+    }
     .geo-tab {
-        padding: 8px 12px;
+        padding: 5px 8px;
+        font-size: .72rem;
     }
     .geo-search-input {
         max-width: none;
