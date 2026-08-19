@@ -5151,6 +5151,154 @@ def geo_coverage_expand_ref():
     return jsonify(success=True, inserted=inserted, cities=[c["city_name"] for c in new_cities[:TARGET]])
 
 
+@web.route("/geo-coverage/expand-regions", methods=["POST"])
+@editor_required
+def geo_coverage_expand_regions():
+    """Add 20 more regions for a country via Mammouth AI (inserts into dim_region)."""
+    import json as _json
+    from .db import get_db
+    from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2, slugify
+    from .services.mammouth_ai import load_settings, generate_city
+
+    country = request.form.get("country", "").strip()
+    if not country:
+        return jsonify(success=False, error="Pays requis"), 400
+
+    country_iso = _COUNTRY_ISO2.get(country)
+    country_aliases = {
+        name for name, iso in _COUNTRY_ISO2.items() if country_iso and iso == country_iso
+    } | {country}
+    country_option = next(
+        (option for option in _dashboard_country_options() if option["value"] in country_aliases),
+        None,
+    )
+    if country_option:
+        country = country_option["value"]
+        country_aliases.add(country_option["label"])
+
+    conn = get_db()
+    existing = conn.execute(
+        "SELECT region_name FROM dim_region WHERE country_name = ANY(?)",
+        (list(country_aliases),),
+    ).fetchall()
+    known_names: set[str] = set()
+    for row in existing:
+        canonical = REGION_ALIASES.get(row["region_name"], row["region_name"])
+        known_names.add(canonical.lower().strip())
+        known_names.add(row["region_name"].lower().strip())
+
+    initial_request = not existing
+    exclusion_list = ", ".join(sorted(known_names))
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    model = settings.get("model", "")
+    if not api_key:
+        return jsonify(success=False, error="Clé API non configurée"), 500
+
+    TARGET = 20
+    new_regions: list[dict[str, str]] = []
+
+    if initial_request:
+        prompts = [
+            (
+                f"Liste les 20 principales régions administratives de premier niveau de {country} "
+                f"(provinces, états, régions, gouvernorats, préfectures — selon le pays).\n\n"
+                f"Utilise les noms officiels courants en français si applicable, sinon le nom local.\n"
+                f"Réponds en JSON array: "
+                f'[{{"region_name": "Nom"}}].\n'
+                f"Trie par ordre alphabétique. UNIQUEMENT le JSON array, aucun markdown, aucun texte autour."
+            )
+        ]
+    else:
+        prompts = [
+            (
+                f"Liste 30 régions administratives (premier ou deuxième niveau) de {country} "
+                f"qui ne sont PAS dans cette liste: [__EXCLUSIONS__].\n\n"
+                f"Inclus des subdivisions moins connues, régions historiques, districts.\n"
+                f"Réponds en JSON array: "
+                f'[{{"region_name": "Nom"}}]\n'
+                f"UNIQUEMENT le JSON array, aucun markdown, aucun texte autour."
+            ),
+            (
+                f"Nomme 30 autres subdivisions de {country} "
+                f"(comtés, préfectures, districts, régions historiques) "
+                f"qui ne sont dans aucune de ces listes: [__EXCLUSIONS__].\n"
+                f"JSON array: "
+                f'[{{"region_name": "Nom"}}]\n'
+                f"UNIQUEMENT le JSON array."
+            ),
+        ]
+
+    for prompt_template in prompts:
+        if len(new_regions) >= TARGET:
+            break
+        prompt = prompt_template.replace("__EXCLUSIONS__", exclusion_list)
+
+        result = generate_city(
+            api_key, model, "", prompt,
+            max_tokens=2000, temperature=0.2 if initial_request else 0.7,
+        )
+        if not result.get("success"):
+            continue
+
+        reply = result.get("reply", "").strip()
+        if reply.startswith("```"):
+            reply = reply.split("\n", 1)[-1]
+        if reply.endswith("```"):
+            reply = reply.rsplit("```", 1)[0]
+        reply = reply.strip()
+
+        start = reply.find("[")
+        end = reply.rfind("]")
+        if start == -1 or end == -1:
+            continue
+        try:
+            parsed = _json.loads(reply[start:end + 1])
+        except _json.JSONDecodeError:
+            continue
+
+        for entry in parsed:
+            if not isinstance(entry, dict) or "region_name" not in entry:
+                continue
+            name = str(entry["region_name"]).strip()
+            if not name or name.lower() in known_names:
+                continue
+            new_regions.append({"region_name": name})
+            known_names.add(name.lower())
+
+        exclusion_list = ", ".join(sorted(known_names))
+
+    if not new_regions:
+        return jsonify(success=False, error="Aucune nouvelle région trouvée après plusieurs tentatives"), 500
+
+    inserted = 0
+    uid = g.user["user_id"] if hasattr(g, "user") and g.user else None
+    for reg in new_regions[:TARGET]:
+        region_name = reg["region_name"]
+        region_slug = slugify(f"{region_name}-{country}")
+        try:
+            result = conn.execute(
+                """INSERT INTO dim_region (region_name, region_slug, country_name, region_color,
+                                           source_file, created_by_user_id, updated_by_user_id)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(region_slug) DO NOTHING""",
+                (region_name, region_slug, country, "#4b5563",
+                 "geo-coverage-expand", uid, uid),
+            )
+            inserted += max(result.rowcount, 0)
+        except Exception:
+            conn.rollback()
+            continue
+    conn.commit()
+
+    if inserted:
+        log_action("import", "dim_region", None,
+                   f"Expansion régions: {inserted} régions ajoutées pour {country}")
+    return jsonify(success=True, inserted=inserted,
+                   regions=[r["region_name"] for r in new_regions[:TARGET]])
+
+
 # ------------------------------------------------------------------
 #  Coverage / completeness
 # ------------------------------------------------------------------

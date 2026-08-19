@@ -46,6 +46,7 @@
             <button type="button" class="geo-sort-btn" data-geo-sort="pop" data-geo-grid="geo-regions-{{ loop.index }}">Population ↓</button>
             <button type="button" class="geo-sort-btn" data-geo-sort="top-missing-pop" data-geo-grid="geo-regions-{{ loop.index }}">Ville majeure ↓</button>
         </div>
+        <button type="button" class="geo-expand-regions-btn" data-country="{{ country.value }}">{{ 'Générer 20 régions' if country.region_total == 0 else 'Ajouter 20 régions' }}</button>
     </div>
     <div class="geo-region-grid" id="geo-regions-{{ loop.index }}">
         {% for reg in country.regions %}
@@ -110,6 +111,15 @@
         button.addEventListener('click', function () {
             button.disabled = true; button.textContent = 'Recherche en cours…'; var body = new FormData(); body.append('region', button.dataset.region); body.append('country', button.dataset.country);
             fetch(expandUrl, {method: 'POST', body: body}).then(function (response) { return response.json(); }).then(function (data) { if (!data.success) throw new Error(data.error || 'Erreur'); button.textContent = data.inserted + ' villes ajoutées'; setTimeout(function () { location.reload(); }, 900); }).catch(function (error) { button.textContent = error.message; button.disabled = false; });
+        });
+    });
+    var expandRegionsUrl = '{{ url_for("web.geo_coverage_expand_regions") }}';
+    document.querySelectorAll('.geo-expand-regions-btn').forEach(function (button) {
+        var originalText = button.textContent;
+        button.addEventListener('click', function () {
+            button.disabled = true; button.textContent = 'Recherche en cours…';
+            var body = new FormData(); body.append('country', button.dataset.country);
+            fetch(expandRegionsUrl, {method: 'POST', body: body}).then(function (response) { return response.json(); }).then(function (data) { if (!data.success) throw new Error(data.error || 'Erreur'); button.textContent = data.inserted + ' régions ajoutées'; setTimeout(function () { location.reload(); }, 900); }).catch(function (error) { button.textContent = error.message; button.disabled = false; setTimeout(function () { button.textContent = originalText; }, 3000); });
         });
     });
 })();

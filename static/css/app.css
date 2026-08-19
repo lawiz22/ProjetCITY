@@ -7255,6 +7255,27 @@ td {
     opacity: .7;
     cursor: wait;
 }
+.geo-expand-regions-btn {
+    margin-left: auto;
+    font-size: .8rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(16, 185, 129, .35);
+    background: rgba(16, 185, 129, .1);
+    color: #047857;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s, transform .15s;
+}
+.geo-expand-regions-btn:hover:not(:disabled) {
+    background: rgba(16, 185, 129, .2);
+    transform: translateY(-1px);
+}
+.geo-expand-regions-btn:disabled {
+    opacity: .7;
+    cursor: wait;
+}
 .geo-gen-btn {
     display: inline-block;
     font-size: .78rem;
