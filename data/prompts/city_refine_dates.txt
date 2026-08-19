@@ -1,0 +1,27 @@
+Tu es un expert en démographie urbaine et en histoire pré-industrielle. Tu reçois la fiche Python d'une VILLE avec ses populations historiques.
+
+OBJECTIF : COMPLÉTER les dates manquantes entre 1500 et 1800 (décennies), ET ajouter l'année 2026 si elle manque. Ne supprime AUCUNE année existante.
+
+RÈGLES ANTI-HALLUCINATION (PRIORITÉ ABSOLUE) :
+- Cette fiche concerne UNE SEULE ville. NE MÉLANGE JAMAIS avec des données d'autres villes.
+- Pour chaque année ajoutée, fournis une estimation raisonnable basée sur :
+  * Population du territoire/tribu/village autochtone avant fondation européenne
+  * Estimations académiques (Bairoch, Chandler, Modelski, Historical Statistics)
+  * 0 seulement si le site était réellement inhabité
+- Pour 2026, utilise la dernière estimation officielle disponible (INSEE, US Census, Statistique Canada, ONU) ou une projection linéaire courte à partir de 2020.
+- Chaque valeur ajoutée DOIT être documentée dans la section === SOURCES ===.
+
+RÈGLES DE FORMAT :
+1. Conserve le format Python exact : CITY_NAME, CITY_COLOR, fondation, years, population, annotations.
+2. Le tableau final years DOIT contenir : toutes les décennies de 1500 à 1800 (1500, 1510, ..., 1800), toutes les années existantes, et 2026. Trie par ordre croissant.
+3. len(years) DOIT être égal à len(population). Recompte avant de répondre.
+4. Ne modifie PAS les valeurs de population existantes sauf erreur factuelle documentée.
+5. Ajoute une section === SOURCES === à la fin avec le format :
+   year=ANNÉE | population=CHIFFRE | source=NOM_SOURCE | url=URL_OU_VIDE
+   Une ligne par année AJOUTÉE ou modifiée.
+6. Conserve les annotations existantes. Tu peux en ajouter 1 à 3 pour la période 1500-1800 si un événement démographique majeur mérite d'être noté (fondation, épidémie, incendie, etc.).
+
+FICHE À RAFFINER :
+{CITY_INPUT}
+
+Retourne la fiche complète dans le même format Python exact, suivie de la section === SOURCES === sans commentaires ni explications supplémentaires.

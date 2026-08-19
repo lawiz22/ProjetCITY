@@ -5558,6 +5558,9 @@ def ai_lab() -> str:
     prompt_refine_city = load_prompt("city_refine.txt")
     prompt_refine_region = load_prompt("region_refine.txt")
     prompt_refine_country = load_prompt("country_refine.txt")
+    prompt_refine_city_dates = load_prompt("city_refine_dates.txt")
+    prompt_refine_region_dates = load_prompt("region_refine_dates.txt")
+    prompt_refine_country_dates = load_prompt("country_refine_dates.txt")
     try:
         cities_for_refine = [dict(r) for r in conn.execute(
             "SELECT city_name, city_slug, country, region, population_validated "
@@ -5640,6 +5643,9 @@ def ai_lab() -> str:
         prompt_refine_city=prompt_refine_city,
         prompt_refine_region=prompt_refine_region,
         prompt_refine_country=prompt_refine_country,
+        prompt_refine_city_dates=prompt_refine_city_dates,
+        prompt_refine_region_dates=prompt_refine_region_dates,
+        prompt_refine_country_dates=prompt_refine_country_dates,
         cities_for_refine=cities_for_refine,
         regions_for_refine=regions_for_refine,
         countries_for_refine=countries_for_refine,
