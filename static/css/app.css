@@ -2190,6 +2190,34 @@ button {
     min-width: 42px;
 }
 
+.random-entity-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    padding: 0;
+    margin-right: 6px;
+    border-radius: 14px;
+    border: 1px solid rgba(139, 92, 246, .35);
+    background: linear-gradient(180deg, rgba(139, 92, 246, .18), rgba(139, 92, 246, .08));
+    color: #6d28d9;
+    font-size: 1.35rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+.random-entity-btn:hover {
+    background: linear-gradient(180deg, rgba(139, 92, 246, .32), rgba(139, 92, 246, .16));
+    transform: translateY(-1px) rotate(-8deg);
+    box-shadow: 0 4px 10px rgba(139, 92, 246, .25);
+}
+.random-entity-btn:active {
+    transform: translateY(0) rotate(15deg);
+}
+
 .view-mode-button {
     position: relative;
     width: 42px;

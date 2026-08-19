@@ -50,6 +50,7 @@
             </div>
             <!-- View switcher -->
             <div class="view-switcher" role="group" aria-label="Mode d'affichage">
+                <a class="random-entity-btn" href="{{ url_for('web.random_entity', entity='city') }}" title="🎲 Ouvrir une ville au hasard" aria-label="Ouvrir une ville au hasard">🎲</a>
                 <a class="secondary-button inline-button view-mode-button view-mode-button-large {% if view_mode == 'large' %}is-active{% endif %}" href="{{ url_for('web.city_directory', view='large') }}" aria-label="Vue gros bloc" title="Vue gros bloc">
                     <span class="view-mode-icon view-mode-large" aria-hidden="true"></span>
                 </a>

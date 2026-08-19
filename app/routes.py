@@ -607,6 +607,45 @@ def recent_additions() -> str:
     )
 
 
+@web.route("/random/<entity>")
+def random_entity(entity: str) -> Response:
+    """Pick a random entity of the given type and redirect to its detail page."""
+    import random as _random
+    from .db import get_db
+
+    entity = (entity or "").strip().lower()
+    conf = {
+        "city":     ("dim_city",     "city_slug",     "web.city_detail",     "city_slug"),
+        "region":   ("dim_region",   "region_slug",   "web.region_detail",   "region_slug"),
+        "country":  ("dim_country",  "country_slug",  "web.country_detail",  "country_slug"),
+        "event":    ("dim_event",    "event_slug",    "web.event_detail",    "event_slug"),
+        "person":   ("dim_person",   "person_slug",   "web.person_detail",   "person_slug"),
+        "monument": ("dim_monument", "monument_slug", "web.monument_detail", "monument_slug"),
+        "legend":   ("dim_legend",   "legend_slug",   "web.legend_detail",   "legend_slug"),
+    }
+    fallback = {
+        "city": "web.city_directory", "region": "web.region_directory", "country": "web.country_directory",
+        "event": "web.events_list", "person": "web.persons_list",
+        "monument": "web.monuments_list", "legend": "web.legends_list",
+    }
+    if entity not in conf:
+        flash("Type d'entité inconnu pour l'aléatoire.", "error")
+        return redirect(url_for("web.dashboard"))
+
+    table, slug_col, route_name, arg_name = conf[entity]
+    conn = get_db()
+    try:
+        rows = conn.execute(f"SELECT {slug_col} FROM {table} WHERE {slug_col} IS NOT NULL").fetchall()
+    except Exception:
+        conn.rollback()
+        rows = []
+    slugs = [r[slug_col] for r in rows if r[slug_col]]
+    if not slugs:
+        flash("Aucun élément disponible pour un tirage aléatoire.", "error")
+        return redirect(url_for(fallback[entity]))
+    return redirect(url_for(route_name, **{arg_name: _random.choice(slugs)}))
+
+
 @web.route("/cities")
 def city_directory() -> str:
     service = AnalyticsService()
