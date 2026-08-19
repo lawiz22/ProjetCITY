@@ -1,5 +1,6 @@
 {% extends 'web/base.html' %}
 {% from 'web/_refetch_photos.html' import refetch_button, refetch_script %}
+{% from 'web/_regen_panel.html' import ai_regen_panel %}
 
 {% block filter_hidden_fields %}
 <input type="hidden" name="city_slug" value="{{ city.city_slug }}">
@@ -104,6 +105,8 @@
         </div>
     </article>
 </section>
+
+{{ ai_regen_panel('city', city.city_slug, city.city_name, city.latest_year is not none, periods|length > 0, fiche is not none) }}
 
 <section class="panel city-chart-panel" id="city-chart">
         <div class="panel-head">

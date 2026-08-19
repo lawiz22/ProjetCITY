@@ -1,5 +1,6 @@
 {% extends 'web/base.html' %}
 {% from 'web/_refetch_photos.html' import refetch_button, refetch_script %}
+{% from 'web/_regen_panel.html' import ai_regen_panel %}
 
 {% block content %}
 <section class="city-sticky-header">
@@ -94,6 +95,8 @@
         </div>
     </article>
 </section>
+
+{{ ai_regen_panel('country', country.country_slug, country.country_name, pop_data|length > 0, periods|length > 0, fiche is not none) }}
 
 {% if pop_data %}
 <section class="panel city-chart-panel" id="country-chart">

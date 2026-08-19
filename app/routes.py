@@ -6321,6 +6321,200 @@ def ai_lab_region_import() -> Response:
     })
 
 
+# --- Token budget per (entity, step) for the regen endpoint. ---
+_REGEN_MAX_TOKENS = {
+    ("city",   1): 2000,
+    ("city",   2): 4000,
+    ("city",   3): 8000,
+    ("region", 1): 2000,
+    ("region", 2): 4000,
+    ("region", 3): 8000,
+    ("country", 1): 2000,
+    ("country", 2): 4000,
+    ("country", 3): 8000,
+}
+
+
+@web.route("/ai-lab/regen-step", methods=["POST"])
+@editor_required
+def ai_lab_regen_step() -> Response:
+    """Regenerate + import a single step (1/2/3) for a given entity (city/region/country).
+
+    Form fields: entity_type, slug, step, model (optional).
+    """
+    from .db import get_db
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+
+    entity_type = request.form.get("entity_type", "").strip().lower()
+    slug = request.form.get("slug", "").strip()
+    step_raw = request.form.get("step", "").strip()
+    try:
+        step = int(step_raw)
+    except ValueError:
+        step = 0
+
+    if entity_type not in {"city", "region", "country"} or not slug or step not in {1, 2, 3}:
+        return jsonify({"success": False, "error": "Paramètres invalides (entity_type, slug, step)."})
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API Mammouth configurée."})
+    model = request.form.get("model", "").strip() or settings.get("model", "gpt-4.1-mini")
+
+    conn = get_db()
+
+    if entity_type == "city":
+        row = conn.execute(
+            "SELECT city_id, city_name, region, country, city_slug FROM dim_city WHERE city_slug = ?",
+            (slug,),
+        ).fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "Ville introuvable."})
+        entity_id = row["city_id"]
+        prompt_input = f"{row['city_name']}, {row['region']}, {row['country']}"
+        display_name = row["city_name"]
+        prompt_file = f"city_data_step{step}.txt"
+    elif entity_type == "region":
+        row = conn.execute(
+            "SELECT region_id, region_name, country_name, region_slug FROM dim_region WHERE region_slug = ?",
+            (slug,),
+        ).fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "Région introuvable."})
+        entity_id = row["region_id"]
+        prompt_input = f"{row['region_name']}, {row['country_name']}"
+        display_name = row["region_name"]
+        prompt_file = f"region_data_step{step}.txt"
+    else:  # country
+        row = conn.execute(
+            "SELECT country_id, country_name, country_slug FROM dim_country WHERE country_slug = ?",
+            (slug,),
+        ).fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "Pays introuvable."})
+        entity_id = row["country_id"]
+        prompt_input = row["country_name"]
+        display_name = row["country_name"]
+        prompt_file = f"country_data_step{step}.txt"
+
+    prompt_text = load_prompt(prompt_file)
+    if not prompt_text:
+        return jsonify({"success": False, "error": f"Prompt introuvable : {prompt_file}"})
+
+    max_tokens = _REGEN_MAX_TOKENS.get((entity_type, step), 4000)
+    ai_result = generate_city(api_key, model, prompt_input, prompt_text, max_tokens=max_tokens)
+    if not ai_result.get("success"):
+        return jsonify({"success": False, "error": f"IA: {ai_result.get('error', 'inconnu')}"})
+
+    reply = (ai_result.get("reply") or "").strip()
+    if step == 1:
+        reply = re.sub(r"^```(?:python)?\s*", "", reply, flags=re.IGNORECASE)
+        reply = re.sub(r"\s*```$", "", reply)
+    if not reply:
+        return jsonify({"success": False, "error": "Réponse IA vide."})
+
+    messages: list[str] = []
+
+    try:
+        if entity_type == "city" and step == 1:
+            stats = parse_stats_text(reply)
+            stats["city_slug"] = slug
+            city_id = import_city_stats(conn, stats)
+            conn.commit()
+            entity_id = city_id
+            messages.append(f"Step 1 — {len(stats['years'])} années, {len(stats['annotations'])} annotations.")
+            try:
+                from scripts.export_villestats_raw import export_all as _exp
+                (Path(__file__).resolve().parent.parent / "villestats_RAW.py").write_text(_exp(), encoding="utf-8")
+            except Exception:
+                pass
+
+        elif entity_type == "city" and step == 2:
+            sections = parse_period_details_text(reply)
+            if not sections:
+                return jsonify({"success": False, "error": "Aucune période détectée dans la réponse IA."})
+            count = import_city_periods(conn, entity_id, slug, sections)
+            save_period_details_file(slug, reply)
+            conn.commit()
+            messages.append(f"Step 2 — {count} périodes importées.")
+
+        elif entity_type == "city" and step == 3:
+            _header, fiche_sections = parse_fiche_text(reply)
+            if not fiche_sections:
+                return jsonify({"success": False, "error": "Aucune section de fiche détectée."})
+            import_city_fiche(conn, entity_id, slug, reply, fiche_sections)
+            conn.commit()
+            messages.append(f"Step 3 — {len(fiche_sections)} sections fiche.")
+
+        elif entity_type == "region" and step == 1:
+            stats = parse_region_stats_text(reply)
+            stats["region_slug"] = slug
+            region_id = import_region_stats(conn, stats)
+            conn.commit()
+            entity_id = region_id
+            messages.append(f"Step 1 — {len(stats['years'])} années, {len(stats['annotations'])} annotations.")
+            try:
+                from scripts.export_regionstats_raw import export_all as _exp
+                (Path(__file__).resolve().parent.parent / "regionstats_RAW.py").write_text(_exp(), encoding="utf-8")
+            except Exception:
+                pass
+
+        elif entity_type == "region" and step == 2:
+            sections = parse_region_period_details_text(reply)
+            if not sections:
+                return jsonify({"success": False, "error": "Aucune période détectée dans la réponse IA."})
+            count = import_region_periods(conn, entity_id, slug, sections)
+            save_region_details_file(slug, reply)
+            conn.commit()
+            messages.append(f"Step 2 — {count} périodes importées.")
+
+        elif entity_type == "region" and step == 3:
+            save_region_fiche_file(slug, reply)
+            messages.append("Step 3 — fiche complète sauvegardée.")
+
+        elif entity_type == "country" and step == 1:
+            stats = parse_country_stats_text(reply)
+            stats["country_slug"] = slug
+            country_id = import_country_stats(conn, stats)
+            conn.commit()
+            entity_id = country_id
+            messages.append(f"Step 1 — {len(stats['years'])} années, {len(stats['annotations'])} annotations.")
+            try:
+                from scripts.export_paysstats_raw import export_all as _exp
+                (Path(__file__).resolve().parent.parent / "paysstats_RAW.py").write_text(_exp(), encoding="utf-8")
+            except Exception:
+                pass
+
+        elif entity_type == "country" and step == 2:
+            save_country_details_file(slug, reply)
+            messages.append("Step 2 — fiche détaillée sauvegardée.")
+
+        elif entity_type == "country" and step == 3:
+            save_country_fiche_file(slug, reply)
+            messages.append("Step 3 — fiche complète sauvegardée.")
+
+    except ValueError as exc:
+        conn.rollback()
+        return jsonify({"success": False, "error": f"Parsing: {exc}"})
+    except Exception as exc:
+        conn.rollback()
+        return jsonify({"success": False, "error": f"Erreur DB: {exc}"})
+
+    log_action(
+        "regen", entity_type, slug,
+        f"AI regen step {step} — {display_name}",
+        {"messages": messages, "model": model},
+    )
+    return jsonify({
+        "success": True,
+        "entity_type": entity_type,
+        "slug": slug,
+        "step": step,
+        "messages": messages,
+    })
+
+
 @web.route("/ai-lab/suggest-region", methods=["POST"])
 @editor_required
 def ai_lab_suggest_region() -> Response:

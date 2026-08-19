@@ -1,0 +1,121 @@
+{# Reusable AI regeneration panel — call as `{{ ai_regen_panel('city', slug, entity_name, has_pop, has_periods, has_fiche) }}`. #}
+{% macro ai_regen_panel(entity_type, slug, entity_name, has_pop, has_periods, has_fiche) %}
+{% set missing_any = not (has_pop and has_periods and has_fiche) %}
+<section class="panel ai-regen-panel" style="margin-top:1rem;border:2px solid {% if missing_any %}#f59e0b{% else %}#22c55e{% endif %};">
+  <div class="panel-head">
+    <div>
+      <h2>🔧 Régénération IA par étape</h2>
+      <span>
+        {% if missing_any %}
+          Étape(s) manquante(s) — régénère et importe automatiquement
+        {% else %}
+          Toutes les étapes sont présentes. Régénère pour corriger/mettre à jour.
+        {% endif %}
+      </span>
+    </div>
+  </div>
+  <div class="options-body" style="padding:1rem;">
+    <div class="ai-regen-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:.75rem;margin-bottom:.75rem;">
+      {% for num, label, present in [
+        (1, 'Population &amp; annotations', has_pop),
+        (2, 'Périodes historiques', has_periods),
+        (3, 'Fiche complète', has_fiche)
+      ] %}
+      <div class="ai-regen-card" style="padding:.75rem;background:var(--card-bg, #fff);border:1px solid var(--border,#e5e7eb);border-radius:8px;">
+        <div style="font-weight:700;font-size:.9rem;margin-bottom:.35rem;color:var(--text-color,#111);">Step {{ num }} — {{ label|safe }}</div>
+        <div style="font-size:.78rem;margin-bottom:.6rem;color:{% if present %}#166534{% else %}#92400e{% endif %};">
+          {% if present %}✅ Présent{% else %}⚠️ Manquant{% endif %}
+        </div>
+        <button type="button" class="opt-btn opt-btn-save ai-regen-step-btn" data-regen-step="{{ num }}" style="width:100%;font-size:.82rem;">🔄 Régénérer</button>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+      <button type="button" id="ai-regen-all-btn" class="opt-btn opt-btn-primary" style="font-weight:600;">🎯 Régénérer les 3 étapes</button>
+      <a href="{{ url_for('web.ai_lab') }}" class="opt-btn" style="font-size:.85rem;">🧪 AI Lab complet →</a>
+      <span style="font-size:.75rem;color:var(--muted);">La page recharge automatiquement après import.</span>
+    </div>
+    <div id="ai-regen-log" style="display:none;margin-top:.75rem;padding:.6rem .8rem;border-radius:6px;font-family:monospace;font-size:.78rem;white-space:pre-wrap;max-height:220px;overflow:auto;"></div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var ENTITY_TYPE = {{ entity_type|tojson }};
+  var SLUG = {{ slug|tojson }};
+  var ENTITY_NAME = {{ entity_name|tojson }};
+  var REGEN_URL = {{ url_for('web.ai_lab_regen_step')|tojson }};
+  var log = document.getElementById('ai-regen-log');
+  function appendLog(kind, msg){
+    log.style.display = '';
+    log.style.background = (kind==='error') ? '#fee2e2' : (kind==='success') ? '#dcfce7' : '#f3f4f6';
+    log.style.color = (kind==='error') ? '#991b1b' : (kind==='success') ? '#166534' : '#374151';
+    var t = new Date().toLocaleTimeString();
+    log.textContent += '[' + t + '] ' + msg + '\n';
+    log.scrollTop = log.scrollHeight;
+  }
+  function regenStep(num, btn){
+    var origLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ Génération…';
+    appendLog('info', 'Step ' + num + ' — génération IA pour ' + ENTITY_NAME + '…');
+    var fd = new FormData();
+    fd.append('entity_type', ENTITY_TYPE);
+    fd.append('slug', SLUG);
+    fd.append('step', String(num));
+    return fetch(REGEN_URL, { method:'POST', body: fd })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        btn.disabled = false;
+        btn.textContent = origLabel;
+        if (d.success){
+          appendLog('success', 'Step ' + num + ' ✅ ' + ((d.messages||[]).join(' | ')));
+          btn.style.background = '#22c55e';
+          btn.style.color = '#fff';
+          return d;
+        }
+        appendLog('error', 'Step ' + num + ' ❌ ' + (d.error || 'Erreur inconnue'));
+        throw new Error(d.error || 'Erreur inconnue');
+      })
+      .catch(function(err){
+        btn.disabled = false;
+        btn.textContent = origLabel;
+        appendLog('error', 'Step ' + num + ' ❌ ' + (err.message || err));
+        throw err;
+      });
+  }
+  document.querySelectorAll('.ai-regen-step-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var num = parseInt(btn.dataset.regenStep, 10);
+      regenStep(num, btn).then(function(){
+        setTimeout(function(){ location.reload(); }, 1500);
+      }).catch(function(){});
+    });
+  });
+  var allBtn = document.getElementById('ai-regen-all-btn');
+  if (allBtn){
+    allBtn.addEventListener('click', function(){
+      var origLabel = allBtn.textContent;
+      allBtn.disabled = true;
+      allBtn.textContent = '⏳ Étapes 1→3 en cours…';
+      log.textContent = '';
+      (function chain(i){
+        if (i > 3){
+          allBtn.disabled = false;
+          allBtn.textContent = origLabel;
+          appendLog('success', 'Les 3 étapes sont terminées — rechargement…');
+          setTimeout(function(){ location.reload(); }, 1500);
+          return;
+        }
+        var btn = document.querySelector('.ai-regen-step-btn[data-regen-step="' + i + '"]');
+        if (!btn){ chain(i+1); return; }
+        regenStep(i, btn).then(function(){ chain(i+1); }).catch(function(){
+          allBtn.disabled = false;
+          allBtn.textContent = origLabel;
+        });
+      })(1);
+    });
+  }
+})();
+</script>
+{% endmacro %}
