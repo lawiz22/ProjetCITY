@@ -5501,6 +5501,81 @@
             });
     });
 
+    /* =====================================================================
+     * DEEP-LINK — Auto-switch to Validation tab + preselect entity/slug
+     * Triggered by ?tab=validation&entity=(pays|region|ville)&slug=...
+     * ===================================================================== */
+    (function() {
+        var qs = new URLSearchParams(window.location.search);
+        var tab = qs.get('tab');
+        var entity = qs.get('entity');
+        var slug = qs.get('slug');
+        if (tab !== 'validation' || !entity || !slug) return;
+
+        /* 1. Switch to Validation tab */
+        document.querySelectorAll('.ailab-tab').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.ailab-tab-content').forEach(function(c) { c.classList.remove('active'); });
+        var valBtn  = document.querySelector('.ailab-tab[data-ailab-tab="validation"]');
+        var valPane = document.getElementById('ailab-tab-validation');
+        if (valBtn)  valBtn.classList.add('active');
+        if (valPane) valPane.classList.add('active');
+
+        /* 2. Activate the entity pill */
+        var pill = document.querySelector('[data-validate-entity="' + entity + '"]');
+        if (pill) pill.click();
+
+        /* 3. Preselect the slug in the matching dropdown */
+        setTimeout(function() {
+            if (entity === 'ville') {
+                var citySel = document.getElementById('refine-city-select');
+                var cityCountry = document.getElementById('refine-city-country-filter');
+                var cityRegion = document.getElementById('refine-city-region-filter');
+                if (!citySel) return;
+                var src = [];
+                try { src = JSON.parse(citySel.getAttribute('data-refine-city-source') || '[]'); } catch(e) {}
+                var match = src.find(function(c) { return c.city_slug === slug; });
+                if (match && cityCountry && cityRegion) {
+                    cityCountry.value = match.country || '';
+                    cityCountry.dispatchEvent(new Event('change'));
+                    cityRegion.value = match.region || '';
+                    cityRegion.dispatchEvent(new Event('change'));
+                }
+                citySel.value = slug;
+                citySel.dispatchEvent(new Event('change'));
+                setTimeout(function() {
+                    var card = document.getElementById('refine-city-card');
+                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 400);
+            } else if (entity === 'region') {
+                var regSel = document.getElementById('refine-region-select');
+                var regCountry = document.getElementById('refine-region-country-filter');
+                if (!regSel) return;
+                var srcR = [];
+                try { srcR = JSON.parse(regSel.getAttribute('data-refine-region-source') || '[]'); } catch(e) {}
+                var matchR = srcR.find(function(r) { return r.region_slug === slug; });
+                if (matchR && regCountry) {
+                    regCountry.value = matchR.country_name || '';
+                    regCountry.dispatchEvent(new Event('change'));
+                }
+                regSel.value = slug;
+                regSel.dispatchEvent(new Event('change'));
+                setTimeout(function() {
+                    var cardR = document.getElementById('refine-region-card');
+                    if (cardR) cardR.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 400);
+            } else if (entity === 'pays') {
+                var coSel = document.getElementById('refine-country-select');
+                if (!coSel) return;
+                coSel.value = slug;
+                coSel.dispatchEvent(new Event('change'));
+                setTimeout(function() {
+                    var cardC = document.getElementById('refine-country-card');
+                    if (cardC) cardC.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 400);
+            }
+        }, 50);
+    })();
+
 })();
 </script>
 {% endblock %}
