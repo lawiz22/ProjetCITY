@@ -7946,6 +7946,50 @@ a.event-card.event-card-compact {
 .opt-btn-warning { background: #d97706; color: #fff; }
 .opt-btn-secondary { background: #6366f1; color: #fff; }
 
+/* ── Refinement status buttons (dot indicator) ── */
+.refine-status-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.refine-status-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .35);
+    border: 1px solid rgba(255, 255, 255, .55);
+    flex: 0 0 auto;
+    font-size: 10px;
+    line-height: 12px;
+    text-align: center;
+    color: #fff;
+    font-weight: 800;
+}
+.refine-status-dot[data-refine-status="done"] {
+    background: #22c55e;
+    border-color: #15803d;
+}
+.refine-status-dot[data-refine-status="done"]::before {
+    content: "✓";
+}
+.refine-status-dot[data-refine-status="pending"] {
+    background: #fbbf24;
+    border-color: #b45309;
+    animation: refine-pulse 1s infinite alternate;
+}
+.refine-status-dot[data-refine-status="error"] {
+    background: #ef4444;
+    border-color: #b91c1c;
+}
+.refine-status-dot[data-refine-status="error"]::before {
+    content: "!";
+}
+@keyframes refine-pulse {
+    from { transform: scale(1); }
+    to   { transform: scale(1.25); }
+}
+
 /* ── Refinement diff view ── */
 .refine-diff-container {
     display: flex;

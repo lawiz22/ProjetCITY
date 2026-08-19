@@ -8156,9 +8156,25 @@ def ai_lab_refine_city_load(city_slug: str) -> Response:
         "SELECT year, population FROM fact_city_population WHERE city_id = ? ORDER BY year DESC LIMIT 1",
         (city["city_id"],)
     ).fetchone()
+    earliest = conn.execute(
+        "SELECT MIN(year) AS y FROM fact_city_population WHERE city_id = ?", (city["city_id"],)
+    ).fetchone()
+    has_2026 = conn.execute(
+        "SELECT 1 FROM fact_city_population WHERE city_id = ? AND year = 2026 LIMIT 1", (city["city_id"],)
+    ).fetchone() is not None
     pop_count = conn.execute(
         "SELECT COUNT(*) FROM fact_city_population WHERE city_id = ?", (city["city_id"],)
     ).fetchone()[0]
+    try:
+        is_validated = bool(conn.execute(
+            "SELECT population_validated FROM dim_city WHERE city_id = ?", (city["city_id"],)
+        ).fetchone()[0])
+    except Exception:
+        conn.rollback()
+        is_validated = False
+
+    earliest_year = earliest["y"] if earliest and earliest["y"] is not None else None
+    dates_done = bool(earliest_year is not None and earliest_year <= 1800 and has_2026)
 
     return jsonify({
         "success": True,
@@ -8168,6 +8184,10 @@ def ai_lab_refine_city_load(city_slug: str) -> Response:
         "region": city["region"],
         "latest_population": latest["population"] if latest else None,
         "latest_year": latest["year"] if latest else None,
+        "earliest_year": earliest_year,
+        "has_2026": has_2026,
+        "dates_done": dates_done,
+        "is_validated": is_validated,
         "pop_count": pop_count,
         "source_text": source_text,
     })
@@ -8351,12 +8371,16 @@ def ai_lab_refine_city_save() -> Response:
     log_action("import", "city", city_slug,
                f"Ville raffinée sauvegardée: {city_row['city_name']} "
                f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
+    earliest_year = min(stats["years"]) if stats["years"] else None
+    dates_done = bool(earliest_year is not None and earliest_year <= 1800 and 2026 in stats["years"])
     return jsonify({
         "success": True,
         "city_name": city_row["city_name"],
         "city_slug": city_slug,
         "years_count": len(stats["years"]),
         "sources_count": len(sources_by_year),
+        "dates_done": dates_done,
+        "is_validated": is_validate,
     })
 
 
@@ -8438,9 +8462,25 @@ def ai_lab_refine_region_load(region_slug: str) -> Response:
         "SELECT year, population FROM fact_region_population WHERE region_id = ? ORDER BY year DESC LIMIT 1",
         (region["region_id"],)
     ).fetchone()
+    earliest = conn.execute(
+        "SELECT MIN(year) AS y FROM fact_region_population WHERE region_id = ?", (region["region_id"],)
+    ).fetchone()
+    has_2026 = conn.execute(
+        "SELECT 1 FROM fact_region_population WHERE region_id = ? AND year = 2026 LIMIT 1", (region["region_id"],)
+    ).fetchone() is not None
     pop_count = conn.execute(
         "SELECT COUNT(*) FROM fact_region_population WHERE region_id = ?", (region["region_id"],)
     ).fetchone()[0]
+    try:
+        is_validated = bool(conn.execute(
+            "SELECT population_validated FROM dim_region WHERE region_id = ?", (region["region_id"],)
+        ).fetchone()[0])
+    except Exception:
+        conn.rollback()
+        is_validated = False
+
+    earliest_year = earliest["y"] if earliest and earliest["y"] is not None else None
+    dates_done = bool(earliest_year is not None and earliest_year <= 1800 and has_2026)
 
     return jsonify({
         "success": True,
@@ -8449,6 +8489,10 @@ def ai_lab_refine_region_load(region_slug: str) -> Response:
         "country_name": region["country_name"],
         "latest_population": latest["population"] if latest else None,
         "latest_year": latest["year"] if latest else None,
+        "earliest_year": earliest_year,
+        "has_2026": has_2026,
+        "dates_done": dates_done,
+        "is_validated": is_validated,
         "pop_count": pop_count,
         "source_text": source_text,
     })
@@ -8622,12 +8666,16 @@ def ai_lab_refine_region_save() -> Response:
     log_action("import", "region", region_slug,
                f"Région raffinée sauvegardée: {region_row['region_name']} "
                f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
+    earliest_year = min(stats["years"]) if stats["years"] else None
+    dates_done = bool(earliest_year is not None and earliest_year <= 1800 and 2026 in stats["years"])
     return jsonify({
         "success": True,
         "region_name": region_row["region_name"],
         "region_slug": region_slug,
         "years_count": len(stats["years"]),
         "sources_count": len(sources_by_year),
+        "dates_done": dates_done,
+        "is_validated": is_validate,
     })
 
 
@@ -8708,9 +8756,25 @@ def ai_lab_refine_country_load(country_slug: str) -> Response:
         "SELECT year, population FROM fact_country_population WHERE country_id = ? ORDER BY year DESC LIMIT 1",
         (country["country_id"],)
     ).fetchone()
+    earliest = conn.execute(
+        "SELECT MIN(year) AS y FROM fact_country_population WHERE country_id = ?", (country["country_id"],)
+    ).fetchone()
+    has_2026 = conn.execute(
+        "SELECT 1 FROM fact_country_population WHERE country_id = ? AND year = 2026 LIMIT 1", (country["country_id"],)
+    ).fetchone() is not None
     pop_count = conn.execute(
         "SELECT COUNT(*) FROM fact_country_population WHERE country_id = ?", (country["country_id"],)
     ).fetchone()[0]
+    try:
+        is_validated = bool(conn.execute(
+            "SELECT population_validated FROM dim_country WHERE country_id = ?", (country["country_id"],)
+        ).fetchone()[0])
+    except Exception:
+        conn.rollback()
+        is_validated = False
+
+    earliest_year = earliest["y"] if earliest and earliest["y"] is not None else None
+    dates_done = bool(earliest_year is not None and earliest_year <= 1800 and has_2026)
 
     return jsonify({
         "success": True,
@@ -8718,6 +8782,10 @@ def ai_lab_refine_country_load(country_slug: str) -> Response:
         "country_slug": country["country_slug"],
         "latest_population": latest["population"] if latest else None,
         "latest_year": latest["year"] if latest else None,
+        "earliest_year": earliest_year,
+        "has_2026": has_2026,
+        "dates_done": dates_done,
+        "is_validated": is_validated,
         "pop_count": pop_count,
         "source_text": source_text,
     })
@@ -8892,12 +8960,16 @@ def ai_lab_refine_country_save() -> Response:
     log_action("import", "country", country_slug,
                f"Pays raffiné sauvegardé: {country_row['country_name']} "
                f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
+    earliest_year = min(stats["years"]) if stats["years"] else None
+    dates_done = bool(earliest_year is not None and earliest_year <= 1800 and 2026 in stats["years"])
     return jsonify({
         "success": True,
         "country_name": country_row["country_name"],
         "country_slug": country_slug,
         "years_count": len(stats["years"]),
         "sources_count": len(sources_by_year),
+        "dates_done": dates_done,
+        "is_validated": is_validate,
     })
 
 
