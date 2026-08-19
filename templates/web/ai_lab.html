@@ -1439,8 +1439,9 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_city }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-warning" id="refine-city-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-city-dates-btn" data-refine-mode="dates" title="Compléter les décennies manquantes de 1500 à 1800 et ajouter 2026">📅 Raffiner dates manquantes (1500-1800 + 2026)</button>
+                    <button type="button" class="opt-btn opt-btn-primary refine-status-btn" id="refine-city-dates-btn" data-refine-mode="dates" title="Compléter les décennies manquantes de 1500 à 1800 et ajouter 2026"><span class="refine-status-dot" data-refine-status="idle"></span> <span class="refine-status-label">1. 📅 Raffiner dates manquantes (1500-1800 + 2026)</span></button>
+                    <button type="button" class="opt-btn opt-btn-warning refine-status-btn" id="refine-city-correct-btn" data-refine-mode="validate"><span class="refine-status-dot" data-refine-status="idle"></span> <span class="refine-status-label">2. ✅ Valider et corriger</span></button>
+                    <button type="button" class="opt-btn opt-btn-success" id="refine-city-both-btn" data-refine-mode="both" title="Enchaîne raffinement des dates puis validation avec sauvegarde automatique">🎯 Tout faire (dates + valider)</button>
                 </div>
             </div>
         </section>
@@ -1548,8 +1549,9 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_region }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-warning" id="refine-region-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-region-dates-btn" data-refine-mode="dates" title="Compléter les décennies manquantes de 1500 à 1800 et ajouter 2026">📅 Raffiner dates manquantes (1500-1800 + 2026)</button>
+                    <button type="button" class="opt-btn opt-btn-primary refine-status-btn" id="refine-region-dates-btn" data-refine-mode="dates" title="Compléter les décennies manquantes de 1500 à 1800 et ajouter 2026"><span class="refine-status-dot" data-refine-status="idle"></span> <span class="refine-status-label">1. 📅 Raffiner dates manquantes (1500-1800 + 2026)</span></button>
+                    <button type="button" class="opt-btn opt-btn-warning refine-status-btn" id="refine-region-correct-btn" data-refine-mode="validate"><span class="refine-status-dot" data-refine-status="idle"></span> <span class="refine-status-label">2. ✅ Valider et corriger</span></button>
+                    <button type="button" class="opt-btn opt-btn-success" id="refine-region-both-btn" data-refine-mode="both" title="Enchaîne raffinement des dates puis validation avec sauvegarde automatique">🎯 Tout faire (dates + valider)</button>
                 </div>
             </div>
         </section>
@@ -1655,8 +1657,9 @@
                         style="width:100%;font-family:monospace;font-size:.8rem;">{{ prompt_refine_country }}</textarea>
                 </div>
                 <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-                    <button type="button" class="opt-btn opt-btn-warning" id="refine-country-correct-btn" data-refine-mode="validate">✅ Valider et corriger</button>
-                    <button type="button" class="opt-btn opt-btn-primary" id="refine-country-dates-btn" data-refine-mode="dates" title="Compléter les décennies manquantes de 1500 à 1800 et ajouter 2026">📅 Raffiner dates manquantes (1500-1800 + 2026)</button>
+                    <button type="button" class="opt-btn opt-btn-primary refine-status-btn" id="refine-country-dates-btn" data-refine-mode="dates" title="Compléter les décennies manquantes de 1500 à 1800 et ajouter 2026"><span class="refine-status-dot" data-refine-status="idle"></span> <span class="refine-status-label">1. 📅 Raffiner dates manquantes (1500-1800 + 2026)</span></button>
+                    <button type="button" class="opt-btn opt-btn-warning refine-status-btn" id="refine-country-correct-btn" data-refine-mode="validate"><span class="refine-status-dot" data-refine-status="idle"></span> <span class="refine-status-label">2. ✅ Valider et corriger</span></button>
+                    <button type="button" class="opt-btn opt-btn-success" id="refine-country-both-btn" data-refine-mode="both" title="Enchaîne raffinement des dates puis validation avec sauvegarde automatique">🎯 Tout faire (dates + valider)</button>
                 </div>
             </div>
         </section>
@@ -4469,6 +4472,29 @@
     /* =====================================================================
      * RAFFINEMENT TAB — Ville (City)
      * ===================================================================== */
+    /* Shared helpers for refine-status buttons */
+    function setBtnLabel(btn, text) {
+        if (!btn) return;
+        var span = btn.querySelector('.refine-status-label');
+        if (span) { span.textContent = text; } else { btn.textContent = text; }
+    }
+    function getBtnLabel(btn) {
+        if (!btn) return '';
+        var span = btn.querySelector('.refine-status-label');
+        return span ? span.textContent : btn.textContent;
+    }
+    function setBtnStatus(btn, status) {
+        if (!btn) return;
+        var dot = btn.querySelector('.refine-status-dot');
+        if (dot) dot.setAttribute('data-refine-status', status || 'idle');
+    }
+    function markOptionValidated(selectEl, slug, validated) {
+        if (!selectEl || !slug) return;
+        var opt = Array.prototype.find.call(selectEl.options, function(o) { return o.value === slug; });
+        if (!opt) return;
+        var text = opt.textContent.replace(/\s*✅\s*$/, '');
+        opt.textContent = validated ? (text + ' ✅') : text;
+    }
     var refineCitySelect      = document.getElementById('refine-city-select');
     var refineCityLoading     = document.getElementById('refine-city-loading');
     var refineCityCard        = document.getElementById('refine-city-card');
@@ -4477,6 +4503,7 @@
     var refineCityPrompt      = document.getElementById('refine-city-prompt');
     var refineCityCorrectBtn  = document.getElementById('refine-city-correct-btn');
     var refineCityDatesBtn    = document.getElementById('refine-city-dates-btn');
+    var refineCityBothBtn     = document.getElementById('refine-city-both-btn');
     var refineCityResultWrap  = document.getElementById('refine-city-result-wrap');
     var refineCityResult      = document.getElementById('refine-city-result');
     var refineCityDiffOld     = document.getElementById('refine-city-diff-old');
@@ -4523,11 +4550,15 @@
                 if (!data.success) { alert('Erreur: ' + data.error); return; }
                 currentCitySlug = slug;
 
+                setBtnStatus(refineCityDatesBtn, data.dates_done ? 'done' : 'idle');
+                setBtnStatus(refineCityCorrectBtn, data.is_validated ? 'done' : 'idle');
+
                 var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
                     + '<span class="badge badge-year">🏙️ ' + (data.city_name || '—').replace(/</g,'&lt;') + '</span>'
                     + '<span class="badge">' + (data.region || '—').replace(/</g,'&lt;') + ', ' + (data.country || '—').replace(/</g,'&lt;') + '</span>'
                     + '<span class="badge badge-level">Pop: ' + (data.latest_population ? data.latest_population.toLocaleString() : '—') + ' (' + (data.latest_year || '?') + ')</span>'
                     + '<span class="badge">' + (data.pop_count || 0) + ' année(s) de données</span>'
+                    + '<span class="badge" style="background:' + (data.dates_done ? '#dcfce7' : '#fef3c7') + ';color:#111;">📅 ' + (data.earliest_year || '?') + '–' + (data.latest_year || '?') + '</span>'
                     + '</div>';
                 refineCityCardContent.innerHTML = html;
                 refineCitySourceText.value = data.source_text || '';
@@ -4540,17 +4571,19 @@
     });
 
     function triggerCityRefine(mode, clickedBtn) {
-        if (!currentCitySlug) { alert('Choisissez une ville.'); return; }
+        if (!currentCitySlug) { alert('Choisissez une ville.'); return Promise.reject(new Error('No city')); }
         currentCityRefineMode = mode;
         refineCityPrompt.value = refineCityPrompts[mode] || refineCityPrompts.enrich;
         var promptText = refineCityPrompt.value.trim();
-        if (!promptText) { alert('Le prompt est vide.'); return; }
+        if (!promptText) { alert('Le prompt est vide.'); return Promise.reject(new Error('Empty prompt')); }
 
         var allBtns = [refineCityCorrectBtn];
         if (refineCityDatesBtn) allBtns.push(refineCityDatesBtn);
-        var _origLabels = allBtns.map(function(b) { return b.textContent; });
+        if (refineCityBothBtn) allBtns.push(refineCityBothBtn);
+        var _origLabels = allBtns.map(getBtnLabel);
         allBtns.forEach(function(b) { b.disabled = true; });
-        clickedBtn.textContent = '⏳ Raffinement en cours…';
+        setBtnLabel(clickedBtn, '⏳ Raffinement en cours…');
+        setBtnStatus(clickedBtn, 'pending');
         refineCityResultWrap.style.display = '';
         if (refineCitySynthWrap) refineCitySynthWrap.style.display = 'none';
         refineCitySaveResult.style.display = 'none';
@@ -4563,32 +4596,94 @@
         fd.append('model', modelSelect.value);
         fd.append('prompt_text', promptText);
 
-        fetch(refineCityGenUrl, { method: 'POST', body: fd })
+        return fetch(refineCityGenUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                allBtns.forEach(function(b, i) { b.disabled = false; b.textContent = _origLabels[i]; });
+                allBtns.forEach(function(b, i) { b.disabled = false; setBtnLabel(b, _origLabels[i]); });
                 if (data.success) {
                     refineCityResult.value = data.reply;
                     buildDiffView(refineCitySourceText.value, data.reply, refineCityDiffOld, refineCityDiffNew);
                     if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
                     var synthBtn = document.getElementById('refine-city-synth-btn');
                     if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
-                } else {
-                    refineCityResult.value = '❌ ERREUR : ' + data.error;
-                    refineCityDiffOld.innerHTML = '';
-                    refineCityDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                    return data;
                 }
+                setBtnStatus(clickedBtn, 'error');
+                refineCityResult.value = '❌ ERREUR : ' + data.error;
+                refineCityDiffOld.innerHTML = '';
+                refineCityDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                throw new Error(data.error);
             })
             .catch(function(err) {
-                allBtns.forEach(function(b, i) { b.disabled = false; b.textContent = _origLabels[i]; });
-                refineCityResult.value = '❌ Erreur réseau : ' + err.message;
-                refineCityDiffOld.innerHTML = '';
-                refineCityDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
+                allBtns.forEach(function(b, i) { b.disabled = false; setBtnLabel(b, _origLabels[i]); });
+                setBtnStatus(clickedBtn, 'error');
+                if (refineCityResult.value.indexOf('❌') === -1) {
+                    refineCityResult.value = '❌ Erreur réseau : ' + (err && err.message ? err.message : err);
+                    refineCityDiffOld.innerHTML = '';
+                    refineCityDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + (err && err.message ? err.message : err) + '</span>';
+                }
+                throw err;
+            });
+    }
+
+    function saveRefinedCity(mode) {
+        var text = refineCityResult.value.trim();
+        if (!text || text.startsWith('❌')) { return Promise.reject(new Error('Empty result')); }
+        var useBtn = document.getElementById('refine-city-use-btn');
+        var targetBtn = (mode === 'validate') ? refineCityCorrectBtn : refineCityDatesBtn;
+        if (useBtn) { useBtn.disabled = true; useBtn.textContent = '⏳ Sauvegarde…'; }
+        setBtnStatus(targetBtn, 'pending');
+        refineCitySaveResult.style.display = '';
+        refineCitySaveResult.className = 'opt-test-result opt-test-pending';
+        refineCitySaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('city_text', text);
+        fd.append('city_slug', currentCitySlug);
+        fd.append('is_validate', (mode === 'validate') ? '1' : '0');
+
+        return fetch(refineCitySaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (useBtn) { useBtn.disabled = false; useBtn.textContent = '✅ Utiliser la version raffinée'; }
+                if (!data.success) {
+                    setBtnStatus(targetBtn, 'error');
+                    refineCitySaveResult.className = 'opt-test-result opt-test-error';
+                    refineCitySaveResult.textContent = '❌ ' + data.error;
+                    throw new Error(data.error);
+                }
+                setBtnStatus(targetBtn, 'done');
+                if (data.is_validated) markOptionValidated(refineCitySelect, currentCitySlug, true);
+                if (data.dates_done) setBtnStatus(refineCityDatesBtn, 'done');
+                refineCitySaveResult.className = 'opt-test-result opt-test-success';
+                refineCitySaveResult.innerHTML = '✅ <strong>' + data.city_name.replace(/</g,'&lt;') + '</strong> sauvegardée ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
+                return data;
+            })
+            .catch(function(err) {
+                if (useBtn) { useBtn.disabled = false; useBtn.textContent = '✅ Utiliser la version raffinée'; }
+                setBtnStatus(targetBtn, 'error');
+                refineCitySaveResult.className = 'opt-test-result opt-test-error';
+                refineCitySaveResult.textContent = '❌ Erreur réseau : ' + (err && err.message ? err.message : err);
+                throw err;
             });
     }
 
     refineCityCorrectBtn.addEventListener('click', function() { triggerCityRefine('validate', refineCityCorrectBtn); });
     if (refineCityDatesBtn) refineCityDatesBtn.addEventListener('click', function() { triggerCityRefine('dates', refineCityDatesBtn); });
+    if (refineCityBothBtn) refineCityBothBtn.addEventListener('click', function() {
+        var origLabel = getBtnLabel(refineCityBothBtn);
+        refineCityBothBtn.disabled = true;
+        setBtnLabel(refineCityBothBtn, '⏳ Étape 1/2 : dates…');
+        triggerCityRefine('dates', refineCityDatesBtn)
+            .then(function() { setBtnLabel(refineCityBothBtn, '⏳ Sauvegarde dates…'); return saveRefinedCity('dates'); })
+            .then(function() { setBtnLabel(refineCityBothBtn, '⏳ Étape 2/2 : validation…'); return triggerCityRefine('validate', refineCityCorrectBtn); })
+            .then(function() { setBtnLabel(refineCityBothBtn, '⏳ Sauvegarde validation…'); return saveRefinedCity('validate'); })
+            .then(function() {
+                setBtnLabel(refineCityBothBtn, '✅ Tout fait');
+                setTimeout(function() { setBtnLabel(refineCityBothBtn, origLabel); refineCityBothBtn.disabled = false; }, 2000);
+            })
+            .catch(function() { setBtnLabel(refineCityBothBtn, origLabel); refineCityBothBtn.disabled = false; });
+    });
 
     document.getElementById('refine-city-copy-btn').addEventListener('click', function() {
         refineCityResult.select();
@@ -4605,39 +4700,7 @@
     });
 
     document.getElementById('refine-city-use-btn').addEventListener('click', function() {
-        var text = refineCityResult.value.trim();
-        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
-        var btn = document.getElementById('refine-city-use-btn');
-        btn.disabled = true;
-        btn.textContent = '⏳ Sauvegarde…';
-        refineCitySaveResult.style.display = '';
-        refineCitySaveResult.className = 'opt-test-result opt-test-pending';
-        refineCitySaveResult.textContent = 'Sauvegarde en cours…';
-
-        var fd = new FormData();
-        fd.append('city_text', text);
-        fd.append('city_slug', currentCitySlug);
-        fd.append('is_validate', currentCityRefineMode === 'validate' ? '1' : '0');
-
-        fetch(refineCitySaveUrl, { method: 'POST', body: fd })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                btn.disabled = false;
-                btn.textContent = '✅ Utiliser la version raffinée';
-                if (data.success) {
-                    refineCitySaveResult.className = 'opt-test-result opt-test-success';
-                    refineCitySaveResult.innerHTML = '✅ <strong>' + data.city_name.replace(/</g,'&lt;') + '</strong> sauvegardée ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
-                } else {
-                    refineCitySaveResult.className = 'opt-test-result opt-test-error';
-                    refineCitySaveResult.textContent = '❌ ' + data.error;
-                }
-            })
-            .catch(function(err) {
-                btn.disabled = false;
-                btn.textContent = '✅ Utiliser la version raffinée';
-                refineCitySaveResult.className = 'opt-test-result opt-test-error';
-                refineCitySaveResult.textContent = '❌ Erreur réseau : ' + err.message;
-            });
+        saveRefinedCity(currentCityRefineMode === 'validate' ? 'validate' : 'dates').catch(function() { /* handled */ });
     });
 
     document.getElementById('refine-city-synth-btn').addEventListener('click', function() {
@@ -4733,6 +4796,7 @@
     var refineRegionPrompt      = document.getElementById('refine-region-prompt');
     var refineRegionCorrectBtn  = document.getElementById('refine-region-correct-btn');
     var refineRegionDatesBtn    = document.getElementById('refine-region-dates-btn');
+    var refineRegionBothBtn     = document.getElementById('refine-region-both-btn');
     var refineRegionResultWrap  = document.getElementById('refine-region-result-wrap');
     var refineRegionResult      = document.getElementById('refine-region-result');
     var refineRegionDiffOld     = document.getElementById('refine-region-diff-old');
@@ -4779,11 +4843,15 @@
                 if (!data.success) { alert('Erreur: ' + data.error); return; }
                 currentRegionSlug = slug;
 
+                setBtnStatus(refineRegionDatesBtn, data.dates_done ? 'done' : 'idle');
+                setBtnStatus(refineRegionCorrectBtn, data.is_validated ? 'done' : 'idle');
+
                 var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
                     + '<span class="badge badge-year">📍 ' + (data.region_name || '—').replace(/</g,'&lt;') + '</span>'
                     + '<span class="badge">' + (data.country_name || '—').replace(/</g,'&lt;') + '</span>'
                     + '<span class="badge badge-level">Pop: ' + (data.latest_population ? data.latest_population.toLocaleString() : '—') + ' (' + (data.latest_year || '?') + ')</span>'
                     + '<span class="badge">' + (data.pop_count || 0) + ' année(s) de données</span>'
+                    + '<span class="badge" style="background:' + (data.dates_done ? '#dcfce7' : '#fef3c7') + ';color:#111;">📅 ' + (data.earliest_year || '?') + '–' + (data.latest_year || '?') + '</span>'
                     + '</div>';
                 refineRegionCardContent.innerHTML = html;
                 refineRegionSourceText.value = data.source_text || '';
@@ -4796,17 +4864,19 @@
     });
 
     function triggerRegionRefine(mode, clickedBtn) {
-        if (!currentRegionSlug) { alert('Choisissez une région.'); return; }
+        if (!currentRegionSlug) { alert('Choisissez une région.'); return Promise.reject(new Error('No region')); }
         currentRegionRefineMode = mode;
         refineRegionPrompt.value = refineRegionPrompts[mode] || refineRegionPrompts.enrich;
         var promptText = refineRegionPrompt.value.trim();
-        if (!promptText) { alert('Le prompt est vide.'); return; }
+        if (!promptText) { alert('Le prompt est vide.'); return Promise.reject(new Error('Empty prompt')); }
 
         var allBtns = [refineRegionCorrectBtn];
         if (refineRegionDatesBtn) allBtns.push(refineRegionDatesBtn);
-        var _origLabels = allBtns.map(function(b) { return b.textContent; });
+        if (refineRegionBothBtn) allBtns.push(refineRegionBothBtn);
+        var _origLabels = allBtns.map(getBtnLabel);
         allBtns.forEach(function(b) { b.disabled = true; });
-        clickedBtn.textContent = '⏳ Raffinement en cours…';
+        setBtnLabel(clickedBtn, '⏳ Raffinement en cours…');
+        setBtnStatus(clickedBtn, 'pending');
         refineRegionResultWrap.style.display = '';
         if (refineRegionSynthWrap) refineRegionSynthWrap.style.display = 'none';
         refineRegionSaveResult.style.display = 'none';
@@ -4819,32 +4889,94 @@
         fd.append('model', modelSelect.value);
         fd.append('prompt_text', promptText);
 
-        fetch(refineRegionGenUrl, { method: 'POST', body: fd })
+        return fetch(refineRegionGenUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                allBtns.forEach(function(b, i) { b.disabled = false; b.textContent = _origLabels[i]; });
+                allBtns.forEach(function(b, i) { b.disabled = false; setBtnLabel(b, _origLabels[i]); });
                 if (data.success) {
                     refineRegionResult.value = data.reply;
                     buildDiffView(refineRegionSourceText.value, data.reply, refineRegionDiffOld, refineRegionDiffNew);
                     if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
                     var synthBtn = document.getElementById('refine-region-synth-btn');
                     if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
-                } else {
-                    refineRegionResult.value = '❌ ERREUR : ' + data.error;
-                    refineRegionDiffOld.innerHTML = '';
-                    refineRegionDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                    return data;
                 }
+                setBtnStatus(clickedBtn, 'error');
+                refineRegionResult.value = '❌ ERREUR : ' + data.error;
+                refineRegionDiffOld.innerHTML = '';
+                refineRegionDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                throw new Error(data.error);
             })
             .catch(function(err) {
-                allBtns.forEach(function(b, i) { b.disabled = false; b.textContent = _origLabels[i]; });
-                refineRegionResult.value = '❌ Erreur réseau : ' + err.message;
-                refineRegionDiffOld.innerHTML = '';
-                refineRegionDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
+                allBtns.forEach(function(b, i) { b.disabled = false; setBtnLabel(b, _origLabels[i]); });
+                setBtnStatus(clickedBtn, 'error');
+                if (refineRegionResult.value.indexOf('❌') === -1) {
+                    refineRegionResult.value = '❌ Erreur réseau : ' + (err && err.message ? err.message : err);
+                    refineRegionDiffOld.innerHTML = '';
+                    refineRegionDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + (err && err.message ? err.message : err) + '</span>';
+                }
+                throw err;
+            });
+    }
+
+    function saveRefinedRegion(mode) {
+        var text = refineRegionResult.value.trim();
+        if (!text || text.startsWith('❌')) { return Promise.reject(new Error('Empty result')); }
+        var useBtn = document.getElementById('refine-region-use-btn');
+        var targetBtn = (mode === 'validate') ? refineRegionCorrectBtn : refineRegionDatesBtn;
+        if (useBtn) { useBtn.disabled = true; useBtn.textContent = '⏳ Sauvegarde…'; }
+        setBtnStatus(targetBtn, 'pending');
+        refineRegionSaveResult.style.display = '';
+        refineRegionSaveResult.className = 'opt-test-result opt-test-pending';
+        refineRegionSaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('region_text', text);
+        fd.append('region_slug', currentRegionSlug);
+        fd.append('is_validate', (mode === 'validate') ? '1' : '0');
+
+        return fetch(refineRegionSaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (useBtn) { useBtn.disabled = false; useBtn.textContent = '✅ Utiliser la version raffinée'; }
+                if (!data.success) {
+                    setBtnStatus(targetBtn, 'error');
+                    refineRegionSaveResult.className = 'opt-test-result opt-test-error';
+                    refineRegionSaveResult.textContent = '❌ ' + data.error;
+                    throw new Error(data.error);
+                }
+                setBtnStatus(targetBtn, 'done');
+                if (data.is_validated) markOptionValidated(refineRegionSelect, currentRegionSlug, true);
+                if (data.dates_done) setBtnStatus(refineRegionDatesBtn, 'done');
+                refineRegionSaveResult.className = 'opt-test-result opt-test-success';
+                refineRegionSaveResult.innerHTML = '✅ <strong>' + data.region_name.replace(/</g,'&lt;') + '</strong> sauvegardée ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
+                return data;
+            })
+            .catch(function(err) {
+                if (useBtn) { useBtn.disabled = false; useBtn.textContent = '✅ Utiliser la version raffinée'; }
+                setBtnStatus(targetBtn, 'error');
+                refineRegionSaveResult.className = 'opt-test-result opt-test-error';
+                refineRegionSaveResult.textContent = '❌ Erreur réseau : ' + (err && err.message ? err.message : err);
+                throw err;
             });
     }
 
     refineRegionCorrectBtn.addEventListener('click', function() { triggerRegionRefine('validate', refineRegionCorrectBtn); });
     if (refineRegionDatesBtn) refineRegionDatesBtn.addEventListener('click', function() { triggerRegionRefine('dates', refineRegionDatesBtn); });
+    if (refineRegionBothBtn) refineRegionBothBtn.addEventListener('click', function() {
+        var origLabel = getBtnLabel(refineRegionBothBtn);
+        refineRegionBothBtn.disabled = true;
+        setBtnLabel(refineRegionBothBtn, '⏳ Étape 1/2 : dates…');
+        triggerRegionRefine('dates', refineRegionDatesBtn)
+            .then(function() { setBtnLabel(refineRegionBothBtn, '⏳ Sauvegarde dates…'); return saveRefinedRegion('dates'); })
+            .then(function() { setBtnLabel(refineRegionBothBtn, '⏳ Étape 2/2 : validation…'); return triggerRegionRefine('validate', refineRegionCorrectBtn); })
+            .then(function() { setBtnLabel(refineRegionBothBtn, '⏳ Sauvegarde validation…'); return saveRefinedRegion('validate'); })
+            .then(function() {
+                setBtnLabel(refineRegionBothBtn, '✅ Tout fait');
+                setTimeout(function() { setBtnLabel(refineRegionBothBtn, origLabel); refineRegionBothBtn.disabled = false; }, 2000);
+            })
+            .catch(function() { setBtnLabel(refineRegionBothBtn, origLabel); refineRegionBothBtn.disabled = false; });
+    });
 
     document.getElementById('refine-region-copy-btn').addEventListener('click', function() {
         refineRegionResult.select();
@@ -4861,39 +4993,7 @@
     });
 
     document.getElementById('refine-region-use-btn').addEventListener('click', function() {
-        var text = refineRegionResult.value.trim();
-        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
-        var btn = document.getElementById('refine-region-use-btn');
-        btn.disabled = true;
-        btn.textContent = '⏳ Sauvegarde…';
-        refineRegionSaveResult.style.display = '';
-        refineRegionSaveResult.className = 'opt-test-result opt-test-pending';
-        refineRegionSaveResult.textContent = 'Sauvegarde en cours…';
-
-        var fd = new FormData();
-        fd.append('region_text', text);
-        fd.append('region_slug', currentRegionSlug);
-        fd.append('is_validate', currentRegionRefineMode === 'validate' ? '1' : '0');
-
-        fetch(refineRegionSaveUrl, { method: 'POST', body: fd })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                btn.disabled = false;
-                btn.textContent = '✅ Utiliser la version raffinée';
-                if (data.success) {
-                    refineRegionSaveResult.className = 'opt-test-result opt-test-success';
-                    refineRegionSaveResult.innerHTML = '✅ <strong>' + data.region_name.replace(/</g,'&lt;') + '</strong> sauvegardée ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
-                } else {
-                    refineRegionSaveResult.className = 'opt-test-result opt-test-error';
-                    refineRegionSaveResult.textContent = '❌ ' + data.error;
-                }
-            })
-            .catch(function(err) {
-                btn.disabled = false;
-                btn.textContent = '✅ Utiliser la version raffinée';
-                refineRegionSaveResult.className = 'opt-test-result opt-test-error';
-                refineRegionSaveResult.textContent = '❌ Erreur réseau : ' + err.message;
-            });
+        saveRefinedRegion(currentRegionRefineMode === 'validate' ? 'validate' : 'dates').catch(function() { /* handled */ });
     });
 
     document.getElementById('refine-region-synth-btn').addEventListener('click', function() {
@@ -4989,6 +5089,7 @@
     var refineCountryPrompt      = document.getElementById('refine-country-prompt');
     var refineCountryCorrectBtn  = document.getElementById('refine-country-correct-btn');
     var refineCountryDatesBtn    = document.getElementById('refine-country-dates-btn');
+    var refineCountryBothBtn     = document.getElementById('refine-country-both-btn');
     var refineCountryResultWrap  = document.getElementById('refine-country-result-wrap');
     var refineCountryResult      = document.getElementById('refine-country-result');
     var refineCountryDiffOld     = document.getElementById('refine-country-diff-old');
@@ -5035,10 +5136,14 @@
                 if (!data.success) { alert('Erreur: ' + data.error); return; }
                 currentCountrySlug = slug;
 
+                setBtnStatus(refineCountryDatesBtn, data.dates_done ? 'done' : 'idle');
+                setBtnStatus(refineCountryCorrectBtn, data.is_validated ? 'done' : 'idle');
+
                 var html = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">'
                     + '<span class="badge badge-year">🌍 ' + (data.country_name || '—').replace(/</g,'&lt;') + '</span>'
                     + '<span class="badge badge-level">Pop: ' + (data.latest_population ? data.latest_population.toLocaleString() : '—') + ' (' + (data.latest_year || '?') + ')</span>'
                     + '<span class="badge">' + (data.pop_count || 0) + ' année(s) de données</span>'
+                    + '<span class="badge" style="background:' + (data.dates_done ? '#dcfce7' : '#fef3c7') + ';color:#111;">📅 ' + (data.earliest_year || '?') + '–' + (data.latest_year || '?') + '</span>'
                     + '</div>';
                 refineCountryCardContent.innerHTML = html;
                 refineCountrySourceText.value = data.source_text || '';
@@ -5051,17 +5156,19 @@
     });
 
     function triggerCountryRefine(mode, clickedBtn) {
-        if (!currentCountrySlug) { alert('Choisissez un pays.'); return; }
+        if (!currentCountrySlug) { alert('Choisissez un pays.'); return Promise.reject(new Error('No country')); }
         currentCountryRefineMode = mode;
         refineCountryPrompt.value = refineCountryPrompts[mode] || refineCountryPrompts.enrich;
         var promptText = refineCountryPrompt.value.trim();
-        if (!promptText) { alert('Le prompt est vide.'); return; }
+        if (!promptText) { alert('Le prompt est vide.'); return Promise.reject(new Error('Empty prompt')); }
 
         var allBtns = [refineCountryCorrectBtn];
         if (refineCountryDatesBtn) allBtns.push(refineCountryDatesBtn);
-        var _origLabels = allBtns.map(function(b) { return b.textContent; });
+        if (refineCountryBothBtn) allBtns.push(refineCountryBothBtn);
+        var _origLabels = allBtns.map(getBtnLabel);
         allBtns.forEach(function(b) { b.disabled = true; });
-        clickedBtn.textContent = '⏳ Raffinement en cours…';
+        setBtnLabel(clickedBtn, '⏳ Raffinement en cours…');
+        setBtnStatus(clickedBtn, 'pending');
         refineCountryResultWrap.style.display = '';
         if (refineCountrySynthWrap) refineCountrySynthWrap.style.display = 'none';
         refineCountrySaveResult.style.display = 'none';
@@ -5074,32 +5181,94 @@
         fd.append('model', modelSelect.value);
         fd.append('prompt_text', promptText);
 
-        fetch(refineCountryGenUrl, { method: 'POST', body: fd })
+        return fetch(refineCountryGenUrl, { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                allBtns.forEach(function(b, i) { b.disabled = false; b.textContent = _origLabels[i]; });
+                allBtns.forEach(function(b, i) { b.disabled = false; setBtnLabel(b, _origLabels[i]); });
                 if (data.success) {
                     refineCountryResult.value = data.reply;
                     buildDiffView(refineCountrySourceText.value, data.reply, refineCountryDiffOld, refineCountryDiffNew);
                     if (data.tokens_total !== undefined) tokenEl.textContent = data.tokens_total;
                     var synthBtn = document.getElementById('refine-country-synth-btn');
                     if (synthBtn) synthBtn.style.display = (mode === 'enrich') ? '' : 'none';
-                } else {
-                    refineCountryResult.value = '❌ ERREUR : ' + data.error;
-                    refineCountryDiffOld.innerHTML = '';
-                    refineCountryDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                    return data;
                 }
+                setBtnStatus(clickedBtn, 'error');
+                refineCountryResult.value = '❌ ERREUR : ' + data.error;
+                refineCountryDiffOld.innerHTML = '';
+                refineCountryDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + data.error + '</span>';
+                throw new Error(data.error);
             })
             .catch(function(err) {
-                allBtns.forEach(function(b, i) { b.disabled = false; b.textContent = _origLabels[i]; });
-                refineCountryResult.value = '❌ Erreur réseau : ' + err.message;
-                refineCountryDiffOld.innerHTML = '';
-                refineCountryDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + err.message + '</span>';
+                allBtns.forEach(function(b, i) { b.disabled = false; setBtnLabel(b, _origLabels[i]); });
+                setBtnStatus(clickedBtn, 'error');
+                if (refineCountryResult.value.indexOf('❌') === -1) {
+                    refineCountryResult.value = '❌ Erreur réseau : ' + (err && err.message ? err.message : err);
+                    refineCountryDiffOld.innerHTML = '';
+                    refineCountryDiffNew.innerHTML = '<span class="refine-diff-line-removed">❌ ' + (err && err.message ? err.message : err) + '</span>';
+                }
+                throw err;
+            });
+    }
+
+    function saveRefinedCountry(mode) {
+        var text = refineCountryResult.value.trim();
+        if (!text || text.startsWith('❌')) { return Promise.reject(new Error('Empty result')); }
+        var useBtn = document.getElementById('refine-country-use-btn');
+        var targetBtn = (mode === 'validate') ? refineCountryCorrectBtn : refineCountryDatesBtn;
+        if (useBtn) { useBtn.disabled = true; useBtn.textContent = '⏳ Sauvegarde…'; }
+        setBtnStatus(targetBtn, 'pending');
+        refineCountrySaveResult.style.display = '';
+        refineCountrySaveResult.className = 'opt-test-result opt-test-pending';
+        refineCountrySaveResult.textContent = 'Sauvegarde en cours…';
+
+        var fd = new FormData();
+        fd.append('country_text', text);
+        fd.append('country_slug', currentCountrySlug);
+        fd.append('is_validate', (mode === 'validate') ? '1' : '0');
+
+        return fetch(refineCountrySaveUrl, { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (useBtn) { useBtn.disabled = false; useBtn.textContent = '✅ Utiliser la version raffinée'; }
+                if (!data.success) {
+                    setBtnStatus(targetBtn, 'error');
+                    refineCountrySaveResult.className = 'opt-test-result opt-test-error';
+                    refineCountrySaveResult.textContent = '❌ ' + data.error;
+                    throw new Error(data.error);
+                }
+                setBtnStatus(targetBtn, 'done');
+                if (data.is_validated) markOptionValidated(refineCountrySelect, currentCountrySlug, true);
+                if (data.dates_done) setBtnStatus(refineCountryDatesBtn, 'done');
+                refineCountrySaveResult.className = 'opt-test-result opt-test-success';
+                refineCountrySaveResult.innerHTML = '✅ <strong>' + data.country_name.replace(/</g,'&lt;') + '</strong> sauvegardé ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
+                return data;
+            })
+            .catch(function(err) {
+                if (useBtn) { useBtn.disabled = false; useBtn.textContent = '✅ Utiliser la version raffinée'; }
+                setBtnStatus(targetBtn, 'error');
+                refineCountrySaveResult.className = 'opt-test-result opt-test-error';
+                refineCountrySaveResult.textContent = '❌ Erreur réseau : ' + (err && err.message ? err.message : err);
+                throw err;
             });
     }
 
     refineCountryCorrectBtn.addEventListener('click', function() { triggerCountryRefine('validate', refineCountryCorrectBtn); });
     if (refineCountryDatesBtn) refineCountryDatesBtn.addEventListener('click', function() { triggerCountryRefine('dates', refineCountryDatesBtn); });
+    if (refineCountryBothBtn) refineCountryBothBtn.addEventListener('click', function() {
+        var origLabel = getBtnLabel(refineCountryBothBtn);
+        refineCountryBothBtn.disabled = true;
+        setBtnLabel(refineCountryBothBtn, '⏳ Étape 1/2 : dates…');
+        triggerCountryRefine('dates', refineCountryDatesBtn)
+            .then(function() { setBtnLabel(refineCountryBothBtn, '⏳ Sauvegarde dates…'); return saveRefinedCountry('dates'); })
+            .then(function() { setBtnLabel(refineCountryBothBtn, '⏳ Étape 2/2 : validation…'); return triggerCountryRefine('validate', refineCountryCorrectBtn); })
+            .then(function() { setBtnLabel(refineCountryBothBtn, '⏳ Sauvegarde validation…'); return saveRefinedCountry('validate'); })
+            .then(function() {
+                setBtnLabel(refineCountryBothBtn, '✅ Tout fait');
+                setTimeout(function() { setBtnLabel(refineCountryBothBtn, origLabel); refineCountryBothBtn.disabled = false; }, 2000);
+            })
+            .catch(function() { setBtnLabel(refineCountryBothBtn, origLabel); refineCountryBothBtn.disabled = false; });
+    });
 
     document.getElementById('refine-country-copy-btn').addEventListener('click', function() {
         refineCountryResult.select();
@@ -5116,39 +5285,7 @@
     });
 
     document.getElementById('refine-country-use-btn').addEventListener('click', function() {
-        var text = refineCountryResult.value.trim();
-        if (!text || text.startsWith('❌')) { alert('Résultat vide ou en erreur.'); return; }
-        var btn = document.getElementById('refine-country-use-btn');
-        btn.disabled = true;
-        btn.textContent = '⏳ Sauvegarde…';
-        refineCountrySaveResult.style.display = '';
-        refineCountrySaveResult.className = 'opt-test-result opt-test-pending';
-        refineCountrySaveResult.textContent = 'Sauvegarde en cours…';
-
-        var fd = new FormData();
-        fd.append('country_text', text);
-        fd.append('country_slug', currentCountrySlug);
-        fd.append('is_validate', currentCountryRefineMode === 'validate' ? '1' : '0');
-
-        fetch(refineCountrySaveUrl, { method: 'POST', body: fd })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                btn.disabled = false;
-                btn.textContent = '✅ Utiliser la version raffinée';
-                if (data.success) {
-                    refineCountrySaveResult.className = 'opt-test-result opt-test-success';
-                    refineCountrySaveResult.innerHTML = '✅ <strong>' + data.country_name.replace(/</g,'&lt;') + '</strong> sauvegardé ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
-                } else {
-                    refineCountrySaveResult.className = 'opt-test-result opt-test-error';
-                    refineCountrySaveResult.textContent = '❌ ' + data.error;
-                }
-            })
-            .catch(function(err) {
-                btn.disabled = false;
-                btn.textContent = '✅ Utiliser la version raffinée';
-                refineCountrySaveResult.className = 'opt-test-result opt-test-error';
-                refineCountrySaveResult.textContent = '❌ Erreur réseau : ' + err.message;
-            });
+        saveRefinedCountry(currentCountryRefineMode === 'validate' ? 'validate' : 'dates').catch(function() { /* handled */ });
     });
 
     document.getElementById('refine-country-synth-btn').addEventListener('click', function() {
