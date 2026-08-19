@@ -6515,6 +6515,143 @@ def ai_lab_regen_step() -> Response:
     })
 
 
+@web.route("/ai-lab/fetch-media", methods=["POST"])
+@editor_required
+def ai_lab_fetch_media() -> Response:
+    """Auto-fetch the flag (country/region) and/or primary photo (city/region) for an existing entity.
+
+    Mirrors the behavior of the official AI Lab import — Wikimedia Commons / flagcdn / Wikipedia REST.
+    Form fields: entity_type, slug.
+    """
+    from .db import get_db
+
+    entity_type = request.form.get("entity_type", "").strip().lower()
+    slug = request.form.get("slug", "").strip()
+    if entity_type not in {"city", "region", "country"} or not slug:
+        return jsonify({"success": False, "error": "Paramètres invalides (entity_type, slug)."})
+
+    conn = get_db()
+    messages: list[str] = []
+
+    if entity_type == "country":
+        row = conn.execute(
+            "SELECT country_id, country_name FROM dim_country WHERE country_slug = ?", (slug,),
+        ).fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "Pays introuvable."})
+        from .services.city_import import download_country_flag
+        try:
+            flag_path = download_country_flag(row["country_name"], slug)
+            if flag_path:
+                messages.append(f"🚩 Drapeau : {flag_path}")
+            else:
+                messages.append("⚠️ Drapeau introuvable (code ISO inconnu).")
+        except Exception as exc:
+            messages.append(f"❌ Drapeau : {exc}")
+
+    elif entity_type == "region":
+        row = conn.execute(
+            "SELECT region_id, region_name, country_name FROM dim_region WHERE region_slug = ?", (slug,),
+        ).fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "Région introuvable."})
+        region_id = row["region_id"]
+
+        try:
+            flag_path = fetch_and_save_region_flag(row["region_name"], slug)
+            if flag_path:
+                messages.append(f"🚩 Drapeau : {flag_path}")
+            else:
+                messages.append("⚠️ Drapeau introuvable (Wikimedia).")
+        except Exception as exc:
+            messages.append(f"❌ Drapeau : {exc}")
+
+        photo_path = None
+        try:
+            photo_path = fetch_and_save_region_photo(
+                conn, region_id, row["region_name"], slug, row["country_name"] or "",
+            )
+            conn.commit()
+            if photo_path:
+                messages.append(f"🖼️ Photo : {photo_path}")
+            else:
+                messages.append("⚠️ Photo Wikipedia introuvable.")
+        except Exception as exc:
+            conn.rollback()
+            messages.append(f"❌ Photo : {exc}")
+
+        # Also register the flag in the region photo album (like the AI Lab import does).
+        try:
+            import shutil as _shutil
+            static_root = Path(current_app.static_folder or "")
+            flag_dest = static_root / "images" / "flags" / "regions" / f"{slug}.png"
+            if flag_dest.exists():
+                region_lib_dir = static_root / "images" / "regions" / slug
+                region_lib_dir.mkdir(parents=True, exist_ok=True)
+                flag_lib_copy = region_lib_dir / "flag.png"
+                if not flag_lib_copy.exists():
+                    _shutil.copy2(str(flag_dest), str(flag_lib_copy))
+                existing_flag = conn.execute(
+                    "SELECT photo_id FROM dim_region_photo WHERE region_id = ? AND filename = 'flag.png'",
+                    (region_id,),
+                ).fetchone()
+                if not existing_flag:
+                    flag_is_primary = not photo_path
+                    conn.execute(
+                        "INSERT INTO dim_region_photo (region_id, filename, caption, source_url, attribution, is_primary) "
+                        "VALUES (?, 'flag.png', ?, ?, 'Wikimedia Commons', ?)",
+                        (region_id, f"Drapeau de {row['region_name']}",
+                         f"images/flags/regions/{slug}.png", flag_is_primary),
+                    )
+                    conn.commit()
+                    messages.append("🚩 Drapeau ajouté à l'album de la région.")
+        except Exception as exc:
+            messages.append(f"⚠️ Album drapeau : {exc}")
+
+    else:  # city
+        row = conn.execute(
+            "SELECT city_id, city_name, region, country FROM dim_city WHERE city_slug = ?", (slug,),
+        ).fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "Ville introuvable."})
+        try:
+            photo_result = fetch_and_save_city_photo(
+                slug, row["city_name"], row["region"], row["country"],
+            )
+            if photo_result.get("success"):
+                messages.append(f"🖼️ Photo : {photo_result['filename']}")
+                try:
+                    from .services.city_photos import save_photo_to_library, CITY_PHOTO_DIR
+                    photo_path = CITY_PHOTO_DIR / photo_result["filename"]
+                    if photo_path.exists():
+                        save_photo_to_library(
+                            conn, row["city_id"], slug,
+                            photo_path.read_bytes(), photo_result["filename"],
+                            source_url=photo_result.get("source_page", ""),
+                            attribution="Wikipedia/Wikimedia — vérifier les licences.",
+                        )
+                        conn.commit()
+                        messages.append("🖼️ Ajoutée à la bibliothèque.")
+                except Exception as exc_lib:
+                    messages.append(f"⚠️ Bibliothèque photo : {exc_lib}")
+            else:
+                messages.append(f"⚠️ Photo : {photo_result.get('error', 'introuvable')}")
+        except Exception as exc:
+            messages.append(f"❌ Photo : {exc}")
+
+    log_action(
+        "fetch_media", entity_type, slug,
+        f"Auto-fetch media pour {slug}",
+        {"messages": messages},
+    )
+    return jsonify({
+        "success": True,
+        "entity_type": entity_type,
+        "slug": slug,
+        "messages": messages,
+    })
+
+
 @web.route("/ai-lab/suggest-region", methods=["POST"])
 @editor_required
 def ai_lab_suggest_region() -> Response:

@@ -32,6 +32,13 @@
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
       <button type="button" id="ai-regen-all-btn" class="opt-btn opt-btn-primary" style="font-weight:600;">🎯 Régénérer les 3 étapes</button>
+      {% if entity_type == 'city' %}
+      <button type="button" id="ai-fetch-media-btn" class="opt-btn" style="background:#0ea5e9;color:#fff;font-weight:600;">🖼️ Photo principale (auto)</button>
+      {% elif entity_type == 'region' %}
+      <button type="button" id="ai-fetch-media-btn" class="opt-btn" style="background:#0ea5e9;color:#fff;font-weight:600;">🚩 Drapeau + photo (auto)</button>
+      {% elif entity_type == 'country' %}
+      <button type="button" id="ai-fetch-media-btn" class="opt-btn" style="background:#0ea5e9;color:#fff;font-weight:600;">🚩 Drapeau (auto)</button>
+      {% endif %}
       <a href="{{ url_for('web.ai_lab') }}" class="opt-btn" style="font-size:.85rem;">🧪 AI Lab complet →</a>
       <span style="font-size:.75rem;color:var(--muted);">La page recharge automatiquement après import.</span>
     </div>
@@ -45,6 +52,7 @@
   var SLUG = {{ slug|tojson }};
   var ENTITY_NAME = {{ entity_name|tojson }};
   var REGEN_URL = {{ url_for('web.ai_lab_regen_step')|tojson }};
+  var FETCH_MEDIA_URL = {{ url_for('web.ai_lab_fetch_media')|tojson }};
   var log = document.getElementById('ai-regen-log');
   function appendLog(kind, msg){
     log.style.display = '';
@@ -114,6 +122,37 @@
           allBtn.textContent = origLabel;
         });
       })(1);
+    });
+  }
+
+  var mediaBtn = document.getElementById('ai-fetch-media-btn');
+  if (mediaBtn){
+    mediaBtn.addEventListener('click', function(){
+      var origLabel = mediaBtn.textContent;
+      mediaBtn.disabled = true;
+      mediaBtn.textContent = '⏳ Recherche…';
+      appendLog('info', 'Média — recherche automatique (Wikimedia/Wikipedia)…');
+      var fd = new FormData();
+      fd.append('entity_type', ENTITY_TYPE);
+      fd.append('slug', SLUG);
+      fetch(FETCH_MEDIA_URL, { method:'POST', body: fd })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          mediaBtn.disabled = false;
+          mediaBtn.textContent = origLabel;
+          if (d.success){
+            (d.messages||[]).forEach(function(m){ appendLog('success', m); });
+            appendLog('success', 'Rechargement de la page…');
+            setTimeout(function(){ location.reload(); }, 1200);
+          } else {
+            appendLog('error', 'Média ❌ ' + (d.error||'Erreur inconnue'));
+          }
+        })
+        .catch(function(err){
+          mediaBtn.disabled = false;
+          mediaBtn.textContent = origLabel;
+          appendLog('error', 'Média ❌ ' + (err.message||err));
+        });
     });
   }
 })();
