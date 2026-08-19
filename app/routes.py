@@ -8241,6 +8241,9 @@ def ai_lab_refine_city_synthesize() -> Response:
 def ai_lab_refine_city_save() -> Response:
     """Save the refined city population data + sources to the database."""
     from .db import get_db
+    from .services.city_import import (
+        parse_stats_text, _build_time_cache, upsert_time_dimension, _upsert_annotation,
+    )
 
     text = request.form.get("city_text", "").strip()
     is_validate = request.form.get("is_validate", "") == "1"
@@ -8251,20 +8254,20 @@ def ai_lab_refine_city_save() -> Response:
         return jsonify({"success": False, "error": "Ville non spécifiée."})
 
     conn = get_db()
-    city_row = conn.execute("SELECT city_id, city_name FROM dim_city WHERE city_slug = ?", (city_slug,)).fetchone()
+    city_row = conn.execute(
+        "SELECT city_id, city_name FROM dim_city WHERE city_slug = ?", (city_slug,)
+    ).fetchone()
     if city_row is None:
         return jsonify({"success": False, "error": "Ville introuvable."})
     city_id = city_row["city_id"]
 
-    # Parse the === SOURCES === section if present
-    sources_by_year: dict[int, dict] = {}
-    # Strip markdown code fences that AI often wraps around output
     clean_text = text.replace("```python", "").replace("```", "").strip()
-    # Normalize various source header formats
     sources_match = re.search(r'={2,}\s*SOURCES\s*={2,}', clean_text)
+    stats_block = clean_text[:sources_match.start()] if sources_match else clean_text
+
+    sources_by_year: dict[int, dict] = {}
     if sources_match:
-        sources_section = clean_text[sources_match.end():]
-        for line in sources_section.strip().splitlines():
+        for line in clean_text[sources_match.end():].strip().splitlines():
             line = line.strip()
             if not line or "|" not in line:
                 continue
@@ -8283,35 +8286,76 @@ def ai_lab_refine_city_save() -> Response:
             except (ValueError, TypeError):
                 continue
 
-    # Update sources on existing population rows
     try:
-        for yr, src in sources_by_year.items():
-            conn.execute(
-                "UPDATE fact_city_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
-                "WHERE city_id = ? AND year = ?",
-                (src["source_url"] or None, src["source_label"] or None, city_id, yr),
-            )
-    except Exception:
-        conn.rollback()
+        stats = parse_stats_text(stats_block)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": f"Bloc population invalide : {exc}"})
 
-    # If validate mode, set the dim-level flag
-    if is_validate:
+    # Persist foundation_year if the AI kept/added one
+    if stats.get("foundation_year"):
         try:
             conn.execute(
-                "UPDATE dim_city SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-                "WHERE city_id = ?", (city_id,)
+                "UPDATE dim_city SET foundation_year = ? WHERE city_id = ?",
+                (stats["foundation_year"], city_id),
             )
         except Exception:
             conn.rollback()
 
+    time_cache = _build_time_cache(conn)
+    annotation_by_year: dict[int, int] = {}
+    for ann in stats["annotations"]:
+        if len(ann) < 4:
+            continue
+        yr, _p, lbl, col = ann[:4]
+        if not (isinstance(yr, int) and isinstance(lbl, str) and isinstance(col, str)):
+            continue
+        annotation_by_year[yr] = _upsert_annotation(conn, lbl, col)
+
+    try:
+        conn.execute("DELETE FROM fact_city_population WHERE city_id = ?", (city_id,))
+        for year, population in zip(stats["years"], stats["population"]):
+            time_id = upsert_time_dimension(conn, time_cache, year)
+            src = sources_by_year.get(year, {})
+            conn.execute(
+                """INSERT INTO fact_city_population
+                   (city_id, time_id, year, population, is_key_year, annotation_id,
+                    source_file, source_url, source_label, validated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (city_id, time_id, year, population,
+                 bool(year in annotation_by_year), annotation_by_year.get(year),
+                 "ai-refine",
+                 src.get("source_url") or None,
+                 src.get("source_label") or None,
+                 datetime.utcnow() if src else None),
+            )
+    except Exception as exc:
+        conn.rollback()
+        return jsonify({"success": False, "error": f"Erreur DB : {exc}"})
+
+    if is_validate:
+        conn.execute(
+            "UPDATE dim_city SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+            "WHERE city_id = ?", (city_id,)
+        )
+
     conn.commit()
 
+    # Regenerate villestats_RAW.py
+    try:
+        from scripts.export_villestats_raw import export_all
+        raw_path = Path(__file__).resolve().parent.parent / "villestats_RAW.py"
+        raw_path.write_text(export_all(), encoding="utf-8")
+    except Exception:
+        pass
+
     log_action("import", "city", city_slug,
-               f"Ville raffinée sauvegardée: {city_row['city_name']} ({len(sources_by_year)} sources)")
+               f"Ville raffinée sauvegardée: {city_row['city_name']} "
+               f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
     return jsonify({
         "success": True,
         "city_name": city_row["city_name"],
         "city_slug": city_slug,
+        "years_count": len(stats["years"]),
         "sources_count": len(sources_by_year),
     })
 
@@ -8478,6 +8522,9 @@ def ai_lab_refine_region_synthesize() -> Response:
 def ai_lab_refine_region_save() -> Response:
     """Save the refined region population data + sources to the database."""
     from .db import get_db
+    from .services.city_import import (
+        parse_region_stats_text, _build_time_cache, upsert_time_dimension, _upsert_annotation,
+    )
 
     text = request.form.get("region_text", "").strip()
     is_validate = request.form.get("is_validate", "") == "1"
@@ -8488,18 +8535,20 @@ def ai_lab_refine_region_save() -> Response:
         return jsonify({"success": False, "error": "Région non spécifiée."})
 
     conn = get_db()
-    region_row = conn.execute("SELECT region_id, region_name FROM dim_region WHERE region_slug = ?", (region_slug,)).fetchone()
+    region_row = conn.execute(
+        "SELECT region_id, region_name FROM dim_region WHERE region_slug = ?", (region_slug,)
+    ).fetchone()
     if region_row is None:
         return jsonify({"success": False, "error": "Région introuvable."})
     region_id = region_row["region_id"]
 
-    # Parse the === SOURCES === section
-    sources_by_year: dict[int, dict] = {}
     clean_text = text.replace("```python", "").replace("```", "").strip()
     sources_match = re.search(r'={2,}\s*SOURCES\s*={2,}', clean_text)
+    stats_block = clean_text[:sources_match.start()] if sources_match else clean_text
+
+    sources_by_year: dict[int, dict] = {}
     if sources_match:
-        sources_section = clean_text[sources_match.end():]
-        for line in sources_section.strip().splitlines():
+        for line in clean_text[sources_match.end():].strip().splitlines():
             line = line.strip()
             if not line or "|" not in line:
                 continue
@@ -8519,32 +8568,65 @@ def ai_lab_refine_region_save() -> Response:
                 continue
 
     try:
-        for yr, src in sources_by_year.items():
+        stats = parse_region_stats_text(stats_block)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": f"Bloc population invalide : {exc}"})
+
+    time_cache = _build_time_cache(conn)
+    annotation_by_year: dict[int, int] = {}
+    for ann in stats["annotations"]:
+        if len(ann) < 4:
+            continue
+        yr, _p, lbl, col = ann[:4]
+        if not (isinstance(yr, int) and isinstance(lbl, str) and isinstance(col, str)):
+            continue
+        annotation_by_year[yr] = _upsert_annotation(conn, lbl, col)
+
+    try:
+        conn.execute("DELETE FROM fact_region_population WHERE region_id = ?", (region_id,))
+        for year, population in zip(stats["years"], stats["population"]):
+            time_id = upsert_time_dimension(conn, time_cache, year)
+            src = sources_by_year.get(year, {})
             conn.execute(
-                "UPDATE fact_region_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
-                "WHERE region_id = ? AND year = ?",
-                (src["source_url"] or None, src["source_label"] or None, region_id, yr),
+                """INSERT INTO fact_region_population
+                   (region_id, time_id, year, population, is_key_year, annotation_id,
+                    source_file, source_url, source_label, validated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (region_id, time_id, year, population,
+                 bool(year in annotation_by_year), annotation_by_year.get(year),
+                 "ai-refine",
+                 src.get("source_url") or None,
+                 src.get("source_label") or None,
+                 datetime.utcnow() if src else None),
             )
-    except Exception:
+    except Exception as exc:
         conn.rollback()
+        return jsonify({"success": False, "error": f"Erreur DB : {exc}"})
 
     if is_validate:
-        try:
-            conn.execute(
-                "UPDATE dim_region SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-                "WHERE region_id = ?", (region_id,)
-            )
-        except Exception:
-            conn.rollback()
+        conn.execute(
+            "UPDATE dim_region SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+            "WHERE region_id = ?", (region_id,)
+        )
 
     conn.commit()
 
+    # Regenerate regionstats_RAW.py
+    try:
+        from scripts.export_regionstats_raw import export_all
+        raw_path = Path(__file__).resolve().parent.parent / "regionstats_RAW.py"
+        raw_path.write_text(export_all(), encoding="utf-8")
+    except Exception:
+        pass
+
     log_action("import", "region", region_slug,
-               f"Région raffinée sauvegardée: {region_row['region_name']} ({len(sources_by_year)} sources)")
+               f"Région raffinée sauvegardée: {region_row['region_name']} "
+               f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
     return jsonify({
         "success": True,
         "region_name": region_row["region_name"],
         "region_slug": region_slug,
+        "years_count": len(stats["years"]),
         "sources_count": len(sources_by_year),
     })
 
@@ -8709,6 +8791,9 @@ def ai_lab_refine_country_synthesize() -> Response:
 def ai_lab_refine_country_save() -> Response:
     """Save the refined country population data + sources to the database."""
     from .db import get_db
+    from .services.city_import import (
+        parse_country_stats_text, _build_time_cache, upsert_time_dimension, _upsert_annotation,
+    )
 
     text = request.form.get("country_text", "").strip()
     is_validate = request.form.get("is_validate", "") == "1"
@@ -8719,18 +8804,21 @@ def ai_lab_refine_country_save() -> Response:
         return jsonify({"success": False, "error": "Pays non spécifié."})
 
     conn = get_db()
-    country_row = conn.execute("SELECT country_id, country_name FROM dim_country WHERE country_slug = ?", (country_slug,)).fetchone()
+    country_row = conn.execute(
+        "SELECT country_id, country_name FROM dim_country WHERE country_slug = ?", (country_slug,)
+    ).fetchone()
     if country_row is None:
         return jsonify({"success": False, "error": "Pays introuvable."})
     country_id = country_row["country_id"]
 
-    # Parse the === SOURCES === section
-    sources_by_year: dict[int, dict] = {}
     clean_text = text.replace("```python", "").replace("```", "").strip()
     sources_match = re.search(r'={2,}\s*SOURCES\s*={2,}', clean_text)
+    stats_block = clean_text[:sources_match.start()] if sources_match else clean_text
+
+    # Parse SOURCES section
+    sources_by_year: dict[int, dict] = {}
     if sources_match:
-        sources_section = clean_text[sources_match.end():]
-        for line in sources_section.strip().splitlines():
+        for line in clean_text[sources_match.end():].strip().splitlines():
             line = line.strip()
             if not line or "|" not in line:
                 continue
@@ -8750,32 +8838,65 @@ def ai_lab_refine_country_save() -> Response:
                 continue
 
     try:
-        for yr, src in sources_by_year.items():
+        stats = parse_country_stats_text(stats_block)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": f"Bloc population invalide : {exc}"})
+
+    time_cache = _build_time_cache(conn)
+    annotation_by_year: dict[int, int] = {}
+    for ann in stats["annotations"]:
+        if len(ann) < 4:
+            continue
+        yr, _p, lbl, col = ann[:4]
+        if not (isinstance(yr, int) and isinstance(lbl, str) and isinstance(col, str)):
+            continue
+        annotation_by_year[yr] = _upsert_annotation(conn, lbl, col)
+
+    try:
+        conn.execute("DELETE FROM fact_country_population WHERE country_id = ?", (country_id,))
+        for year, population in zip(stats["years"], stats["population"]):
+            time_id = upsert_time_dimension(conn, time_cache, year)
+            src = sources_by_year.get(year, {})
             conn.execute(
-                "UPDATE fact_country_population SET source_url = ?, source_label = ?, validated_at = CURRENT_TIMESTAMP "
-                "WHERE country_id = ? AND year = ?",
-                (src["source_url"] or None, src["source_label"] or None, country_id, yr),
+                """INSERT INTO fact_country_population
+                   (country_id, time_id, year, population, is_key_year, annotation_id,
+                    source_file, source_url, source_label, validated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (country_id, time_id, year, population,
+                 bool(year in annotation_by_year), annotation_by_year.get(year),
+                 "ai-refine",
+                 src.get("source_url") or None,
+                 src.get("source_label") or None,
+                 datetime.utcnow() if src else None),
             )
-    except Exception:
+    except Exception as exc:
         conn.rollback()
+        return jsonify({"success": False, "error": f"Erreur DB : {exc}"})
 
     if is_validate:
-        try:
-            conn.execute(
-                "UPDATE dim_country SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
-                "WHERE country_id = ?", (country_id,)
-            )
-        except Exception:
-            conn.rollback()
+        conn.execute(
+            "UPDATE dim_country SET population_validated = TRUE, population_validated_at = CURRENT_TIMESTAMP "
+            "WHERE country_id = ?", (country_id,)
+        )
 
     conn.commit()
 
+    # Regenerate paysstats_RAW.py
+    try:
+        from scripts.export_paysstats_raw import export_all
+        raw_path = Path(__file__).resolve().parent.parent / "paysstats_RAW.py"
+        raw_path.write_text(export_all(), encoding="utf-8")
+    except Exception:
+        pass
+
     log_action("import", "country", country_slug,
-               f"Pays raffiné sauvegardé: {country_row['country_name']} ({len(sources_by_year)} sources)")
+               f"Pays raffiné sauvegardé: {country_row['country_name']} "
+               f"({len(stats['years'])} années, {len(sources_by_year)} sources)")
     return jsonify({
         "success": True,
         "country_name": country_row["country_name"],
         "country_slug": country_slug,
+        "years_count": len(stats["years"]),
         "sources_count": len(sources_by_year),
     })
 

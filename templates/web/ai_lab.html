@@ -4626,7 +4626,7 @@
                 btn.textContent = '✅ Utiliser la version raffinée';
                 if (data.success) {
                     refineCitySaveResult.className = 'opt-test-result opt-test-success';
-                    refineCitySaveResult.innerHTML = '✅ <strong>' + data.city_name.replace(/</g,'&lt;') + '</strong> sauvegardée! (' + data.sources_count + ' sources mises à jour)';
+                    refineCitySaveResult.innerHTML = '✅ <strong>' + data.city_name.replace(/</g,'&lt;') + '</strong> sauvegardée ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
                 } else {
                     refineCitySaveResult.className = 'opt-test-result opt-test-error';
                     refineCitySaveResult.textContent = '❌ ' + data.error;
@@ -4882,7 +4882,7 @@
                 btn.textContent = '✅ Utiliser la version raffinée';
                 if (data.success) {
                     refineRegionSaveResult.className = 'opt-test-result opt-test-success';
-                    refineRegionSaveResult.innerHTML = '✅ <strong>' + data.region_name.replace(/</g,'&lt;') + '</strong> sauvegardée! (' + data.sources_count + ' sources mises à jour)';
+                    refineRegionSaveResult.innerHTML = '✅ <strong>' + data.region_name.replace(/</g,'&lt;') + '</strong> sauvegardée ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
                 } else {
                     refineRegionSaveResult.className = 'opt-test-result opt-test-error';
                     refineRegionSaveResult.textContent = '❌ ' + data.error;
@@ -5137,7 +5137,7 @@
                 btn.textContent = '✅ Utiliser la version raffinée';
                 if (data.success) {
                     refineCountrySaveResult.className = 'opt-test-result opt-test-success';
-                    refineCountrySaveResult.innerHTML = '✅ <strong>' + data.country_name.replace(/</g,'&lt;') + '</strong> sauvegardé! (' + data.sources_count + ' sources mises à jour)';
+                    refineCountrySaveResult.innerHTML = '✅ <strong>' + data.country_name.replace(/</g,'&lt;') + '</strong> sauvegardé ! (' + (data.years_count || 0) + ' années de population, ' + (data.sources_count || 0) + ' sources)';
                 } else {
                     refineCountrySaveResult.className = 'opt-test-result opt-test-error';
                     refineCountrySaveResult.textContent = '❌ ' + data.error;
