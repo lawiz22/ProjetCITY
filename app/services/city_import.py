@@ -448,7 +448,13 @@ def _ascii_name(name: str) -> str:
 def _resolve_import_location(conn: DbConnection, stats: dict[str, Any]) -> None:
     """Resolve non-CA/US regions against dim_region before importing a city."""
     region = stats.get("region")
-    if not region or stats.get("country") != "Unknown":
+    country = stats.get("country")
+
+    if not region and country and country != "Unknown":
+        _resolve_region_from_country(conn, stats)
+        return
+
+    if not region or country != "Unknown":
         return
 
     canonical_region = REGION_ALIASES.get(region, region)
@@ -476,6 +482,49 @@ def _resolve_import_location(conn: DbConnection, stats: dict[str, Any]) -> None:
         (value["country"] for value in country_values if _COUNTRY_ISO2.get(value["country"]) == country_iso),
         country_label,
     )
+
+
+def _resolve_region_from_country(conn: DbConnection, stats: dict[str, Any]) -> None:
+    """When country is known but region is missing, infer the region by
+    looking the city up in ref_city / dim_city for the same country
+    (matched via ISO code so 'Égypte' and 'Egypt' align)."""
+    country = stats.get("country")
+    city_name = stats.get("city_name")
+    if not country or not city_name:
+        return
+
+    country_iso = _COUNTRY_ISO2.get(country)
+    ascii_target = _ascii_name(city_name)
+
+    def _matches_country(value: str | None) -> bool:
+        if not value:
+            return False
+        if value == country:
+            return True
+        return country_iso is not None and _COUNTRY_ISO2.get(value) == country_iso
+
+    try:
+        ref_rows = conn.execute(
+            "SELECT city_name, region, country FROM ref_city WHERE region IS NOT NULL"
+        ).fetchall()
+    except Exception:
+        ref_rows = []
+    for row in ref_rows:
+        if not _matches_country(row["country"]):
+            continue
+        if _ascii_name(row["city_name"]) == ascii_target:
+            stats["region"] = REGION_ALIASES.get(row["region"], row["region"])
+            return
+
+    dim_rows = conn.execute(
+        "SELECT city_name, region, country FROM dim_city WHERE region IS NOT NULL"
+    ).fetchall()
+    for row in dim_rows:
+        if not _matches_country(row["country"]):
+            continue
+        if _ascii_name(row["city_name"]) == ascii_target:
+            stats["region"] = REGION_ALIASES.get(row["region"], row["region"])
+            return
 
 
 def _resolve_duplicate_slug(conn: DbConnection, stats: dict[str, Any]) -> None:

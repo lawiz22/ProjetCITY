@@ -10,6 +10,7 @@ from .services.analytics import AnalyticsService, SqlExecutionError
 from .services.app_state import delete_raw_document, load_raw_document
 from .services.city_import import (
     _resolve_duplicate_slug,
+    _resolve_import_location,
     delete_city_fiche,
     fetch_and_save_city_photo,
     get_city_fiche,
@@ -3827,6 +3828,7 @@ def add_city_merge_import() -> Response:
     conn = get_db()
     messages: list[str] = []
 
+    _resolve_import_location(conn, stats)
     _resolve_duplicate_slug(conn, stats)
 
     # --- Upsert dim_city to get city_id ---
@@ -4097,6 +4099,7 @@ def add_city_import() -> Response:
 
     if skip_pop:
         # Still need city_id — upsert dim_city only, skip population
+        _resolve_import_location(conn, stats)
         _resolve_duplicate_slug(conn, stats)
         uid = g.user["user_id"] if hasattr(g, "user") and g.user else None
         cursor = conn.execute(
