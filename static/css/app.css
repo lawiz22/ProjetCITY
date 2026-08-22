@@ -1397,20 +1397,25 @@ button {
 
 /* Collapsible panel enhancement (JS-driven, opt-out via .no-collapse). */
 .panel-collapse-head {
+    /* keep .panel-head layout as-is; only the toggle-zone is clickable */
+}
+.panel-collapse-toggle-zone {
     cursor: pointer;
     user-select: none;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
 }
-.panel-collapse-head:hover { opacity: .9; }
-.panel-collapse-head:focus-visible {
+.panel-collapse-toggle-zone:focus-visible {
     outline: 2px solid var(--accent, #2f6fed);
     outline-offset: 2px;
     border-radius: 4px;
 }
 .panel-collapse-arrow {
     display: inline-block;
-    font-size: .9em;
+    font-size: .85em;
     line-height: 1;
-    margin-right: 6px;
+    margin-right: 4px;
     color: var(--muted, #6b7280);
     transition: transform .15s ease;
 }
@@ -1419,9 +1424,13 @@ button {
 }
 .panel-collapse-body {
     overflow: hidden;
-    transition: opacity .15s ease;
 }
 .panel.panel-collapsed > .panel-collapse-body {
+    display: none;
+}
+/* When collapsed, only the title cluster stays visible: hide the action
+   buttons/forms that live as siblings inside .panel-head. */
+.panel.panel-collapsed > .panel-head > *:not(.panel-collapse-toggle-zone) {
     display: none;
 }
 .panel.panel-collapsed > .panel-head {
@@ -1429,6 +1438,10 @@ button {
 }
 
 .global-panels-toggle {
+    display: none;
+}
+body.detail-page .global-panels-toggle {
+    display: inline-block;
     position: sticky;
     top: 8px;
     z-index: 20;
@@ -1444,7 +1457,7 @@ button {
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(0,0,0,.08);
 }
-.global-panels-toggle:hover {
+body.detail-page .global-panels-toggle:hover {
     background: var(--accent-soft, #eef2ff);
 }
 
