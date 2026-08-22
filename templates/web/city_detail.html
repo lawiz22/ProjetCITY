@@ -107,6 +107,73 @@
     </article>
 </section>
 
+{% set _unknown_country = not city.country or city.country|lower in ['unknown', 'inconnu', 'n/a', '-'] %}
+{% set _unknown_region = not city.region or city.region|lower in ['unknown', 'inconnu', 'n/a', '-'] %}
+{% if _unknown_country or _unknown_region %}
+<section class="panel no-collapse city-auto-assign-banner" id="city-auto-assign"
+         style="margin-top:1rem;border:2px dashed #f59e0b;background:#fffbeb;">
+    <div class="panel-head" style="align-items:flex-start;">
+        <div>
+            <h2 style="margin:0;">⚠️ Localisation incomplète</h2>
+            <span class="helper-text">
+                {% if _unknown_country and _unknown_region %}
+                    Pays et région non renseignés — impossible de lier cette ville à un pays ou à une région.
+                {% elif _unknown_country %}
+                    Pays non renseigné — impossible de lier cette ville à un pays.
+                {% else %}
+                    Région non renseignée — impossible de lier cette ville à une région.
+                {% endif %}
+            </span>
+        </div>
+        <button type="button" id="city-auto-assign-btn" class="opt-btn opt-btn-primary"
+                data-city-slug="{{ city.city_slug }}"
+                style="font-weight:600;">
+            🤖 Auto-assigner par IA
+        </button>
+    </div>
+    <div id="city-auto-assign-log" style="display:none;margin-top:.6rem;padding:.5rem .7rem;border-radius:6px;font-family:monospace;font-size:.78rem;white-space:pre-wrap;"></div>
+</section>
+<script>
+(function(){
+  var btn = document.getElementById('city-auto-assign-btn');
+  if (!btn) return;
+  var log = document.getElementById('city-auto-assign-log');
+  function appendLog(kind, msg){
+    log.style.display = '';
+    log.style.background = kind==='error' ? '#fee2e2' : kind==='success' ? '#dcfce7' : '#f3f4f6';
+    log.style.color = kind==='error' ? '#991b1b' : kind==='success' ? '#166534' : '#374151';
+    var t = new Date().toLocaleTimeString();
+    log.textContent += '[' + t + '] ' + msg + '\n';
+  }
+  btn.addEventListener('click', function(){
+    var orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ Analyse IA…';
+    appendLog('info', 'Interrogation Mammouth pour ' + {{ city.city_name|tojson }} + '…');
+    var url = '/cities/' + btn.dataset.citySlug + '/auto-assign';
+    fetch(url, { method:'POST', body: new FormData() })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d.success){
+          (d.messages||[]).forEach(function(m){ appendLog('success', m); });
+          appendLog('success', 'Rechargement…');
+          setTimeout(function(){ location.reload(); }, 1200);
+        } else {
+          btn.disabled = false;
+          btn.textContent = orig;
+          appendLog('error', d.error || 'Erreur inconnue');
+        }
+      })
+      .catch(function(err){
+        btn.disabled = false;
+        btn.textContent = orig;
+        appendLog('error', err.message || err);
+      });
+  });
+})();
+</script>
+{% endif %}
+
 {{ ai_regen_panel('city', city.city_slug, city.city_name, city.latest_year is not none, periods|length > 0, fiche is not none) }}
 
 <section class="panel city-chart-panel" id="city-chart">

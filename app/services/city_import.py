@@ -115,25 +115,25 @@ def split_location(raw_city_name: str) -> tuple[str | None, str]:
         # 2-part form "City, Country" (e.g. "Tokyo, Japan", "Alexandrie, Égypte")
         if country_hint is None and len(parts) == 2 and parts[-1] in _COUNTRY_ISO2:
             country_iso = _COUNTRY_ISO2[parts[-1]]
-            country = {"ca": "Canada", "us": "United States"}.get(country_iso, parts[-1])
+            country = _ISO2_TO_FR.get(country_iso, parts[-1])
             return None, country
         region_name = parts[-2] if country_hint else parts[-1]
         region = REGION_ALIASES.get(region_name, region_name)
         if country_hint:
             country_iso = _COUNTRY_ISO2[country_hint]
-            country = {"ca": "Canada", "us": "United States"}.get(country_iso, country_hint)
+            country = _ISO2_TO_FR.get(country_iso, country_hint)
             return region, country
         if region in CANADIAN_PROVINCES:
             return region, "Canada"
         if region in US_STATES:
-            return region, "United States"
+            return region, "États-Unis"
         # Handle composite regions like "Alberta/Saskatchewan"
         if "/" in region:
             sub = [s.strip() for s in region.split("/")]
             if any(s in CANADIAN_PROVINCES for s in sub):
                 return sub[0], "Canada"
             if any(s in US_STATES for s in sub):
-                return sub[0], "United States"
+                return sub[0], "États-Unis"
         return region, "Unknown"
     return None, "Unknown"
 
@@ -470,6 +470,13 @@ def _resolve_import_location(conn: DbConnection, stats: dict[str, Any]) -> None:
     """Resolve non-CA/US regions against dim_region before importing a city."""
     region = stats.get("region")
     country = stats.get("country")
+
+    # Always try to normalize the country to its canonical French label so
+    # dim_city.country matches dim_country.country_name.
+    normalized = normalize_country_name_fr(country) if country else country
+    if normalized and normalized != country:
+        stats["country"] = normalized
+        country = normalized
 
     if not region and country and country != "Unknown":
         _resolve_region_from_country(conn, stats)
@@ -1429,6 +1436,87 @@ _COUNTRY_ISO2: dict[str, str] = {
     "Koweït": "kw", "Bahreïn": "bh", "Yémen": "ye",
     "Roumanie": "ro", "Macédoine du Nord": "mk",
 }
+
+
+# ISO-2 → canonical French country name (used to align dim_city.country with
+# dim_country.country_name so links/joins work regardless of the label the AI
+# produced). Missing entries fall back to the input string unchanged.
+_ISO2_TO_FR: dict[str, str] = {
+    "af": "Afghanistan", "al": "Albanie", "dz": "Algérie", "ad": "Andorre",
+    "ao": "Angola", "ag": "Antigua-et-Barbuda", "ar": "Argentine", "am": "Arménie",
+    "au": "Australie", "at": "Autriche", "az": "Azerbaïdjan", "bs": "Bahamas",
+    "bh": "Bahreïn", "bd": "Bangladesh", "bb": "Barbade", "by": "Biélorussie",
+    "be": "Belgique", "bz": "Belize", "bj": "Bénin", "bt": "Bhoutan",
+    "bo": "Bolivie", "ba": "Bosnie-Herzégovine", "bw": "Botswana", "br": "Brésil",
+    "bn": "Brunei", "bg": "Bulgarie", "bf": "Burkina Faso", "bi": "Burundi",
+    "cv": "Cap-Vert", "kh": "Cambodge", "cm": "Cameroun", "ca": "Canada",
+    "cf": "République centrafricaine", "td": "Tchad", "cl": "Chili", "cn": "Chine",
+    "co": "Colombie", "km": "Comores", "cg": "Congo", "cd": "République démocratique du Congo",
+    "cr": "Costa Rica", "ci": "Côte d'Ivoire", "hr": "Croatie", "cu": "Cuba",
+    "cy": "Chypre", "cz": "Tchéquie", "dk": "Danemark", "dj": "Djibouti",
+    "dm": "Dominique", "do": "République dominicaine", "ec": "Équateur",
+    "eg": "Égypte", "sv": "Salvador", "gq": "Guinée équatoriale", "er": "Érythrée",
+    "ee": "Estonie", "sz": "Eswatini", "et": "Éthiopie", "fj": "Fidji",
+    "fi": "Finlande", "fr": "France", "ga": "Gabon", "gm": "Gambie",
+    "ge": "Géorgie", "de": "Allemagne", "gh": "Ghana", "gr": "Grèce",
+    "gd": "Grenade", "gt": "Guatemala", "gn": "Guinée", "gw": "Guinée-Bissau",
+    "gy": "Guyana", "ht": "Haïti", "hn": "Honduras", "hu": "Hongrie",
+    "is": "Islande", "in": "Inde", "id": "Indonésie", "ir": "Iran",
+    "iq": "Irak", "ie": "Irlande", "il": "Israël", "it": "Italie",
+    "jm": "Jamaïque", "jp": "Japon", "jo": "Jordanie", "kz": "Kazakhstan",
+    "ke": "Kenya", "ki": "Kiribati", "kw": "Koweït", "kg": "Kirghizistan",
+    "la": "Laos", "lv": "Lettonie", "lb": "Liban", "ls": "Lesotho",
+    "lr": "Libéria", "ly": "Libye", "li": "Liechtenstein", "lt": "Lituanie",
+    "lu": "Luxembourg", "mg": "Madagascar", "mw": "Malawi", "my": "Malaisie",
+    "mv": "Maldives", "ml": "Mali", "mt": "Malte", "mh": "Îles Marshall",
+    "mr": "Mauritanie", "mu": "Maurice", "mx": "Mexique", "fm": "Micronésie",
+    "md": "Moldavie", "mc": "Monaco", "mn": "Mongolie", "me": "Monténégro",
+    "ma": "Maroc", "mz": "Mozambique", "mm": "Birmanie", "na": "Namibie",
+    "nr": "Nauru", "np": "Népal", "nl": "Pays-Bas", "nz": "Nouvelle-Zélande",
+    "ni": "Nicaragua", "ne": "Niger", "ng": "Nigéria", "kp": "Corée du Nord",
+    "mk": "Macédoine du Nord", "no": "Norvège", "om": "Oman", "pk": "Pakistan",
+    "pw": "Palaos", "pa": "Panama", "pg": "Papouasie-Nouvelle-Guinée",
+    "py": "Paraguay", "pe": "Pérou", "ph": "Philippines", "pl": "Pologne",
+    "pt": "Portugal", "qa": "Qatar", "ro": "Roumanie", "ru": "Russie",
+    "rw": "Rwanda", "kn": "Saint-Kitts-et-Nevis", "lc": "Sainte-Lucie",
+    "vc": "Saint-Vincent-et-les-Grenadines", "ws": "Samoa", "sm": "Saint-Marin",
+    "st": "Sao Tomé-et-Principe", "sa": "Arabie saoudite", "sn": "Sénégal",
+    "rs": "Serbie", "sc": "Seychelles", "sl": "Sierra Leone", "sg": "Singapour",
+    "sk": "Slovaquie", "si": "Slovénie", "sb": "Îles Salomon", "so": "Somalie",
+    "za": "Afrique du Sud", "kr": "Corée du Sud", "ss": "Soudan du Sud",
+    "es": "Espagne", "lk": "Sri Lanka", "sd": "Soudan", "sr": "Suriname",
+    "se": "Suède", "ch": "Suisse", "sy": "Syrie", "tw": "Taïwan",
+    "tj": "Tadjikistan", "tz": "Tanzanie", "th": "Thaïlande", "tl": "Timor oriental",
+    "tg": "Togo", "to": "Tonga", "tt": "Trinité-et-Tobago", "tn": "Tunisie",
+    "tr": "Turquie", "tm": "Turkménistan", "tv": "Tuvalu", "ug": "Ouganda",
+    "ua": "Ukraine", "ae": "Émirats arabes unis", "gb": "Royaume-Uni",
+    "us": "États-Unis", "uy": "Uruguay", "uz": "Ouzbékistan", "vu": "Vanuatu",
+    "va": "Vatican", "ve": "Venezuela", "vn": "Viêt Nam", "ye": "Yémen",
+    "zm": "Zambie", "zw": "Zimbabwe", "re": "Réunion", "xk": "Kosovo",
+}
+
+
+def normalize_country_name_fr(country_name: str | None) -> str | None:
+    """Return the canonical French name of a country given any label/ISO variant.
+
+    Falls back to the input string if the country is unknown. Empty/None/'Unknown'
+    are returned unchanged so callers can decide how to handle them.
+    """
+    if not country_name:
+        return country_name
+    label = country_name.strip()
+    if not label or label.lower() in {"unknown", "inconnu", "n/a", "-"}:
+        return label
+    iso2 = _COUNTRY_ISO2.get(label)
+    if not iso2:
+        lower = label.lower()
+        for k, v in _COUNTRY_ISO2.items():
+            if k.lower() == lower:
+                iso2 = v
+                break
+    if not iso2:
+        return label
+    return _ISO2_TO_FR.get(iso2, label)
 
 
 def download_country_flag(country_name: str, country_slug: str) -> str | None:

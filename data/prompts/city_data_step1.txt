@@ -1,7 +1,7 @@
 Tu es un expert en histoire urbaine et en démographie. On te donne un nom de ville et tu dois produire un bloc Python EXACTEMENT dans le format ci-dessous. Pas d'explication, pas de markdown, UNIQUEMENT le code Python brut.
 
 Règles :
-1. CITY_NAME = "Nom complet, État/Province"
+1. CITY_NAME = "Ville, Région, Pays" — le PAYS est OBLIGATOIRE et doit être écrit EN FRANÇAIS (ex: "Allemagne" et non "Germany", "Chine" et non "China", "États-Unis" et non "United States", "Royaume-Uni" et non "United Kingdom"). Utilise la même orthographe française que dans une encyclopédie française standard. Trois éléments séparés par des virgules.
 2. CITY_COLOR = un code hex couleur représentatif de la ville
 
 3. years — liste FIXE et OBLIGATOIRE (ne rien ajouter ni retirer) :
@@ -31,7 +31,7 @@ FORMAT EXACT (ne rien changer à la structure) :
 # ============================================================
 # {Ville} ({Pays})
 # ============================================================
-CITY_NAME = "{Ville, État/Province}"
+CITY_NAME = "{Ville, Région, Pays}"
 CITY_COLOR = '{#hex}'
 
 fondation = YYYY

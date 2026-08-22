@@ -779,6 +779,124 @@ def city_delete(city_slug: str) -> Response:
     return redirect(url_for("web.city_directory"))
 
 
+@web.route("/cities/<city_slug>/auto-assign", methods=["POST"])
+@editor_required
+def city_auto_assign(city_slug: str) -> Response:
+    """Ask the AI to resolve the country + region (in French) of a city and
+    update dim_city so it links properly to dim_country / dim_region."""
+    from .db import get_db
+    from .services.mammouth_ai import load_settings, generate_city
+    from .services.city_import import normalize_country_name_fr, REGION_ALIASES
+    import json as _json
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT city_id, city_name, region, country FROM dim_city WHERE city_slug = ?",
+        (city_slug,),
+    ).fetchone()
+    if not row:
+        return jsonify({"success": False, "error": "Ville introuvable."})
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API Mammouth configurée."})
+    model = request.form.get("model", "").strip() or settings.get("model", "gpt-4.1-mini")
+
+    known_country = row["country"] if _is_dashboard_country_name(row["country"]) else ""
+    known_region = row["region"] or ""
+    hints = []
+    if known_country:
+        hints.append(f"pays supposé : « {known_country} »")
+    if known_region:
+        hints.append(f"région supposée : « {known_region} »")
+    hint_txt = f" ({', '.join(hints)})" if hints else ""
+
+    prompt = (
+        f"Pour la ville « {row['city_name']} »{hint_txt}, détermine son pays et sa "
+        f"région/état/province administrative principale.\n"
+        f"Réponds UNIQUEMENT avec un JSON valide de la forme :\n"
+        f'{{"country": "Nom du pays en français", "region": "Nom de la région en français"}}\n'
+        f"Le pays et la région DOIVENT être écrits EN FRANÇAIS "
+        f"(ex: \"Allemagne\" et non \"Germany\", \"Bavière\" et non \"Bavaria\", "
+        f"\"États-Unis\" et non \"United States\"). "
+        f"Si aucun nom français usuel n'existe (ex: régions du Japon), utilise la "
+        f"translittération latine standard.\n"
+        f"Aucune explication, aucun texte hors du JSON."
+    )
+    result = generate_city(api_key, model, "", prompt, max_tokens=200, temperature=0.1)
+    if not result.get("success"):
+        return jsonify({"success": False, "error": f"IA: {result.get('error', 'inconnu')}"})
+
+    reply = (result.get("reply") or "").strip()
+    # Strip markdown fences if any
+    if reply.startswith("```"):
+        reply = reply.split("\n", 1)[1] if "\n" in reply else reply
+        reply = reply.rsplit("```", 1)[0].strip()
+        if reply.lower().startswith("json"):
+            reply = reply[4:].strip()
+    try:
+        parsed = _json.loads(reply)
+    except Exception:
+        return jsonify({
+            "success": False,
+            "error": f"Réponse IA non JSON : {reply[:120]}",
+        })
+    new_country_raw = str(parsed.get("country") or "").strip()
+    new_region_raw = str(parsed.get("region") or "").strip()
+    if not new_country_raw and not new_region_raw:
+        return jsonify({"success": False, "error": "L'IA n'a proposé ni pays ni région."})
+
+    new_country = normalize_country_name_fr(new_country_raw) or new_country_raw
+    # Prefer the canonical French region name (e.g. Colombie-Britannique)
+    new_region = new_region_raw
+    for alias, canonical in REGION_ALIASES.items():
+        if canonical == new_region_raw:
+            new_region = alias
+            break
+
+    updates: dict[str, str] = {}
+    if new_country and new_country != row["country"]:
+        updates["country"] = new_country
+    if new_region and new_region != row["region"]:
+        updates["region"] = new_region
+
+    if not updates:
+        return jsonify({
+            "success": True,
+            "unchanged": True,
+            "country": row["country"],
+            "region": row["region"],
+            "messages": ["Aucun changement — les valeurs actuelles sont déjà correctes."],
+        })
+
+    try:
+        set_clause = ", ".join(f"{k} = ?" for k in updates)
+        params = list(updates.values()) + [row["city_id"]]
+        conn.execute(f"UPDATE dim_city SET {set_clause} WHERE city_id = ?", params)
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        return jsonify({"success": False, "error": f"Erreur DB : {exc}"})
+
+    log_action(
+        "update", "city", city_slug,
+        f"Auto-assignation IA — {row['city_name']}",
+        {"before": {"country": row["country"], "region": row["region"]}, "after": updates},
+    )
+    messages = []
+    if "country" in updates:
+        messages.append(f"Pays : « {row['country']} » → « {updates['country']} »")
+    if "region" in updates:
+        messages.append(f"Région : « {row['region']} » → « {updates['region']} »")
+    return jsonify({
+        "success": True,
+        "country": updates.get("country", row["country"]),
+        "region": updates.get("region", row["region"]),
+        "messages": messages,
+    })
+
+
 @web.route("/cities/<city_slug>/export/pdf")
 @editor_required
 def city_detail_pdf(city_slug: str) -> Response:
