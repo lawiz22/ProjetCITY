@@ -6994,14 +6994,18 @@ def ai_lab_suggest_region() -> Response:
             f"Ma base contient déjà ces régions{country_ctx}: {', '.join(existing_names)}.\n"
             f"Suggère UNE région, province ou état{country_ctx} qui n'est PAS dans cette liste. "
             f"Choisis une région importante ou bien connue.\n"
-            f"Réponds UNIQUEMENT avec le nom de la région en anglais.\n"
+            f"Réponds UNIQUEMENT avec le nom de la région EN FRANÇAIS (nom officiel ou usuel en français). "
+            f"Si le français n'existe pas (ex: certaines régions du Japon, de Chine, etc.), utilise la translittération latine standard. "
+            f"N'utilise JAMAIS le nom anglais si un nom français existe (ex: 'Bavière' et non 'Bavaria', 'Rhénanie' et non 'Rhineland').\n"
             f"Aucun autre texte."
         )
     else:
         prompt = (
             f"Suggère UNE région, province ou état{country_ctx} au hasard. "
             f"Choisis une région importante ou bien connue.\n"
-            f"Réponds UNIQUEMENT avec le nom de la région en anglais.\n"
+            f"Réponds UNIQUEMENT avec le nom de la région EN FRANÇAIS (nom officiel ou usuel en français). "
+            f"Si le français n'existe pas (ex: certaines régions du Japon, de Chine, etc.), utilise la translittération latine standard. "
+            f"N'utilise JAMAIS le nom anglais si un nom français existe (ex: 'Bavière' et non 'Bavaria').\n"
             f"Aucun autre texte."
         )
 
