@@ -204,6 +204,31 @@ def _delete_rows_by_ids(
 # Stats text parser (Python format)
 # ---------------------------------------------------------------------------
 
+_ALIGN_TOLERANCE = 2  # auto-fix if len(population) differs from len(years) by at most this
+
+
+def _align_years_population(years: list[int], population: list[int]) -> tuple[list[int], list[int]]:
+    """Return (years, population) with matching length.
+
+    Tolerates a small drift (<= _ALIGN_TOLERANCE) — trims extra population entries
+    or pads with the last known value (or 0). Raises ValueError otherwise.
+    """
+    diff = len(population) - len(years)
+    if diff == 0:
+        return years, population
+    if abs(diff) > _ALIGN_TOLERANCE:
+        raise ValueError(
+            f"years ({len(years)}) et population ({len(population)}) n'ont pas la même longueur."
+        )
+    if diff > 0:
+        # AI produced too many population values → drop the trailing ones (they're usually the extras)
+        return years, population[: len(years)]
+    # diff < 0 → pad population with last known value (or 0 if empty) so the years still line up
+    filler = population[-1] if population else 0
+    padded = population + [filler] * (-diff)
+    return years, padded
+
+
 def parse_stats_text(text: str) -> dict[str, Any]:
     """Parse the Python-style stats block (CITY_NAME, CITY_COLOR, years, population, annotations)."""
     result: dict[str, Any] = {}
@@ -233,11 +258,7 @@ def parse_stats_text(text: str) -> dict[str, Any]:
         raise ValueError("Liste 'population' introuvable.")
     result["population"] = [int(p.strip()) for p in pop_match.group(1).split(",") if p.strip()]
 
-    if len(result["years"]) != len(result["population"]):
-        raise ValueError(
-            f"years ({len(result['years'])}) et population ({len(result['population'])}) "
-            f"n'ont pas la même longueur."
-        )
+    result["years"], result["population"] = _align_years_population(result["years"], result["population"])
 
     annotations: list[tuple] = []
     ann_match = re.search(r"annotations\s*=\s*\[(.+?)\]\s*$", text, re.DOTALL | re.MULTILINE)
@@ -1219,11 +1240,7 @@ def parse_country_stats_text(text: str) -> dict[str, Any]:
         raise ValueError("Liste 'population' introuvable.")
     result["population"] = [int(p.strip()) for p in pop_match.group(1).split(",") if p.strip()]
 
-    if len(result["years"]) != len(result["population"]):
-        raise ValueError(
-            f"years ({len(result['years'])}) et population ({len(result['population'])}) "
-            f"n'ont pas la même longueur."
-        )
+    result["years"], result["population"] = _align_years_population(result["years"], result["population"])
 
     annotations: list[tuple] = []
     ann_match = re.search(r"annotations\s*=\s*\[(.+?)\]\s*$", text, re.DOTALL | re.MULTILINE)
@@ -1492,11 +1509,7 @@ def parse_region_stats_text(text: str) -> dict[str, Any]:
         raise ValueError("Liste 'population' introuvable.")
     result["population"] = [int(p.strip()) for p in pop_match.group(1).split(",") if p.strip()]
 
-    if len(result["years"]) != len(result["population"]):
-        raise ValueError(
-            f"years ({len(result['years'])}) et population ({len(result['population'])}) "
-            f"n'ont pas la même longueur."
-        )
+    result["years"], result["population"] = _align_years_population(result["years"], result["population"])
 
     annotations: list[tuple] = []
     ann_match = re.search(r"annotations\s*=\s*\[(.+?)\]\s*$", text, re.DOTALL | re.MULTILINE)
