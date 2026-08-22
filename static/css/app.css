@@ -5951,8 +5951,37 @@ td {
 .photo-lib-actions {
     display: flex;
     align-items: center;
-    gap: .8rem;
+    gap: .4rem;
     flex-wrap: wrap;
+}
+
+/* When a photo-library toolbar sits inside a .panel-head, drop it under the
+   title on its own line and shrink the buttons. */
+.panel-head {
+    flex-wrap: wrap;
+}
+.panel-head > .photo-lib-actions {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    margin-top: .35rem;
+    gap: .4rem;
+}
+.photo-lib-actions .secondary-button,
+.photo-lib-actions button,
+.photo-lib-actions a.secondary-button,
+.photo-lib-actions .refetch-btn {
+    padding: .28rem .65rem;
+    font-size: .78rem;
+    border-radius: 5px;
+    line-height: 1.2;
+    font-weight: 500;
+}
+.photo-lib-actions input[type="file"] {
+    max-width: 170px;
+    font-size: .72rem;
+}
+.photo-lib-actions form {
+    gap: .35rem !important;
 }
 
 .photo-gallery {
