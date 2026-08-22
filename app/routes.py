@@ -5266,7 +5266,7 @@ def city_fiche_delete(city_slug: str) -> Response:
 def geo_coverage() -> str:
     """Geographic coverage for every country and region known to the database."""
     from .db import get_db
-    from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2
+    from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2, normalize_region_name_fr
 
     conn = get_db()
     dimension_regions = conn.execute(
@@ -5275,8 +5275,17 @@ def geo_coverage() -> str:
            WHERE country_name IS NOT NULL AND region_name IS NOT NULL
            ORDER BY LOWER(country_name), LOWER(region_name)"""
     ).fetchall()
+
+    def _region_key(name):
+        # Collapse "Departamento de Santa Cruz" / "Département de Santa Cruz" / "Santa Cruz"
+        # to the same bucket regardless of source table.
+        return (normalize_region_name_fr(name) or name or "").casefold()
+
+    def _clean_label(name):
+        return normalize_region_name_fr(name) or name or ""
+
     region_country_by_key = {
-        REGION_ALIASES.get(row["region_name"], row["region_name"]).casefold(): row["country_name"]
+        _region_key(row["region_name"]): row["country_name"]
         for row in dimension_regions
         if _is_dashboard_country_name(row["country_name"])
     }
@@ -5294,7 +5303,7 @@ def geo_coverage() -> str:
     for raw_row in raw_rows:
         row = dict(raw_row)
         if not _is_dashboard_country_name(row["country"]):
-            region_key = REGION_ALIASES.get(row["region"], row["region"]).casefold() if row["region"] else ""
+            region_key = _region_key(row["region"]) if row["region"] else ""
             row["country"] = region_country_by_key.get(region_key)
         if _is_dashboard_country_name(row["country"]):
             rows.append(row)
@@ -5315,9 +5324,6 @@ def geo_coverage() -> str:
 
     def _country_key(name: str) -> str:
         return _COUNTRY_ISO2.get(name, name.casefold())
-
-    def _region_key(name: str) -> str:
-        return REGION_ALIASES.get(name, name).casefold()
 
     import unicodedata as _ud
 
@@ -5397,14 +5403,14 @@ def geo_coverage() -> str:
     region_country_names: dict[tuple[str, str], str] = {}
     for row in dimension_regions:
         key = (_country_key(row["country_name"]), _region_key(row["region_name"]))
-        region_labels[key] = row["region_name"]
+        region_labels[key] = _clean_label(row["region_name"])
         region_country_names[key] = row["country_name"]
     for key, data in region_data.items():
-        region_labels.setdefault(key, data["region"] or "Sans région")
+        region_labels.setdefault(key, _clean_label(data["region"]) or "Sans région")
         region_country_names.setdefault(key, data["country"])
     for rr in ref_rows:
         key = (_country_key(rr["country"]), _region_key(rr["region"]))
-        region_labels.setdefault(key, rr["region"])
+        region_labels.setdefault(key, _clean_label(rr["region"]))
         region_country_names.setdefault(key, rr["country"])
 
     country_keys = list(dict.fromkeys(
