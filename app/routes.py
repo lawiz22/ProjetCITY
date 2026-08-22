@@ -1051,47 +1051,93 @@ def country_detail(country_slug: str) -> str:
 
 
 def _build_country_possible_regions(conn, country_slug: str, country_name: str) -> dict:
-    """Return {"has_list": bool, "regions": [{name, slug, flag_path, exists}, ...]}."""
+    """Return {"has_list": bool, "regions": [{name, slug, flag_path, photo_path, image_path, exists}, ...]}."""
     import os
     from .services.country_regions import load_country_regions
 
     names = load_country_regions(country_slug)
     existing_rows = conn.execute(
-        "SELECT region_name, region_slug FROM dim_region WHERE country_name = ?",
+        """SELECT r.region_name, r.region_slug,
+                  (SELECT filename FROM dim_region_photo
+                    WHERE region_id = r.region_id AND is_primary = TRUE
+                    LIMIT 1) AS primary_photo,
+                  (SELECT filename FROM dim_region_photo
+                    WHERE region_id = r.region_id
+                    ORDER BY photo_id LIMIT 1) AS any_photo
+             FROM dim_region r
+            WHERE r.country_name = ?""",
         (country_name,),
     ).fetchall()
-    existing_by_name = {r["region_name"].strip().lower(): r["region_slug"] for r in existing_rows}
-    existing_by_slug = {r["region_slug"]: r["region_name"] for r in existing_rows}
     static_root = current_app.static_folder or ""
 
-    def _flag(slug: str) -> str | None:
-        rel = f"images/flags/regions/{slug}.png"
+    def _rel_if_exists(rel: str) -> str | None:
         full = os.path.join(static_root, rel.replace("/", os.sep))
         return rel if os.path.exists(full) else None
 
-    result: list[dict] = []
-    seen_slugs: set[str] = set()
-    if names:
-        for name in names:
-            slug = existing_by_name.get(name.strip().lower())
-            if slug:
-                seen_slugs.add(slug)
-            result.append({
-                "name": name,
-                "slug": slug,
-                "flag_path": _flag(slug) if slug else None,
-                "exists": slug is not None,
-            })
-    for slug, display_name in existing_by_slug.items():
-        if slug in seen_slugs:
-            continue
-        result.append({
-            "name": display_name,
+    def _flag(slug: str) -> str | None:
+        return _rel_if_exists(f"images/flags/regions/{slug}.png")
+
+    def _photo(slug: str, filename: str | None) -> str | None:
+        if not filename:
+            return None
+        return _rel_if_exists(f"images/regions/{slug}/{filename}")
+
+    existing_by_name: dict[str, dict] = {}
+    existing_by_slug: dict[str, dict] = {}
+    for r in existing_rows:
+        slug = r["region_slug"]
+        entry = {
+            "name": r["region_name"],
             "slug": slug,
             "flag_path": _flag(slug),
-            "exists": True,
-        })
-    return {"has_list": names is not None, "regions": result}
+            "photo_path": _photo(slug, r["primary_photo"] or r["any_photo"]),
+        }
+        existing_by_name[r["region_name"].strip().lower()] = entry
+        existing_by_slug[slug] = entry
+
+    result: list[dict] = []
+    seen_slugs: set[str] = set()
+
+    def _make_entry(name: str, existing: dict | None) -> dict:
+        if existing:
+            flag_path = existing["flag_path"]
+            photo_path = existing["photo_path"]
+            return {
+                "name": existing["name"] or name,
+                "slug": existing["slug"],
+                "flag_path": flag_path,
+                "photo_path": photo_path,
+                "image_path": flag_path or photo_path,
+                "exists": True,
+            }
+        return {
+            "name": name,
+            "slug": None,
+            "flag_path": None,
+            "photo_path": None,
+            "image_path": None,
+            "exists": False,
+        }
+
+    if names:
+        for name in names:
+            existing = existing_by_name.get(name.strip().lower())
+            if existing:
+                seen_slugs.add(existing["slug"])
+            result.append(_make_entry(name, existing))
+    for slug, entry in existing_by_slug.items():
+        if slug in seen_slugs:
+            continue
+        result.append(_make_entry(entry["name"], entry))
+
+    existing_count = sum(1 for r in result if r["exists"])
+    missing_count = len(result) - existing_count
+    return {
+        "has_list": names is not None,
+        "regions": result,
+        "existing_count": existing_count,
+        "missing_count": missing_count,
+    }
 
 
 # ------------------------------------------------------------------
