@@ -99,82 +99,75 @@
 {{ ai_regen_panel('country', country.country_slug, country.country_name, pop_data|length > 0, periods|length > 0, fiche is not none) }}
 
 <section class="panel" id="country-possible-regions" style="margin-top:1rem;">
-    <details id="possible-regions-details" open>
-        <summary style="cursor:pointer;list-style:none;">
-            <div class="panel-head" style="display:flex;align-items:center;gap:.5rem;">
-                <span class="possible-regions-arrow" style="transition:transform .2s;">▾</span>
-                <div style="flex:1;">
-                    <h2 style="margin:0;">🗺️ Régions de {{ country.country_name }}</h2>
-                    <span class="helper-text" id="possible-regions-summary">
-                        {% if possible_regions.regions %}
-                            {{ possible_regions.regions|length }} région(s) —
-                            {{ possible_regions.existing_count }} en base{% if possible_regions.missing_count %},
-                            {{ possible_regions.missing_count }} à générer{% endif %}
-                        {% elif possible_regions.has_list %}
-                            Liste vide
-                        {% else %}
-                            Aucune liste générée — clique pour créer automatiquement
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-        </summary>
-        <div style="padding:0 1rem 1rem;">
-            {% if not possible_regions.has_list and not possible_regions.regions %}
-            <div style="padding:1rem;background:var(--card-bg,#fff);border:1px dashed #f59e0b;border-radius:8px;text-align:center;">
-                <p style="margin:0 0 .75rem;color:var(--muted);">
-                    Aucune liste de régions n'a encore été générée pour ce pays.
-                </p>
-                <button type="button" id="pr-generate-list-btn" class="opt-btn opt-btn-primary">
-                    🤖 Générer la liste des régions par IA
-                </button>
-            </div>
-            {% elif not possible_regions.has_list and possible_regions.regions %}
-            <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem;">
-                <button type="button" id="pr-generate-list-btn" class="opt-btn" style="font-size:.75rem;padding:.25rem .5rem;">
-                    🤖 Compléter la liste par IA
-                </button>
-            </div>
-            {% elif possible_regions.missing_count == 0 %}
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;gap:.5rem;">
-                <span class="helper-text" style="color:#166534;">✅ Toutes les régions listées sont en base.</span>
-                <button type="button" id="pr-generate-list-btn" class="opt-btn" style="font-size:.75rem;padding:.25rem .5rem;">
-                    🔄 Régénérer la liste
-                </button>
-            </div>
-            {% endif %}
-            <div id="pr-regions-grid" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.75rem;">
-                {% for r in possible_regions.regions %}
-                <div class="pr-region-item" data-region-name="{{ r.name }}"
-                     style="display:flex;flex-direction:column;align-items:center;width:88px;padding:.4rem;border:1px solid var(--border,#e5e7eb);border-radius:6px;background:var(--card-bg,#fff);">
-                    {% if r.exists %}
-                        <a href="{{ url_for('web.region_detail', region_slug=r.slug) }}"
-                           title="Voir {{ r.name }}{% if not r.flag_path and r.photo_path %} (photo — drapeau manquant){% endif %}"
-                           style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:inherit;">
-                            {% if r.image_path %}
-                            <img src="{{ url_for('static', filename=r.image_path) }}"
-                                 alt="{{ r.name }}"
-                                 style="width:56px;height:36px;object-fit:cover;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.15);{% if not r.flag_path %}outline:1px dashed #94a3b8;{% endif %}">
-                            {% else %}
-                            <div style="width:56px;height:36px;display:flex;align-items:center;justify-content:center;background:#e0f2fe;color:#0369a1;border-radius:3px;font-size:.7rem;" title="Sans drapeau ni photo — cliquer pour ouvrir la région">📷?</div>
-                            {% endif %}
-                            <span style="font-size:.7rem;text-align:center;margin-top:.25rem;line-height:1.1;">{{ r.name }}</span>
-                        </a>
-                    {% else %}
-                        <div style="width:56px;height:36px;display:flex;align-items:center;justify-content:center;background:#fef3c7;color:#92400e;border-radius:3px;font-size:.75rem;border:1px dashed #f59e0b;">·?·</div>
-                        <span style="font-size:.7rem;text-align:center;margin-top:.25rem;line-height:1.1;color:var(--muted);">{{ r.name }}</span>
-                        <button type="button" class="pr-generate-region-btn opt-btn"
-                                data-region-name="{{ r.name }}"
-                                style="margin-top:.3rem;font-size:.65rem;padding:.15rem .4rem;width:100%;background:#0ea5e9;color:#fff;">
-                            🤖 Générer
-                        </button>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-            <div id="pr-log" style="display:none;margin-top:.75rem;padding:.5rem .7rem;border-radius:6px;font-family:monospace;font-size:.75rem;white-space:pre-wrap;max-height:200px;overflow:auto;"></div>
+    <div class="panel-head">
+        <div>
+            <h2>🗺️ Régions de {{ country.country_name }}</h2>
+            <span class="helper-text" id="possible-regions-summary">
+                {% if possible_regions.regions %}
+                    {{ possible_regions.regions|length }} région(s) —
+                    {{ possible_regions.existing_count }} en base{% if possible_regions.missing_count %},
+                    {{ possible_regions.missing_count }} à générer{% endif %}
+                {% elif possible_regions.has_list %}
+                    Liste vide
+                {% else %}
+                    Aucune liste générée — clique pour créer automatiquement
+                {% endif %}
+            </span>
         </div>
-    </details>
+    </div>
+    {% if not possible_regions.has_list and not possible_regions.regions %}
+    <div style="padding:1rem;background:var(--card-bg,#fff);border:1px dashed #f59e0b;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 .75rem;color:var(--muted);">
+            Aucune liste de régions n'a encore été générée pour ce pays.
+        </p>
+        <button type="button" id="pr-generate-list-btn" class="opt-btn opt-btn-primary">
+            🤖 Générer la liste des régions par IA
+        </button>
+    </div>
+    {% elif not possible_regions.has_list and possible_regions.regions %}
+    <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem;">
+        <button type="button" id="pr-generate-list-btn" class="opt-btn" style="font-size:.75rem;padding:.25rem .5rem;">
+            🤖 Compléter la liste par IA
+        </button>
+    </div>
+    {% elif possible_regions.missing_count == 0 %}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;gap:.5rem;">
+        <span class="helper-text" style="color:#166534;">✅ Toutes les régions listées sont en base.</span>
+        <button type="button" id="pr-generate-list-btn" class="opt-btn" style="font-size:.75rem;padding:.25rem .5rem;">
+            🔄 Régénérer la liste
+        </button>
+    </div>
+    {% endif %}
+    <div id="pr-regions-grid" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.75rem;">
+        {% for r in possible_regions.regions %}
+        <div class="pr-region-item" data-region-name="{{ r.name }}"
+             style="display:flex;flex-direction:column;align-items:center;width:88px;padding:.4rem;border:1px solid var(--border,#e5e7eb);border-radius:6px;background:var(--card-bg,#fff);">
+            {% if r.exists %}
+                <a href="{{ url_for('web.region_detail', region_slug=r.slug) }}"
+                   title="Voir {{ r.name }}{% if not r.flag_path and r.photo_path %} (photo — drapeau manquant){% endif %}"
+                   style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:inherit;">
+                    {% if r.image_path %}
+                    <img src="{{ url_for('static', filename=r.image_path) }}"
+                         alt="{{ r.name }}"
+                         style="width:56px;height:36px;object-fit:cover;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.15);{% if not r.flag_path %}outline:1px dashed #94a3b8;{% endif %}">
+                    {% else %}
+                    <div style="width:56px;height:36px;display:flex;align-items:center;justify-content:center;background:#e0f2fe;color:#0369a1;border-radius:3px;font-size:.7rem;" title="Sans drapeau ni photo — cliquer pour ouvrir la région">📷?</div>
+                    {% endif %}
+                    <span style="font-size:.7rem;text-align:center;margin-top:.25rem;line-height:1.1;">{{ r.name }}</span>
+                </a>
+            {% else %}
+                <div style="width:56px;height:36px;display:flex;align-items:center;justify-content:center;background:#fef3c7;color:#92400e;border-radius:3px;font-size:.75rem;border:1px dashed #f59e0b;">·?·</div>
+                <span style="font-size:.7rem;text-align:center;margin-top:.25rem;line-height:1.1;color:var(--muted);">{{ r.name }}</span>
+                <button type="button" class="pr-generate-region-btn opt-btn"
+                        data-region-name="{{ r.name }}"
+                        style="margin-top:.3rem;font-size:.65rem;padding:.15rem .4rem;width:100%;background:#0ea5e9;color:#fff;">
+                    🤖 Générer
+                </button>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    <div id="pr-log" style="display:none;margin-top:.75rem;padding:.5rem .7rem;border-radius:6px;font-family:monospace;font-size:.75rem;white-space:pre-wrap;max-height:200px;overflow:auto;"></div>
 </section>
 
 <script>
@@ -183,14 +176,6 @@
   var GEN_LIST_URL = {{ url_for('web.country_regions_list_generate', country_slug=country.country_slug)|tojson }};
   var CREATE_URL   = {{ url_for('web.country_regions_list_create_region', country_slug=country.country_slug)|tojson }};
   var LIST_URL     = {{ url_for('web.country_regions_list', country_slug=country.country_slug)|tojson }};
-
-  var details = document.getElementById('possible-regions-details');
-  var arrow = details ? details.querySelector('.possible-regions-arrow') : null;
-  if (details && arrow){
-    details.addEventListener('toggle', function(){
-      arrow.style.transform = details.open ? 'rotate(0deg)' : 'rotate(-90deg)';
-    });
-  }
 
   var log = document.getElementById('pr-log');
   function appendLog(kind, msg){

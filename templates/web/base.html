@@ -12,13 +12,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
     {% block head_extra %}{% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=57">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=58">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0"></script>
     <script defer src="{{ url_for('static', filename='js/ui.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/tables.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/collapsible-panels.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dir-pager.js') }}"></script>
 </head>
 <body>
@@ -79,6 +80,9 @@
         <main class="main-panel">
             <header class="hero-bar">
                 {% block hero_title %}<h1>{{ page_title }}</h1>{% endblock %}
+                <button type="button" id="global-toggle-panels-btn"
+                        class="global-panels-toggle"
+                        title="Ouvrir ou fermer toutes les sections">▾ Tout fermer</button>
             </header>
 
             {% with messages = get_flashed_messages(with_categories=true) %}

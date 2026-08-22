@@ -1395,6 +1395,59 @@ button {
     margin: 0;
 }
 
+/* Collapsible panel enhancement (JS-driven, opt-out via .no-collapse). */
+.panel-collapse-head {
+    cursor: pointer;
+    user-select: none;
+}
+.panel-collapse-head:hover { opacity: .9; }
+.panel-collapse-head:focus-visible {
+    outline: 2px solid var(--accent, #2f6fed);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+.panel-collapse-arrow {
+    display: inline-block;
+    font-size: .9em;
+    line-height: 1;
+    margin-right: 6px;
+    color: var(--muted, #6b7280);
+    transition: transform .15s ease;
+}
+.panel-auto-icon {
+    margin-right: .35em;
+}
+.panel-collapse-body {
+    overflow: hidden;
+    transition: opacity .15s ease;
+}
+.panel.panel-collapsed > .panel-collapse-body {
+    display: none;
+}
+.panel.panel-collapsed > .panel-head {
+    margin-bottom: 0;
+}
+
+.global-panels-toggle {
+    position: sticky;
+    top: 8px;
+    z-index: 20;
+    align-self: flex-end;
+    margin-left: auto;
+    padding: .3rem .7rem;
+    font-size: .78rem;
+    font-weight: 600;
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 999px;
+    background: var(--card-bg, #fff);
+    color: var(--text-color, #111);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.global-panels-toggle:hover {
+    background: var(--accent-soft, #eef2ff);
+}
+
 .tall-panel {
     min-height: 420px;
 }
