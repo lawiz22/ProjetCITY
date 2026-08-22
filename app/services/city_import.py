@@ -478,6 +478,15 @@ def _resolve_import_location(conn: DbConnection, stats: dict[str, Any]) -> None:
         stats["country"] = normalized
         country = normalized
 
+    # Same for the region: strip Departamento/Département/Region of/Provincia/…
+    # prefixes so a city imported with region "Departamento de Santa Cruz"
+    # ends up in the same bucket as a region imported as "Santa Cruz".
+    if region:
+        normalized_region = normalize_region_name_fr(region)
+        if normalized_region and normalized_region != region:
+            stats["region"] = normalized_region
+            region = normalized_region
+
     if not region and country and country != "Unknown":
         _resolve_region_from_country(conn, stats)
         return
@@ -1519,6 +1528,40 @@ def normalize_country_name_fr(country_name: str | None) -> str | None:
     return _ISO2_TO_FR.get(iso2, label)
 
 
+# Common administrative-division prefixes in FR / ES / EN / IT that we strip
+# so "Département de Santa Cruz", "Departamento de Santa Cruz" and "Santa Cruz"
+# all collapse to the same canonical region label.
+_REGION_PREFIX_STRIP = re.compile(
+    r"^\s*("
+    r"département\s+d[eu']?\s+|départ\.\s+d[eu']?\s+|"
+    r"departamento\s+d[eu']?\s+|dep\.\s+d[eu']?\s+|"
+    r"province\s+d[eu']?\s+|provincia\s+d[eu']?\s+|province\s+of\s+|"
+    r"état\s+d[eu']?\s+|estado\s+d[eu']?\s+|state\s+of\s+|"
+    r"région\s+d[eu']?\s+|region\s+d[eu']?\s+|region\s+of\s+|regione\s+|"
+    r"préfecture\s+d[eu']?\s+|prefecture\s+of\s+|"
+    r"comté\s+d[eu']?\s+|county\s+of\s+|"
+    r"gouvernorat\s+d[eu']?\s+|governorate\s+of\s+"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def normalize_region_name_fr(name: str | None) -> str:
+    """Strip administrative prefixes and apply French aliases so region labels
+    coming from any source (AI list, city import, dim_region) collapse to a
+    single canonical form. Empty input passes through as ""."""
+    if not name:
+        return ""
+    label = str(name).strip()
+    if not label:
+        return ""
+    stripped = _REGION_PREFIX_STRIP.sub("", label, count=1).strip()
+    if not stripped:
+        stripped = label
+    stripped = REGION_ALIASES.get(stripped, stripped)
+    return stripped
+
+
 def download_country_flag(country_name: str, country_slug: str) -> str | None:
     """Download the flag for a country from flagcdn.com and save to static/images/flags/countries/.
 
@@ -1609,6 +1652,12 @@ def parse_region_stats_text(text: str) -> dict[str, Any]:
             pass
     result["annotations"] = annotations
 
+    # Normalize the region label so "Departamento de X" / "Département de X" / "X"
+    # all collapse to the same canonical entry in dim_region.
+    result["region_name"] = normalize_region_name_fr(result["region_name"]) or result["region_name"]
+    # Country also normalized to French so it matches dim_country.
+    if result.get("region_country"):
+        result["region_country"] = normalize_country_name_fr(result["region_country"]) or result["region_country"]
     result["region_slug"] = slugify(result["region_name"])
 
     return result

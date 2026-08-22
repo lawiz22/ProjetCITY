@@ -786,7 +786,7 @@ def city_auto_assign(city_slug: str) -> Response:
     update dim_city so it links properly to dim_country / dim_region."""
     from .db import get_db
     from .services.mammouth_ai import load_settings, generate_city
-    from .services.city_import import normalize_country_name_fr, REGION_ALIASES
+    from .services.city_import import normalize_country_name_fr, normalize_region_name_fr, REGION_ALIASES
     import json as _json
 
     conn = get_db()
@@ -848,10 +848,11 @@ def city_auto_assign(city_slug: str) -> Response:
         return jsonify({"success": False, "error": "L'IA n'a proposé ni pays ni région."})
 
     new_country = normalize_country_name_fr(new_country_raw) or new_country_raw
-    # Prefer the canonical French region name (e.g. Colombie-Britannique)
-    new_region = new_region_raw
+    new_region = normalize_region_name_fr(new_region_raw) or new_region_raw
+    # If the normalized name has a canonical French alias (e.g.
+    # "British Columbia" → "Colombie-Britannique"), prefer that.
     for alias, canonical in REGION_ALIASES.items():
-        if canonical == new_region_raw:
+        if canonical == new_region:
             new_region = alias
             break
 
@@ -1172,6 +1173,7 @@ def _build_country_possible_regions(conn, country_slug: str, country_name: str) 
     """Return {"has_list": bool, "regions": [{name, slug, flag_path, photo_path, image_path, exists}, ...]}."""
     import os
     from .services.country_regions import load_country_regions
+    from .services.city_import import normalize_region_name_fr
 
     names = load_country_regions(country_slug)
     existing_rows = conn.execute(
@@ -1200,7 +1202,10 @@ def _build_country_possible_regions(conn, country_slug: str, country_name: str) 
             return None
         return _rel_if_exists(f"images/regions/{slug}/{filename}")
 
-    existing_by_name: dict[str, dict] = {}
+    def _norm_key(name: str) -> str:
+        return (normalize_region_name_fr(name) or name or "").strip().lower()
+
+    existing_by_norm: dict[str, dict] = {}
     existing_by_slug: dict[str, dict] = {}
     for r in existing_rows:
         slug = r["region_slug"]
@@ -1210,7 +1215,7 @@ def _build_country_possible_regions(conn, country_slug: str, country_name: str) 
             "flag_path": _flag(slug),
             "photo_path": _photo(slug, r["primary_photo"] or r["any_photo"]),
         }
-        existing_by_name[r["region_name"].strip().lower()] = entry
+        existing_by_norm[_norm_key(r["region_name"])] = entry
         existing_by_slug[slug] = entry
 
     result: list[dict] = []
@@ -1239,7 +1244,7 @@ def _build_country_possible_regions(conn, country_slug: str, country_name: str) 
 
     if names:
         for name in names:
-            existing = existing_by_name.get(name.strip().lower())
+            existing = existing_by_norm.get(_norm_key(name))
             if existing:
                 seen_slugs.add(existing["slug"])
             result.append(_make_entry(name, existing))
@@ -1283,6 +1288,7 @@ def country_regions_list_generate(country_slug: str) -> Response:
     from .db import get_db
     from .services.mammouth_ai import load_settings, generate_city
     from .services.country_regions import parse_regions_reply, save_country_regions
+    from .services.city_import import normalize_region_name_fr
 
     conn = get_db()
     row = conn.execute(
@@ -1302,7 +1308,14 @@ def country_regions_list_generate(country_slug: str) -> Response:
         "Tu es un expert en géographie administrative.\n"
         f"Liste TOUTES les régions administratives principales du pays « {country_name} » "
         "(provinces, états, régions ou divisions équivalentes de premier niveau).\n"
-        "Utilise les noms officiels en français quand ils existent, sinon la forme locale.\n"
+        "RÈGLES DE NOMMAGE (à respecter strictement) :\n"
+        "- Utilise le nom officiel EN FRANÇAIS quand il existe (ex: « Bavière » et non « Bayern » ou « Bavaria »).\n"
+        "- N'inclus PAS le préfixe administratif : jamais « Département de », « Departamento de », "
+        "« Province de », « Region of », « État de », « Estado de », « Provincia de », etc. "
+        "Écris uniquement le nom propre de la région (ex: « Santa Cruz » et non « Departamento de Santa Cruz »; "
+        "« Bavière » et non « État libre de Bavière »).\n"
+        "- Si aucun nom français usuel n'existe (ex: régions du Japon, de Chine), utilise la translittération latine "
+        "sans préfixe administratif.\n"
         "Réponds UNIQUEMENT avec un JSON valide de la forme :\n"
         '{"regions": ["Nom1", "Nom2", "Nom3"]}\n'
         "Aucune explication, aucun texte hors du JSON."
@@ -1311,9 +1324,23 @@ def country_regions_list_generate(country_slug: str) -> Response:
     if not result.get("success"):
         return jsonify({"success": False, "error": f"IA: {result.get('error', 'inconnu')}"})
 
-    regions = parse_regions_reply(result.get("reply") or "")
-    if not regions:
+    raw_regions = parse_regions_reply(result.get("reply") or "")
+    if not raw_regions:
         return jsonify({"success": False, "error": "Réponse IA vide ou impossible à parser."})
+
+    # Strip administrative prefixes and dedup after normalization so
+    # "Departamento de Santa Cruz" collapses with any pre-existing "Santa Cruz".
+    seen: set[str] = set()
+    regions: list[str] = []
+    for raw in raw_regions:
+        norm = normalize_region_name_fr(raw)
+        if not norm:
+            continue
+        key = norm.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        regions.append(norm)
 
     save_country_regions(country_slug, regions)
     log_action("regen", "country", country_slug,
