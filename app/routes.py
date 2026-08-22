@@ -5183,8 +5183,38 @@ def geo_coverage_expand_regions():
 
 
 # ------------------------------------------------------------------
-#  Coverage / completeness
+#  Reference population
 # ------------------------------------------------------------------
+
+@web.route("/reference-population")
+def reference_population() -> str:
+    service = AnalyticsService()
+    data = service.get_reference_population_overview()
+    return render_template(
+        "web/reference_population.html",
+        page_title="Population de référence",
+        **data,
+    )
+
+
+# ------------------------------------------------------------------
+#  Options
+# ------------------------------------------------------------------
+
+@web.route("/options", methods=["GET"])
+@collaborator_required
+def options() -> str:
+    from .services.mammouth_ai import load_settings, fetch_models
+
+    settings = load_settings()
+    models = fetch_models()
+    return render_template(
+        "web/options.html",
+        page_title="Options",
+        settings=settings,
+        models=models,
+    )
+
 
 @web.route("/ai-lab")
 @collaborator_required
