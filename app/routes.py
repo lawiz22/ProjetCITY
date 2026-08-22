@@ -1031,6 +1031,8 @@ def country_detail(country_slug: str) -> str:
     from .services.city_photos import get_country_photos, count_missing_photos
     country_photos = get_country_photos(conn, country_slug)
     missing_photos_count = count_missing_photos(conn, "country", country_slug)
+    # Possible regions (cached list + DB cross-reference)
+    possible_regions = _build_country_possible_regions(conn, country_slug, country["country_name"])
     return render_template(
         "web/country_detail.html",
         page_title=country["country_name"],
@@ -1044,7 +1046,269 @@ def country_detail(country_slug: str) -> str:
         country_photos=country_photos,
         missing_photos_count=missing_photos_count,
         pop_sources=pop_sources,
+        possible_regions=possible_regions,
     )
+
+
+def _build_country_possible_regions(conn, country_slug: str, country_name: str) -> dict:
+    """Return {"has_list": bool, "regions": [{name, slug, flag_path, exists}, ...]}."""
+    import os
+    from .services.country_regions import load_country_regions
+
+    names = load_country_regions(country_slug)
+    existing_rows = conn.execute(
+        "SELECT region_name, region_slug FROM dim_region WHERE country_name = ?",
+        (country_name,),
+    ).fetchall()
+    existing_by_name = {r["region_name"].strip().lower(): r["region_slug"] for r in existing_rows}
+    existing_by_slug = {r["region_slug"]: r["region_name"] for r in existing_rows}
+    static_root = current_app.static_folder or ""
+
+    def _flag(slug: str) -> str | None:
+        rel = f"images/flags/regions/{slug}.png"
+        full = os.path.join(static_root, rel.replace("/", os.sep))
+        return rel if os.path.exists(full) else None
+
+    result: list[dict] = []
+    seen_slugs: set[str] = set()
+    if names:
+        for name in names:
+            slug = existing_by_name.get(name.strip().lower())
+            if slug:
+                seen_slugs.add(slug)
+            result.append({
+                "name": name,
+                "slug": slug,
+                "flag_path": _flag(slug) if slug else None,
+                "exists": slug is not None,
+            })
+    for slug, display_name in existing_by_slug.items():
+        if slug in seen_slugs:
+            continue
+        result.append({
+            "name": display_name,
+            "slug": slug,
+            "flag_path": _flag(slug),
+            "exists": True,
+        })
+    return {"has_list": names is not None, "regions": result}
+
+
+# ------------------------------------------------------------------
+#  Country -> Possible regions list (AI generated) + on-demand region creation
+# ------------------------------------------------------------------
+
+@web.route("/countries/<country_slug>/regions-list")
+def country_regions_list(country_slug: str) -> Response:
+    """Return the JSON payload for the possible-regions box (used to refresh via AJAX)."""
+    from .db import get_db
+    conn = get_db()
+    row = conn.execute(
+        "SELECT country_name FROM dim_country WHERE country_slug = ?", (country_slug,)
+    ).fetchone()
+    if not row:
+        return jsonify({"success": False, "error": "Pays introuvable."})
+    payload = _build_country_possible_regions(conn, country_slug, row["country_name"])
+    return jsonify({"success": True, **payload})
+
+
+@web.route("/countries/<country_slug>/regions-list/generate", methods=["POST"])
+@editor_required
+def country_regions_list_generate(country_slug: str) -> Response:
+    """Ask Mammouth to enumerate the main regions/provinces/states of the country."""
+    from .db import get_db
+    from .services.mammouth_ai import load_settings, generate_city
+    from .services.country_regions import parse_regions_reply, save_country_regions
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT country_name FROM dim_country WHERE country_slug = ?", (country_slug,)
+    ).fetchone()
+    if not row:
+        return jsonify({"success": False, "error": "Pays introuvable."})
+    country_name = row["country_name"]
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API Mammouth configurée."})
+    model = request.form.get("model", "").strip() or settings.get("model", "gpt-4.1-mini")
+
+    prompt = (
+        "Tu es un expert en géographie administrative.\n"
+        f"Liste TOUTES les régions administratives principales du pays « {country_name} » "
+        "(provinces, états, régions ou divisions équivalentes de premier niveau).\n"
+        "Utilise les noms officiels en français quand ils existent, sinon la forme locale.\n"
+        "Réponds UNIQUEMENT avec un JSON valide de la forme :\n"
+        '{"regions": ["Nom1", "Nom2", "Nom3"]}\n'
+        "Aucune explication, aucun texte hors du JSON."
+    )
+    result = generate_city(api_key, model, country_name, prompt, max_tokens=1500, temperature=0.2)
+    if not result.get("success"):
+        return jsonify({"success": False, "error": f"IA: {result.get('error', 'inconnu')}"})
+
+    regions = parse_regions_reply(result.get("reply") or "")
+    if not regions:
+        return jsonify({"success": False, "error": "Réponse IA vide ou impossible à parser."})
+
+    save_country_regions(country_slug, regions)
+    log_action("regen", "country", country_slug,
+               f"Liste des régions générée — {len(regions)} régions", {"model": model})
+    payload = _build_country_possible_regions(conn, country_slug, country_name)
+    return jsonify({"success": True, "count": len(regions), **payload})
+
+
+@web.route("/countries/<country_slug>/regions-list", methods=["POST"])
+@editor_required
+def country_regions_list_save(country_slug: str) -> Response:
+    """Persist a manually edited list of possible regions."""
+    from .db import get_db
+    from .services.country_regions import save_country_regions
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT country_name FROM dim_country WHERE country_slug = ?", (country_slug,)
+    ).fetchone()
+    if not row:
+        return jsonify({"success": False, "error": "Pays introuvable."})
+
+    data = request.get_json(silent=True) or {}
+    regions = data.get("regions")
+    if not isinstance(regions, list):
+        return jsonify({"success": False, "error": "Champ 'regions' invalide."})
+    save_country_regions(country_slug, [str(x) for x in regions])
+    log_action("update", "country", country_slug,
+               f"Liste des régions mise à jour — {len(regions)} régions")
+    payload = _build_country_possible_regions(conn, country_slug, row["country_name"])
+    return jsonify({"success": True, **payload})
+
+
+@web.route("/countries/<country_slug>/regions-list/create-region", methods=["POST"])
+@editor_required
+def country_regions_list_create_region(country_slug: str) -> Response:
+    """Run the full 3-step AI generation for a single region belonging to the country."""
+    from .db import get_db
+    from .services.mammouth_ai import load_settings, generate_city, load_prompt
+
+    region_name = (request.form.get("region_name") or "").strip()
+    if not region_name:
+        return jsonify({"success": False, "error": "Nom de région manquant."})
+
+    conn = get_db()
+    country_row = conn.execute(
+        "SELECT country_name FROM dim_country WHERE country_slug = ?", (country_slug,)
+    ).fetchone()
+    if not country_row:
+        return jsonify({"success": False, "error": "Pays introuvable."})
+    country_name = country_row["country_name"]
+
+    settings = load_settings()
+    api_key = settings.get("api_key", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "Aucune clé API Mammouth configurée."})
+    model = request.form.get("model", "").strip() or settings.get("model", "gpt-4.1-mini")
+    prompt_input = f"{region_name}, {country_name}"
+    messages: list[str] = []
+
+    # --- Step 1: population + annotations ------------------------------------
+    step1_prompt = load_prompt("region_data_step1.txt")
+    if not step1_prompt:
+        return jsonify({"success": False, "error": "Prompt region_data_step1.txt introuvable."})
+    r1 = generate_city(api_key, model, prompt_input, step1_prompt, max_tokens=2000)
+    if not r1.get("success"):
+        return jsonify({"success": False, "error": f"IA Step 1: {r1.get('error', 'inconnu')}"})
+    stats_text = (r1.get("reply") or "").strip()
+    stats_text = re.sub(r"^```(?:python)?\s*", "", stats_text, flags=re.IGNORECASE)
+    stats_text = re.sub(r"\s*```$", "", stats_text)
+    try:
+        stats = parse_region_stats_text(stats_text)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": f"Parsing Step 1: {exc}"})
+    # Force country to the current one (AI may translate)
+    stats["region_country"] = country_name
+    try:
+        region_id = import_region_stats(conn, stats)
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        return jsonify({"success": False, "error": f"DB Step 1: {exc}"})
+    region_slug = stats["region_slug"]
+    messages.append(
+        f"Step 1 — {len(stats['years'])} années, {len(stats['annotations'])} annotations."
+    )
+    try:
+        from scripts.export_regionstats_raw import export_all as _exp
+        (Path(__file__).resolve().parent.parent / "regionstats_RAW.py").write_text(
+            _exp(), encoding="utf-8"
+        )
+    except Exception:
+        pass
+
+    # --- Step 2: historical periods -----------------------------------------
+    step2_prompt = load_prompt("region_data_step2.txt")
+    if step2_prompt:
+        r2 = generate_city(api_key, model, prompt_input, step2_prompt, max_tokens=4000)
+        if r2.get("success"):
+            periods_text = (r2.get("reply") or "").strip()
+            try:
+                sections = parse_region_period_details_text(periods_text)
+                if sections:
+                    count = import_region_periods(conn, region_id, region_slug, sections)
+                    save_region_details_file(region_slug, periods_text)
+                    conn.commit()
+                    messages.append(f"Step 2 — {count} périodes importées.")
+                else:
+                    messages.append("⚠️ Step 2 — aucune période détectée.")
+            except Exception as exc:
+                conn.rollback()
+                messages.append(f"⚠️ Step 2: {exc}")
+        else:
+            messages.append(f"⚠️ IA Step 2: {r2.get('error', 'inconnu')}")
+
+    # --- Step 3: fiche complète ---------------------------------------------
+    step3_prompt = load_prompt("region_data_step3.txt")
+    if step3_prompt:
+        r3 = generate_city(api_key, model, prompt_input, step3_prompt, max_tokens=8000)
+        if r3.get("success"):
+            fiche_text = (r3.get("reply") or "").strip()
+            try:
+                save_region_fiche_file(region_slug, fiche_text)
+                messages.append("Step 3 — fiche complète sauvegardée.")
+            except Exception as exc:
+                messages.append(f"⚠️ Step 3: {exc}")
+        else:
+            messages.append(f"⚠️ IA Step 3: {r3.get('error', 'inconnu')}")
+
+    # --- Flag + photo -------------------------------------------------------
+    try:
+        flag_path = fetch_and_save_region_flag(stats["region_name"], region_slug)
+        if flag_path:
+            messages.append(f"Drapeau téléchargé: {flag_path}")
+        else:
+            messages.append("⚠️ Drapeau introuvable (Wikimedia).")
+    except Exception as exc:
+        messages.append(f"⚠️ Drapeau: {exc}")
+    try:
+        photo_path = fetch_and_save_region_photo(
+            conn, region_id, stats["region_name"], region_slug, country_name
+        )
+        conn.commit()
+        if photo_path:
+            messages.append(f"Photo téléchargée: {photo_path}")
+    except Exception as exc:
+        messages.append(f"⚠️ Photo: {exc}")
+
+    log_action("regen", "region", region_slug,
+               f"Création IA depuis pays {country_slug} — {stats['region_name']}",
+               {"messages": messages, "model": model})
+    payload = _build_country_possible_regions(conn, country_slug, country_name)
+    return jsonify({
+        "success": True,
+        "region_slug": region_slug,
+        "region_name": stats["region_name"],
+        "messages": messages,
+        **payload,
+    })
 
 
 # ------------------------------------------------------------------
