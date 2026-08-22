@@ -142,8 +142,12 @@
     <div id="pr-regions-grid" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.75rem;">
         {% for r in possible_regions.regions %}
         <div class="pr-region-item" data-region-name="{{ r.name }}"
-             style="display:flex;flex-direction:column;align-items:center;width:88px;padding:.4rem;border:1px solid var(--border,#e5e7eb);border-radius:6px;background:var(--card-bg,#fff);">
+             style="position:relative;display:flex;flex-direction:column;align-items:center;width:88px;padding:.4rem;border:1px solid var(--border,#e5e7eb);border-radius:6px;background:var(--card-bg,#fff);">
             {% if r.exists %}
+                <button type="button" class="pr-delete-region-btn"
+                        data-region-slug="{{ r.slug }}" data-region-name="{{ r.name }}"
+                        title="Supprimer {{ r.name }} de la base"
+                        style="position:absolute;top:2px;right:2px;width:18px;height:18px;padding:0;border:none;border-radius:50%;background:rgba(239,68,68,.85);color:#fff;font-size:.65rem;line-height:1;cursor:pointer;">×</button>
                 <a href="{{ url_for('web.region_detail', region_slug=r.slug) }}"
                    title="Voir {{ r.name }}{% if not r.flag_path and r.photo_path %} (photo — drapeau manquant){% endif %}"
                    style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:inherit;">
@@ -241,6 +245,41 @@
         .catch(function(err){
           btn.disabled = false;
           btn.textContent = orig;
+          appendLog('error', name + ' — ' + (err.message || err));
+        });
+    });
+  });
+
+  document.querySelectorAll('.pr-delete-region-btn').forEach(function(btn){
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      var slug = btn.dataset.regionSlug;
+      var name = btn.dataset.regionName;
+      if (!slug) return;
+      if (!confirm('Supprimer définitivement la région « ' + name + ' » de la base ?\nCette action est irréversible.')) return;
+      btn.disabled = true;
+      btn.textContent = '…';
+      appendLog('info', name + ' — suppression…');
+      fetch('/regions/' + slug + '/delete', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(function(r){
+          if (r.redirected || r.status === 302 || r.ok){
+            appendLog('success', name + ' ✅ supprimée. Rechargement…');
+            setTimeout(function(){ location.reload(); }, 800);
+            return;
+          }
+          return r.json().then(function(d){
+            btn.disabled = false;
+            btn.textContent = '×';
+            appendLog('error', name + ' — ' + (d.error || ('HTTP ' + r.status)));
+          });
+        })
+        .catch(function(err){
+          btn.disabled = false;
+          btn.textContent = '×';
           appendLog('error', name + ' — ' + (err.message || err));
         });
     });
