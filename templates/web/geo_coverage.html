@@ -76,7 +76,10 @@
                     {% for city in missing_refs %}<tr><td>{{ city.rank }}</td><td class="geo-ref-city-name">{{ city.city_name }}</td><td>{{ '{:,}'.format(city.population or 0).replace(',', ' ') }}</td><td><a class="geo-gen-btn" href="{{ url_for('web.ai_lab') }}?city={{ city.city_name|urlencode }}, {{ reg.name|urlencode }}, {{ country.label|urlencode }}" title="Générer dans AI Lab">IA</a></td></tr>{% endfor %}
                 </tbody></table>
                 {% elif reg.ref_total > 0 %}<p class="geo-all-covered">Toutes les villes majeures de référence sont couvertes.</p>{% endif %}
-                <div class="geo-reference-actions"><button type="button" class="geo-expand-btn" data-region="{{ reg.value }}" data-country="{{ country.value }}">{{ 'Générer 20 villes majeures' if reg.ref_total == 0 else 'Ajouter 20 références' }}</button></div>
+                <div class="geo-reference-actions">
+                    <button type="button" class="geo-expand-btn" data-region="{{ reg.value }}" data-country="{{ country.value }}">{{ 'Générer 20 villes majeures' if reg.ref_total == 0 else 'Ajouter 20 références' }}</button>
+                    {% if reg.ref_total > 0 %}<button type="button" class="geo-reset-ref-btn" data-region="{{ reg.value }}" data-country="{{ country.value }}" title="Supprimer toutes les références et régénérer">🗑 Réinitialiser</button>{% endif %}
+                </div>
             </div>
         </article>
         {% else %}<div class="panel geo-empty-country"><p>Aucune région n'est encore enregistrée pour {{ country.label }}.</p></div>{% endfor %}
@@ -111,6 +114,15 @@
         button.addEventListener('click', function () {
             button.disabled = true; button.textContent = 'Recherche en cours…'; var body = new FormData(); body.append('region', button.dataset.region); body.append('country', button.dataset.country);
             fetch(expandUrl, {method: 'POST', body: body}).then(function (response) { return response.json(); }).then(function (data) { if (!data.success) throw new Error(data.error || 'Erreur'); button.textContent = data.inserted + ' villes ajoutées'; setTimeout(function () { location.reload(); }, 900); }).catch(function (error) { button.textContent = error.message; button.disabled = false; });
+        });
+    });
+    var resetRefUrl = '{{ url_for("web.geo_coverage_reset_ref") }}';
+    document.querySelectorAll('.geo-reset-ref-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            if (!confirm('Supprimer toutes les références de "' + button.dataset.region + '" et régénérer ? Cette action est irréversible.')) return;
+            button.disabled = true; button.textContent = 'Suppression…';
+            var body = new FormData(); body.append('region', button.dataset.region); body.append('country', button.dataset.country);
+            fetch(resetRefUrl, {method: 'POST', body: body}).then(function (r) { return r.json(); }).then(function (data) { if (!data.success) throw new Error(data.error || 'Erreur'); button.textContent = data.deleted + ' références supprimées'; setTimeout(function () { location.reload(); }, 900); }).catch(function (error) { button.textContent = error.message; button.disabled = false; });
         });
     });
     var expandRegionsUrl = '{{ url_for("web.geo_coverage_expand_regions") }}';

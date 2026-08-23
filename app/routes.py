@@ -4908,10 +4908,25 @@ def geo_coverage_expand_ref():
     new_cities: list[dict] = []
     TARGET = 20
 
+    # Build a disambiguation note when the region name could be confused with a country.
+    # e.g. "Niger" is both a Nigerian state and a neighboring country.
+    _region_is_also_country = region.lower() != country.lower() and region.lower() in {
+        k.lower() for k in _COUNTRY_ISO2
+    }
+    _disambiguation = (
+        f" IMPORTANT: \"{region}\" est ici un État/une région administrative de {country}, "
+        f"PAS le pays {region}. Toutes les villes doivent être situées dans l'État/la région "
+        f"\"{region}\" à l'intérieur de {country}."
+        if _region_is_also_country else ""
+    )
+
     if initial_request:
         prompts = [
             (
-                f"Liste les 20 villes les plus peuplées de {region} ({country}).\n\n"
+                f"Liste les 20 villes les plus peuplées de l'État/région \"{region}\" "
+                f"en {country} (subdivision administrative, PAS le pays \"{region}\").\n\n"
+                f"Toutes les villes DOIVENT être situées dans l'État/région \"{region}\" "
+                f"en {country}.{_disambiguation}\n"
                 f"Utilise la population de la ville ou municipalité, pas celle de l'aire métropolitaine. "
                 f"Inclus les villes déjà connues si elles font partie des 20 plus importantes.\n"
                 f"Réponds en JSON array: "
@@ -4926,7 +4941,9 @@ def geo_coverage_expand_ref():
         # Try progressively smaller settlements when extending an existing reference list.
         prompts = [
         (
-            f"Liste 30 villes et municipalités de {region} ({country}) "
+            f"Liste 30 villes et municipalités de l'État/région \"{region}\" "
+            f"en {country}.{_disambiguation}\n"
+            f"Toutes les villes DOIVENT être situées dans l'État/région \"{region}\" en {country}. "
             f"qui ne sont PAS dans cette liste: [__EXCLUSIONS__].\n\n"
             f"Inclus des villes moyennes et petites (10 000 à 100 000 habitants), "
             f"pas seulement les grandes métropoles.\n"
@@ -4937,7 +4954,9 @@ def geo_coverage_expand_ref():
             f"UNIQUEMENT le JSON array, aucun markdown, aucun texte autour."
         ),
         (
-            f"Liste 30 petites villes et villages de {region} ({country}) "
+            f"Liste 30 petites villes et villages de l'État/région \"{region}\" "
+            f"en {country}.{_disambiguation}\n"
+            f"Toutes les villes DOIVENT être dans l'État/région \"{region}\" en {country}. "
             f"de moins de 50 000 habitants.\n\n"
             f"NE PAS inclure ces villes déjà connues: [__EXCLUSIONS__].\n\n"
             f"Inclus des municipalités, villages, petites villes régionales.\n"
@@ -4947,7 +4966,9 @@ def geo_coverage_expand_ref():
             f"UNIQUEMENT le JSON array, aucun markdown."
         ),
         (
-            f"Donne-moi 30 localités/municipalités/villages de {region} ({country}) "
+            f"Donne-moi 30 localités/municipalités/villages de l'État/région \"{region}\" "
+            f"en {country}.{_disambiguation}\n"
+            f"Toutes les villes DOIVENT être dans l'État/région \"{region}\" en {country}. "
             f"qui sont moins connues, entre 1 000 et 30 000 habitants.\n\n"
             f"EXCLURE absolument: [__EXCLUSIONS__].\n\n"
             f"Réponds en JSON array: "
@@ -4955,7 +4976,9 @@ def geo_coverage_expand_ref():
             f"UNIQUEMENT le JSON array."
         ),
         (
-            f"Nomme 30 autres communautés de {region} ({country}) "
+            f"Nomme 30 autres communautés de l'État/région \"{region}\" "
+            f"en {country}.{_disambiguation}\n"
+            f"Toutes les villes DOIVENT être dans l'État/région \"{region}\" en {country}. "
             f"qui ne sont dans aucune de ces listes: [__EXCLUSIONS__].\n"
             f"Même les très petits villages de quelques centaines d'habitants.\n"
             f"JSON array: "
@@ -5032,6 +5055,50 @@ def geo_coverage_expand_ref():
         log_action("import", "ref_city", None,
                    f"Expansion référence: {inserted} villes ajoutées pour {region} ({country})")
     return jsonify(success=True, inserted=inserted, cities=[c["city_name"] for c in new_cities[:TARGET]])
+
+
+@web.route("/geo-coverage/reset-ref", methods=["POST"])
+@editor_required
+def geo_coverage_reset_ref():
+    """Delete all ref_city rows for a given region+country so the user can regenerate cleanly."""
+    from .db import get_db
+    from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2
+
+    region = request.form.get("region", "").strip()
+    country = request.form.get("country", "").strip()
+    if not region or not country:
+        return jsonify(success=False, error="Région et pays requis"), 400
+
+    # Build alias sets (same logic as expand_ref)
+    country_iso = _COUNTRY_ISO2.get(country)
+    country_aliases = {
+        name for name, iso in _COUNTRY_ISO2.items() if country_iso and iso == country_iso
+    } | {country}
+    country_option = next(
+        (option for option in _dashboard_country_options() if option["value"] in country_aliases),
+        None,
+    )
+    if country_option:
+        country = country_option["value"]
+        country_aliases.add(country_option["label"])
+
+    canonical_region = REGION_ALIASES.get(region, region)
+    region_aliases = {
+        label for label, value in REGION_ALIASES.items() if value == canonical_region
+    } | {region, canonical_region}
+
+    conn = get_db()
+    result = conn.execute(
+        "DELETE FROM ref_city WHERE region = ANY(?) AND country = ANY(?)",
+        (list(region_aliases), list(country_aliases)),
+    )
+    deleted = result.rowcount
+    conn.commit()
+
+    if deleted:
+        log_action("delete", "ref_city", None,
+                   f"Réinitialisation références: {deleted} villes supprimées pour {canonical_region} ({country})")
+    return jsonify(success=True, deleted=deleted)
 
 
 @web.route("/geo-coverage/expand-regions", methods=["POST"])
