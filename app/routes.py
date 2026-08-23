@@ -1219,7 +1219,7 @@ def _build_country_possible_regions(conn, country_slug: str, country_name: str) 
         existing_by_slug[slug] = entry
 
     result: list[dict] = []
-    seen_slugs: set[str] = set()
+    seen_norm_keys: set[str] = set()
 
     def _make_entry(name: str, existing: dict | None) -> dict:
         if existing:
@@ -1242,16 +1242,22 @@ def _build_country_possible_regions(conn, country_slug: str, country_name: str) 
             "exists": False,
         }
 
+    # Step 1: walk the JSON list first (desired order / user-curated names)
     if names:
         for name in names:
-            existing = existing_by_norm.get(_norm_key(name))
-            if existing:
-                seen_slugs.add(existing["slug"])
+            nk = _norm_key(name)
+            existing = existing_by_norm.get(nk)
+            seen_norm_keys.add(nk)
             result.append(_make_entry(name, existing))
-    for slug, entry in existing_by_slug.items():
-        if slug in seen_slugs:
+
+    # Step 2: append any dim_region rows NOT yet represented in the list
+    # (e.g. regions created via geo-coverage expand-regions or other tools)
+    for r in existing_rows:
+        nk = _norm_key(r["region_name"])
+        if nk in seen_norm_keys:
             continue
-        result.append(_make_entry(entry["name"], entry))
+        seen_norm_keys.add(nk)
+        result.append(_make_entry(r["region_name"], existing_by_slug[r["region_slug"]]))
 
     existing_count = sum(1 for r in result if r["exists"])
     missing_count = len(result) - existing_count
@@ -1261,6 +1267,38 @@ def _build_country_possible_regions(conn, country_slug: str, country_name: str) 
         "existing_count": existing_count,
         "missing_count": missing_count,
     }
+
+
+def _sync_country_regions_json(conn, country_slug: str, country_name: str) -> None:
+    """Keep the country_regions JSON file in sync with dim_region.
+
+    After any operation that adds regions to dim_region (generate from country detail,
+    geo-coverage expand-regions), call this so the JSON file reflects reality and the
+    country detail page shows the correct "in base / to generate" counts.
+    Any region already in the JSON keeps its position; new dim_region entries are appended.
+    """
+    from .services.country_regions import load_country_regions, save_country_regions
+    from .services.city_import import normalize_region_name_fr
+
+    def _norm_key(name: str) -> str:
+        return (normalize_region_name_fr(name) or name or "").strip().lower()
+
+    existing_json = load_country_regions(country_slug) or []
+    json_keys: set[str] = {_norm_key(n) for n in existing_json}
+
+    db_rows = conn.execute(
+        "SELECT region_name FROM dim_region WHERE country_name = ? ORDER BY region_name",
+        (country_name,),
+    ).fetchall()
+
+    merged = list(existing_json)
+    for row in db_rows:
+        nk = _norm_key(row["region_name"])
+        if nk not in json_keys:
+            merged.append(row["region_name"])
+            json_keys.add(nk)
+
+    save_country_regions(country_slug, merged)
 
 
 # ------------------------------------------------------------------
@@ -1492,6 +1530,11 @@ def country_regions_list_create_region(country_slug: str) -> Response:
     log_action("regen", "region", region_slug,
                f"Création IA depuis pays {country_slug} — {stats['region_name']}",
                {"messages": messages, "model": model})
+    # Keep the JSON list in sync so the country detail page reflects the new region
+    try:
+        _sync_country_regions_json(conn, country_slug, country_name)
+    except Exception:
+        pass
     payload = _build_country_possible_regions(conn, country_slug, country_name)
     return jsonify({
         "success": True,
@@ -5248,6 +5291,15 @@ def geo_coverage_expand_regions():
     if inserted:
         log_action("import", "dim_region", None,
                    f"Expansion régions: {inserted} régions ajoutées pour {country}")
+        # Sync the country_regions JSON so the country detail page stays consistent
+        try:
+            country_row = conn.execute(
+                "SELECT country_slug FROM dim_country WHERE country_name = ?", (country,)
+            ).fetchone()
+            if country_row:
+                _sync_country_regions_json(conn, country_row["country_slug"], country)
+        except Exception:
+            pass
     return jsonify(success=True, inserted=inserted,
                    regions=[r["region_name"] for r in new_regions[:TARGET]])
 
