@@ -5205,14 +5205,24 @@ def reference_population() -> str:
 @collaborator_required
 def options() -> str:
     from .services.mammouth_ai import load_settings, fetch_models
+    from .services.app_state import load_json_setting
 
     settings = load_settings()
     models = fetch_models()
+    countries = _dashboard_country_options()
+    saved = load_json_setting("dashboard_settings", {"countries": None})
+    saved_values = saved.get("countries")
+    if saved_values is None:
+        dashboard_countries = [option["value"] for option in countries]
+    else:
+        dashboard_countries = [str(v) for v in saved_values]
     return render_template(
         "web/options.html",
         page_title="Options",
         settings=settings,
         models=models,
+        countries=countries,
+        dashboard_countries=dashboard_countries,
     )
 
 
