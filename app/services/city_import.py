@@ -1540,7 +1540,11 @@ _REGION_PREFIX_STRIP = re.compile(
     r"région\s+d[eu']?\s+|region\s+d[eu']?\s+|region\s+of\s+|regione\s+|"
     r"préfecture\s+d[eu']?\s+|prefecture\s+of\s+|"
     r"comté\s+d[eu']?\s+|county\s+of\s+|"
-    r"gouvernorat\s+d[eu']?\s+|governorate\s+of\s+"
+    r"gouvernorat\s+d[eu']?\s+|gouvernorat\s+d'|governorate\s+of\s+|"
+    r"division\s+d[eu']?\s+|division\s+d'|division\s+of\s+|"
+    r"district\s+d[eu']?\s+|district\s+d'|district\s+of\s+|"
+    r"cercle\s+d[eu']?\s+|cercle\s+d'|cercle\s+of\s+|"
+    r"wilaya\s+d[eu']?\s+|wilaya\s+d'|wilaya\s+of\s+"
     r")",
     re.IGNORECASE,
 )

@@ -5040,7 +5040,7 @@ def geo_coverage_expand_regions():
     """Add 20 more regions for a country via Mammouth AI (inserts into dim_region)."""
     import json as _json
     from .db import get_db
-    from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2, slugify
+    from .services.city_import import REGION_ALIASES, _COUNTRY_ISO2, slugify, normalize_region_name_fr
     from .services.mammouth_ai import load_settings, generate_city
 
     country = request.form.get("country", "").strip()
@@ -5145,6 +5145,9 @@ def geo_coverage_expand_regions():
             if not isinstance(entry, dict) or "region_name" not in entry:
                 continue
             name = str(entry["region_name"]).strip()
+            # Normalize: strip administrative prefixes ("Division de", "District de", etc.)
+            # so "Division de Rangpur" collapses to "Rangpur" and doesn't create a duplicate.
+            name = normalize_region_name_fr(name) or name
             if not name or name.lower() in known_names:
                 continue
             new_regions.append({"region_name": name})
